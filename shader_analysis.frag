@@ -118,9 +118,6 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
   if (normal.x > 0.0)
     angle *= -1.0;
 
-  if (reconstruction_filter_size > 100.0)
-    return -1.0;
-
   // major and minor axis
   float a = 2.0*radius*reconstruction_filter_size;
   float b = a*normal.z;
@@ -235,7 +232,7 @@ void main (void) {
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-      if  (dist_test >= 0.0)
+      if  (dist_test >= -10.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
@@ -249,8 +246,8 @@ void main (void) {
       }
     }
   }
-  float new_zmax = zmax;
 
+  float new_zmax = zmax;
 
   // Gather pixels values
   for (int i = 0; i < 4; ++i)
@@ -264,7 +261,7 @@ void main (void) {
 	  bufferA += pixelA[i];
 
 	  // Increment ellipse total path with distance from gather pixel to center
-	  bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy);
+	  bufferB.zw += pixelB[i].zw + gather_pixel_desloc[i].xy;
 	  
 	  // Take maximum depth range
 	  new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);

@@ -43,9 +43,9 @@ void main(void)
 
   //gl_FragData[0] = vec4 (normal_vec, (radius_depth_w.x /  zoom_factor) );
 
-  //  float depth_interval = radius_depth_w.x;
+  float depth_interval = radius_depth_w.x;
 
-  float depth_interval = radius_depth_w.x * (1.0-normal_vec.z) +0.005;
+  //float depth_interval = radius_depth_w.x * (1.0-normal_vec.z);
 
   // Second buffer : minimum depth, depth interval, center.x, center.y
   gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval*2.0, 0.0, 0.0);
