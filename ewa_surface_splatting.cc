@@ -93,7 +93,7 @@ void EWASurfaceSplatting::phongShader ( double n[3], double c[]) {
 }
 
 /// Computes the splat color using phong lighting model
-void EWASurfaceSplatting::splatShader ( surfelListIter s, double mv[][4], double c[]) {
+void EWASurfaceSplatting::splatShader ( surfelVectorIter s, double mv[][4], double c[]) {
   
   // Diffuse color
   double light[3] = {light_dir[0], light_dir[1], light_dir[2]};
@@ -135,7 +135,7 @@ void EWASurfaceSplatting::splatShader ( surfelListIter s, double mv[][4], double
   c[2] = color[2];
 }
 
-void EWASurfaceSplatting::setVertices( list<Surfel> *s ) {
+void EWASurfaceSplatting::setVertices( vector<Surfel> *s ) {
   surfels = s;
 
   zbuffer.clear();
@@ -270,7 +270,7 @@ void EWASurfaceSplatting::draw ( void ) {
 
   int clipped_surfs = 0;
   /******************************* Splat Setup Loop ********************************************/
-  for (surfelListIter it = surfels->begin(); it != surfels->end(); ++it) {
+  for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
 #ifdef DEBUG
     sta_sh = glutGet(GLUT_ELAPSED_TIME);
 #endif

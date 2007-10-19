@@ -1,5 +1,5 @@
 /*****Visual interface global vars*****/
-surfelListIter selected_surfel;
+surfelVectorIter selected_surfel;
 int selected_point_id;
 
 double reconstruction_filter_size;

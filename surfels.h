@@ -11,6 +11,7 @@
 #define __SURFELS__
 
 #include <list.h>
+#include <vector.h>
 #include <math.h>
 
 struct Vector
@@ -128,6 +129,12 @@ struct Point
 };
 
 
+struct Triangle {
+  int verts[3];
+  int id;
+};
+
+
 const Point default_color (0.8, 0.4, 0.2);
 const Point bg_color (1.0, 1.0, 1.0);
 const Point black_color (0.0, 0.0, 0.0);
@@ -210,6 +217,7 @@ class Surfel
 };
 
 //typedef list<Surfel>::const_iterator surfelListIter;
-typedef list<Surfel>::iterator surfelListIter;
+typedef vector<Surfel>::iterator surfelVectorIter;
+typedef vector<Triangle>::iterator triangleVectorIter;
 
 #endif

@@ -28,27 +28,20 @@
 
 #include "ewa_surface_splatting.h"
 #include "pyramid_point_render.h"
+#include "pyramid_triangle_renderer.h"
+#include "triangle_renderer.h"
+#include "surfels.h"
+#include "quat.h"
 
+#include "object.h"
 
 #define PI 3.14159265
 #define HALF_PI 1.570796325
 #define QUARTER_PI 0.785398163
 #define E 2.71828183
 
-
-
-typedef enum 
-  {
-    PYRAMID,
-    EWA_SPLATTING,
-    EWA_SPLATTING_INTERPOLATE_NORMALS
-  } point_render_type_enum;
-
-using namespace std;
-
-
-
-
 unsigned int number_surfels;
+
+PyramidPointRender *point_based_render;
 
 #endif

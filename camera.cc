@@ -18,17 +18,21 @@ const double rad_to_deg = 180.0/PI;
 void Camera::initLight (void) {
   glEnable (GL_LIGHTING);
   glEnable (GL_LIGHT0);
-  glEnable (GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  glDisable (GL_COLOR_MATERIAL);
 
-  GLfloat ambientLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  GLfloat diffuseLight[] = { 0.4f, 0.4f, 0.4, 1.0f };
-  GLfloat specularLight[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+  GLfloat ambientLight[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+  GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+  light_position[3] = 0.0;
 
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
   glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  
+  GLfloat model_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_ambient);
 
   glShadeModel(GL_SMOOTH);
 }
@@ -44,8 +48,10 @@ void Camera::setView (void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  GLfloat lposition[] = {light_position[0], light_position[1], light_position[2], light_position[3]};
-  glLightfv(GL_LIGHT0, GL_POSITION, lposition);
+  //  GLfloat lposition[] = {light_position[0], light_position[1], light_position[2], light_position[3]};  
+  //GLfloat lposition[] = {light_position[0], light_position[1], light_position[2], 1.0};  
+  //glLightfv(GL_LIGHT0, GL_POSITION, lposition);
+  initLight();
 
   //glScalef(zoom_factor, zoom_factor, zoom_factor);
 
@@ -235,8 +241,6 @@ void Camera::rotate(int x, int y) {
   q_rot.normalize();
 }
 
-
-
 /// Sets mouse button click position
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
@@ -246,7 +250,7 @@ void Camera::mouseSetClick(int x, int y) {
   mouse_start[2] = 0.0;
 }
 
-/// Zoom in/out world
+/// Translate on z axe.
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
 void Camera::zooming(int x, int y) {
@@ -255,8 +259,10 @@ void Camera::zooming(int x, int y) {
   mouse_curr[1] = screen_height - y;
   mouse_curr[2] = 0.0;
 
-  double diff = mouse_curr[1] - mouse_start[1];
-  zoom_factor += diff / screen_height;
+//   double diff = mouse_curr[1] - mouse_start[1];
+//   zoom_factor += diff / screen_height;
+
+  position[2] -= 5.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];

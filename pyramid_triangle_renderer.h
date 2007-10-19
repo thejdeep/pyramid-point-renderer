@@ -1,19 +1,17 @@
 /*
-** pyramid_point_render.h Pyramid Point Based Rendering header.
+** pyramid_triangle_renderer.h Triangle renderer.
 **
 **
-**   history:	created  02-Jul-07
+**   history:	created  16-Oct-07
 */
 
 
-#ifndef __PYRAMID_POINT_RENDER_H__
-#define __PYRAMID_POINT_RENDER_H__
+#ifndef __PYRAMID_TRIANGLE_RENDERER_H__
+#define __PYRAMID_TRIANGLE_RENDERER_H__
 
 #define GL_GLEXT_PROTOTYPES
 
 extern "C" {
-/* #include <GL/glut.h> */
-/* #include <GL/glext.h> */
 #include "timer.h"
 }
 
@@ -23,14 +21,12 @@ extern "C" {
 #include <stdlib.h>
 
 #include "point_based_render.h"
-#include "object.h"
 
 #define FBO_TYPE GL_TEXTURE_2D
 #define FBO_FORMAT GL_RGBA16F_ARB
 #define FBO_BUFFERS_COUNT 4
 
-
-class PyramidPointRender : public PointBasedRender
+class PyramidTriangleRenderer : public PointBasedRender
 {
  private:
 
@@ -46,11 +42,8 @@ class PyramidPointRender : public PointBasedRender
   int copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
   void rasterizeAnalysisPyramid( void );
   int analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  int projectionPointsCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  void projectPoints( Object * );
-  int projectionTrianglesCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  void projectTriangles( Object * );
-
+  int projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  void projectPoints( void );
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);
@@ -58,18 +51,15 @@ class PyramidPointRender : public PointBasedRender
   double computeHalfPixelSize(int level);
 
  public:
-  PyramidPointRender();
-  PyramidPointRender(int w, int h);
-  ~PyramidPointRender();
+  PyramidTriangleRenderer();
+  PyramidTriangleRenderer(int w, int h);
+  ~PyramidTriangleRenderer();
 
   void draw();
   void draw(int timing_profile);
   
-  void clearBuffers (void);
-  void projectSamples(Object *);
-  void interpolate( void );
-
-  void setVertices( vector<Surfel> *surfels );
+  void setTriangles( vector<Triangle> *t );
+  void setVertices( vector<Surfel> *s );
   void setPrefilterSize(double s);
   void setReconstructionFilterSize(double s);
   void setZoomFactor (double z);
@@ -88,10 +78,18 @@ class PyramidPointRender : public PointBasedRender
   /// Canvas border height.
   int canvas_border_height;
 
+  /// Vertex buffer
+  GLuint vertex_buffer;
+  /// Normal Buffer
+  GLuint normal_buffer;
+  /// Triangle Display List
+  GLuint triangleDisplayList;
+
+  /// Number of samples.
+  int number_points;
+
   /// Point projection shader.
-  GLSLKernel *shader_point_projection;
-  /// Triangle projection shader.
-  GLSLKernel *shader_triangle_projection;
+  GLSLKernel *shader_projection;
   /// Pyramid copy phase shader.
   GLSLKernel *shader_copy;
   /// Pyramid analysis phase shader.
@@ -127,11 +125,16 @@ class PyramidPointRender : public PointBasedRender
   int cur_level;
 
   /// Type of most recently used framebuffer.
-  framebuffer_state_enum framebuffer_state; 
+  framebuffer_state_enum framebuffer_state;   
   
   /// Current rendering mode.
   render_state_enum render_state;
 
+  /// Pointer to list of surfels (vertices).
+  vector<Surfel> *surfels;
+
+  /// Pointer to list of triangles.
+  vector<Triangle> *triangles;
 };
 
 #define CHECK_FOR_OGL_ERROR()	  									 \

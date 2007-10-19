@@ -40,7 +40,7 @@ class EWASurfaceSplatting : public PointBasedRender
  private:
 
   Vector perpendicular( const Vector &v );
-  void splatShader ( surfelListIter s, double mv[][4], double c[]);
+  void splatShader ( surfelVectorIter s, double mv[][4], double c[]);
   void phongShader ( double n[3], double c[]);
 
  public:
@@ -51,7 +51,7 @@ class EWASurfaceSplatting : public PointBasedRender
   void draw();
   void draw(int) {}
   
-  void setVertices( list<Surfel> *surfels );
+  void setVertices( vector<Surfel> *surfels );
   void setPrefilterSize(double s);
   void setReconstructionFilterSize(double s);
   void setZoomFactor (double z);
@@ -63,11 +63,11 @@ class EWASurfaceSplatting : public PointBasedRender
   /// Number of samples.
   int number_points;
 
-  /// Pointer to surfel list.
-  list<Surfel> *surfels;
+  /// Pointer to surfel vector.
+  vector<Surfel> *surfels;
 
   /// Vector of pixels
-  std::vector<zBufferPixel> zbuffer;
+  vector<zBufferPixel> zbuffer;
 
   /// Final image containing RBG values
   GLfloat *fb;

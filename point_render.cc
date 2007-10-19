@@ -10,29 +10,45 @@
 #include "file_io.h"
 #include "camera.h"
 
-// #define CANVAS_WIDTH  1024
-// #define CANVAS_HEIGHT 1024
+#include "materials.h"
+
+#define CANVAS_WIDTH  1024
+#define CANVAS_HEIGHT 1024
  
-#define CANVAS_WIDTH  768
-#define CANVAS_HEIGHT 768
+// #define CANVAS_WIDTH  768
+// #define CANVAS_HEIGHT 768
+
+// #define CANVAS_WIDTH  512
+// #define CANVAS_HEIGHT 512
+
 
 Camera * camera;
-PointBasedRender * point_based_render;
+TriangleRenderer * triangle_renderer;
 
-// List of point samples
-std::list<Surfel> surfels;
+int material_id;
+int selected_obj;
+vector<Object> objects;
+int num_objects;
+
+// Vector of point samples
+std::vector<Surfel> surfels;
+// Vector of triangles with indices to surfels
+std::vector<Triangle> triangles;
 
 //****** Globals for faster matrix operations *******/
 double inv3 = 1.0/3.0;
 double root3 = sqrt(3.0);
+
 /***************************************************/
 
 // Function declarations
 void screenButtons (int, int );
 Point unproject (const Point&);
 void keyboard(unsigned char key, int x, int y);
-void glVertex(surfelListIter it);
+void glVertex(surfelVectorIter it);
 void createPointRender(int type);
+void changeMaterial(void);
+void changeRendererType( int type );
 
 /// Interface function and variables
 #include "interface.cc"
@@ -46,7 +62,7 @@ void glVertex(const Surfel * s) {
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
-void glVertex(surfelListIter it) {
+void glVertex(surfelVectorIter it) {
   Point p = it->position();
   glVertex3f(p.x(), p.y(), p.z());
 }
@@ -57,19 +73,21 @@ void glVertex(Point p) {
   glVertex3f(p.x(), p.y(), p.z());
 }
 
-
 /// Render all points 
 void drawPoints(void)
 {
-  if (show_points) {
-    glPointSize(1.0);  
-    glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+  glPointSize(5.0);
+  glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 
-    glBegin(GL_POINTS);
-    for (surfelListIter it = surfels.begin(); it != surfels.end(); ++it)  
+  glBegin(GL_POINTS);
+  
+  for (int i = 0; i < num_objects; ++i) {
+    for (surfelVectorIter it = objects[i].getSurfels()->begin(); 
+	 it != objects[i].getSurfels()->end(); ++it)  
       glVertex(it);
-    glEnd();
   }
+
+  glEnd();
 }
 
 /// Display func
@@ -100,12 +118,12 @@ void draw(void) {
   q.rotate(c);
   double eye[3] = {c[0], c[1], c[2]};
   point_based_render->setEye(eye);
-
-  // set light direction and zoom factor
-  double light_dir[3];
-  camera->lightVec(light_dir);
-  point_based_render->setLight(light_dir);
-  point_based_render->setZoomFactor(camera->zoom());
+    
+    // set light direction and zoom factor
+//     double light_dir[3];
+//     camera->lightVec(light_dir);
+//     point_based_render->setLight(light_dir);
+//     point_based_render->setZoomFactor(camera->zoom());
 
   // pyramid interpolation algorithm
 #ifdef TIMING
@@ -114,14 +132,28 @@ void draw(void) {
 
 #else
 
-  if (show_splats < 4)
-    if (analysis_filter_size == 0)
-      point_based_render->draw();
-    else
-      point_based_render->draw(analysis_filter_size);
-  
+  point_based_render->clearBuffers();
+
+  for (int i = 0; i < num_objects; ++i) {
+    if (objects[i].getRendererType() != TRIANGLES) {
+      point_based_render->projectSamples( &objects[i] );
+      camera->setView();
+
+    }
+  }    
+
+  point_based_render->interpolate();
 
   camera->setView();
+
+  for (int i = 0; i < num_objects; ++i)
+    if (objects[i].getRendererType() == TRIANGLES)
+      objects[i].render();
+
+  glDisable (GL_LIGHTING);
+  glDisable (GL_LIGHT0);
+  glDisable (GL_COLOR_MATERIAL);
+
 
   if (show_points)
     drawPoints();
@@ -155,7 +187,7 @@ void draw(void) {
   if (timing_profile == 4) {
     cout << "PREPARE    : " << timings[0] << endl;
     cout << "PROJECT    : " << timings[1] - timings[0] << endl;
-    cout << "PYRAMID    : " << timings[2] - timings[1] << endl;
+    cout << "PYRAMID_POINTS    : " << timings[2] - timings[1] << endl;
     cout << "SHADE      : " << timings[3] - timings[2]<< endl;
     cout << "TOTAL      : " << timings[3] << endl;
     cout << "FPS        : " << 1000.0 / timings[3] << endl;
@@ -278,6 +310,60 @@ void mouseMotion(int x, int y) {
   glutPostRedisplay();
 }
 
+/**
+ * Change material properties.
+ **/
+void changeMaterial(void) {
+
+  GLfloat material_ambient[4] = {Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]};  
+  GLfloat material_diffuse[4] = {Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]};  
+  GLfloat material_specular[4] = {Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]};
+  GLfloat material_shininess = Mats[material_id][12];
+
+  glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
+  glMaterialf (GL_FRONT, GL_SHININESS, material_shininess);
+}
+
+/// Keyboard special keys function
+/// @param key Pressed key
+/// @param x X coordinate of mouse pointer
+/// @param y Y coordinate of mouse pointer
+void specialKey(int key_pressed, int x, int y) {
+  switch (key_pressed) {
+  case GLUT_KEY_F1:
+    changeRendererType(PYRAMID_POINTS);
+    show_splats = 1;
+    break;
+  case GLUT_KEY_F2:
+    changeRendererType(PYRAMID_TRIANGLES);
+    show_splats = 2;
+    break;
+  case GLUT_KEY_F3:
+    changeRendererType(PYRAMID_HYBRID);
+    show_splats = 3;
+    break;
+  case GLUT_KEY_F4:
+    changeRendererType(EWA_SPLATTING_INTERPOLATE_NORMALS);
+    show_splats = 4;
+    break;
+  case GLUT_KEY_F5:
+    changeRendererType(TRIANGLES);
+    show_splats = 5;
+    break;
+  case GLUT_KEY_F6:
+    show_splats = 6;
+    break;
+  case GLUT_KEY_F12:
+    show_splats = 0;
+    show_points = true;
+    break;
+  };
+  glutPostRedisplay();
+}
+
+
 /// Keyboard keys function
 /// @param key Pressed key
 /// @param x X coordinate of mouse pointer
@@ -320,37 +406,46 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     case 'R' :
       rotating = !rotating;
       break;
+    case '1' :
+      selected_obj = 0;
+      cout << "selected : 1" << endl;
+      break;
+    case '2' :
+      if (num_objects > 1) {
+	selected_obj = 1;
+	cout << "selected : 2" << endl;
+      }
+      break;
+    case '3' :
+      if (num_objects > 2) {
+	selected_obj = 2;
+	cout << "selected : 3" << endl;
+      }
+      break;
+    case '4' :
+      if (num_objects > 3) {
+	selected_obj = 3;
+	cout << "selected : 4" << endl;
+      }
+      break;
     case 't':
       fps_loop = 100;
-      break;
-    case '0':
-      show_splats = 0;
-      show_points = true;
-      break;
-    case '1':
-      createPointRender(PYRAMID);
-      show_splats = 1;
-      break;
-    case '2':
-      createPointRender(EWA_SPLATTING);
-      show_splats = 2;
-      break;
-    case '3':
-      createPointRender(EWA_SPLATTING_INTERPOLATE_NORMALS);
-      show_splats = 3;
-      break;
-    case '4':
-      show_splats = 4;
       break;
     case 'z' :
       depth_culling = !depth_culling;
       point_based_render->setDepthTest(depth_culling);
       break;
     case ']' :
-      point_based_render->upMaterial();
+      ++material_id;
+      if (material_id == NUM_MATERIALS)
+	material_id = 0;
+      changeMaterial();
       break;
     case '[' :
-      point_based_render->downMaterial();
+      --material_id;
+      if (material_id < 0)
+	material_id = NUM_MATERIALS - 1;
+      changeMaterial();
       break;
     case '.' :
       analysis_filter_size += 1;
@@ -386,25 +481,22 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   glutPostRedisplay(); 
 }
 
+void changeRendererType( int type ) {
+  objects[selected_obj].setRendererType(type);
+}
+
 void createPointRender( int type ) {
-  int mat = 0;
-  if (point_based_render)
-    mat = point_based_render->getMaterial();
 
   delete point_based_render;
 
-  if (type == PYRAMID)
-    point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
-  else if (type == EWA_SPLATTING)
-    point_based_render = new EWASurfaceSplatting(CANVAS_WIDTH, CANVAS_HEIGHT, 0);
-  else if (type == EWA_SPLATTING_INTERPOLATE_NORMALS)
-    point_based_render = new EWASurfaceSplatting(CANVAS_WIDTH, CANVAS_HEIGHT, 1);
+  point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  point_based_render->setVertices(&surfels);
+  assert (point_based_render);
+
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
-  point_based_render->setMaterial(mat);
 
+  glutPostRedisplay(); 
 }
 
 /// Initialize global variables and opengl states
@@ -422,33 +514,41 @@ void init(void) {
   output_type = 0;
   rotating = 0;
 
-  show_screen_info = false;
+  show_screen_info = true;
   show_points = false;
-  show_splats = 2;
+  show_splats = 1;
 
   timing_profile = 0;
+
+  material_id = 0;
+  selected_obj = 0;
 
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
 
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
-  glShadeModel(GL_FLAT);
   glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
 
-  CHECK_FOR_OGL_ERROR()	;
   for (int i = 0; i < 8; ++i) {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
 
   }
-
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
 
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
+  glDepthMask(GL_FALSE);
+
   camera->initLight();
+
+  changeMaterial();
+
+  glEnable(GL_NORMALIZE);
+  CHECK_FOR_OGL_ERROR()	;
+
 }
 
 /// Main Program
@@ -471,20 +571,35 @@ int main(int argc, char * argv []) {
   glutMouseFunc(mouse);
   glutMotionFunc(mouseMotion);
   glutKeyboardFunc(keyboard);
+  glutSpecialFunc(specialKey);
 
   // Initialize global variables
   init();
 
   // Read model file (.normals)
-  int read = readPoints(argc, argv, &surfels);
+  //int read = readPoints(argc, argv, &surfels);
+  //int read = readPointsAndTriangles(argc, argv, &surfels, &triangles);
+
+  int read = readModels(argc, argv, &objects);
+  num_objects = objects.size();
+
+  cout << "objects : " << num_objects << endl;
+  for (int i = 0; i < num_objects; ++i) {
+    objects[i].setRendererType( PYRAMID_POINTS );
+    //objects[i].setArrays();
+    //    objects[i].setDisplayList();
+    //objects[i].setHybridDisplayList();
+    cout << "object " << i << endl <<
+      "  num points    : " << objects[i].getSurfels()->size() <<
+      "  num triangles : " << objects[i].getTriangles()->size() <<
+      "  render type   : " << objects[i].getRendererType() << endl;
+  }
+
+  createPointRender( PYRAMID_POINTS );
 
   if (read == 0)
     exit(0);
 
-  number_surfels = surfels.size();
-
-  // starts with PYRAMID or EWA_SPLATTING
-  createPointRender( PYRAMID );
 
 #ifdef TIMING
   if (argc < 2)

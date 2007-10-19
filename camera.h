@@ -42,7 +42,7 @@ public:
   /// Constructor with screen dimensions
   Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				     zoom_factor(1.0), fov(1.0),
-				     z_near(1.0), z_far(10.0) {
+				     z_near(0.01), z_far(10.0) {
     view_mode = PERSPECTIVE;
     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     std::copy (identity, identity+16, rotation_matrix);
@@ -55,13 +55,12 @@ public:
 
     position[0] = 0.0; position[1] = 0.0; position[2] = 0.0;
     
-    light_position[0] = 5.0; light_position[1] = 0.0; light_position[2] = 3.0; light_position[3] = 0.0;
+    light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
   }
 
   /// Destructor
   ~Camera();
   
-
   /// Initializes modelview and projection matrices for rendering
   void setView ( void );
   /// Resets the view mode properties

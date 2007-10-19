@@ -12,6 +12,8 @@
 #include <GL/glut.h>
 #include "surfels.h"
 #include "materials.h"
+#include "pyramid_types.h"
+#include "glslkernel.h"
 
 class PointBasedRender
 {
@@ -24,7 +26,6 @@ class PointBasedRender
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
 
-
   PointBasedRender(int w, int h) : window_width(w), window_height(h),
     canvas_width(h), canvas_height(h),
     zoom_factor(1.0), material_id(0), depth_test(1),
@@ -36,7 +37,8 @@ class PointBasedRender
    virtual void draw( ) {}
    virtual void draw(int) {}
 
-   virtual void setVertices( std::list<Surfel> *surfels ) {}
+   virtual void setVertices( std::vector<Surfel> *surfels ) {}
+   virtual void setTriangles( std::vector<Triangle> *triangles ) {}
 
    virtual void setPrefilterSize(double s) {}
    virtual void setReconstructionFilterSize(double s) {}
