@@ -62,7 +62,7 @@ void screenText(int w, int h) {
   fps_text << "FPS : " << fps;
   sps_text << "Surfels per sec : " << sps << "K";
   
-  num_pts_text << "number of points : " << surfels.size() << endl;
+  num_pts_text << "number of points : " << number_surfels << endl;
   glWrite(1.1, 1.60, (char*) num_pts_text.str().c_str());
   glWrite(1.1, 1.45, (char*) fps_text.str().c_str());
   

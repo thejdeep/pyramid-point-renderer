@@ -5,6 +5,8 @@
  **/
 void Object::render ( void ) {
 
+  glTranslatef(center[0], center[1], center[2]);
+
   if (renderer_type == PYRAMID_POINTS) {
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -18,7 +20,8 @@ void Object::render ( void ) {
 
   }
   else if ( (renderer_type == PYRAMID_TRIANGLES) 
-	    || (renderer_type == PYRAMID_HYBRID)) {
+	    || (renderer_type == PYRAMID_HYBRID)
+	    || (renderer_type == PYRAMID_LINES)) {
     glCallList(triangleDisplayList);
 
   }
@@ -34,6 +37,21 @@ void Object::render ( void ) {
     glColor4f(1.0, 1.0, 1.0, 1.0);
     
     glCallList(triangleDisplayList);
+  }
+  else if (renderer_type == LINES) {
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+      
+    glShadeModel(GL_SMOOTH);
+    
+    glColor4f(1.0, 1.0, 1.0, 1.0);
+    
+    glLineWidth(2.0);
+
+    glCallList(triangleDisplayList);
+
+    glLineWidth(1.0);
   }
 }
 
@@ -51,19 +69,23 @@ void Object::setRendererType ( int type ) {
   glDeleteLists(triangleDisplayList, 1);
 
   if (renderer_type == PYRAMID_POINTS)
-    setArrays();
+    setPyramidPointsArrays();
   else if (renderer_type == PYRAMID_TRIANGLES)
-    setDisplayList();
+    setPyramidTrianglesDisplayList();
   else if (renderer_type == PYRAMID_HYBRID)
-    setHybridDisplayList();
+    setPyramidHybridDisplayList();
+  else if (renderer_type == PYRAMID_LINES)
+    setPyramidLinesDisplayList();
   else if (renderer_type == TRIANGLES)
-    setTriangleDisplayList();
+    setTrianglesDisplayList();
+  else if (renderer_type == LINES)
+    setLinesDisplayList();
 }
 
 /**
  * Create arrays and VBO.
  **/
-void Object::setArrays ( void ) {
+void Object::setPyramidPointsArrays ( void ) {
 
   GLfloat *vertex_array, *normal_array;
   number_points = surfels.size();
@@ -105,40 +127,43 @@ void Object::setArrays ( void ) {
   glNormalPointer(GL_FLOAT, 0, NULL); 
 }
 
-/**
- * Sets the triangles list.
- **/
-void Object::setTriangleDisplayList( void ) {
+void Object::setPyramidPointsDisplayList ( void ) {
 
   triangleDisplayList = glGenLists(1);
 
-  Point p[3];
-  Vector n[3];
+
   glNewList(triangleDisplayList, GL_COMPILE);
   
-  for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    p[0] = surfels.at( it->verts[0] ).position();
-    p[1] = surfels.at( it->verts[1] ).position();
-    p[2] = surfels.at( it->verts[2] ).position();
-    n[0] = surfels.at( it->verts[0] ).normal();
-    n[1] = surfels.at( it->verts[1] ).normal();
-    n[2] = surfels.at( it->verts[2] ).normal();
-
-    glBegin(GL_TRIANGLES);  
-    for (int i = 0; i < 3; ++i) {
-      glNormal3f(n[i].x(), n[i].y(), n[i].z());
-      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
-    }
-    glEnd();
+  glBegin(GL_POINTS);
+  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+    glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
+    glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
   }
+  glEnd();
+
+//   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
+//     p[0] = surfels.at( it->verts[0] ).position();
+//     p[1] = surfels.at( it->verts[1] ).position();
+//     p[2] = surfels.at( it->verts[2] ).position();
+//     n[0] = surfels.at( it->verts[0] ).normal();
+//     n[1] = surfels.at( it->verts[1] ).normal();
+//     n[2] = surfels.at( it->verts[2] ).normal();
+
+//     glBegin(GL_TRIANGLES);
+//     for (int i = 0; i < 3; ++i) {
+//       glNormal3f(n[i].x(), n[i].y(), n[i].z());
+//       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.000001);
+//     }
+//     glEnd();
+//   }
 
   glEndList();
 }
 
 /**
- * Sets the triangles list.
+ * Sets the pyramid triangles list.
  **/
-void Object::setDisplayList( void ) {
+void Object::setPyramidTrianglesDisplayList( void ) {
 
   triangleDisplayList = glGenLists(1);
 
@@ -154,7 +179,7 @@ void Object::setDisplayList( void ) {
     n[1] = surfels.at( it->verts[1] ).normal();
     n[2] = surfels.at( it->verts[2] ).normal();
 
-    glBegin(GL_TRIANGLES);  
+    glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.000001);
@@ -166,10 +191,40 @@ void Object::setDisplayList( void ) {
 }
 
 /**
+ * Sets the pyramid lines list.
+ **/
+void Object::setPyramidLinesDisplayList( void ) {
+
+  triangleDisplayList = glGenLists(1);
+
+  Point p[3];
+  Vector n[3];
+  glNewList(triangleDisplayList, GL_COMPILE);
+  
+  for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
+    p[0] = surfels.at( it->verts[0] ).position();
+    p[1] = surfels.at( it->verts[1] ).position();
+    p[2] = surfels.at( it->verts[2] ).position();
+    n[0] = surfels.at( it->verts[0] ).normal();
+    n[1] = surfels.at( it->verts[1] ).normal();
+    n[2] = surfels.at( it->verts[2] ).normal();
+
+    glBegin(GL_LINES);
+    for (int i = 0; i < 3; ++i) {
+      glNormal3f(n[i].x(), n[i].y(), n[i].z());
+      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
+    }
+    glEnd();
+  }
+
+  glEndList();
+}
+
+/**
  * Sets the display list, half rendered as triangles
  * and the other half as points.
  **/
-void Object::setHybridDisplayList( void ) {
+void Object::setPyramidHybridDisplayList( void ) {
 
 
   triangleDisplayList = glGenLists(1);
@@ -187,7 +242,7 @@ void Object::setHybridDisplayList( void ) {
     n[1] = surfels.at( it->verts[1] ).normal();
     n[2] = surfels.at( it->verts[2] ).normal();
 
-    if ((p[0].y() > 0.0) || (p[1].y() > 0.0) || (p[2].y() > 0.0)) {
+    if ((p[0].x() > 0.0) || (p[1].x() > 0.0) || (p[2].x() > 0.0)) {
 
       glBegin(GL_TRIANGLES);  
       for (int i = 0; i < 3; ++i) {
@@ -197,16 +252,75 @@ void Object::setHybridDisplayList( void ) {
       glEnd();
     }
   }
+
   glBegin(GL_POINTS);  
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
-    if (it->position().y() <= 0.001) {    
+    if (it->position().x() <= 0.001) {    
       glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
       glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
     }
   }
-
-  
   glEnd();
+
+  glEndList();
+}
+
+/**
+ * Sets the triangles list.
+ **/
+void Object::setTrianglesDisplayList( void ) {
+
+  triangleDisplayList = glGenLists(1);
+
+  Point p[3];
+  Vector n[3];
+  glNewList(triangleDisplayList, GL_COMPILE);
+  
+  for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
+    p[0] = surfels.at( it->verts[0] ).position();
+    p[1] = surfels.at( it->verts[1] ).position();
+    p[2] = surfels.at( it->verts[2] ).position();
+    n[0] = surfels.at( it->verts[0] ).normal();
+    n[1] = surfels.at( it->verts[1] ).normal();
+    n[2] = surfels.at( it->verts[2] ).normal();
+
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < 3; ++i) {
+      glNormal3f(n[i].x(), n[i].y(), n[i].z());
+      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
+    }
+    glEnd();
+  }
+
+  glEndList();
+}
+
+/**
+ * Sets the triangles list.
+ **/
+void Object::setLinesDisplayList( void ) {
+
+  triangleDisplayList = glGenLists(1);
+
+  Point p[3];
+  Vector n[3];
+  glNewList(triangleDisplayList, GL_COMPILE);
+  
+  for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
+    p[0] = surfels.at( it->verts[0] ).position();
+    p[1] = surfels.at( it->verts[1] ).position();
+    p[2] = surfels.at( it->verts[2] ).position();
+    n[0] = surfels.at( it->verts[0] ).normal();
+    n[1] = surfels.at( it->verts[1] ).normal();
+    n[2] = surfels.at( it->verts[2] ).normal();
+
+    glBegin(GL_LINES);
+    for (int i = 0; i < 3; ++i) {
+      glNormal3f(n[i].x(), n[i].y(), n[i].z());
+      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
+    }
+    glEnd();
+  }
 
   glEndList();
 }

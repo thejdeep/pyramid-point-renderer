@@ -135,10 +135,10 @@ void draw(void) {
   point_based_render->clearBuffers();
 
   for (int i = 0; i < num_objects; ++i) {
-    if (objects[i].getRendererType() != TRIANGLES) {
+    if ((objects[i].getRendererType() != TRIANGLES) 
+	&& (objects[i].getRendererType() != LINES)) {
       point_based_render->projectSamples( &objects[i] );
       camera->setView();
-
     }
   }    
 
@@ -147,13 +147,13 @@ void draw(void) {
   camera->setView();
 
   for (int i = 0; i < num_objects; ++i)
-    if (objects[i].getRendererType() == TRIANGLES)
+    if ((objects[i].getRendererType() == TRIANGLES)
+	|| (objects[i].getRendererType() == LINES))
       objects[i].render();
 
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
-
 
   if (show_points)
     drawPoints();
@@ -298,10 +298,18 @@ void mouseMotion(int x, int y) {
     camera->rotate(x, y);
   }
   else if (button_pressed == GLUT_MIDDLE_BUTTON) {
-    if (active_shift)
-      camera->translate(x, y);
-    else
-      camera->zooming (x, y);
+    if (active_shift) {
+      if (selected_obj == -1)
+	camera->translate(x, y);
+      else
+	camera->translateVec(x, y, objects[selected_obj].getCenter());
+    }
+    else {
+      if (selected_obj == -1)
+	camera->zooming (x, y);
+      else
+	camera->zoomingVec(x, y, objects[selected_obj].getCenter());
+    }
   }
   else if (button_pressed == GLUT_RIGHT_BUTTON) {
     camera->lightTranslate(x, y);
@@ -345,7 +353,7 @@ void specialKey(int key_pressed, int x, int y) {
     show_splats = 3;
     break;
   case GLUT_KEY_F4:
-    changeRendererType(EWA_SPLATTING_INTERPOLATE_NORMALS);
+    changeRendererType(PYRAMID_LINES);
     show_splats = 4;
     break;
   case GLUT_KEY_F5:
@@ -353,6 +361,7 @@ void specialKey(int key_pressed, int x, int y) {
     show_splats = 5;
     break;
   case GLUT_KEY_F6:
+    changeRendererType(LINES);
     show_splats = 6;
     break;
   case GLUT_KEY_F12:
@@ -428,6 +437,9 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 	cout << "selected : 4" << endl;
       }
       break;
+    case '0' :
+      selected_obj = -1;
+      break;
     case 't':
       fps_loop = 100;
       break;
@@ -482,7 +494,8 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 }
 
 void changeRendererType( int type ) {
-  objects[selected_obj].setRendererType(type);
+  if (selected_obj != -1)
+    objects[selected_obj].setRendererType(type);
 }
 
 void createPointRender( int type ) {
@@ -542,6 +555,8 @@ void init(void) {
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
 
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
   camera->initLight();
 
   changeMaterial();
@@ -583,12 +598,11 @@ int main(int argc, char * argv []) {
   int read = readModels(argc, argv, &objects);
   num_objects = objects.size();
 
+  number_surfels = 0;
   cout << "objects : " << num_objects << endl;
   for (int i = 0; i < num_objects; ++i) {
     objects[i].setRendererType( PYRAMID_POINTS );
-    //objects[i].setArrays();
-    //    objects[i].setDisplayList();
-    //objects[i].setHybridDisplayList();
+    number_surfels += objects[i].getSurfels()->size();
     cout << "object " << i << endl <<
       "  num points    : " << objects[i].getSurfels()->size() <<
       "  num triangles : " << objects[i].getTriangles()->size() <<

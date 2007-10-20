@@ -623,7 +623,6 @@ void PyramidPointRender::clearBuffers() {
   CHECK_FOR_OGL_ERROR();
 }
 
-
 /**
  * Reconstructs the surface for visualization.
  **/
@@ -820,7 +819,7 @@ void PyramidPointRender::createFBO() {
  **/
 void PyramidPointRender::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
   shader_point_projection = new GLSLKernel();
   assert( shader_point_projection->has_GLSL() );

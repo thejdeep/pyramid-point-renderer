@@ -269,6 +269,7 @@ void Camera::zooming(int x, int y) {
   mouse_start[2] = mouse_curr[2];
 }
 
+
 /// Translate camera position
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
@@ -285,6 +286,66 @@ void Camera::translate (int x, int y) {
   mouse_start[1] = mouse_curr[1];
   mouse_start[2] = mouse_curr[2];
 }
+
+/// Translate a given vector
+/// @param x Mouse screen x coordinate
+/// @param y Mouse screen y coordinate
+void Camera::translateVec (int x, int y, double* vec) {
+
+  mouse_curr[0] = x;
+  mouse_curr[1] = screen_height - y;
+  mouse_curr[2] = 0.0;
+
+  // translation displacement vector
+  double rotVec[3] = {0.0, 0.0, 0.0};
+
+  rotVec[0] = (mouse_curr[0] - mouse_start[0]) / screen_width;
+  rotVec[1] = (mouse_curr[1] - mouse_start[1]) / screen_height;
+
+  mouse_start[0] = mouse_curr[0];
+  mouse_start[1] = mouse_curr[1];
+  mouse_start[2] = mouse_curr[2];
+
+  // rotates displacement to align with object axis
+  Quat q = q_rot;
+  q.x *= -1; q.y *= -1; q.z *= -1;
+  q.rotate(rotVec);
+
+  // increment given vector by oriented displacement
+  vec[0] += rotVec[0];
+  vec[1] += rotVec[1];
+  vec[2] += rotVec[2];
+}
+
+/// Translate a given vector
+/// @param x Mouse screen x coordinate
+/// @param y Mouse screen y coordinate
+void Camera::zoomingVec (int x, int y, double* vec) {
+
+  mouse_curr[0] = x;
+  mouse_curr[1] = screen_height - y;
+  mouse_curr[2] = 0.0;
+
+  // translation displacement vector
+  double rotVec[3] = {0.0, 0.0, 0.0};
+
+  rotVec[2] -= 5.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
+
+  mouse_start[0] = mouse_curr[0];
+  mouse_start[1] = mouse_curr[1];
+  mouse_start[2] = mouse_curr[2];
+
+  // rotates displacement to align with object axis
+  Quat q = q_rot;
+  q.x *= -1; q.y *= -1; q.z *= -1;
+  q.rotate(rotVec);
+
+  // increment given vector by oriented displacement
+  vec[0] += rotVec[0];
+  vec[1] += rotVec[1];
+  vec[2] += rotVec[2];
+}
+
 
 /// Translate ligth position
 /// @param x Mouse screen x coordinate

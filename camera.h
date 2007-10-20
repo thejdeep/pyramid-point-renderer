@@ -105,6 +105,11 @@ public:
   /// Translation procedure
   void translate (int x, int y);
 
+  /// Translate a given vector
+  void translateVec (int x, int y, double* vec);
+  /// Translate a given vector in the z axis
+  void zoomingVec (int x, int y, double* vec);
+
   /// Return rotation matrix
   const double* rotationMatrix ( void );// { return rotation_matrix; }
 

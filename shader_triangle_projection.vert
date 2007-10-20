@@ -13,13 +13,12 @@ void main(void)
 {
   // back face culling (rotated eye, fixed point)
   
-  if ( ( gl_Vertex.w != 0.000001 ) &&
+  if ( ( (gl_Vertex.w != 0.000001) && (gl_Vertex.w != 0.001) ) &&
       ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < 0.001 )) {
     radius_depth_w.x = 0.0;
     // for some reason seting the vector to vec4(0.0) drops
     // the performance significantly -- RM 2007-10-19
     gl_Position = vec4(1.0);
-
   }
   else
   {

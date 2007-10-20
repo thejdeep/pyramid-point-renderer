@@ -21,9 +21,11 @@
 typedef enum 
   {
     TRIANGLES,
+    LINES,
     PYRAMID_POINTS,
     PYRAMID_TRIANGLES,
     PYRAMID_HYBRID,
+    PYRAMID_LINES,
     EWA_SPLATTING,
     EWA_SPLATTING_INTERPOLATE_NORMALS
   } point_render_type_enum;
@@ -36,7 +38,9 @@ class Object
   
   Object() { }
 
-  Object(int id_num) : id(id_num) {}
+  Object(int id_num) : id(id_num) {
+    center[0] = center[1] = center[2] = 0.0;
+  }
 
   ~Object() {}
 
@@ -51,15 +55,20 @@ class Object
 
   void setId ( int id_num ) { id = id_num; }
 
+  double* getCenter ( void ) { return &center[0]; }
 
  private:
 
-  void setArrays( void );
-  void setDisplayList( void );
-  void setHybridDisplayList( void );
-  void setTriangleDisplayList( void );
+  void setPyramidPointsArrays( void );
+  void setPyramidPointsDisplayList( void );
+  void setPyramidTrianglesDisplayList( void );
+  void setPyramidHybridDisplayList( void );
+  void setPyramidLinesDisplayList( void );
+  void setTrianglesDisplayList( void );
+  void setLinesDisplayList( void );
 
   // Center position (for individual translation)
+  double center[3];
 
   // Rotation quaternion (for individual rotation)
   Quat q_rotation;
