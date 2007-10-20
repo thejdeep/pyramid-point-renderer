@@ -109,15 +109,15 @@ void draw(void) {
 
   // Compute eye coordinate
   // Rotate eye on opposite direction
-  double c[4];
-  camera->eyeVec(c);
-  c[3] = 1.0;
-  Quat q = camera->rotationQuat();
-  // Invert quaternion -- simulates inverse of modelview
-  q.x *= -1; q.y *= -1; q.z *= -1;
-  q.rotate(c);
-  double eye[3] = {c[0], c[1], c[2]};
-  point_based_render->setEye(eye);
+//   double c[4];
+//   camera->eyeVec(c);
+//   c[3] = 1.0;
+//   Quat q = camera->rotationQuat();
+//   // Invert quaternion -- simulates inverse of modelview
+//   q.x *= -1; q.y *= -1; q.z *= -1;
+//   q.rotate(c);
+//   double eye[3] = {c[0], c[1], c[2]};
+//   point_based_render->setEye(eye);
     
     // set light direction and zoom factor
 //     double light_dir[3];
@@ -134,9 +134,27 @@ void draw(void) {
 
   point_based_render->clearBuffers();
 
+  double c[4];
   for (int i = 0; i < num_objects; ++i) {
     if ((objects[i].getRendererType() != TRIANGLES) 
 	&& (objects[i].getRendererType() != LINES)) {
+     
+      // Set eye for each object separately
+      camera->eyeVec(c);
+      c[3] = 1.0;
+
+      Quat q = camera->rotationQuat();
+      q = q.composeWith(*(objects[i].getRotationQuat()));
+
+//       Quat q = *(objects[i].getRotationQuat());
+//       q = q.composeWith(camera->rotationQuat());
+
+      // Invert quaternion -- simulates inverse of modelview
+      q.x *= -1; q.y *= -1; q.z *= -1;
+      q.rotate(c);
+      double eye[3] = {c[0], c[1], c[2]};
+      point_based_render->setEye(eye);
+
       point_based_render->projectSamples( &objects[i] );
       camera->setView();
     }
@@ -265,11 +283,13 @@ void mouse(int button, int state, int x, int y) {
   if (state == GLUT_DOWN) {
     if (button == GLUT_LEFT_BUTTON) {
 
-      camera->startRotation(x, y);
+      if (selected_obj == -1)
+	camera->startRotation(x, y);
+      else
+	camera->startQuatRotation(x, y, objects[selected_obj].getRotationQuat());
 
       // Check if clicked in one of interface buttons ( flags )
-      screenButtons (x, y);
-      
+      screenButtons (x, y);      
     }
     else if (button == GLUT_MIDDLE_BUTTON) {
       camera->mouseSetClick(x, y);
@@ -295,7 +315,10 @@ void mouseMotion(int x, int y) {
   Point click = unproject (Point (x, y, 0.0));
 
   if (button_pressed == GLUT_LEFT_BUTTON) {
-    camera->rotate(x, y);
+    if (selected_obj == -1)
+      camera->rotate(x, y);
+    else
+      camera->rotateQuat(x, y, objects[selected_obj].getRotationQuat());
   }
   else if (button_pressed == GLUT_MIDDLE_BUTTON) {
     if (active_shift) {

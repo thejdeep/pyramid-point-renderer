@@ -166,6 +166,20 @@ void Camera::startRotation(int x, int y) {
 
 }
 
+/// Starts a rotation procedure
+/// @param x Mouse screen x coordinate
+/// @param y Mouse screen y coordinate
+void Camera::startQuatRotation(int x, int y, Quat* q) {
+
+  q_last = *q;
+
+  // Save initial click
+  mouse_start[0] = x;
+  mouse_start[1] = screen_height - y;
+  mouse_start[2] = 0.0;
+
+}
+
 /// Ends a rotation procedure
 void Camera::endRotation() {
   q_last = q_rot;
@@ -239,6 +253,33 @@ void Camera::rotate(int x, int y) {
   q_rot = new_rot.composeWith(q_last);
 
   q_rot.normalize();
+}
+
+/// Rotate given quaternion
+/// @param x Mouse screen x coordinate
+/// @param y Mouse screen y coordinate
+void Camera::rotateQuat(int x, int y, Quat *q) {
+
+  mouse_curr[0] = x;
+  mouse_curr[1] = screen_height - y;
+  mouse_curr[2] = 0.0;
+
+  double v0[3], v1[3];
+  mapToSphere(mouse_start, v0, radius);
+  mapToSphere(mouse_curr, v1, radius);
+
+  // Cross-product (v0, v1)
+  double axis[3] = {v0[1]*v1[2] - v0[2]*v1[1], 
+		    v0[2]*v1[0] - v0[0]*v1[2], 
+		    v0[0]*v1[1] - v0[1]*v1[0]};
+  double angle = v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2];
+
+  Quat new_rot (angle, axis[0], axis[1], axis[2]);
+
+  // Multiply local rotation by total rotation (order matters!)
+  *q = new_rot.composeWith(q_last);
+
+  q->normalize();
 }
 
 /// Sets mouse button click position

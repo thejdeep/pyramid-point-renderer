@@ -84,6 +84,8 @@ public:
   /// Reshape function
   void reshape (int w, int h);
 
+  /// Starts a quat rotation procedure
+  void startQuatRotation(int x, int y, Quat*);
   /// Starts a rotation procedure
   void startRotation(int x, int y);
   /// Ends a rotation procedure
@@ -109,6 +111,8 @@ public:
   void translateVec (int x, int y, double* vec);
   /// Translate a given vector in the z axis
   void zoomingVec (int x, int y, double* vec);
+  /// Rotate a given quaternion
+  void rotateQuat(int x, int y, Quat *q);
 
   /// Return rotation matrix
   const double* rotationMatrix ( void );// { return rotation_matrix; }

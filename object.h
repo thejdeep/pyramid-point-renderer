@@ -40,6 +40,7 @@ class Object
 
   Object(int id_num) : id(id_num) {
     center[0] = center[1] = center[2] = 0.0;
+    q_rot.a = 1; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
   }
 
   ~Object() {}
@@ -56,6 +57,7 @@ class Object
   void setId ( int id_num ) { id = id_num; }
 
   double* getCenter ( void ) { return &center[0]; }
+  Quat* getRotationQuat ( void ) { return &q_rot; }
 
  private:
 
@@ -71,7 +73,7 @@ class Object
   double center[3];
 
   // Rotation quaternion (for individual rotation)
-  Quat q_rotation;
+  Quat q_rot;
 
   // Rendering type.
   int renderer_type;
