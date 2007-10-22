@@ -63,11 +63,10 @@ class PyramidPointRender : public PointBasedRender
   ~PyramidPointRender();
 
   void draw();
-  void draw(int timing_profile);
   
   void clearBuffers (void);
-  void projectSamples(Object *);
-  void interpolate( void );
+  void projectSamples (Object *);
+  void interpolate ( void );
 
   void setVertices( vector<Surfel> *surfels );
   void setPrefilterSize(double s);

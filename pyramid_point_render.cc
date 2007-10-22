@@ -650,8 +650,16 @@ void PyramidPointRender::interpolate() {
   copyAnalysisPyramid();
   rasterizeSynthesisPyramid();
   
+
+}
+
+/**
+ * Renders reconstructed model on screen with
+ * per pixel shading.
+ **/
+void PyramidPointRender::draw( void ) {
+
   // Deffered shading of the final image containing normal map
-  //framebuffer_state = FBS_UNDEFINED;
   rasterizePhongShading(0);
   //showPixels(1);
 
@@ -661,60 +669,6 @@ void PyramidPointRender::interpolate() {
   glDisable(FBO_TYPE);
 
   CHECK_FOR_OGL_ERROR();
-}
-
-void PyramidPointRender::draw( void ) {}
-
-/**
- * Draw function for taking timings for different
- * parts of the algorithm.
- **/
-void PyramidPointRender::draw(int timing_profile) {
-//   int i;
-
-//   glEnable(FBO_TYPE);
-//   glDisable(GL_BLEND);
-//   glEnable(GL_DEPTH_TEST);
-//   glDepthMask(GL_TRUE);
-//   glDepthFunc(GL_LESS);
-  
-//   // Clear all buffers, including the render buffer
-//   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-//   for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
-//     glDrawBuffer(fbo_buffers[i]);
-//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//   }
-
-//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-//   glDrawBuffer(GL_BACK);
-//   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-//   glClear(GL_COLOR_BUFFER_BIT); 
-//   framebuffer_state = FBS_UNDEFINED;
-
-//   CHECK_FOR_OGL_ERROR();
-
-//   if (timing_profile > 0) {
-//     projectPoints();
-//     glDisable(GL_DEPTH_TEST);
-//     glDepthMask(GL_FALSE);  
-//   }
-//   if (timing_profile > 1) {
-//     rasterizeAnalysisPyramid();
-//     copyAnalysisPyramid();
-//     rasterizeSynthesisPyramid();
-//   }
-//   if (timing_profile > 2)
-//     rasterizePhongShading(0);
- 
-//   showPixels(0);
-
-//   glFinish();
-  
-//   glDisable(FBO_TYPE);
-  
-//   CHECK_FOR_OGL_ERROR();
 }
 
 

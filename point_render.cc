@@ -128,7 +128,46 @@ void draw(void) {
   // pyramid interpolation algorithm
 #ifdef TIMING
 
-  point_based_render->draw(timing_profile);
+  if (timing_profile >= 0) {
+    point_based_render->clearBuffers();
+  }
+  if (timing_profile > 0) {
+  
+    double c[4];
+    for (int i = 0; i < num_objects; ++i) {
+      if ((objects[i].getRendererType() != TRIANGLES) 
+	  && (objects[i].getRendererType() != LINES)) {
+	
+	// Set eye for each object separately
+	camera->eyeVec(c);
+	c[3] = 1.0;
+	
+	Quat q = camera->rotationQuat();
+	q = q.composeWith(*(objects[i].getRotationQuat()));
+	
+	//       Quat q = *(objects[i].getRotationQuat());
+	//       q = q.composeWith(camera->rotationQuat());
+	
+	// Invert quaternion -- simulates inverse of modelview
+	q.x *= -1; q.y *= -1; q.z *= -1;
+	q.rotate(c);
+	double eye[3] = {c[0], c[1], c[2]};
+	point_based_render->setEye(eye);
+	
+	point_based_render->projectSamples( &objects[i] );
+	camera->setView();
+      }
+    }
+  }
+  if (timing_profile > 1) {
+    point_based_render->interpolate();
+  }
+  if (timing_profile > 2) {
+    point_based_render->draw();
+    camera->setView();
+  }
+
+  camera->rotate();
 
 #else
 
@@ -161,6 +200,7 @@ void draw(void) {
   }    
 
   point_based_render->interpolate();
+  point_based_render->draw();
 
   camera->setView();
 
@@ -181,7 +221,7 @@ void draw(void) {
   // compute frames per second
   // fps variable is rendered on screen text
   ++fps_loop;
-  if (fps_loop == 30) {
+  if (fps_loop == 50) {
     double end_time = timer();
     fps = (end_time - start_time) / (double)fps_loop;
     #ifndef TIMING
@@ -193,7 +233,7 @@ void draw(void) {
   if (rotating)
     camera->rotate();
 
-  glFinish();
+  //glFinish();
 
 #ifdef TIMING
 
@@ -203,12 +243,13 @@ void draw(void) {
     }
 
   if (timing_profile == 4) {
-    cout << "PREPARE    : " << timings[0] << endl;
-    cout << "PROJECT    : " << timings[1] - timings[0] << endl;
-    cout << "PYRAMID_POINTS    : " << timings[2] - timings[1] << endl;
-    cout << "SHADE      : " << timings[3] - timings[2]<< endl;
-    cout << "TOTAL      : " << timings[3] << endl;
-    cout << "FPS        : " << 1000.0 / timings[3] << endl;
+    cout << "PREPARE     : " << timings[0] << endl;
+    cout << "PROJECT     : " << timings[1] - timings[0] << endl;
+    cout << "RECONSTRUCT : " << timings[2] - timings[1] << endl;
+    cout << "SHADE       : " << timings[3] - timings[2]<< endl;
+    cout << "TOTAL       : " << timings[3] << endl;
+    cout << "FPS         : " << 1000.0 / timings[3] << endl;
+    cout << "SPLATS/SEC  : " << ((double)number_surfels * (1000.0 / timings[3]) / 1000) << " M" << endl;
     exit(0);
   }
 

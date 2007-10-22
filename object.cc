@@ -21,6 +21,7 @@ void Object::render ( void ) {
   }
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 
+
   if (renderer_type == PYRAMID_POINTS) {
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
