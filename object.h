@@ -62,6 +62,7 @@ class Object
  private:
 
   void setPyramidPointsArrays( void );
+  void setPyramidPointsArraysColor( void );
   void setPyramidPointsDisplayList( void );
   void setPyramidTrianglesDisplayList( void );
   void setPyramidHybridDisplayList( void );
@@ -80,6 +81,8 @@ class Object
 
   /// Vertex buffer
   GLuint vertex_buffer;
+  /// Color Buffer
+  GLuint color_buffer;
   /// Normal Buffer
   GLuint normal_buffer;
   /// Triangle Display List

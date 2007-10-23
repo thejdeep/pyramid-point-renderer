@@ -5,7 +5,6 @@
 **   history:	created  02-Jul-07
 */
 
-
 #ifndef __PYRAMID_POINT_RENDER_H__
 #define __PYRAMID_POINT_RENDER_H__
 
@@ -25,12 +24,8 @@ extern "C" {
 #include "point_based_render.h"
 #include "object.h"
 
-#define FBO_TYPE GL_TEXTURE_2D
-#define FBO_FORMAT GL_RGBA16F_ARB
-#define FBO_BUFFERS_COUNT 6
 
-
-class PyramidPointRender : public PointBasedRender
+class PyramidPointRenderColor : public PointBasedRender
 {
  private:
 
@@ -51,16 +46,16 @@ class PyramidPointRender : public PointBasedRender
   int projectionTrianglesCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
   void projectTriangles( Object * );
 
-  pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1);
+  pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);
 
   double computeHalfPixelSize(int level);
 
  public:
-  PyramidPointRender();
-  PyramidPointRender(int w, int h);
-  ~PyramidPointRender();
+  PyramidPointRenderColor();
+  PyramidPointRenderColor(int w, int h);
+  ~PyramidPointRenderColor();
 
   void draw();
   

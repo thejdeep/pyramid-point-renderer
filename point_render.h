@@ -26,9 +26,9 @@
 #include <list>
 #include <vector>
 
-#include "ewa_surface_splatting.h"
-#include "pyramid_point_render.h"
-#include "pyramid_triangle_renderer.h"
+//#include "ewa_surface_splatting.h"
+#include "pyramid_point_render_color.h"
+//#include "pyramid_triangle_renderer.h"
 #include "triangle_renderer.h"
 #include "surfels.h"
 #include "quat.h"
@@ -42,6 +42,6 @@
 
 unsigned int number_surfels;
 
-PyramidPointRender *point_based_render;
+PyramidPointRenderColor *point_based_render;
 
 #endif

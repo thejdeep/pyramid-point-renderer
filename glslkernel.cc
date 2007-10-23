@@ -82,7 +82,7 @@ static int error_check () {
 
 	glErr = glGetError();
 	while (glErr != GL_NO_ERROR) {
-		cerr << "glError : " << gluErrorString(glErr) << "\n";
+		cerr << __FILE__ << " glError: " << __LINE__ << " " << gluErrorString(glErr) << endl;
 		retCode = 1;
 		glErr = glGetError();
 	}

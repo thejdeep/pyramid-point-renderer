@@ -21,7 +21,6 @@
 // #define CANVAS_WIDTH  512
 // #define CANVAS_HEIGHT 512
 
-
 Camera * camera;
 TriangleRenderer * triangle_renderer;
 
@@ -166,7 +165,6 @@ void draw(void) {
     point_based_render->draw();
     camera->setView();
   }
-
   camera->rotate();
 
 #else
@@ -197,7 +195,7 @@ void draw(void) {
       point_based_render->projectSamples( &objects[i] );
       camera->setView();
     }
-  }    
+  }
 
   point_based_render->interpolate();
   point_based_render->draw();
@@ -233,7 +231,7 @@ void draw(void) {
   if (rotating)
     camera->rotate();
 
-  //glFinish();
+  glFinish();
 
 #ifdef TIMING
 
@@ -566,7 +564,7 @@ void createPointRender( int type ) {
 
   delete point_based_render;
 
-  point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
+  point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   assert (point_based_render);
 

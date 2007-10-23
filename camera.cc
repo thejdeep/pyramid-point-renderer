@@ -39,6 +39,7 @@ void Camera::initLight (void) {
 
 /// Sets OpenGL camera
 void Camera::setView (void) {
+
   glViewport(0, 0, screen_width, screen_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

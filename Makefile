@@ -13,7 +13,7 @@ else
 CXXFLAGS = -g -O3 -Wall -Wno-deprecated
 endif
 
-CCFLAGS = -g -O3 -Wall
+CCFLAGS = -g -O3 -Wall -Wno-missing-braces
 
 # compiler names
 CXX = g++
@@ -30,12 +30,15 @@ XLIBS      = -lXext -lX11 -lXi
 LIBSLIST = $(GLLIBS) $(GLUTLIB) $(XLIBS) $(MATLIB)
 
 OBJFILES = timer.o point_render.o camera.o glslkernel.o object.o \
-	point_based_render.o pyramid_point_render.o ewa_surface_splatting.o \
-	pyramid_triangle_renderer.o triangle_renderer.o ply.o GLee.o
+	point_based_render.o pyramid_point_render.o \
+	triangle_renderer.o ply.o GLee.o \
+	pyramid_point_render_color.o
+
 
 CODES =  point_render.cc camera.cc timer.c glslkernel.cc object.cc\
-	point_based_render.cc pyramid_point_render.cc ewa_surface_splatting.cc \
-	pyramid_triangle_renderer.cc triangle_renderer.cc ply.c GLee.cpp
+	point_based_render.cc pyramid_point_render.cc \
+	triangle_renderer.cc ply.c GLee.cpp \
+	pyramid_point_render_color.cc
 
 ###################################
 
