@@ -16,6 +16,7 @@ extern "C" {
 
 typedef struct Vertex {
   float x,y,z;
+  float r,g,b;
   float nx,ny,nz;
   float radius;
   void *other_props;       /* other properties */
@@ -406,6 +407,93 @@ void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
+
+void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
+		       vector<Triangle> *triangles) {
+
+  FILE *fp = fopen(filename, "r");
+  in_ply = read_ply(fp);
+
+  int i,j;
+  int elem_count;
+  char *elem_name;
+  
+  for (i = 0; i < in_ply->num_elem_types; i++) {
+
+    /* prepare to read the i'th list of elements */
+    elem_name = setup_element_read_ply (in_ply, i, &elem_count);
+
+    if (equal_strings ("vertex", elem_name)) {
+
+      /* create a vertex list to hold all the vertices */
+      nverts = elem_count;
+
+      /* set up for getting vertex elements */
+      setup_property_ply (in_ply, &vert_props[0]);
+      setup_property_ply (in_ply, &vert_props[1]);
+      setup_property_ply (in_ply, &vert_props[2]);
+
+      for (j = 0; j < in_ply->elems[i]->nprops; j++) {
+	PlyProperty *prop;
+	prop = in_ply->elems[i]->props[j];
+	if (equal_strings ("nx", prop->name))
+	  setup_property_ply (in_ply, &vert_props[3]);
+	if (equal_strings ("ny", prop->name))
+	  setup_property_ply (in_ply, &vert_props[4]);
+	if (equal_strings ("nz", prop->name))
+	  setup_property_ply (in_ply, &vert_props[5]);
+	if (equal_strings ("radius", prop->name))
+	  setup_property_ply (in_ply, &vert_props[6]);
+	if (equal_strings ("r", prop->name))
+	  setup_property_ply (in_ply, &vert_props[7]);
+	if (equal_strings ("g", prop->name))
+	  setup_property_ply (in_ply, &vert_props[8]);
+	if (equal_strings ("b", prop->name))
+	  setup_property_ply (in_ply, &vert_props[9]);
+      }
+
+      vert_other = get_other_properties_ply (in_ply, 
+					     offsetof(Vertex,other_props));
+
+      Vertex v;
+      /* grab all the vertex elements */
+      for (j = 0; j < elem_count; j++) {
+
+        get_element_ply (in_ply, (void *) &v);
+
+	Point p (v.x, v.y, v.z);
+	Vector n (v.nx, v.ny, v.nz);
+	Point c (v.r, v.g, v.b);
+	
+	surfels->push_back ( Surfel (p, n, c, (double)v.radius, j) );
+      }
+    }
+    else if (equal_strings ("face", elem_name)) {
+
+      /* create a list to hold all the face elements */
+      nfaces = elem_count;
+
+      /* set up for getting face elements */
+      setup_property_ply (in_ply, &face_props[0]);
+      face_other = get_other_properties_ply (in_ply,
+					     offsetof(Face,other_props));
+      Face f;
+      /* grab all the face elements */
+      for (j = 0; j < elem_count; j++) {
+	get_element_ply (in_ply, (void *) &f);
+	Triangle t;
+	for (int k = 0; k < 3; ++k)
+	  t.verts[k] = f.verts[k];
+	t.id = j;
+	triangles->push_back( t );	
+      }      
+    }
+    else
+      get_other_element_ply (in_ply);
+  }
+  close_ply(in_ply);
+}
+
 int readModels (int argc, char **argv, vector<Object> *objs) {
 
   // For each model passed in command line
@@ -419,6 +507,7 @@ int readModels (int argc, char **argv, vector<Object> *objs) {
 
   return 1;
 }
+
 
 int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,
 			   vector<Triangle> *triangles){

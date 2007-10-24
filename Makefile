@@ -29,16 +29,14 @@ XLIBS      = -lXext -lX11 -lXi
 
 LIBSLIST = $(GLLIBS) $(GLUTLIB) $(XLIBS) $(MATLIB)
 
-OBJFILES = timer.o point_render.o camera.o glslkernel.o object.o \
-	point_based_render.o pyramid_point_render.o \
-	triangle_renderer.o ply.o GLee.o \
-	pyramid_point_render_color.o
+OBJFILES = timer.o camera.o glslkernel.o object.o \
+	point_based_render.o pyramid_point_render.o pyramid_point_render_color.o \
+	point_render.o ply.o GLee.o \
 
 
-CODES =  point_render.cc camera.cc timer.c glslkernel.cc object.cc\
-	point_based_render.cc pyramid_point_render.cc \
-	triangle_renderer.cc ply.c GLee.cpp \
-	pyramid_point_render_color.cc
+CODES =  camera.cc timer.c glslkernel.cc object.cc\
+	point_based_render.cc pyramid_point_render.cc pyramid_point_render_color.cc \
+	point_render.cc ply.c GLee.cpp \
 
 ###################################
 

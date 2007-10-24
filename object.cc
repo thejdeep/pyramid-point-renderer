@@ -5,6 +5,10 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
+GLfloat obj_colors[3][4] = {{0.5, 0.1, 0.1, 1.0},
+			    {0.1, 0.5, 0.1, 1.0},
+			    {0.1, 0.1, 0.5, 1.0}};
+
 /**
  * Render object using designed rendering system.
  **/
@@ -92,7 +96,8 @@ void Object::setRendererType ( int type ) {
 
   if (renderer_type == PYRAMID_POINTS)
     setPyramidPointsArraysColor();
-  //setPyramidPointsDisplayList();
+  else if (renderer_type == PYRAMID_POINTS_COLOR)
+    setPyramidPointsDisplayList();
   else if (renderer_type == PYRAMID_TRIANGLES)
     setPyramidTrianglesDisplayList();
   else if (renderer_type == PYRAMID_HYBRID)
@@ -174,18 +179,12 @@ void Object::setPyramidPointsArraysColor ( void ) {
 //     color_array[pos*4 + 2] = (GLfloat)(it->color().z());
 //     color_array[pos*4 + 3] = (GLfloat)(it->color().w());
 
-    if (id == 0) {
-      color_array[pos*4 + 0] = (GLfloat)(0.3);
-      color_array[pos*4 + 1] = (GLfloat)(0.3);
-      color_array[pos*4 + 2] = (GLfloat)(0.9);
-      color_array[pos*4 + 3] = (GLfloat)(1.0);
-    }
-    else {
-      color_array[pos*4 + 0] = (GLfloat)(0.9);
-      color_array[pos*4 + 1] = (GLfloat)(0.3);
-      color_array[pos*4 + 2] = (GLfloat)(0.3);
-      color_array[pos*4 + 3] = (GLfloat)(1.0);
-    }
+
+    color_array[pos*4 + 0] = obj_colors[id][0];
+    color_array[pos*4 + 1] = obj_colors[id][1];
+    color_array[pos*4 + 2] = obj_colors[id][2];
+    color_array[pos*4 + 3] = obj_colors[id][0];
+
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
     normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
@@ -231,10 +230,7 @@ void Object::setPyramidPointsDisplayList ( void ) {
   
   glBegin(GL_POINTS);
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
-    if (id == 0)
-      glColor4f(0.0, 0.0, 1.0, 1.0);
-    else
-      glColor4f(0.0, 1.0, 0.0, 1.0);
+    glColor4fv(obj_colors[id]);
     glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
     glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
   }
@@ -264,10 +260,7 @@ void Object::setPyramidTrianglesDisplayList( void ) {
 
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
-      if (id == 0)
-	glColor4f(0.0, 0.0, 1.0, 1.0);
-      else
-	glColor4f(0.0, 1.0, 0.0, 1.0);
+      glColor4fv(obj_colors[id]);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.000001);
     }
@@ -296,8 +289,9 @@ void Object::setPyramidLinesDisplayList( void ) {
     n[1] = surfels.at( it->verts[1] ).normal();
     n[2] = surfels.at( it->verts[2] ).normal();
 
-    glBegin(GL_LINES);
+    glBegin(GL_LINE_LOOP);
     for (int i = 0; i < 3; ++i) {
+      glColor4fv(obj_colors[id]);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
     }

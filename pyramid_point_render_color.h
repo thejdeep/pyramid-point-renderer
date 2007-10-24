@@ -5,14 +5,12 @@
 **   history:	created  02-Jul-07
 */
 
-#ifndef __PYRAMID_POINT_RENDER_H__
-#define __PYRAMID_POINT_RENDER_H__
+#ifndef __PYRAMID_POINT_RENDER_COLOR_H__
+#define __PYRAMID_POINT_RENDER_COLOR_H__
 
 #define GL_GLEXT_PROTOTYPES
 
 extern "C" {
-/* #include <GL/glut.h> */
-/* #include <GL/glext.h> */
 #include "timer.h"
 }
 
@@ -22,8 +20,8 @@ extern "C" {
 #include <stdlib.h>
 
 #include "point_based_render.h"
-#include "object.h"
 
+#define FBO_BUFFERS_COUNT_6 6
 
 class PyramidPointRenderColor : public PointBasedRender
 {
@@ -104,7 +102,7 @@ class PyramidPointRenderColor : public PointBasedRender
 
   /// usually fboBuffers[i] == GL_COLOR_ATTACHMENT0_EXT + i, 
   /// but we don't rely on this assumption
-  GLuint fbo_buffers[FBO_BUFFERS_COUNT];
+  GLuint fbo_buffers[FBO_BUFFERS_COUNT_6];
 
   /** Textures bound to the framebuffer object; 
    * the ping-pong rendering switches between pairs 0-2 and 1-3
@@ -112,7 +110,7 @@ class PyramidPointRenderColor : public PointBasedRender
    * (pairs 0-1 and 2-3 would have to be rearranged to 0-1-2 and 3-4-5).
    * use getTextureOfBuffer to find the texture name of a buffer
    **/
-  GLuint fbo_textures[FBO_BUFFERS_COUNT];
+  GLuint fbo_textures[FBO_BUFFERS_COUNT_6];
   
   /// Number of pyramid levels.
   int levels_count;

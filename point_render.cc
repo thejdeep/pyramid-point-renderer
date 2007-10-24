@@ -22,7 +22,6 @@
 // #define CANVAS_HEIGHT 512
 
 Camera * camera;
-TriangleRenderer * triangle_renderer;
 
 int material_id;
 int selected_obj;
@@ -556,15 +555,16 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 }
 
 void changeRendererType( int type ) {
-  if (selected_obj != -1)
+  if (selected_obj != -1) {   
     objects[selected_obj].setRendererType(type);
+  }
 }
 
 void createPointRender( int type ) {
 
   delete point_based_render;
 
-  point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+  point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   assert (point_based_render);
 

@@ -150,6 +150,14 @@ class Surfel
 {
  public:
 
+  Surfel(Point _p, Vector _n, Point _c, double _r, unsigned int _id) {
+    p = Point(_p);
+    id_num = _id;
+    n = _n;
+    c = _c;
+    r = _r;
+  }
+
   Surfel(Point _p, Vector _n, double _r, unsigned int _id) {
     p = Point(_p);
     id_num = _id;

@@ -14,6 +14,8 @@
 #include "materials.h"
 #include "pyramid_types.h"
 #include "glslkernel.h"
+#include "object.h"
+
 
 class PointBasedRender
 {
@@ -36,6 +38,9 @@ class PointBasedRender
    
    virtual void draw( ) {}
    virtual void draw(int) {}
+   virtual void interpolate( ) {}
+   virtual void projectSamples(Object* o) {}
+   virtual void clearBuffers( ) {}
 
    virtual void setVertices( std::vector<Surfel> *surfels ) {}
    virtual void setTriangles( std::vector<Triangle> *triangles ) {}

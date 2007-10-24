@@ -42,8 +42,8 @@ PyramidPointRenderColor::~PyramidPointRenderColor() {
   delete shader_phong;
   delete shader_show;
 
-  glDeleteTextures(FBO_BUFFERS_COUNT, fbo_textures);
-  for (int i = 0; i < FBO_BUFFERS_COUNT; ++i) {
+  glDeleteTextures(FBO_BUFFERS_COUNT_6, fbo_textures);
+  for (int i = 0; i < FBO_BUFFERS_COUNT_6; ++i) {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(FBO_TYPE, 0);
     glDisable(FBO_TYPE);
@@ -62,7 +62,7 @@ GLuint PyramidPointRenderColor::getTextureOfBuffer(GLuint buffer)
 {
   int i;
 
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++)
+  for (i = 0; i < FBO_BUFFERS_COUNT_6; i++)
     {
 
       if (fbo_buffers[i] == buffer)
@@ -70,7 +70,7 @@ GLuint PyramidPointRenderColor::getTextureOfBuffer(GLuint buffer)
 	  break;
 	}
     }
-  if (i < FBO_BUFFERS_COUNT)
+  if (i < FBO_BUFFERS_COUNT_6)
     {
       return fbo_textures[i];
     }
@@ -640,7 +640,7 @@ void PyramidPointRenderColor::clearBuffers() {
   // Clear all buffers, including the render buffer
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
+  for (i = 0; i < FBO_BUFFERS_COUNT_6; i++) {
     glDrawBuffer(fbo_buffers[i]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
@@ -732,10 +732,10 @@ void PyramidPointRenderColor::createFBO() {
 
   /* initialize fbos */
 
-  assert(FBO_BUFFERS_COUNT <= 16);
+  assert(FBO_BUFFERS_COUNT_6 <= 16);
 
-  glGenTextures(FBO_BUFFERS_COUNT, fbo_textures);
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
+  glGenTextures(FBO_BUFFERS_COUNT_6, fbo_textures);
+  for (i = 0; i < FBO_BUFFERS_COUNT_6; i++) {
     fbo_buffers[i] = attachments[i];
     glBindTexture(FBO_TYPE, fbo_textures[i]);
     glTexImage2D(FBO_TYPE, 0, FBO_FORMAT,
@@ -759,7 +759,7 @@ void PyramidPointRenderColor::createFBO() {
 
   CHECK_FOR_OGL_ERROR();
 
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) 
+  for (i = 0; i < FBO_BUFFERS_COUNT_6; i++) 
     {
       fprintf(stderr, "bind fbo buffer %i\n", i);
       glBindTexture(FBO_TYPE, fbo_textures[i]);

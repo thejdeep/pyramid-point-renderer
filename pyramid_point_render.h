@@ -12,8 +12,6 @@
 #define GL_GLEXT_PROTOTYPES
 
 extern "C" {
-/* #include <GL/glut.h> */
-/* #include <GL/glext.h> */
 #include "timer.h"
 }
 
@@ -23,12 +21,6 @@ extern "C" {
 #include <stdlib.h>
 
 #include "point_based_render.h"
-#include "object.h"
-
-#define FBO_TYPE GL_TEXTURE_2D
-#define FBO_FORMAT GL_RGBA16F_ARB
-#define FBO_BUFFERS_COUNT 6
-
 
 class PyramidPointRender : public PointBasedRender
 {

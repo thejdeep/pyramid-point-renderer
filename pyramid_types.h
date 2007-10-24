@@ -2,7 +2,7 @@
 
 #define FBO_TYPE GL_TEXTURE_2D
 #define FBO_FORMAT GL_RGBA16F_ARB
-#define FBO_BUFFERS_COUNT 6
+#define FBO_BUFFERS_COUNT 4
 
 /** A pixels_struct specifies a rectangle of pixels 
  * in one or two buffers of one framebuffer object 
