@@ -5,9 +5,14 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-GLfloat obj_colors[3][4] = {{0.5, 0.1, 0.1, 1.0},
+// GLfloat obj_colors[3][4] = {{0.5, 0.1, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.1, 0.5, 1.0}};
+
+GLfloat obj_colors[3][4] = {{0.35, 0.1, 0.1, 1.0},
 			    {0.1, 0.5, 0.1, 1.0},
-			    {0.1, 0.1, 0.5, 1.0}};
+			    {0.1, 0.5, 0.1, 1.0}};
+
 
 /**
  * Render object using designed rendering system.
@@ -293,7 +298,8 @@ void Object::setPyramidLinesDisplayList( void ) {
     for (int i = 0; i < 3; ++i) {
       glColor4fv(obj_colors[id]);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
-      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
+  //      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
+      glVertex4f(p[i].x(), p[i].y(), p[i].z(), surfels.at( it->verts[i] ).radius());
     }
     glEnd();
   }
@@ -329,7 +335,7 @@ void Object::setPyramidHybridDisplayList( void ) {
       for (int i = 0; i < 3; ++i) {
 	glColor4f(0.3, 0.3, 0.9, 1.0);
 	glNormal3f(n[i].x(), n[i].y(), n[i].z());
-	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.000001);
+	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
       }
       glEnd();
     }

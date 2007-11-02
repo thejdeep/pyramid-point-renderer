@@ -17,11 +17,15 @@ void main (void) {
     
     color = gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient;
 
-    float NdotL = max(dot(normal.xyz, lightDir),0.0);
+    //    float NdotL = max(dot(normal.xyz, lightDir),0.0);
+    
+    float NdotL = abs(dot(normal.xyz, lightDir));
+
     color += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * NdotL;
 
     if (NdotL > 0.0) {
-      float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz),0.0);
+      //float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz),0.0);
+      float NdotHV = abs(dot(normal.xyz, gl_LightSource[0].halfVector.xyz));
 
       color += gl_FrontMaterial.specular * gl_LightSource[0].specular 
 	* pow(NdotHV, gl_FrontMaterial.shininess);

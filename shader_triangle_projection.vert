@@ -19,6 +19,7 @@ void main(void)
     // for some reason seting the vector to vec4(0.0) drops
     // the performance significantly -- RM 2007-10-19
     gl_Position = vec4(1.0);
+  
   }
   else
   {

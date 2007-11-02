@@ -181,6 +181,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   b += prefilter_size;
 
   // inside ellipse test
+  //  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
   if (test <= reconstruction_filter_size)

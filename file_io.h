@@ -395,10 +395,12 @@ void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
       for (j = 0; j < elem_count; j++) {
 	get_element_ply (in_ply, (void *) &f);
 	Triangle t;
-	for (int k = 0; k < 3; ++k)
+	for (int k = 0; k < (int)f.nverts; ++k)
 	  t.verts[k] = f.verts[k];
+	if ((int)f.nverts == 2)
+	  t.verts[2] = f.verts[1];
 	t.id = j;
-	triangles->push_back( t );	
+	triangles->push_back( t );
       }      
     }
     else
@@ -482,7 +484,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
       for (j = 0; j < elem_count; j++) {
 	get_element_ply (in_ply, (void *) &f);
 	Triangle t;
-	for (int k = 0; k < 3; ++k)
+	for (int k = 0; k < f.nverts; ++k)
 	  t.verts[k] = f.verts[k];
 	t.id = j;
 	triangles->push_back( t );	

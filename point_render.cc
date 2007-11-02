@@ -443,10 +443,12 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
     switch (key_pressed) {
     case '+' :
+    case '=' :
       prefilter_size += 0.25;
       point_based_render->setPrefilterSize(prefilter_size);
       break;
     case '-' :
+    case '_' :
       if (prefilter_size > 0.0)
 	prefilter_size -= 0.25;
       point_based_render->setPrefilterSize(prefilter_size);
@@ -533,6 +535,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
       cout << "analysis_filter_size : " << analysis_filter_size << endl;
       break;
     case '+' :
+    case '=' :
       if (reconstruction_filter_size > 0.2)
 	reconstruction_filter_size += 0.1;
       else
@@ -540,6 +543,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
       point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
       break;
     case '-' :
+    case '_' :
       if (reconstruction_filter_size > 0.0) {
 	if (reconstruction_filter_size > 0.2)
 	  reconstruction_filter_size -= 0.1;
@@ -564,7 +568,7 @@ void createPointRender( int type ) {
 
   delete point_based_render;
 
-  point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
+  point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   assert (point_based_render);
 
@@ -573,6 +577,7 @@ void createPointRender( int type ) {
 
   glutPostRedisplay(); 
 }
+
 
 /// Initialize global variables and opengl states
 void init(void) {
@@ -598,7 +603,7 @@ void init(void) {
   material_id = 0;
   selected_obj = 0;
 
-  reconstruction_filter_size = 1.0;
+  reconstruction_filter_size = 0.1;
   prefilter_size = 1.0;
 
   glDisable(GL_DEPTH_TEST);

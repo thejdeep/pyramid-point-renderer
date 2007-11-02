@@ -38,6 +38,11 @@ void main(void)
   if (radius_depth_w.x == 0.0)
     discard;
 
+/*   vec3 normal = normal_vec; */
+
+/*   vec3 lightDir = -(normalize(gl_LightSource[0].position.xyz)); */
+/*   normal = lightDir - normal * ( dot(lightDir, normal) / dot(normal, normal)); */
+
   // First buffer : normal.x, normal.y, normal.z, radius
   gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z ); 
   // gl_FragData[0] = vec4 (normal_vec, perspective_radius(radius_depth_w.x) * 0.001);
@@ -48,7 +53,7 @@ void main(void)
     depth_interval = 0.0;
   else
     depth_interval = radius_depth_w.x;
- 
+
   // Second buffer : minimum depth, depth interval, center.x, center.y
   gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval*2.0, 0.0, 0.0);
   gl_FragData[2] = gl_Color;
