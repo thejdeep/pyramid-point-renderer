@@ -165,7 +165,8 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
-  normal.y /= len;
+  if (len != 0.0)
+    normal.y /= len;
 
   // angle between normal and z direction
   float angle = acos(normal.y);
@@ -227,6 +228,7 @@ void main (void) {
   float dist_test = 0.0;
   float zmin = 10000.0;
   float zmax = -10000.0;
+  float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
     if (pixelA[i].w > 0.0) {
       // test if this ellipse reaches the center of the pixel being constructed
@@ -234,13 +236,14 @@ void main (void) {
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-      if  (dist_test >= 0.0)
+      if  (dist_test >= -100.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
 	    zmin = pixelB[i].x;
 	    zmax = zmin + pixelB[i].y;
-	  }	  
+	    obj_id = pixelC[i].w;
+	  }
 	}
       else {
 	// if the ellipse does not reach the center ignore it in the averaging
@@ -257,20 +260,23 @@ void main (void) {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) {
 	
-	// Depth test between valid in reach ellipses
-	if ((!depth_test) || (pixelB[i].x <= zmax)) {
-
-	  bufferA += pixelA[i];
-
-	  // Increment ellipse total path with distance from gather pixel to center
-	  bufferB.zw += pixelB[i].zw + gather_pixel_desloc[i].xy;
-	  
-	  bufferC += pixelC[i];
-
-	  // Take maximum depth range
-	  new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
-	  
-	  valid_pixels += 1.0;
+	if (pixelC[i].w == obj_id) 
+	{
+	  // Depth test between valid in reach ellipses
+	  if ((!depth_test) || (pixelB[i].x <= zmax)) {
+	    
+	    bufferA += pixelA[i];
+	    
+	    // Increment ellipse total path with distance from gather pixel to center
+	    bufferB.zw += pixelB[i].zw + gather_pixel_desloc[i].xy;
+	    
+	    bufferC += pixelC[i];
+	    
+	    // Take maximum depth range
+	    new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
+	    
+	    valid_pixels += 1.0;
+	  }
 	}
       }
     }
@@ -282,13 +288,14 @@ void main (void) {
     bufferB.x = zmin;
     bufferB.y = new_zmax - zmin;
     bufferB.zw /= valid_pixels;
-    bufferC /= valid_pixels;
+    bufferC.rgb /= valid_pixels;
+    bufferC.w = obj_id;
   }
 
   // first buffer = (n.x, n.y, n.z, radius)
   gl_FragData[0] = bufferA;
   // second buffer = (depth, max_depth, dx, dy)
   gl_FragData[1] = bufferB;
-  // color value = (r, g, b, a)
+  // color value = (r, g, b, obj_id)
   gl_FragData[2] = bufferC;
 }

@@ -5,14 +5,15 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-// GLfloat obj_colors[3][4] = {{0.5, 0.1, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.1, 0.5, 1.0}};
 
-GLfloat obj_colors[3][4] = {{0.35, 0.1, 0.1, 1.0},
-			    {0.1, 0.5, 0.1, 1.0},
-			    {0.1, 0.5, 0.1, 1.0}};
-
+GLfloat obj_colors[8][4] = {{0.35, 0.1, 0.1, 0.0},
+			    {0.35, 0.1, 0.1, 0.4},
+			    {0.1, 0.5, 0.1, 0.2},
+			    {0.1, 0.5, 0.1, 0.3},
+			    {0.35, 0.1, 0.1, 0.5},
+			    {0.1, 0.5, 0.1, 0.6},
+			    {0.35, 0.1, 0.1, 0.7},
+			    {0.1, 0.5, 0.1, 0.8}};
 
 /**
  * Render object using designed rendering system.
@@ -232,7 +233,7 @@ void Object::setPyramidPointsDisplayList ( void ) {
   triangleDisplayList = glGenLists(1);
 
   glNewList(triangleDisplayList, GL_COMPILE);
-  
+
   glBegin(GL_POINTS);
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
     glColor4fv(obj_colors[id]);
@@ -284,6 +285,7 @@ void Object::setPyramidLinesDisplayList( void ) {
 
   Point p[3];
   Vector n[3];
+  double r[3];
   glNewList(triangleDisplayList, GL_COMPILE);
   
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
@@ -293,15 +295,74 @@ void Object::setPyramidLinesDisplayList( void ) {
     n[0] = surfels.at( it->verts[0] ).normal();
     n[1] = surfels.at( it->verts[1] ).normal();
     n[2] = surfels.at( it->verts[2] ).normal();
+    r[0] = surfels.at( it->verts[0] ).radius();
+    r[1] = surfels.at( it->verts[1] ).radius();
+    r[2] = surfels.at( it->verts[2] ).radius();
 
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < 3; ++i) {
-      glColor4fv(obj_colors[id]);
-      glNormal3f(n[i].x(), n[i].y(), n[i].z());
-  //      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
-      glVertex4f(p[i].x(), p[i].y(), p[i].z(), surfels.at( it->verts[i] ).radius());
-    }
-    glEnd();
+//     if (id == 0) 
+//       {
+// 	//compute tangent : line segment representing cylinder
+// 	Vector dir = p[1] - p[0];
+// 	double length = dir.length();
+// 	p[2] = Point((p[0].x() + p[1].x())*0.5, (p[0].y() + p[1].y())*0.5, (p[0].z() + p[1].z())*0.5);
+// 	n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
+// 	double radius = (surfels.at( it->verts[0] ).radius() + surfels.at( it->verts[1] ).radius()) * 0.5;
+// 	double nz = radius / length;
+// 	double nxy = sqrt(fabs( (1.0 - nz) / 2.0));
+	
+// // 	n[2] = Vector (nxy, nxy, nz);
+// // 	cout << length << " " << radius << " " << nxy << " " << nz << " " << n[2].length() << endl;
+
+// 	glBegin(GL_POINTS);
+// 	glColor4fv(obj_colors[id]);
+// 	glNormal3f(-n[2].y(), n[2].x(), nz );
+// 	glVertex4f(p[2].x(), p[2].y(), p[2].z(), length*0.5);
+	
+// 	glEnd();
+//       }
+//     if (id == 0) 
+//       {
+// 	//compute tangent : line segment representing cylinder
+// 	Vector dir = p[1] - p[0];
+// 	double length = dir.length();
+// 	n[0].normalize();
+// 	n[0] = n[0] * length;
+
+// 	glBegin(GL_POINTS);
+// 	glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], obj_cnt/num_objs);
+// 	glNormal3f(n[0].x(), n[0].y(), n[0].z() );
+// 	glVertex4f(p[0].x(), p[0].y(), p[0].z(), r[0]);
+	
+// 	glEnd();
+//       }
+//     else
+      {
+
+	p[2] = Point ((p[0].x() + p[1].x())*0.5, (p[0].y() + p[1].y())*0.5, (p[0].z() + p[1].z())*0.5);
+ 	n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
+	r[2] = (r[0] + r[1]) * 0.5;
+
+	glBegin(GL_LINES);
+// 	  glColor4fv(obj_colors[id]);
+
+// 	  glNormal3f(n[0].x(), n[0].y(), n[0].z());
+// 	  glVertex4f(p[0].x(), p[0].y(), p[0].z(), r[0]);
+
+// 	  glNormal3f(n[2].x(), n[2].y(), n[2].z());
+// 	  glVertex4f(p[2].x(), p[2].y(), p[2].z(), r[2]);
+
+// 	  glNormal3f(n[1].x(), n[1].y(), n[1].z());
+// 	  glVertex4f(p[1].x(), p[1].y(), p[1].z(), r[1]);
+
+	for (int i = 0; i < 2; ++i) {
+	  glColor4fv(obj_colors[id]);
+	  //glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], obj_colors[id][3]);
+	  glNormal3f(n[i].x(), n[i].y(), n[i].z());
+	  glVertex4f(p[i].x(), p[i].y(), p[i].z(), r[i]);
+	}
+	glEnd();
+      }
+	
   }
 
   glEndList();
@@ -333,7 +394,7 @@ void Object::setPyramidHybridDisplayList( void ) {
 
       glBegin(GL_TRIANGLES);  
       for (int i = 0; i < 3; ++i) {
-	glColor4f(0.3, 0.3, 0.9, 1.0);
+	glColor4fv(obj_colors[0]);
 	glNormal3f(n[i].x(), n[i].y(), n[i].z());
 	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
       }
@@ -344,7 +405,7 @@ void Object::setPyramidHybridDisplayList( void ) {
   glBegin(GL_POINTS);  
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
     if (it->position().x() <= 0.001) {
-      glColor4f(0.9, 0.3, 0.3, 1.0);
+      glColor4fv(obj_colors[1]);
       glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
       glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
     }
@@ -375,6 +436,7 @@ void Object::setTrianglesDisplayList( void ) {
 
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
+      glColor4fv(obj_colors[id]);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
     }
@@ -394,6 +456,8 @@ void Object::setLinesDisplayList( void ) {
   Point p[3];
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
+
+  glPointSize(5.0);
   
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels.at( it->verts[0] ).position();
@@ -405,11 +469,22 @@ void Object::setLinesDisplayList( void ) {
 
     glBegin(GL_LINES);
     for (int i = 0; i < 3; ++i) {
+      glColor4fv(obj_colors[0]);
+      glNormal3f(n[i].x(), n[i].y(), n[i].z());
+      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
+    }
+    glEnd();
+
+    glBegin(GL_POINTS);
+    for (int i = 0; i < 3; ++i) {
+      glColor4fv(obj_colors[1]);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
     }
     glEnd();
   }
+
+  glPointSize(1.0);
 
   glEndList();
 }

@@ -189,6 +189,43 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   else return -1.0;
 }
 
+// tests if a point is inside a parallelogram
+// @param d Difference vector from center of ellipse to point.
+// @param radius Ellipse major axis length * 0.5.
+// @param normal Normal vector.
+float pointInRectangle(in vec2 d, in float radius, in vec3 normal){
+  float len = length(normal.xy);
+  normal.y /= len;
+
+  // angle between normal and z direction
+  float angle = acos(normal.x);
+/*   if (normal.x > 0.0) */
+/*     angle *= -1.0; */
+
+  // rotate point to ellipse coordinate system
+  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
+			 -d.x*sin(angle) + d.y*cos(angle));
+
+  // major and minor axis
+  float a = 2.0*radius;
+  float b = a*normal.z;
+
+  // include antialiasing filter (increase both axis)
+  a += prefilter_size;
+  b += prefilter_size;
+
+  float scale = reconstruction_filter_size + prefilter_size;
+
+  float test = 0.0;
+  if (((rotated_pos.x >= -normal.x * scale) && (rotated_pos.x <= 0.0)) &&
+      ((rotated_pos.y <= radius) && (rotated_pos.y >= -radius)))
+    test = 1.0;
+
+  if (test == 1.0)
+    return test;
+  else return -1.0;
+}
+
 void main (void) {
 
   vec2 tex_coord[4];
@@ -216,10 +253,13 @@ void main (void) {
     if  (bufferA.w != 0.0) {
       vec4 up_pixelA = texture2D (textureA, gl_TexCoord[3].st).xyzw;
       vec4 up_pixelB = texture2D (textureB, gl_TexCoord[3].st).xyzw;
+      vec4 up_pixelC = texture2D (textureC, gl_TexCoord[3].st).xyzw;
       
       if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) ) {
-	occluded = true;
+	occluded = true;	
       }
+      if (up_pixelC.w != bufferC.w)
+	occluded = true;	  
     }
   }
 
@@ -330,7 +370,8 @@ void main (void) {
       float dist_test;
       float zmin = 10000.0;
       float zmax = -zmin;
-
+      float obj_id = -1.0;
+    
       // For each scatter pixel
       for (int i = 0; i < 4; ++i) {
 
@@ -341,10 +382,15 @@ void main (void) {
 	pixelB[i].zw += dist_to_pixel;
 
 	// if specified scatter pixel test distance to center of ellipse
-	if (pixelA[i].w > 0.0)
-	  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	if (pixelA[i].w > 0.0) {
+	  //dist_test = pointInRectangle(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	  if (pixelC[i].w == 0.0)
+	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, vec3(1.0, 1.0, 1.0));
+	  else
+	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
 	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
 	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+	}
 	else
 	  dist_test = -1.0;
  	
@@ -352,7 +398,7 @@ void main (void) {
 	if ((pixelA[i].w == 0.0) || (dist_test == -1.0)) {
 	  weights[i] = 0.0;
 	}
-	else {
+	else {	  
 	  weights[i] = exp(-0.5*dist_test);
 	  total_weight ++;
 
@@ -360,17 +406,18 @@ void main (void) {
 	  if (pixelB[i].x < zmin) {
 	    zmin = pixelB[i].x;
 	    zmax = pixelB[i].y;
+	    obj_id = pixelC[i].w;
 	  }
 	}
       }
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
-/*       if (occluded) { */
-/* 	for (int i = 0; i < 4; ++i) */
-/* 	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0)) */
-/* 	    occluded = false; */
-/*       } */
+      if (occluded) {
+	for (int i = 0; i < 4; ++i)
+	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
+	    occluded = false;
+      }
 
       // If the pixel was set as occluded but there are no valid
       // pixels in range to synthesize, leave as it is
@@ -389,21 +436,24 @@ void main (void) {
 	  // Ellipse in range
 	  if (weights[i] > 0.0)
 	    {
-	      // Depth test between ellipses in range
-	      if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
-		{
-		  total_weight += weights[i];	  
-		  bufferA += weights[i] * pixelA[i];
-		  bufferB += weights[i] * pixelB[i];
-		  bufferC += weights[i] * pixelC[i];
-		}
+	      if (pixelC[i].w == obj_id) {
+		// Depth test between ellipses in range
+		if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
+		  {
+		    total_weight += weights[i];	  
+		    bufferA += weights[i] * pixelA[i];
+		    bufferB += weights[i] * pixelB[i];
+		    bufferC += weights[i] * pixelC[i];
+		  }
+	      }
 	    }
 	}
 
 	if (total_weight > 0.0) {
 	  bufferA /= total_weight;
 	  bufferB /= total_weight;
-	  bufferC /= total_weight;
+	  bufferC.rgb /= total_weight;
+	  bufferC.w = obj_id;
 	}
       }
     }

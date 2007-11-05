@@ -12,11 +12,11 @@
 
 #include "materials.h"
 
-#define CANVAS_WIDTH  1024
-#define CANVAS_HEIGHT 1024
+// #define CANVAS_WIDTH  1024
+// #define CANVAS_HEIGHT 1024
  
-// #define CANVAS_WIDTH  768
-// #define CANVAS_HEIGHT 768
+#define CANVAS_WIDTH  768
+#define CANVAS_HEIGHT 768
 
 // #define CANVAS_WIDTH  512
 // #define CANVAS_HEIGHT 512
@@ -173,7 +173,8 @@ void draw(void) {
   double c[4];
   for (int i = 0; i < num_objects; ++i) {
     if ((objects[i].getRendererType() != TRIANGLES) 
-	&& (objects[i].getRendererType() != LINES)) {
+	&& (objects[i].getRendererType() != LINES)
+	&& (objects[i].getRendererType() != NONE)) {
      
       // Set eye for each object separately
       camera->eyeVec(c);
@@ -223,6 +224,7 @@ void draw(void) {
     fps = (end_time - start_time) / (double)fps_loop;
     #ifndef TIMING
     fps = 1000.0 / fps;
+    sps = (fps * number_surfels) / 1000000;
     #endif
     fps_loop = 0;
   }
@@ -323,8 +325,9 @@ void mouse(int button, int state, int x, int y) {
 
       if (selected_obj == -1)
 	camera->startRotation(x, y);
-      else
+      else {
 	camera->startQuatRotation(x, y, objects[selected_obj].getRotationQuat());
+      }
 
       // Check if clicked in one of interface buttons ( flags )
       screenButtons (x, y);      
@@ -355,21 +358,27 @@ void mouseMotion(int x, int y) {
   if (button_pressed == GLUT_LEFT_BUTTON) {
     if (selected_obj == -1)
       camera->rotate(x, y);
-    else
+    else {
       camera->rotateQuat(x, y, objects[selected_obj].getRotationQuat());
+      //      objects[selected_obj+1].setRotationQuat(objects[selected_obj].getRotationQuat());
+    }
   }
   else if (button_pressed == GLUT_MIDDLE_BUTTON) {
     if (active_shift) {
       if (selected_obj == -1)
 	camera->translate(x, y);
-      else
+      else {
 	camera->translateVec(x, y, objects[selected_obj].getCenter());
+	//	objects[selected_obj+1].setCenter(objects[selected_obj].getCenter());
+      }
     }
     else {
       if (selected_obj == -1)
 	camera->zooming (x, y);
-      else
+      else {
 	camera->zoomingVec(x, y, objects[selected_obj].getCenter());
+	//	objects[selected_obj+1].setCenter(objects[selected_obj].getCenter());
+      }
     }
   }
   else if (button_pressed == GLUT_RIGHT_BUTTON) {
@@ -425,6 +434,10 @@ void specialKey(int key_pressed, int x, int y) {
     changeRendererType(LINES);
     show_splats = 6;
     break;
+ case GLUT_KEY_F10:
+    changeRendererType(NONE);
+    show_splats = 10;
+    break;
   case GLUT_KEY_F12:
     show_splats = 0;
     show_points = true;
@@ -432,7 +445,6 @@ void specialKey(int key_pressed, int x, int y) {
   };
   glutPostRedisplay();
 }
-
 
 /// Keyboard keys function
 /// @param key Pressed key
@@ -500,8 +512,35 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 	cout << "selected : 4" << endl;
       }
       break;
+    case '5' :
+      if (num_objects > 4) {
+	selected_obj = 4;
+	cout << "selected : 5" << endl;
+      }
+    case '6' :
+      if (num_objects > 5) {
+	selected_obj = 5;
+	cout << "selected : 6" << endl;
+      }
+    case '7' :
+      if (num_objects > 6) {
+	selected_obj = 6;
+	cout << "selected : 7" << endl;
+      }
+    case '8' :
+      if (num_objects > 7) {
+	selected_obj = 7;
+	cout << "selected : 8" << endl;
+      }
+    case '9' :
+      if (num_objects > 8) {
+	selected_obj = 8;
+	cout << "selected : 9" << endl;
+      }
+      break;
     case '0' :
       selected_obj = -1;
+      cout << "no object selected" << endl;
       break;
     case 't':
       fps_loop = 100;
@@ -509,6 +548,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     case 'z' :
       depth_culling = !depth_culling;
       point_based_render->setDepthTest(depth_culling);
+      cout << "depth test : " << depth_culling << endl;
       break;
     case ']' :
       ++material_id;
@@ -536,7 +576,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
       break;
     case '+' :
     case '=' :
-      if (reconstruction_filter_size > 0.2)
+      if (reconstruction_filter_size > 0.1)
 	reconstruction_filter_size += 0.1;
       else
 	reconstruction_filter_size += 0.01;
@@ -603,8 +643,8 @@ void init(void) {
   material_id = 0;
   selected_obj = 0;
 
-  reconstruction_filter_size = 0.1;
-  prefilter_size = 1.0;
+  reconstruction_filter_size = 1.0;
+  prefilter_size = 0.0;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
@@ -668,7 +708,7 @@ int main(int argc, char * argv []) {
   number_surfels = 0;
   cout << "objects : " << num_objects << endl;
   for (int i = 0; i < num_objects; ++i) {
-    objects[i].setRendererType( PYRAMID_POINTS );
+    objects[i].setRendererType( PYRAMID_LINES );
     number_surfels += objects[i].getSurfels()->size();
     cout << "object " << i << endl <<
       "  num points    : " << objects[i].getSurfels()->size() <<
@@ -676,7 +716,7 @@ int main(int argc, char * argv []) {
       "  render type   : " << objects[i].getRendererType() << endl;
   }
 
-  createPointRender( PYRAMID_POINTS );
+  createPointRender( PYRAMID_LINES );
 
   if (read == 0)
     exit(0);

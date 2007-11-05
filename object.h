@@ -28,7 +28,8 @@ typedef enum
     PYRAMID_HYBRID,
     PYRAMID_LINES,
     EWA_SPLATTING,
-    EWA_SPLATTING_INTERPOLATE_NORMALS
+    EWA_SPLATTING_INTERPOLATE_NORMALS,
+    NONE
   } point_render_type_enum;
 
 using namespace std;
@@ -58,7 +59,14 @@ class Object
   void setId ( int id_num ) { id = id_num; }
 
   double* getCenter ( void ) { return &center[0]; }
+  void setCenter ( double c[3] ) { 
+    for (int i = 0; i < 3; ++i)
+      center[i]=c[i]; 
+  }
+
   Quat* getRotationQuat ( void ) { return &q_rot; }
+  void setRotationQuat ( Quat* q ) { q_rot = *q; }
+
 
  private:
 
