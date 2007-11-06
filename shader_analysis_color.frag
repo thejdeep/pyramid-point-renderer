@@ -163,6 +163,37 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
+float pointInEllipse(in vec2 d, in float radius){
+
+  vec3 normal = vec3(0.0, 0.0, 1.0);
+
+  // angle between normal and z direction
+  float angle = 1.0;
+
+  // rotate point to ellipse coordinate system
+  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
+			 -d.x*sin(angle) + d.y*cos(angle));
+
+  // major and minor axis
+  float a = 2.0*radius;
+  float b = a*normal.z;
+
+  // include antialiasing filter
+  a += prefilter_size;
+  b += prefilter_size;
+
+  // inside ellipse test
+  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
+
+  if (test <= 1.0)
+    return test;
+  else return -1.0;
+}
+
+// tests if a point is inside an ellipse.
+// Ellipse is centered at origin and point displaced by d.
+// Radius is the half the ellipse's major axis.
+// Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
   if (len != 0.0)
@@ -232,11 +263,15 @@ void main (void) {
   for (int i = 0; i < 4; ++i) {
     if (pixelA[i].w > 0.0) {
       // test if this ellipse reaches the center of the pixel being constructed
-      dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
+      if (pixelC[i].w == 0.0)
+	dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
+      //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
+      else
+	dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-      if  (dist_test >= -100.0)
+      if  (dist_test >= 0.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {

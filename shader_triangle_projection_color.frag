@@ -49,8 +49,6 @@ void main(void)
   else
     depth_interval = radius_depth_w.x;
 
-  //  depth_interval = 0.0;
-
   // Second buffer : minimum depth, depth interval, center.x, center.y
   //gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval*2.0, 0.0, 0.0);
   gl_FragData[1] = vec4 (radius_depth_w.y, depth_interval*2.0, 0.0, 0.0);

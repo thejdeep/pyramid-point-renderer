@@ -16,8 +16,6 @@
 
 #include "GL/glut.h"
 
-
-
 typedef enum 
   {
     TRIANGLES,
@@ -81,9 +79,14 @@ class Object
 
   // Center position (for individual translation)
   double center[3];
+  vector<Point> centers;
 
   // Rotation quaternion (for individual rotation)
   Quat q_rot;
+  vector<Quat> rotations;
+
+  // Number of instances of this object
+  int instances;
 
   // Rendering type.
   int renderer_type;

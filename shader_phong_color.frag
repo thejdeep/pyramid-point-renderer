@@ -16,11 +16,13 @@ void main (void) {
      /*       vec3 NxL = normalize(cross(-normal.xyz, lightDir.xyz)); */
 /*       normal = vec4(cross(NxL, -normal.xyz), 1.0); */
     }
+    else {
+      if (dot(normal.xyz, lightDir.xyz) < 0.0)
+	normal *= -1.0;
+    }
 
     normal = normalize(normal);
-
-/*     if (dot(normal.xyz, lightDir.xyz) < 0.0) */
-/*       normal *= -1.0; */
+    
     
     color += gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient;
 
@@ -29,11 +31,11 @@ void main (void) {
 
     color += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * NdotL;
 
-    if (NdotL > 0.0) {
-      float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
+/*     if (NdotL > 0.0) { */
+/*       float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0); */
 
-      color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess);
-    }
+/*       color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess); */
+/*     } */
   }
   else
     color = vec4(1.0);

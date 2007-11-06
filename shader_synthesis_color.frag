@@ -159,6 +159,40 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // @param d Difference vector from center of ellipse to point.
 // @param radius Ellipse major axis length * 0.5.
 // @param normal Normal vector.
+float pointInEllipse(in vec2 d, in float radius){
+  vec3 normal = vec3(0.0, 0.0, 1.0);
+
+  // angle between normal and z direction
+  float angle = 1.0;
+
+  // rotate point to ellipse coordinate system
+  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
+			 -d.x*sin(angle) + d.y*cos(angle));
+
+  // major and minor axis
+  float a = 2.0*radius;
+  float b = a*normal.z;
+
+  // include antialiasing filter (increase both axis)
+  a += prefilter_size;
+  b += prefilter_size;
+
+  // inside ellipse test
+  //  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
+  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
+
+  if (test <= 1.0)
+    return test;
+  else return -1.0;
+}
+
+// tests if a point is inside an ellipse.
+// Ellipse is centered at origin and point displaced by d.
+// Radius is the half the ellipse's major axis.
+// Minor axis is computed by normal direction.
+// @param d Difference vector from center of ellipse to point.
+// @param radius Ellipse major axis length * 0.5.
+// @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
   normal.y /= len;
@@ -385,7 +419,8 @@ void main (void) {
 	if (pixelA[i].w > 0.0) {
 	  //dist_test = pointInRectangle(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
 	  if (pixelC[i].w == 0.0)
-	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, vec3(1.0, 1.0, 1.0));
+	    dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+	  //	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w);
 	  else
 	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
 	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);

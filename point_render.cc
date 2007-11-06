@@ -721,7 +721,6 @@ int main(int argc, char * argv []) {
   if (read == 0)
     exit(0);
 
-
 #ifdef TIMING
   if (argc < 2)
     cout << "MODEL      : ../models/mannequin.sls.normals" << endl;
