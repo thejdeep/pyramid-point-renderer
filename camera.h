@@ -42,7 +42,7 @@ public:
   /// Constructor with screen dimensions
   Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				     zoom_factor(1.0), fov(1.0),
-				     z_near(0.01), z_far(100.0) {
+				     z_near(0.01), z_far(1000.0) {
     view_mode = PERSPECTIVE;
     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     std::copy (identity, identity+16, rotation_matrix);

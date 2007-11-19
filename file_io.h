@@ -496,15 +496,15 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
-int readModels (int argc, char **argv, vector<Object> *objs) {
+int readModels (int argc, char **argv, vector<Primitives> *prims) {
 
   // For each model passed in command line
   for (int i = 1; i < argc; ++i) {
 
-    objs->push_back( Object(i-1) );
+    prims->push_back( Primitives(i-1) );
     readPlyTriangles (argv[i], 
-		      (objs->at(i-1)).getSurfels(), 
-		      (objs->at(i-1)).getTriangles());
+		      (prims->at(i-1)).getSurfels(), 
+		      (prims->at(i-1)).getTriangles());
   }
 
   return 1;

@@ -41,7 +41,7 @@ class PyramidPointRender : public PointBasedRender
   int projectionPointsCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
   void projectPoints( Object * );
   int projectionTrianglesCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  void projectTriangles( Object * );
+  void projectTriangles( vector<Primitives*>::iterator prim );
 
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
@@ -57,7 +57,7 @@ class PyramidPointRender : public PointBasedRender
   void draw();
   
   void clearBuffers (void);
-  void projectSamples (Object *);
+  void projectSamples ( vector<Primitives*>::iterator prim );
   void interpolate ( void );
 
   void setVertices( vector<Surfel> *surfels );

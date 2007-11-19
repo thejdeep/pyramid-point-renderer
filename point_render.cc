@@ -26,6 +26,7 @@ Camera * camera;
 int material_id;
 int selected_obj;
 vector<Object> objects;
+vector<Primitives> primitives;
 int num_objects;
 
 // Vector of point samples
@@ -80,9 +81,10 @@ void drawPoints(void)
   glBegin(GL_POINTS);
   
   for (int i = 0; i < num_objects; ++i) {
-    for (surfelVectorIter it = objects[i].getSurfels()->begin(); 
-	 it != objects[i].getSurfels()->end(); ++it)  
-      glVertex(it);
+    vector<Primitives*> *prims = objects[i].getPrimitivesList();
+    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+      for (surfelVectorIter it = (*prim_it)->getSurfels()->begin(); it != (*prim_it)->getSurfels()->end(); ++it)
+	glVertex(it);
   }
 
   glEnd();
@@ -172,29 +174,37 @@ void draw(void) {
 
   double c[4];
   for (int i = 0; i < num_objects; ++i) {
-    if ((objects[i].getRendererType() != TRIANGLES) 
-	&& (objects[i].getRendererType() != LINES)
-	&& (objects[i].getRendererType() != NONE)) {
-     
-      // Set eye for each object separately
-      camera->eyeVec(c);
-      c[3] = 1.0;
+    // Set eye for each object separately
+    camera->eyeVec(c);
+    c[3] = 1.0;
+	
+    Quat q = camera->rotationQuat();
+    q = q.composeWith(*(objects[i].getRotationQuat()));
+    
+    //       Quat q = *(objects[i].getRotationQuat());
+    //       q = q.composeWith(camera->rotationQuat());
+    
+    // Invert quaternion -- simulates inverse of modelview
+    q.x *= -1; q.y *= -1; q.z *= -1;
+    q.rotate(c);
+    double eye[3] = {c[0], c[1], c[2]};
+    point_based_render->setEye(eye);
 
-      Quat q = camera->rotationQuat();
-      q = q.composeWith(*(objects[i].getRotationQuat()));
+    objects[i].render();
 
-//       Quat q = *(objects[i].getRotationQuat());
-//       q = q.composeWith(camera->rotationQuat());
+    // Render objects primitives
+    vector<Primitives*>* prims = objects[i].getPrimitivesList();
+    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
 
-      // Invert quaternion -- simulates inverse of modelview
-      q.x *= -1; q.y *= -1; q.z *= -1;
-      q.rotate(c);
-      double eye[3] = {c[0], c[1], c[2]};
-      point_based_render->setEye(eye);
-
-      point_based_render->projectSamples( &objects[i] );
-      camera->setView();
+      if (((*prim_it)->getRendererType() != TRIANGLES) 
+	  && ((*prim_it)->getRendererType() != LINES)
+	  && ((*prim_it)->getRendererType() != NONE)) {       
+	
+	point_based_render->projectSamples( prim_it );	
+      }
     }
+    
+    camera->setView();
   }
 
   point_based_render->interpolate();
@@ -202,10 +212,15 @@ void draw(void) {
 
   camera->setView();
 
-  for (int i = 0; i < num_objects; ++i)
-    if ((objects[i].getRendererType() == TRIANGLES)
-	|| (objects[i].getRendererType() == LINES))
-      objects[i].render();
+  for (int i = 0; i < num_objects; ++i) {
+    vector<Primitives*>* prims = objects[i].getPrimitivesList();
+    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+      
+      if (((*prim_it)->getRendererType() == TRIANGLES)
+	  || ((*prim_it)->getRendererType() == LINES))
+	(*prim_it)->render();
+    }
+  }
 
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
@@ -599,9 +614,9 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 }
 
 void changeRendererType( int type ) {
-  if (selected_obj != -1) {   
-    objects[selected_obj].setRendererType(type);
-  }
+//   if (selected_obj != -1) {
+//     objects[selected_obj].setRendererType(type);
+//   }
 }
 
 void createPointRender( int type ) {
@@ -702,18 +717,35 @@ int main(int argc, char * argv []) {
   //int read = readPoints(argc, argv, &surfels);
   //int read = readPointsAndTriangles(argc, argv, &surfels, &triangles);
 
-  int read = readModels(argc, argv, &objects);
+  int read = readModels(argc, argv, &primitives);
+
+  for (int i = 0; i < 4; ++i)
+    objects.push_back( Object(i, i, 0.0, 0.0) );
+
   num_objects = objects.size();
+
+
+  for (int i = 0; i < num_objects; ++i) {
+    int k = 0;
+    for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++k) {
+      objects[i].addPrimitives( &(*it) );
+      if (k == 1)
+	it->setRendererType( PYRAMID_TRIANGLES );
+      else
+      it->setRendererType( PYRAMID_LINES );
+    }
+  }
 
   number_surfels = 0;
   cout << "objects : " << num_objects << endl;
   for (int i = 0; i < num_objects; ++i) {
-    objects[i].setRendererType( PYRAMID_LINES );
-    number_surfels += objects[i].getSurfels()->size();
-    cout << "object " << i << endl <<
-      "  num points    : " << objects[i].getSurfels()->size() <<
-      "  num triangles : " << objects[i].getTriangles()->size() <<
-      "  render type   : " << objects[i].getRendererType() << endl;
+    vector<Primitives*>* prims = objects[i].getPrimitivesList();
+    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+      number_surfels += (*prim_it)->getSurfels()->size();
+//     cout << "object " << i << endl <<
+//       "  num points    : " << objects[i].getSurfels()->size() <<
+//       "  num triangles : " << objects[i].getTriangles()->size() <<
+//       "  render type   : " << objects[i].getRendererType() << endl;
   }
 
   createPointRender( PYRAMID_LINES );
