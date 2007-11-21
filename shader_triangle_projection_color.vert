@@ -13,7 +13,7 @@ void main(void)
 {
 
   // back face culling (rotated eye, fixed point)  
-  if ( ( (gl_Vertex.w != 0.001) && (gl_Vertex.w != 0.000001) && (gl_Vertex.w != 0.001) ) &&
+  if ( ( (gl_Vertex.w != 0.001) && (gl_Vertex.w != 0.0001) ) &&
       ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < -100.001 )) {
     radius_depth_w.x = 0.0;
 

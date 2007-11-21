@@ -65,6 +65,7 @@ void screenText(int w, int h) {
   num_pts_text << "number of points : " << number_surfels << endl;
   glWrite(1.1, 1.60, (char*) num_pts_text.str().c_str());
   glWrite(1.1, 1.45, (char*) fps_text.str().c_str());
+  glWrite(1.1, 1.25, (char*) sps_text.str().c_str());
   
  if (show_screen_info) {
     ostringstream show_screen_info_text;

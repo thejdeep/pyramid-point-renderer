@@ -34,7 +34,8 @@ float pointInCircle(in vec2 d, in float radius){
 
   float dif = sqrt_len / (radius*radius);
 
-  if (dif <= reconstruction_filter_size)
+  //  if (dif <= reconstruction_filter_size)
+  if (dif <= 1.0)
     return dif;
   else return -1.0;
 }
@@ -220,7 +221,8 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
   if (test <= reconstruction_filter_size)
-    return test;
+    return 1.0;
+    //    return test;
   else return -1.0;
 }
 
@@ -295,7 +297,7 @@ void main (void) {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) {
 	
-	if (pixelC[i].w == obj_id) 
+	if (pixelC[i].w == obj_id)
 	{
 	  // Depth test between valid in reach ellipses
 	  if ((!depth_test) || (pixelB[i].x <= zmax)) {
@@ -318,7 +320,7 @@ void main (void) {
 
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
-  if (valid_pixels > 0.0) {
+  if (valid_pixels != 0.0) {
     bufferA /= valid_pixels;
     bufferB.x = zmin;
     bufferB.y = new_zmax - zmin;

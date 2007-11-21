@@ -44,7 +44,7 @@ void main(void)
 
   float depth_interval;
   
-  if (radius_depth_w.x == 0.000001)
+  if (radius_depth_w.x == 0.0001)
     depth_interval = 0.0;
   else
     depth_interval = radius_depth_w.x;

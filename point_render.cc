@@ -195,17 +195,26 @@ void draw(void) {
     // Render objects primitives
     vector<Primitives*>* prims = objects[i].getPrimitivesList();
     for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-
       if (((*prim_it)->getRendererType() != TRIANGLES) 
 	  && ((*prim_it)->getRendererType() != LINES)
 	  && ((*prim_it)->getRendererType() != NONE)) {       
 	
-	point_based_render->projectSamples( prim_it );	
+	point_based_render->projectSamples( prim_it );
       }
     }
     
     camera->setView();
   }
+
+  // render floor
+//   glBegin(GL_QUADS);
+//   glColor4f(0.0, 1.0, 0.0, 1.0);
+//   glNormal3f(0.0, -1.0, 0.0);
+//   glVertex4f(-1.0, -1.0, 0.0, 0.0001);
+//   glVertex4f(-1.0,  1.0, 0.0, 0.0001);
+//   glVertex4f( 1.0,  1.0, 0.0, 0.0001);
+//   glVertex4f( 1.0, -1.0, 0.0, 0.0001);
+//   glEnd();
 
   point_based_render->interpolate();
   point_based_render->draw();
@@ -655,7 +664,7 @@ void init(void) {
 
   timing_profile = 0;
 
-  material_id = 0;
+  material_id = 3;
   selected_obj = 0;
 
   reconstruction_filter_size = 1.0;
@@ -719,21 +728,41 @@ int main(int argc, char * argv []) {
 
   int read = readModels(argc, argv, &primitives);
 
-  for (int i = 0; i < 4; ++i)
-    objects.push_back( Object(i, i, 0.0, 0.0) );
+  num_objects = 10;
+  double x, y;
+  Quat q;
 
-  num_objects = objects.size();
-
-
+  srand (time(NULL));
   for (int i = 0; i < num_objects; ++i) {
-    int k = 0;
-    for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++k) {
-      objects[i].addPrimitives( &(*it) );
-      if (k == 1)
-	it->setRendererType( PYRAMID_TRIANGLES );
-      else
+    x = ((rand()%200) / 10.0) - 10.0;
+    y = ((rand()%200) / 10.0) - 10.0;
+    q.a = (rand()%100) / 10.0;
+    q.x = 0.0;
+    q.y = 0.0;
+    q.z = (rand()%100) / 10.0;
+    q.normalize();
+    objects.push_back( Object(i, x, y, 0.0, q) );
+  }
+
+  int k = 0;
+  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++k) {
+    if (k == 0) {
+      it->setType( 1 );
       it->setRendererType( PYRAMID_LINES );
     }
+    else if (k == 1) {
+      it->setType( 0 );
+      it->setRendererType( PYRAMID_TRIANGLES );
+    }
+    else {
+      it->setType( 0 );
+      it->setRendererType( PYRAMID_LINES );
+    }
+
+    for (int i = 0; i < num_objects; ++i) {
+      objects[i].addPrimitives( &(*it) );
+    }
+
   }
 
   number_surfels = 0;

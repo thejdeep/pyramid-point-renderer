@@ -304,7 +304,7 @@ void Camera::zooming(int x, int y) {
 //   double diff = mouse_curr[1] - mouse_start[1];
 //   zoom_factor += diff / screen_height;
 
-  position[2] -= 5.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
+  position[2] -= 15.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];
@@ -321,8 +321,8 @@ void Camera::translate (int x, int y) {
   mouse_curr[1] = screen_height - y;
   mouse_curr[2] = 0.0;
 
-  position[0] += (mouse_curr[0] - mouse_start[0]) / screen_width;
-  position[1] += (mouse_curr[1] - mouse_start[1]) / screen_height;
+  position[0] += 5.0*(mouse_curr[0] - mouse_start[0]) / screen_width;
+  position[1] += 5.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];

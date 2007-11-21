@@ -30,7 +30,8 @@ float pointInCircle(in vec2 d, in float radius){
 
   float dif = sqrt_len / (radius*radius);
 
-  if (dif <= reconstruction_filter_size)
+  //  if (dif <= reconstruction_filter_size)
+  if (dif <= 1.0)
     return dif;
   else return -1.0;
 }

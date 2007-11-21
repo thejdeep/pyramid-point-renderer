@@ -36,6 +36,13 @@ class Object
   
   Object() { }
 
+  Object(int id_num, double x, double y, double z, Quat q) : id(id_num) {
+    center[0] = x;
+    center[1] = y;
+    center[2] = z;
+    q_rot = q;
+  }
+
   Object(int id_num, double x, double y, double z) : id(id_num) {
     center[0] = x;
     center[1] = y;

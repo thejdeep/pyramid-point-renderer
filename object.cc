@@ -21,8 +21,4 @@ void Object::render ( void ) {
   }
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 
-  for (vector<Primitives*>::iterator it = primitives_list.begin(); it != primitives_list.end(); ++it) {
-    (*it)->render();
-  }
-
 }
