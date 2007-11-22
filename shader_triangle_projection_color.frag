@@ -26,11 +26,11 @@ float perspective_radius(in float r)
 
   float r_p = r * (z_near / radius_depth_w.y) * (1.0 / (h_near) );
   
-  if (r_p < 10000000.0)
-    return 0.000001;
-  else
+/*   if (r_p < 10000000.0) */
+/*     return 0.000001; */
+/*   else */
 
-  return r_p;
+    return r_p;
 }
 
 void main(void)
@@ -38,19 +38,19 @@ void main(void)
   if (radius_depth_w.x == 0.0)
     discard;
 
-  // First buffer : normal.x, normal.y, normal.z, radius
-  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z ); 
-  //gl_FragData[0] = vec4 (normal_vec, perspective_radius(radius_depth_w.x));
-
   float depth_interval;
   
-  if (radius_depth_w.x == 0.0001)
+  if (gl_Color.a == 0.5)
     depth_interval = 0.0;
-  else
+  else if (gl_Color.a == 0.0)
     depth_interval = radius_depth_w.x;
+  else
+    depth_interval = perspective_radius(radius_depth_w.x);
 
+  // First buffer  : normal.x, normal.y, normal.z, radius
   // Second buffer : minimum depth, depth interval, center.x, center.y
-  //gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval*2.0, 0.0, 0.0);
+  // Third buffer  : color
+  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z ); 
   gl_FragData[1] = vec4 (radius_depth_w.y, depth_interval*2.0, 0.0, 0.0);
   gl_FragData[2] = gl_Color;
 }

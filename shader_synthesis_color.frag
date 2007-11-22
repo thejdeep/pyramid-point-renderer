@@ -290,11 +290,11 @@ void main (void) {
       vec4 up_pixelB = texture2D (textureB, gl_TexCoord[3].st).xyzw;
       vec4 up_pixelC = texture2D (textureC, gl_TexCoord[3].st).xyzw;
       
-      if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) ) {
-	occluded = true;	
-      }
+      if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) )
+	occluded = true;
+
       if (up_pixelC.w != bufferC.w)
-	occluded = true;	  
+	occluded = true;
     }
   }
 
@@ -429,12 +429,12 @@ void main (void) {
 	}
 	else
 	  dist_test = -1.0;
- 	
+
 	// if not specified or out of range dont use it
 	if ((pixelA[i].w == 0.0) || (dist_test == -1.0)) {
 	  weights[i] = 0.0;
 	}
-	else {	  
+	else {
 	  weights[i] = exp(-0.5*dist_test);
 	  total_weight ++;
 
@@ -474,23 +474,23 @@ void main (void) {
 	    {
 	      if (pixelC[i].w == obj_id) {
 		// Depth test between ellipses in range
-		if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
-		  {
-		    total_weight += weights[i];	  
-		    bufferA += weights[i] * pixelA[i];
-		    bufferB += weights[i] * pixelB[i];
-		    bufferC += weights[i] * pixelC[i];
-		  }
+		if ((!depth_test) || (pixelB[i].x <= zmin + zmax)) {		  
+		  total_weight += weights[i];	  
+		  bufferA += weights[i] * pixelA[i];
+		  bufferB += weights[i] * pixelB[i];
+		  bufferC += weights[i] * pixelC[i];
+		}
 	      }
 	    }
 	}
 
-	if (total_weight > 0.0) {
-	  bufferA /= total_weight;
-	  bufferB /= total_weight;
-	  bufferC.rgb /= total_weight;
-	  bufferC.w = obj_id;
-	}
+	if (total_weight > 0.0) 
+	  {
+	    bufferA /= total_weight;
+	    bufferB /= total_weight;
+	    bufferC.rgb /= total_weight;
+	    bufferC.w = obj_id;
+	  }
       }
     }
  

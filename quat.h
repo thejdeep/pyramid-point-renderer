@@ -15,7 +15,9 @@ class Quat {
 public:
   double x,y,z,a;
 
-  Quat() {}
+  Quat() {
+    a = x = y = z = 0.0;
+  }
 
   Quat(double _a, double _x, double _y, double _z) {
     a = _a;

@@ -728,8 +728,8 @@ int main(int argc, char * argv []) {
 
   int read = readModels(argc, argv, &primitives);
 
-  num_objects = 10;
-  double x, y;
+  num_objects = 15;
+  double x = 0.0, y = 0.0;
   Quat q;
 
   srand (time(NULL));
@@ -745,7 +745,9 @@ int main(int argc, char * argv []) {
   }
 
   int k = 0;
-  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++k) {
+  vector<Primitives>::iterator it_end = primitives.end();
+  it_end --; 
+  for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
     if (k == 0) {
       it->setType( 1 );
       it->setRendererType( PYRAMID_LINES );
@@ -754,16 +756,26 @@ int main(int argc, char * argv []) {
       it->setType( 0 );
       it->setRendererType( PYRAMID_TRIANGLES );
     }
-    else {
+    else if (k == 2){
       it->setType( 0 );
       it->setRendererType( PYRAMID_LINES );
+    }
+    else {
+      it->setType( 0 );
+      it->setRendererType( PYRAMID_TRIANGLES );
     }
 
     for (int i = 0; i < num_objects; ++i) {
       objects[i].addPrimitives( &(*it) );
     }
-
   }
+
+  objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
+  objects[num_objects].addPrimitives( &(*it_end) );
+  it_end->setType( 0 );
+  it_end->setRendererType( PYRAMID_TRIANGLES );
+
+  num_objects = objects.size();
 
   number_surfels = 0;
   cout << "objects : " << num_objects << endl;

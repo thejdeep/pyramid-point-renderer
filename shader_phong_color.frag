@@ -13,8 +13,8 @@ void main (void) {
     {
       normal *= -1.0;
       normal = lightDir - normal * ( dot(lightDir, normal) / dot(normal, normal) );
-     /*       vec3 NxL = normalize(cross(-normal.xyz, lightDir.xyz)); */
-/*       normal = vec4(cross(NxL, -normal.xyz), 1.0); */
+      /* vec3 NxL = normalize(cross(-normal.xyz, lightDir.xyz)); */
+      /* normal = vec4(cross(NxL, -normal.xyz), 1.0); */
     }
     else {
       if (dot(normal.xyz, lightDir.xyz) < 0.0)
@@ -23,22 +23,23 @@ void main (void) {
 
     normal = normalize(normal);
     
-    
     color += gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient;
 
-    //float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
+    // float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
     float NdotL = abs(dot(normal.xyz, lightDir.xyz));
 
     color += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * NdotL;
 
-/*     if (NdotL > 0.0) { */
-/*       float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0); */
+    /* if (NdotL > 0.0) { */
+    /*  float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0); */
+    /*  color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess); */
+    /* } */
 
-/*       color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess); */
-/*     } */
   }
   else
     color = vec4(1.0);
+  
+  //discard;
 
   gl_FragColor = vec4(color.rgb, 1.0);
 }

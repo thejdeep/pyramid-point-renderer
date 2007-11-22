@@ -320,14 +320,16 @@ void main (void) {
 
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
-  if (valid_pixels != 0.0) {
-    bufferA /= valid_pixels;
-    bufferB.x = zmin;
-    bufferB.y = new_zmax - zmin;
-    bufferB.zw /= valid_pixels;
-    bufferC.rgb /= valid_pixels;
-    bufferC.w = obj_id;
-  }
+  
+  if (valid_pixels != 0.0) 
+    {
+      bufferA /= valid_pixels;
+      bufferB.x = zmin;
+      bufferB.y = new_zmax - zmin;
+      bufferB.zw /= valid_pixels;
+      bufferC.rgb /= valid_pixels;
+      bufferC.w = obj_id;
+    }
 
   // first buffer = (n.x, n.y, n.z, radius)
   gl_FragData[0] = bufferA;
