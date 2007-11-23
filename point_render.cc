@@ -728,52 +728,63 @@ int main(int argc, char * argv []) {
 
   int read = readModels(argc, argv, &primitives);
 
-  num_objects = 15;
-  double x = 0.0, y = 0.0;
-  Quat q;
-
-  srand (time(NULL));
-  for (int i = 0; i < num_objects; ++i) {
-    x = ((rand()%200) / 10.0) - 10.0;
-    y = ((rand()%200) / 10.0) - 10.0;
-    q.a = (rand()%100) / 10.0;
-    q.x = 0.0;
-    q.y = 0.0;
-    q.z = (rand()%100) / 10.0;
-    q.normalize();
-    objects.push_back( Object(i, x, y, 0.0, q) );
-  }
-
-  int k = 0;
-  vector<Primitives>::iterator it_end = primitives.end();
-  it_end --; 
-  for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
-    if (k == 0) {
-      it->setType( 1 );
-      it->setRendererType( PYRAMID_LINES );
-    }
-    else if (k == 1) {
-      it->setType( 0 );
-      it->setRendererType( PYRAMID_TRIANGLES );
-    }
-    else if (k == 2){
-      it->setType( 0 );
-      it->setRendererType( PYRAMID_LINES );
-    }
-    else {
-      it->setType( 0 );
-      it->setRendererType( PYRAMID_TRIANGLES );
-    }
-
+  if (strcmp(argv[1], "trees") == 0) {
+    num_objects = 10;
+    double x = 0.0, y = 0.0;
+    Quat q;
+    
+    // add objects with random translations and rotations
+    srand (time(NULL));
     for (int i = 0; i < num_objects; ++i) {
+      x = ((rand()%200) / 10.0) - 10.0;
+      y = ((rand()%200) / 10.0) - 10.0;
+      q.a = (rand()%100) / 10.0;
+      q.x = 0.0;
+      q.y = 0.0;
+      q.z = (rand()%100) / 10.0;
+      q.normalize();
+      objects.push_back( Object(i, x, y, 0.0, q) );
+    }
+    
+    // add primitives pointer to each tree object
+    int k = 0;
+    vector<Primitives>::iterator it_end = primitives.end();
+    it_end --; 
+    for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
+      if (k == 0) {
+	it->setType( 0.0 );
+	it->setRendererType( PYRAMID_LINES );
+      }
+      else if (k == 1) {
+	it->setType( 0.5 );
+	it->setRendererType( PYRAMID_TRIANGLES );
+      }
+      else if (k == 2){
+	it->setType( 1.0 );
+	it->setRendererType( PYRAMID_LINES );
+      }
+      
+      for (int i = 0; i < num_objects; ++i) {
+	objects[i].addPrimitives( &(*it) );
+      }
+    }
+    
+    // add floor
+    objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
+    objects[num_objects].addPrimitives( &(*it_end) );
+    it_end->setType( 0.5 );
+    it_end->setRendererType( PYRAMID_TRIANGLES );
+  }
+  else {
+    int i = 0;
+    cout << "prims : " << primitives.size() << endl;
+    for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++i) {
+      objects.push_back( Object(i) );
       objects[i].addPrimitives( &(*it) );
+      it->setType( 0.0 );
+      it->setRendererType( PYRAMID_POINTS );
     }
   }
-
-  objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
-  objects[num_objects].addPrimitives( &(*it_end) );
-  it_end->setType( 0 );
-  it_end->setRendererType( PYRAMID_TRIANGLES );
 
   num_objects = objects.size();
 

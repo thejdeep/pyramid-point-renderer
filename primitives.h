@@ -51,8 +51,8 @@ class Primitives
 
   void setRendererType ( int type );
 
-  void setType ( int t ) {type = t;}
-  int getType ( void ) {return type;}
+  void setType ( GLfloat t ) {type = t;}
+  GLfloat getType ( void ) {return type;}
 
 
   void setId ( int id_num ) { id = id_num; }
@@ -72,7 +72,7 @@ class Primitives
   int renderer_type;
 
   // Type of primitives (Cylinder, other)
-  int type;
+  GLfloat type;
 
   /// Vertex buffer
   GLuint vertex_buffer;

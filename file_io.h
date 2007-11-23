@@ -499,18 +499,23 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 int readModels (int argc, char **argv, vector<Primitives> *prims) {
 
   // For each model passed in command line
-  int i;
-  for (i = 1; i < argc; ++i) {
-    prims->push_back( Primitives(i-1) );
-    readPlyTriangles (argv[i], 
-		      (prims->at(i-1)).getSurfels(), 
-		      (prims->at(i-1)).getTriangles());
+  if (strcmp(argv[1], "trees") == 0) {
+    prims->push_back( Primitives(0) );
+    readPlyTriangles ("../plys/apple_bark.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
+    prims->push_back( Primitives(1) );
+    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
+    prims->push_back( Primitives(2) );
+    readPlyTriangles ("../plys/apple_leaves.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
+    prims->push_back( Primitives(3) );
+    readPlyTriangles ("../plys/square.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
   }
-
-  prims->push_back( Primitives(i-1) );
-  readPlyTriangles ("../plys/square.ply", 
-		    (prims->at(i-1)).getSurfels(), 
-		    (prims->at(i-1)).getTriangles());
+  else {
+    int i;
+    for (i = 1; i < argc; ++i) {
+      prims->push_back( Primitives(i-1) );
+      readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
+    }
+  }
 
   return 1;
 }
@@ -518,7 +523,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims) {
 
 int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,
 			   vector<Triangle> *triangles){
-
+    
   for (int i = 1; i < argc; ++i)
     readPlyTriangles (argv[i], surfels, triangles);
 

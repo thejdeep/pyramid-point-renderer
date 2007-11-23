@@ -8,7 +8,7 @@ const double rad_to_deg = 180.0/PI;
 GLfloat obj_colors[8][4] = {{0.35, 0.1, 0.1, 0.0},
 			    {0.35, 0.1, 0.1, 0.4},
 			    {0.1, 0.5, 0.1, 0.2},
-			    {0.6, 0.4, 0.0, 0.3},
+			    {0.8, 0.7, 0.2, 0.3},
 			    {0.35, 0.1, 0.1, 0.5},
 			    {0.1, 0.5, 0.1, 0.6},
 			    {0.35, 0.1, 0.1, 0.7},
@@ -254,7 +254,7 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
       //      glColor4fv(obj_colors[id]);
-      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], 0.5);
+      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.0001);
     }
@@ -275,14 +275,9 @@ void Primitives::setPyramidLinesDisplayList( void ) {
   Vector n[3];
   double r[3];
   glNewList(triangleDisplayList, GL_COMPILE);
-  GLfloat obj_id = 0.0;
-  //GLfloat max_tris = triangles.size() + 1.0;
+//   GLfloat obj_id = 0.0;
+//   GLfloat max_tris = triangles.size() + 1.0;
   
-  if (type == 1)
-    obj_id = 0.0;
-  else
-    obj_id = 1.0;
-
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     r[0] = surfels.at( it->verts[0] ).radius();
     p[0] = surfels.at( it->verts[0] ).position();
@@ -297,12 +292,10 @@ void Primitives::setPyramidLinesDisplayList( void ) {
 //     n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
 //     r[2] = (r[0] + r[1]) * 0.5;
 
-
-
     glBegin(GL_LINES);
     for (int i = 0; i < 2; ++i) {
       //glColor4fv(obj_colors[id]);
-      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], obj_id);
+      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), r[i]);
     }
