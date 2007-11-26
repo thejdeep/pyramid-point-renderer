@@ -196,7 +196,10 @@ float pointInEllipse(in vec2 d, in float radius){
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
-  normal.y /= len;
+  if (len == 0.0)
+    normal.y = 0.0;
+  else
+    normal.y /= len;
 
   // angle between normal and z direction
   float angle = acos(normal.y);
@@ -424,7 +427,7 @@ void main (void) {
 	  //	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w);
 	  else
 	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+	    //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
 	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
 	}
 	else

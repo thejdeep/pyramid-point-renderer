@@ -39,7 +39,5 @@ void main (void) {
   else
     color = vec4(1.0);
   
-  //discard;
-
   gl_FragColor = vec4(color.rgb, 1.0);
 }

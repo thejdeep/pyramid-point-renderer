@@ -14,6 +14,16 @@ GLfloat obj_colors[8][4] = {{0.35, 0.1, 0.1, 0.0},
 			    {0.35, 0.1, 0.1, 0.7},
 			    {0.1, 0.5, 0.1, 0.8}};
 
+// GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
+// 			    {0.1, 0.1, 0.3, 1.0},
+// 			    {0.3, 0.1, 0.1, 1.0},
+// 			    {0.8, 0.7, 0.2, 0.3},
+// 			    {0.35, 0.1, 0.1, 0.5},
+// 			    {0.1, 0.5, 0.1, 0.6},
+// 			    {0.35, 0.1, 0.1, 0.7},
+// 			    {0.1, 0.5, 0.1, 0.8}};
+
+
 /**
  * Render object using designed rendering system.
  **/
@@ -277,7 +287,9 @@ void Primitives::setPyramidLinesDisplayList( void ) {
   glNewList(triangleDisplayList, GL_COMPILE);
 //   GLfloat obj_id = 0.0;
 //   GLfloat max_tris = triangles.size() + 1.0;
-  
+
+  glLineWidth(1.0);
+  glEnable(GL_LINE_SMOOTH);
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     r[0] = surfels.at( it->verts[0] ).radius();
     p[0] = surfels.at( it->verts[0] ).position();
@@ -288,19 +300,18 @@ void Primitives::setPyramidLinesDisplayList( void ) {
 //     p[2] = surfels.at( it->verts[2] ).position();
 //     n[2] = surfels.at( it->verts[2] ).normal();
 //     r[2] = surfels.at( it->verts[2] ).radius();
-//     p[2] = Point ((p[0].x() + p[1].x())*0.5, (p[0].y() + p[1].y())*0.5, (p[0].z() + p[1].z())*0.5);
-//     n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
-//     r[2] = (r[0] + r[1]) * 0.5;
+    p[2] = Point ((p[0].x() + p[1].x())*0.5, (p[0].y() + p[1].y())*0.5, (p[0].z() + p[1].z())*0.5);
+    n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
+    r[2] = (r[0] + r[1]) * 0.5;
 
     glBegin(GL_LINES);
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 3; ++i) {
       //glColor4fv(obj_colors[id]);
       glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), r[i]);
     }
     glEnd();
-  	
   }
 
   glEndList();
@@ -331,9 +342,10 @@ void Primitives::setPyramidHybridDisplayList( void ) {
 
       glBegin(GL_TRIANGLES);  
       for (int i = 0; i < 3; ++i) {
-	glColor4fv(obj_colors[0]);
+	//glColor4fv(obj_colors[0]);
+	glColor4f(obj_colors[1][0], obj_colors[1][1], obj_colors[1][2], 0.5);
 	glNormal3f(n[i].x(), n[i].y(), n[i].z());
-	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
+	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.0001);
       }
       glEnd();
     }
@@ -341,8 +353,10 @@ void Primitives::setPyramidHybridDisplayList( void ) {
 
   glBegin(GL_POINTS);  
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
-    if (it->position().x() <= 0.001) {
-      glColor4fv(obj_colors[1]);
+    if (it->position().x() <= 0.001) 
+      {
+      //      glColor4fv(obj_colors[1]);
+      glColor4f(obj_colors[0][0], obj_colors[0][1], obj_colors[0][2], 0.1);
       glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
       glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
     }

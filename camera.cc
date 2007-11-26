@@ -341,8 +341,8 @@ void Camera::translateVec (int x, int y, double* vec) {
   // translation displacement vector
   double rotVec[3] = {0.0, 0.0, 0.0};
 
-  rotVec[0] = (mouse_curr[0] - mouse_start[0]) / screen_width;
-  rotVec[1] = (mouse_curr[1] - mouse_start[1]) / screen_height;
+  rotVec[0] = 10*(mouse_curr[0] - mouse_start[0]) / screen_width;
+  rotVec[1] = 10*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];
@@ -371,7 +371,7 @@ void Camera::zoomingVec (int x, int y, double* vec) {
   // translation displacement vector
   double rotVec[3] = {0.0, 0.0, 0.0};
 
-  rotVec[2] -= 5.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
+  rotVec[2] -= 15.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];

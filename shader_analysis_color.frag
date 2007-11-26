@@ -199,6 +199,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
   if (len != 0.0)
     normal.y /= len;
+  else normal.y = 0.0;
 
   // angle between normal and z direction
   float angle = acos(normal.y);

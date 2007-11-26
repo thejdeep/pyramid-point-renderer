@@ -498,6 +498,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 
 int readModels (int argc, char **argv, vector<Primitives> *prims) {
 
+
   // For each model passed in command line
   if (strcmp(argv[1], "trees") == 0) {
     prims->push_back( Primitives(0) );
@@ -516,10 +517,8 @@ int readModels (int argc, char **argv, vector<Primitives> *prims) {
       readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
     }
   }
-
   return 1;
 }
-
 
 int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,
 			   vector<Triangle> *triangles){

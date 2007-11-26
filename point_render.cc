@@ -623,9 +623,11 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 }
 
 void changeRendererType( int type ) {
-//   if (selected_obj != -1) {
-//     objects[selected_obj].setRendererType(type);
-//   }
+  if (selected_obj != -1) {
+    vector<Primitives*>* prims = objects[selected_obj].getPrimitivesList();
+    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+      (*prim_it)->setRendererType(type);
+  }
 }
 
 void createPointRender( int type ) {
@@ -770,10 +772,10 @@ int main(int argc, char * argv []) {
     }
     
     // add floor
-    objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
-    objects[num_objects].addPrimitives( &(*it_end) );
-    it_end->setType( 0.5 );
-    it_end->setRendererType( PYRAMID_TRIANGLES );
+//     objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
+//     objects[num_objects].addPrimitives( &(*it_end) );
+//     it_end->setType( 0.5 );
+//     it_end->setRendererType( PYRAMID_TRIANGLES );
   }
   else {
     int i = 0;
@@ -781,8 +783,8 @@ int main(int argc, char * argv []) {
     for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++i) {
       objects.push_back( Object(i) );
       objects[i].addPrimitives( &(*it) );
-      it->setType( 0.0 );
-      it->setRendererType( PYRAMID_POINTS );
+      it->setType( 1.0 );
+      it->setRendererType( PYRAMID_LINES );
     }
   }
 
@@ -800,7 +802,7 @@ int main(int argc, char * argv []) {
 //       "  render type   : " << objects[i].getRendererType() << endl;
   }
 
-  createPointRender( PYRAMID_LINES );
+  createPointRender( PYRAMID_POINTS );
 
   if (read == 0)
     exit(0);
