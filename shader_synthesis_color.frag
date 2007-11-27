@@ -472,7 +472,7 @@ void main (void) {
 	  // Ellipse in range
 	  if (weights[i] > 0.0)
 	    {
-	      if (abs(pixelC[i].w - obj_id) < 0.01 ) 
+	      if (abs(pixelC[i].w - obj_id) < 0.0001 ) 
 	      {
 		// Depth test between ellipses in range
 		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  

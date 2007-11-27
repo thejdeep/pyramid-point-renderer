@@ -381,9 +381,12 @@ void Primitives::setPyramidLinesDisplayList( void ) {
   Point p[3];
   Vector n[3];
   double r[3];
+
+  number_triangles = triangles.size();
+
   glNewList(triangleDisplayList, GL_COMPILE);
-//   GLfloat obj_id = 0.0;
-//   GLfloat max_tris = triangles.size() + 1.0;
+  GLfloat pos = 0.0;
+
 
   glLineWidth(1.0);
   glDisable(GL_LINE_SMOOTH);
@@ -404,11 +407,15 @@ void Primitives::setPyramidLinesDisplayList( void ) {
     glBegin(GL_LINES);
     for (int i = 0; i < 2; ++i) {
       //glColor4fv(obj_colors[id]);
-      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
+      if (type == 1.0)
+	glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], 0.9 + ((pos / number_triangles)/10.0));
+      else
+	glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), r[i]);
     }
     glEnd();
+    ++pos;
   }
 
   glEndList();

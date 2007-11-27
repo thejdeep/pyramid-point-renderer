@@ -298,7 +298,7 @@ void main (void) {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) {
 	
-	if (pixelC[i].w == obj_id)
+	if (abs(pixelC[i].w - obj_id) < 0.0001)
 	{
 	  // Depth test between valid in reach ellipses
 	  if ((!depth_test) || (pixelB[i].x <= zmax)) {

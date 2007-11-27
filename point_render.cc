@@ -809,7 +809,7 @@ int main(int argc, char * argv []) {
     // add floor
 //     objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
 //     objects[num_objects].addPrimitives( &(*it_end) );
-//     it_end->setType( 0.5 );
+//     it_end->setType( 0.1 );
 //     it_end->setRendererType( PYRAMID_TRIANGLES );
   }
   else {
