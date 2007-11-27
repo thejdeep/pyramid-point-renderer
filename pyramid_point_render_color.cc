@@ -762,7 +762,7 @@ void PyramidPointRenderColor::createFBO() {
 
   for (i = 0; i < FBO_BUFFERS_COUNT_6; i++) 
     {
-      fprintf(stderr, "bind fbo buffer %i\n", i);
+      //      fprintf(stderr, "bind fbo buffer %i\n", i);
       glBindTexture(FBO_TYPE, fbo_textures[i]);
       glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				fbo_buffers[i], FBO_TYPE, fbo_textures[i], 0);
@@ -799,7 +799,7 @@ void PyramidPointRenderColor::createFBO() {
   CHECK_FOR_OGL_ERROR();
 
   glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &i);
-  fprintf(stderr, "max color attachments %i\n", i);
+  //  fprintf(stderr, "max color attachments %i\n", i);
 }		
 
 /**

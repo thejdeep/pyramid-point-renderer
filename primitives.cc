@@ -443,7 +443,7 @@ void Primitives::setPyramidHybridDisplayList( void ) {
 	//glColor4fv(obj_colors[0]);
 	glColor4f(obj_colors[1][0], obj_colors[1][1], obj_colors[1][2], 0.1);
 	glNormal3f(n[i].x(), n[i].y(), n[i].z());
-	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.0001);
+	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.00001);
       }
       glEnd();
     }

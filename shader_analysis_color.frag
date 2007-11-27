@@ -269,7 +269,7 @@ void main (void) {
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-      if  (dist_test >= 0.0)
+      if  (dist_test >= -10.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
@@ -294,10 +294,10 @@ void main (void) {
 	// Check if valid gather pixel or unspecified (or ellipse out of reach set above)
 	if (pixelA[i].w > 0.0) {
 	  	
-	  if (abs(pixelC[i].w - obj_id) < 0.01 )
+	  //if (abs(pixelC[i].w - obj_id) < 0.1 )
 	    {
 	      // Depth test between valid in reach ellipses
-	      if ((!depth_test) || (pixelB[i].x <= zmax)) {
+	      if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax)) {
 		
 		bufferA += pixelA[i];
 		

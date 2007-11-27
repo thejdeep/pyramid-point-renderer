@@ -172,8 +172,8 @@ void draw(void) {
   }
   if (timing_profile > 2) {
     point_based_render->draw();
-    camera->setView();
   }
+
   camera->rotate();
 
 #else
@@ -214,16 +214,6 @@ void draw(void) {
     camera->setView();
   }
 
-  // render floor
-//   glBegin(GL_QUADS);
-//   glColor4f(0.0, 1.0, 0.0, 1.0);
-//   glNormal3f(0.0, -1.0, 0.0);
-//   glVertex4f(-1.0, -1.0, 0.0, 0.0001);
-//   glVertex4f(-1.0,  1.0, 0.0, 0.0001);
-//   glVertex4f( 1.0,  1.0, 0.0, 0.0001);
-//   glVertex4f( 1.0, -1.0, 0.0, 0.0001);
-//   glEnd();
-
   point_based_render->interpolate();
   point_based_render->draw();
 
@@ -252,8 +242,12 @@ void draw(void) {
   // fps variable is rendered on screen text
   ++fps_loop;
   if (fps_loop == 200) {
+
+
     double end_time = timer();
+    //    double end_time = glutGet(GLUT_ELAPSED_TIME);
     fps = (end_time - start_time) / (double)fps_loop;
+
     #ifndef TIMING
     fps = 1000.0 / fps;
     sps = (fps * number_surfels) / 1000000;
@@ -275,9 +269,9 @@ void draw(void) {
 
   if (timing_profile == 4) {
     if (color_model)
-      cout << "COLOR BUFFER ON" << endl;
+      cout << endl << "COLOR BUFFER ON" << endl;
     else
-      cout << "COLOR BUFFER OFF" << endl;
+      cout << endl << "COLOR BUFFER OFF" << endl;
 
     cout << "PREPARE     : " << timings[0] << endl;
     cout << "PROJECT     : " << timings[1] - timings[0] << endl;
@@ -285,7 +279,7 @@ void draw(void) {
     cout << "SHADE       : " << timings[3] - timings[2]<< endl;
     cout << "TOTAL       : " << timings[3] << endl;
     cout << "FPS         : " << 1000.0 / timings[3] << endl;
-    cout << "SPLATS/SEC  : " << ((double)number_surfels * (1000.0 / timings[3]) / 1000) << " M" << endl;
+    cout << "SPLATS/SEC  : " << ((double)number_surfels * (1000.0 / timings[3]) / 1000.0) << " M" << endl;
     
     if (!color_model) {
       color_model = true;

@@ -294,7 +294,7 @@ void main (void) {
       vec4 up_pixelB = texture2D (textureB, gl_TexCoord[3].st).xyzw;
       vec4 up_pixelC = texture2D (textureC, gl_TexCoord[3].st).xyzw;
       
-      if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) )
+      if ( (up_pixelA.w != 0.0) && (bufferB.x  - bufferB.y > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
 
       if (up_pixelC.w != bufferC.w)
@@ -475,7 +475,7 @@ void main (void) {
 	      if (abs(pixelC[i].w - obj_id) < 0.01 ) 
 	      {
 		// Depth test between ellipses in range
-		if ((!depth_test) || (pixelB[i].x <= zmin + zmax)) {		  
+		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  
 		  total_weight += weights[i];	  
 		  bufferA += weights[i] * pixelA[i];
 		  bufferB += weights[i] * pixelB[i];
