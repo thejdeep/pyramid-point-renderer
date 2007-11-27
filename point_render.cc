@@ -837,7 +837,14 @@ int main(int argc, char * argv []) {
 //       "  render type   : " << objects[i].getRendererType() << endl;
   }
 
-  createPointRender( PYRAMID_POINTS );
+  if (strcmp(argv[1], "trees") == 0) {
+    point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
+    assert (point_based_render);
+    point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
+    point_based_render->setPrefilterSize(prefilter_size);
+  }
+  else
+    createPointRender( PYRAMID_POINTS );
 
   if (read == 0)
     exit(0);

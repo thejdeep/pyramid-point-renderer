@@ -31,12 +31,12 @@ LIBSLIST = $(GLLIBS) $(GLUTLIB) $(XLIBS) $(MATLIB)
 
 OBJFILES = timer.o camera.o glslkernel.o object.o primitives.o \
 	point_based_render.o pyramid_point_render.o pyramid_point_render_color.o \
-	point_render.o ply.o GLee.o \
+	pyramid_point_render_trees.o point_render.o ply.o GLee.o \
 
 
 CODES =  camera.cc timer.c glslkernel.cc object.cc primitives.cc \
 	point_based_render.cc pyramid_point_render.cc pyramid_point_render_color.cc \
-	point_render.cc ply.c GLee.cpp \
+	pyramid_point_render_trees.cc point_render.cc ply.c GLee.cpp \
 
 ###################################
 

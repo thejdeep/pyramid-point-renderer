@@ -32,6 +32,7 @@
 
 #include "pyramid_point_render.h"
 #include "pyramid_point_render_color.h"
+#include "pyramid_point_render_trees.h"
 
 #include "surfels.h"
 #include "quat.h"

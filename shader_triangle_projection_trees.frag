@@ -38,9 +38,8 @@ void main(void)
   if (radius_depth_w.x <= 0.0)
     discard;
 
-  if (normal_vec.z < 0.0)
-    discard;
-
+/*   if (normal_vec.z < 0.0) */
+/*     discard; */
 
   float depth_interval;
   
