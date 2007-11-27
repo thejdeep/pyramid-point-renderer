@@ -789,11 +789,11 @@ int main(int argc, char * argv []) {
     it_end --; 
     for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
       if (k == 0) {
-	it->setType( 0.0 );
+	it->setType( 0.5 );
 	it->setRendererType( PYRAMID_LINES );
       }
       else if (k == 1) {
-	it->setType( 0.5 );
+	it->setType( 0.1 );
 	it->setRendererType( PYRAMID_TRIANGLES );
       }
       else if (k == 2){

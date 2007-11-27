@@ -5,23 +5,23 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-// GLfloat obj_colors[8][4] = {{0.35, 0.1, 0.1, 0.0},
-// 			    {0.35, 0.1, 0.1, 0.4},
-// 			    {0.1, 0.5, 0.1, 0.2},
-// 			    {0.8, 0.7, 0.2, 0.3},
-// 			    {0.35, 0.1, 0.1, 0.5},
-// 			    {0.1, 0.5, 0.1, 0.6},
-// 			    {0.35, 0.1, 0.1, 0.7},
-// 			    {0.1, 0.5, 0.1, 0.8}};
-
-GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
-			    {0.1, 0.1, 0.3, 1.0},
-			    {0.3, 0.1, 0.1, 1.0},
+GLfloat obj_colors[8][4] = {{0.35, 0.1, 0.1, 0.0},
+			    {0.35, 0.1, 0.1, 0.4},
+			    {0.1, 0.5, 0.1, 0.2},
 			    {0.8, 0.7, 0.2, 0.3},
 			    {0.35, 0.1, 0.1, 0.5},
 			    {0.1, 0.5, 0.1, 0.6},
 			    {0.35, 0.1, 0.1, 0.7},
 			    {0.1, 0.5, 0.1, 0.8}};
+
+// GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
+// 			    {0.1, 0.1, 0.3, 1.0},
+// 			    {0.3, 0.1, 0.1, 1.0},
+// 			    {0.8, 0.7, 0.2, 0.3},
+// 			    {0.35, 0.1, 0.1, 0.5},
+// 			    {0.1, 0.5, 0.1, 0.6},
+// 			    {0.35, 0.1, 0.1, 0.7},
+// 			    {0.1, 0.5, 0.1, 0.8}};
 
 /**
  * Render object using designed rendering system.
@@ -325,7 +325,7 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
     color_array[pos*4 + 0] = obj_colors[id][0];
     color_array[pos*4 + 1] = obj_colors[id][1];
     color_array[pos*4 + 2] = obj_colors[id][2];
-    color_array[pos*4 + 3] = obj_colors[id][0];
+    color_array[pos*4 + 3] = type;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
     normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());

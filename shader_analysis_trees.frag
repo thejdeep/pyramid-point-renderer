@@ -266,7 +266,7 @@ void main (void) {
   for (int i = 0; i < 4; ++i) {
     if (pixelA[i].w > 0.0) {
       // test if this ellipse reaches the center of the pixel being constructed
-      if (pixelC[i].w == 0.0)
+      if (abs(pixelC[i].w - 0.5) < 0.1)
 	dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       else
