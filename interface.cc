@@ -11,8 +11,10 @@ bool show_points;
 int show_splats;
 bool show_screen_info;
 
+bool elliptical_weight;
 bool depth_culling;
 bool rotating;
+bool color_model;
 
 int button_pressed;
 bool active_shift;

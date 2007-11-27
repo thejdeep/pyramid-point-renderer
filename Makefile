@@ -56,7 +56,7 @@ depend:
 	$(CC) $(CXXFLAGS) -M *.cc > .depend
 
 clean:	
-	rm *.o point_render *~
+	rm *.o point_render *~ .depend
 
 all: clean depend point_render
 

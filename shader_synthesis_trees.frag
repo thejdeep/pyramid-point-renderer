@@ -422,8 +422,13 @@ void main (void) {
 
 	// if specified scatter pixel test distance to center of ellipse
 	if (pixelA[i].w > 0.0) {
-	  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+	  //dist_test = pointInRectangle(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	  if (pixelC[i].w == 0.0)
+	    dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+	  //	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w);
+	  else
+	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	    //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
 	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
 	}
 	else
@@ -472,8 +477,7 @@ void main (void) {
 	  // Ellipse in range
 	  if (weights[i] > 0.0)
 	    {
-	      if (abs(pixelC[i].w - obj_id) < 0.01 ) 
-	      {
+	      if (pixelC[i].w == obj_id) {
 		// Depth test between ellipses in range
 		if ((!depth_test) || (pixelB[i].x <= zmin + zmax)) {		  
 		  total_weight += weights[i];	  
@@ -490,7 +494,6 @@ void main (void) {
 	    bufferA /= total_weight;
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
-	    //	    bufferC.w = 1.0;
 	    bufferC.w = obj_id;
 	  }
       }

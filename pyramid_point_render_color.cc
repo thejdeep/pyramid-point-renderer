@@ -516,6 +516,7 @@ int PyramidPointRenderColor::synthesisCallbackFunc(pixels_struct dest, pixels_st
   shader_synthesis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
   shader_synthesis->set_uniform("depth_test", depth_test);
+  shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
 
   shader_synthesis->set_uniform("textureA", 0);
   shader_synthesis->set_uniform("textureB", 1);
@@ -806,7 +807,7 @@ void PyramidPointRenderColor::createFBO() {
  **/
 void PyramidPointRenderColor::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_point_projection = new GLSLKernel();
   assert( shader_point_projection->has_GLSL() );

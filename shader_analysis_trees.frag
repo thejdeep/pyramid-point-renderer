@@ -265,6 +265,11 @@ void main (void) {
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
     if (pixelA[i].w > 0.0) {
+      // test if this ellipse reaches the center of the pixel being constructed
+      if (pixelC[i].w == 0.0)
+	dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
+      //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
+      else
 	dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
@@ -287,34 +292,33 @@ void main (void) {
 
   float new_zmax = zmax;
 
-  if (obj_id != -1.0) {
-    // Gather pixels values
-    for (int i = 0; i < 4; ++i)
-      {
-	// Check if valid gather pixel or unspecified (or ellipse out of reach set above)
-	if (pixelA[i].w > 0.0) {
-	  	
-	  if (abs(pixelC[i].w - obj_id) < 0.01 )
-	    {
-	      // Depth test between valid in reach ellipses
-	      if ((!depth_test) || (pixelB[i].x <= zmax)) {
-		
-		bufferA += pixelA[i];
-		
-		// Increment ellipse total path with distance from gather pixel to center
-		bufferB.zw += pixelB[i].zw + gather_pixel_desloc[i].xy;
-		
-		bufferC += pixelC[i];
-		
-		// Take maximum depth range
-		new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
-		
-		valid_pixels += 1.0;
-	      }
-	    }
+  // Gather pixels values
+  for (int i = 0; i < 4; ++i)
+    {
+      // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
+      if (pixelA[i].w > 0.0) {
+	
+	if (pixelC[i].w == obj_id)
+	{
+	  // Depth test between valid in reach ellipses
+	  if ((!depth_test) || (pixelB[i].x <= zmax)) {
+	    
+	    bufferA += pixelA[i];
+	    
+	    // Increment ellipse total path with distance from gather pixel to center
+	    bufferB.zw += pixelB[i].zw + gather_pixel_desloc[i].xy;
+	    
+	    bufferC += pixelC[i];
+	    
+	    // Take maximum depth range
+	    new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
+	    
+	    valid_pixels += 1.0;
+	  }
 	}
       }
-  }
+    }
+
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
   
@@ -326,7 +330,6 @@ void main (void) {
       bufferB.zw /= valid_pixels;
       bufferC.rgb /= valid_pixels;
       bufferC.w = obj_id;
-      //bufferC.w = 1.0;
     }
 
   // first buffer = (n.x, n.y, n.z, radius)

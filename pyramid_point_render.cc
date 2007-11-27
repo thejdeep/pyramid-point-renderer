@@ -622,7 +622,7 @@ void PyramidPointRender::clearBuffers() {
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   //glClear(GL_COLOR_BUFFER_BIT); 
   framebuffer_state = FBS_UNDEFINED;
@@ -778,7 +778,7 @@ void PyramidPointRender::createFBO() {
  **/
 void PyramidPointRender::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_point_projection = new GLSLKernel();
   assert( shader_point_projection->has_GLSL() );

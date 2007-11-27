@@ -12,11 +12,11 @@
 
 #include "materials.h"
 
-// #define CANVAS_WIDTH  1024
-// #define CANVAS_HEIGHT 1024
+#define CANVAS_WIDTH  1024
+#define CANVAS_HEIGHT 1024
  
-#define CANVAS_WIDTH  768
-#define CANVAS_HEIGHT 768
+// #define CANVAS_WIDTH  768
+// #define CANVAS_HEIGHT 768
 
 // #define CANVAS_WIDTH  512
 // #define CANVAS_HEIGHT 512
@@ -135,28 +135,36 @@ void draw(void) {
   
     double c[4];
     for (int i = 0; i < num_objects; ++i) {
-      if ((objects[i].getRendererType() != TRIANGLES) 
-	  && (objects[i].getRendererType() != LINES)) {
-	
-	// Set eye for each object separately
-	camera->eyeVec(c);
-	c[3] = 1.0;
-	
-	Quat q = camera->rotationQuat();
-	q = q.composeWith(*(objects[i].getRotationQuat()));
-	
-	//       Quat q = *(objects[i].getRotationQuat());
-	//       q = q.composeWith(camera->rotationQuat());
-	
-	// Invert quaternion -- simulates inverse of modelview
-	q.x *= -1; q.y *= -1; q.z *= -1;
-	q.rotate(c);
-	double eye[3] = {c[0], c[1], c[2]};
-	point_based_render->setEye(eye);
-	
-	point_based_render->projectSamples( &objects[i] );
-	camera->setView();
+      // Set eye for each object separately
+      camera->eyeVec(c);
+      c[3] = 1.0;
+      
+      Quat q = camera->rotationQuat();
+      q = q.composeWith(*(objects[i].getRotationQuat()));
+      
+      //       Quat q = *(objects[i].getRotationQuat());
+      //       q = q.composeWith(camera->rotationQuat());
+      
+      // Invert quaternion -- simulates inverse of modelview
+      q.x *= -1; q.y *= -1; q.z *= -1;
+      q.rotate(c);
+      double eye[3] = {c[0], c[1], c[2]};
+      point_based_render->setEye(eye);
+      
+      objects[i].render();
+      
+      // Render objects primitives
+      vector<Primitives*>* prims = objects[i].getPrimitivesList();
+      for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+	if (((*prim_it)->getRendererType() != TRIANGLES) 
+	    && ((*prim_it)->getRendererType() != LINES)
+	    && ((*prim_it)->getRendererType() != NONE)) {       
+	  
+	  point_based_render->projectSamples( prim_it );
+	}
       }
+      
+      camera->setView();
     }
   }
   if (timing_profile > 1) {
@@ -243,7 +251,7 @@ void draw(void) {
   // compute frames per second
   // fps variable is rendered on screen text
   ++fps_loop;
-  if (fps_loop == 50) {
+  if (fps_loop == 200) {
     double end_time = timer();
     fps = (end_time - start_time) / (double)fps_loop;
     #ifndef TIMING
@@ -266,6 +274,11 @@ void draw(void) {
     }
 
   if (timing_profile == 4) {
+    if (color_model)
+      cout << "COLOR BUFFER ON" << endl;
+    else
+      cout << "COLOR BUFFER OFF" << endl;
+
     cout << "PREPARE     : " << timings[0] << endl;
     cout << "PROJECT     : " << timings[1] - timings[0] << endl;
     cout << "RECONSTRUCT : " << timings[2] - timings[1] << endl;
@@ -273,7 +286,16 @@ void draw(void) {
     cout << "TOTAL       : " << timings[3] << endl;
     cout << "FPS         : " << 1000.0 / timings[3] << endl;
     cout << "SPLATS/SEC  : " << ((double)number_surfels * (1000.0 / timings[3]) / 1000) << " M" << endl;
-    exit(0);
+    
+    if (!color_model) {
+      color_model = true;
+      createPointRender ( PYRAMID_POINTS );
+      timings[0] = timings[1] = timings[2] = timings[3] = 0;
+      fps_loop = 0;
+      timing_profile = 0;
+    }
+    else
+      exit(0);
   }
 
 #endif
@@ -458,7 +480,11 @@ void specialKey(int key_pressed, int x, int y) {
     changeRendererType(LINES);
     show_splats = 6;
     break;
- case GLUT_KEY_F10:
+  case GLUT_KEY_F7:
+    changeRendererType(PYRAMID_HYBRID_TEST);
+    show_splats = 7;
+    break;
+  case GLUT_KEY_F10:
     changeRendererType(NONE);
     show_splats = 10;
     break;
@@ -574,6 +600,16 @@ void keyboard(unsigned char key_pressed, int x, int y) {
       point_based_render->setDepthTest(depth_culling);
       cout << "depth test : " << depth_culling << endl;
       break;
+    case 'e' :
+      elliptical_weight = !elliptical_weight;
+      point_based_render->setEllipticalWeight(elliptical_weight);
+      cout << "elliptical_weight : " << elliptical_weight << endl;
+      break;
+    case 'c' :
+      color_model = !color_model;
+      createPointRender ( PYRAMID_POINTS );
+      cout << "color_model : " << color_model << endl;
+      break;
     case ']' :
       ++material_id;
       if (material_id == NUM_MATERIALS)
@@ -634,7 +670,10 @@ void createPointRender( int type ) {
 
   delete point_based_render;
 
-  point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+  if (color_model)
+    point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+  else
+    point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   assert (point_based_render);
 
@@ -656,7 +695,9 @@ void init(void) {
 
   analysis_filter_size = 0;
 
-  depth_culling = 1;
+  color_model = false;
+  elliptical_weight = true;
+  depth_culling = true;
   output_type = 0;
   rotating = 0;
 
@@ -784,7 +825,7 @@ int main(int argc, char * argv []) {
       objects.push_back( Object(i) );
       objects[i].addPrimitives( &(*it) );
       it->setType( 1.0 );
-      it->setRendererType( PYRAMID_LINES );
+      it->setRendererType( PYRAMID_POINTS );
     }
   }
 

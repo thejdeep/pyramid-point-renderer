@@ -24,6 +24,7 @@ typedef enum
     PYRAMID_POINTS_COLOR,
     PYRAMID_TRIANGLES,
     PYRAMID_HYBRID,
+    PYRAMID_HYBRID_TEST,
     PYRAMID_LINES,
     EWA_SPLATTING,
     EWA_SPLATTING_INTERPOLATE_NORMALS,
@@ -64,7 +65,9 @@ class Primitives
   void setPyramidPointsDisplayList( void );
   void setPyramidTrianglesDisplayList( void );
   void setPyramidHybridDisplayList( void );
+  void setPyramidHybridTestDisplayList( void );
   void setPyramidLinesDisplayList( void );
+  void setPyramidLinesArraysColor ( void );
   void setTrianglesDisplayList( void );
   void setLinesDisplayList( void );
 
@@ -85,6 +88,12 @@ class Primitives
 
   /// Number of samples.
   int number_points;
+
+  /// Number of triangles or lines
+  int number_triangles;
+
+  /// Indices vector for vertex arrays for lines
+  GLuint *indices;
 
   // Vector of surfels belonging to this object.
   vector<Surfel> surfels;

@@ -41,13 +41,16 @@ void main(void)
   if (normal_vec.z < 0.0)
     discard;
 
-  float depth_interval;
 
-  if (gl_Color.a > 0.90)  
-    //    depth_interval = radius_depth_w.x;
-    depth_interval = perspective_radius(radius_depth_w.x);
-  else
+  float depth_interval;
+  
+  if (gl_Color.a > 0.90)
+    depth_interval = radius_depth_w.x;
+    //depth_interval = perspective_radius(radius_depth_w.x);
+  else if (gl_Color.a > 0.4)
     depth_interval = 0.0;
+  else
+    depth_interval = radius_depth_w.x;
 
   // First buffer  : normal.x, normal.y, normal.z, radius
   // Second buffer : minimum depth, depth interval, center.x, center.y
