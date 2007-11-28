@@ -101,6 +101,8 @@ void draw(void) {
     start_time = timer();
   }
 
+  //  dtStart = clock();
+
   // Set camera position and direction
   camera->setView();
 
@@ -241,8 +243,21 @@ void draw(void) {
   // compute frames per second
   // fps variable is rendered on screen text
   ++fps_loop;
-  if (fps_loop == 200) {
+//   ++numFrames;
+//   dtTotal += clock() - dtStart;
 
+//  int timeElapsed = ( (clock() - lastUpdateTime) / CLOCKS_PER_SEC );
+
+  if (fps_loop == 100) {
+
+  //  cout << clock() << " " << lastUpdateTime << " " << timeElapsed << " "  << CLOCKS_PER_SEC << endl;
+//   if ( timeElapsed >= 2 ) {    
+//     fps = numFrames / (dtTotal / (GLfloat)CLOCKS_PER_SEC);
+
+//     numFrames = 0;
+//     dtTotal = 0;
+//     timeElapsed = 0;
+//     lastUpdateTime = clock();
 
     double end_time = timer();
     //    double end_time = glutGet(GLUT_ELAPSED_TIME);
@@ -352,6 +367,8 @@ Point unproject (const Point& p) {
 /// @param y Y coordinate of mouse click
 void mouse(int button, int state, int x, int y) {
   
+
+
   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT)
     active_shift = 1;
   else
@@ -497,7 +514,7 @@ void specialKey(int key_pressed, int x, int y) {
 void keyboard(unsigned char key_pressed, int x, int y) {
 
   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
-    switch (key_pressed) {
+    switch (key_pressed) {     
     case '+' :
     case '=' :
       prefilter_size += 0.25;
@@ -683,6 +700,7 @@ void init(void) {
   render_mode = GL_RENDER;
 
   fps_loop = 0;
+  //lastUpdateTime = clock();
 
   button_pressed = -1;
   active_shift = 0;
@@ -705,7 +723,7 @@ void init(void) {
   selected_obj = 0;
 
   reconstruction_filter_size = 1.0;
-  prefilter_size = 0.0;
+  prefilter_size = 0.75;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);

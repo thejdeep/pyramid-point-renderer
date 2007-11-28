@@ -99,7 +99,6 @@ static std::vector <char*> line; ///< Points to individual lines inside buffer
 static void load_file (const char* filename) {
 	ifstream f (filename);
 	vector<int> n;
-	cout << filename << endl;
 	assert (f);
 	char buf [1000];
 	buffer.clear ();
@@ -179,6 +178,7 @@ void GLSLKernel::install (bool debug) {
 
 			GLint compileFrag;
 			glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileFrag);
+			cout << fragFileName << endl;
 			assert (compileFrag == GL_TRUE);
 
 			glAttachShader(programObject, fragmentShader);

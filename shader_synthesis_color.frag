@@ -1,7 +1,7 @@
 /* Synthesis step */
 
 #extension GL_ARB_draw_buffers : enable
-#version 110
+//#version 120
 
 // flag for depth test on/off
 uniform bool depth_test;
@@ -472,7 +472,7 @@ void main (void) {
 	  // Ellipse in range
 	  if (weights[i] > 0.0)
 	    {
-	      if (abs(pixelC[i].w - obj_id) < 0.0001 ) 
+	      if (abs(pixelC[i].w - obj_id) < 0.1 ) 
 	      {
 		// Depth test between ellipses in range
 		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  

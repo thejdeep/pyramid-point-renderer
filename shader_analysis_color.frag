@@ -1,7 +1,7 @@
 /* Analysis step */
 
 #extension GL_ARB_draw_buffers : enable
-#version 110
+//#version 120
 
 // flag for depth test on/off
 uniform bool depth_test;
@@ -287,7 +287,7 @@ void main (void) {
 
   float new_zmax = zmax;
 
-  if (obj_id != -1.0) {
+  if (obj_id != -10.0) {
     // Gather pixels values
     for (int i = 0; i < 4; ++i)
       {

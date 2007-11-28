@@ -778,7 +778,7 @@ void PyramidPointRender::createFBO() {
  **/
 void PyramidPointRender::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
   shader_point_projection = new GLSLKernel();
   assert( shader_point_projection->has_GLSL() );

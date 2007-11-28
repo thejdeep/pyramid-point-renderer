@@ -509,11 +509,17 @@ int readModels (int argc, char **argv, vector<Primitives> *prims) {
     prims->push_back( Primitives(3) );
     readPlyTriangles ("../plys/square.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
   }
+  // read old normals made up format
   else {
-    int i;
-    for (i = 1; i < argc; ++i) {
-      prims->push_back( Primitives(i-1) );
-      readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
+    for (int i = 1; i < argc; ++i) {
+      if (strstr(argv[i], ".normals") != NULL) { 
+	prims->push_back( Primitives(i-1) );
+	loadNormals (argv[i], (prims->at(i-1)).getSurfels());
+      }
+      else {
+	prims->push_back( Primitives(i-1) );
+	readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
+      }
     }
   }
   return 1;
