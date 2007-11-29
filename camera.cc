@@ -32,7 +32,9 @@ void Camera::initLight (void) {
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
   
   GLfloat model_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_ambient);
+  //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_ambient);
+
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
   glShadeModel(GL_SMOOTH);
 }

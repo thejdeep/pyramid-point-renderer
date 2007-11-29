@@ -97,7 +97,7 @@ int intersectEllipseLine (in vec2 p, in float rx, in float ry, in vec2 a1, in ve
  **/
 float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in float unit){
 
-  vec2 center = {0.0, 0.0};
+  vec2 center = vec2(0.0, 0.0);
 
   // rotate point to ellipse's coordinate system
   vec2 desloc_point = d;
@@ -130,18 +130,19 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
   float cos_angle = cos(angle);
   float sin_angle = sin(angle);
 
-  vec2 rot_box[4] = {
-    vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-	 -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle),
+  vec2 rot_box[4];
+  rot_box[0] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
+		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
-    vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-	 -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle),
+  rot_box[1] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
+		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
-    vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-	 -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle),
+  rot_box[2] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
+		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+  
+  rot_box[3] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
+		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
 
-    vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-	 -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle)};
 
   // ellipse intersects the pixels box
   if (((intersectEllipseLine(center, a, b, rot_box[0], rot_box[1]) > 0) ||
@@ -201,6 +202,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
     normal.y = 0.0;
   else
     normal.y /= len;
+
 
   // angle between normal and z direction
   float angle = acos(normal.y);

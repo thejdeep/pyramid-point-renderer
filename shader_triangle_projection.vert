@@ -13,13 +13,14 @@ void main(void)
 {
   // back face culling (rotated eye, fixed point)
   
-  if ( ( (gl_Vertex.w != 0.000001) && (gl_Vertex.w != 0.001) ) &&
-      ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < 0.001 )) {
+  // back face culling (rotated eye, fixed point)  
+  if ( ((gl_Color.a > 0.9) ) &&
+    ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < 0.001 )) {
     radius_depth_w.x = 0.0;
+
     // for some reason seting the vector to vec4(0.0) drops
-    // the performance significantly -- RM 2007-10-19
+    // the performance significantly, at least on the GeForce8800 -- RM 2007-10-19
     gl_Position = vec4(1.0);
-  
   }
   else
   {
@@ -31,7 +32,7 @@ void main(void)
     // compute depth value without projection matrix, only modelview
     radius_depth_w = vec3(gl_Vertex.w, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
     
-    radius_depth_w.z = radius_depth_w.y;
+    //radius_depth_w.z = radius_depth_w.y;
 
     //radius_depth_w.z = (1.0 / radius_depth_w.y) * (10.0 / 9.0) + (10.0 / 9.0);
 

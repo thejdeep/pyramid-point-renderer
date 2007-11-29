@@ -5,23 +5,33 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-// GLfloat obj_colors[8][4] = {{0.35, 0.1, 0.1, 0.0},
-// 			    {0.35, 0.1, 0.1, 0.4},
-// 			    {0.1, 0.5, 0.1, 0.2},
+// GLfloat obj_colors[8][4] = {
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0}};
+
+GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
+			    {0.7, 0.2, 0.2, 0.1},
+			    {0.2, 1.0, 0.2, 1.0},
+			    {0.7, 0.2, 0.2, 1.0},
+			    {0.7, 0.2, 0.2, 1.0},
+			    {0.2, 1.0, 0.2, 1.0},
+			    {0.1, 0.5, 0.1, 1.0},
+			    {0.35, 0.1, 0.1, 0.7}};
+
+// GLfloat obj_colors[8][4] = {{0.1, 0.05, 0.025, 1.0},
+// 			    {0.1, 0.1, 0.3, 1.0},
+// 			    {0.3, 0.1, 0.1, 1.0},
 // 			    {0.8, 0.7, 0.2, 0.3},
 // 			    {0.35, 0.1, 0.1, 0.5},
 // 			    {0.1, 0.5, 0.1, 0.6},
 // 			    {0.35, 0.1, 0.1, 0.7},
 // 			    {0.1, 0.5, 0.1, 0.8}};
-
-GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
-			    {0.1, 0.1, 0.3, 1.0},
-			    {0.3, 0.1, 0.1, 1.0},
-			    {0.8, 0.7, 0.2, 0.3},
-			    {0.35, 0.1, 0.1, 0.5},
-			    {0.1, 0.5, 0.1, 0.6},
-			    {0.35, 0.1, 0.1, 0.7},
-			    {0.1, 0.5, 0.1, 0.8}};
 
 /**
  * Render object using designed rendering system.
@@ -45,23 +55,23 @@ void Primitives::render ( void ) {
 
     //glCallList(triangleDisplayList);
   }
-  if (renderer_type == PYRAMID_LINES) {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glVertexPointer(4, GL_FLOAT, 0, NULL); 
+//   else if (renderer_type == PYRAMID_LINES) {
+//     glEnableClientState(GL_VERTEX_ARRAY);
+//     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+//     glVertexPointer(4, GL_FLOAT, 0, NULL); 
     
-    glEnableClientState(GL_COLOR_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-    glColorPointer(4, GL_FLOAT, 0, NULL);
+//     glEnableClientState(GL_COLOR_ARRAY);
+//     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+//     glColorPointer(4, GL_FLOAT, 0, NULL);
 
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-    glNormalPointer(GL_FLOAT, 0, NULL); 
+//     glEnableClientState(GL_NORMAL_ARRAY);
+//     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+//     glNormalPointer(GL_FLOAT, 0, NULL); 
     
-    glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
+//     glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
 
-    //glCallList(triangleDisplayList);
-  }
+//     //glCallList(triangleDisplayList);
+//   }
   else if ( (renderer_type == PYRAMID_TRIANGLES) 
 	    || (renderer_type == PYRAMID_HYBRID)
 	    || (renderer_type == PYRAMID_HYBRID_TEST)
@@ -74,13 +84,16 @@ void Primitives::render ( void ) {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     
-    //    glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
     glShadeModel(GL_SMOOTH);
     
     glColor4f(1.0, 1.0, 1.0, 1.0);
-    
+   
     glCallList(triangleDisplayList);
+   
   }
   else if (renderer_type == LINES) {
     glDisable(GL_BLEND);
@@ -125,8 +138,8 @@ void Primitives::setRendererType ( int type ) {
   else if (renderer_type == PYRAMID_HYBRID_TEST)
     setPyramidHybridTestDisplayList();
   else if (renderer_type == PYRAMID_LINES)
-    setPyramidLinesArraysColor();
-  //    setPyramidLinesDisplayList();
+    //setPyramidLinesArraysColor();
+    setPyramidLinesDisplayList();
   else if (renderer_type == TRIANGLES)
     setTrianglesDisplayList();
   else if (renderer_type == LINES)
@@ -278,7 +291,10 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
   glNewList(triangleDisplayList, GL_COMPILE);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  
+
+  obj_colors[id][3] = type;
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
+
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels.at( it->verts[0] ).position();
     p[1] = surfels.at( it->verts[1] ).position();
@@ -290,7 +306,7 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
       //      glColor4fv(obj_colors[id]);
-      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
+      //      glColor4f(obj_colors[id][0], obj_colors[id][1], obj_colors[id][2], type);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.0001);
     }
@@ -305,12 +321,14 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
  **/
 void Primitives::setPyramidLinesArraysColor ( void ) {
 
+
   GLfloat *vertex_array, *normal_array, *color_array;
   number_points = surfels.size();
   vertex_array = new GLfloat[number_points * 4];
   normal_array = new GLfloat[number_points * 3];
   color_array = new GLfloat[number_points * 4];
 
+  // triangles are actually lines in this representation
   number_triangles = triangles.size();
   indices = new GLuint[number_triangles*2];
 
@@ -376,6 +394,7 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
  **/
 void Primitives::setPyramidLinesDisplayList( void ) {
 
+  //  type = 0.8;
   triangleDisplayList = glGenLists(1);
 
   Point p[3];
@@ -387,6 +406,8 @@ void Primitives::setPyramidLinesDisplayList( void ) {
   glNewList(triangleDisplayList, GL_COMPILE);
   GLfloat pos = 0.0;
 
+  obj_colors[id][3] = type;
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
 
   glLineWidth(1.0);
   glDisable(GL_LINE_SMOOTH);
@@ -397,14 +418,16 @@ void Primitives::setPyramidLinesDisplayList( void ) {
     r[1] = surfels.at( it->verts[1] ).radius();
     p[1] = surfels.at( it->verts[1] ).position();
     n[1] = surfels.at( it->verts[1] ).normal();
-//     p[2] = surfels.at( it->verts[2] ).position();
-//     n[2] = surfels.at( it->verts[2] ).normal();
-//     r[2] = surfels.at( it->verts[2] ).radius();
+    p[2] = surfels.at( it->verts[0] ).position() + Vector(0.0000001, 0.0000001, 0.0000001);
+    n[2] = surfels.at( it->verts[0] ).normal();
+    r[2] = surfels.at( it->verts[0] ).radius();
 //     p[2] = Point ((p[0].x() + p[1].x())*0.5, (p[0].y() + p[1].y())*0.5, (p[0].z() + p[1].z())*0.5);
 //     n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
 //     r[2] = (r[0] + r[1]) * 0.5;
 
     glBegin(GL_LINES);
+    //    glBegin(GL_TRIANGLES);
+
     for (int i = 0; i < 2; ++i) {
       //glColor4fv(obj_colors[id]);
       if (type == 1.0)
@@ -433,6 +456,9 @@ void Primitives::setPyramidHybridDisplayList( void ) {
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
 
+  double radius = 0.00001;
+  double type_id;
+
   // Half as triangles.
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels.at( it->verts[0] ).position();
@@ -444,13 +470,21 @@ void Primitives::setPyramidHybridDisplayList( void ) {
 
     if ((p[0].x() > 0.0) || (p[1].x() > 0.0) || (p[2].x() > 0.0)) {
 
+      if ((p[0].x() > 0.005) || (p[1].x() > 0.005) || (p[2].x() > 0.005)) {
+	radius = 0.00001;
+	type_id = 0.1;
+      }
+      else {
+	radius = 0.0015;
+	type_id = 0.6;
+      }
 
       glBegin(GL_TRIANGLES);
       for (int i = 0; i < 3; ++i) {
 	//glColor4fv(obj_colors[0]);
-	glColor4f(obj_colors[1][0], obj_colors[1][1], obj_colors[1][2], 0.1);
+	glColor4f(obj_colors[1][0], obj_colors[1][1], obj_colors[1][2], type_id);
 	glNormal3f(n[i].x(), n[i].y(), n[i].z());
-	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.00001);
+	glVertex4f(p[i].x(), p[i].y(), p[i].z(), radius);
       }
       glEnd();
     }
@@ -483,13 +517,11 @@ void Primitives::setPyramidHybridTestDisplayList( void ) {
   Point p[3];
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
-  
-//   glPolygonMode(GL_BACK, GL_LINE);
-//   glPolygonMode(GL_FRONT, GL_FILL);
-
-//  glEnable(GL_CULL_FACE);
 
    glEnable(GL_LINE_SMOOTH);
+
+   double radius;
+   double type_id;
 
   // Half as triangles.
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
@@ -502,14 +534,24 @@ void Primitives::setPyramidHybridTestDisplayList( void ) {
 
     if ((p[0].x() > 0.0) || (p[1].x() > 0.0) || (p[2].x() > 0.0)) {
 
+
+      if ((p[0].x() > 0.005) || (p[1].x() > 0.005) || (p[2].x() > 0.005)) {
+	radius = 0.00001;
+	type_id = 0.1;
+      }
+      else {
+	radius = 0.0015;
+	type_id = 0.6;
+      }
+
       glLineWidth(5.0);
       glBegin(GL_LINE_LOOP);
 //      glBegin(GL_TRIANGLES);
       for (int i = 0; i < 3; ++i) {
 	//glColor4fv(obj_colors[0]);
-	glColor4f(obj_colors[1][0], obj_colors[1][1], obj_colors[1][2], 0.1);
+	glColor4f(obj_colors[1][0], obj_colors[1][1], obj_colors[1][2], type_id);
 	glNormal3f(n[i].x(), n[i].y(), n[i].z());
-	glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.0001);
+	glVertex4f(p[i].x(), p[i].y(), p[i].z(), radius);
       }
       glEnd();
     }
@@ -530,7 +572,6 @@ void Primitives::setPyramidHybridTestDisplayList( void ) {
   glEndList();
 }
 
-
 /**
  * Sets the triangles list.
  **/
@@ -541,7 +582,14 @@ void Primitives::setTrianglesDisplayList( void ) {
   Point p[3];
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
-  
+
+  GLfloat black[] = {0.0, 0.0, 0.0, 1.0};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, obj_colors[id]);
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
+  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels.at( it->verts[0] ).position();
     p[1] = surfels.at( it->verts[1] ).position();
@@ -552,12 +600,15 @@ void Primitives::setTrianglesDisplayList( void ) {
 
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
-      glColor4fv(obj_colors[id]);
-      glNormal3f(n[i].x(), n[i].y(), n[i].z());
+      //      glColor4fv(obj_colors[id]);
+      glNormal3f(-n[i].x(), -n[i].y(), -n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
     }
     glEnd();
   }
+  
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, black);
 
   glEndList();
 }

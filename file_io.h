@@ -499,13 +499,41 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 int readModels (int argc, char **argv, vector<Primitives> *prims) {
 
   // For each model passed in command line
-  if (strcmp(argv[1], "trees") == 0) {
+  if (strcmp(argv[1], "trees_original") == 0) {
+    prims->push_back( Primitives(0) );
+    readPlyTriangles ("../plys/apple_bark_original.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
+    prims->push_back( Primitives(1) );
+    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
+    prims->push_back( Primitives(2) );
+    readPlyTriangles ("../plys/apple_leaves_original.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
+    prims->push_back( Primitives(3) );
+
+  }
+  else if (strcmp(argv[1], "trees_both") == 0) {
     prims->push_back( Primitives(0) );
     readPlyTriangles ("../plys/apple_bark.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
     prims->push_back( Primitives(1) );
     readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
     prims->push_back( Primitives(2) );
     readPlyTriangles ("../plys/apple_leaves.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
+    prims->push_back( Primitives(3) );
+    readPlyTriangles ("../plys/apple_bark_original.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
+    prims->push_back( Primitives(4) );
+    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(4)).getSurfels(), (prims->at(4)).getTriangles());
+    prims->push_back( Primitives(5) );
+    readPlyTriangles ("../plys/apple_leaves_original.ply", (prims->at(5)).getSurfels(), (prims->at(5)).getTriangles());
+
+    prims->push_back( Primitives(6) );
+    readPlyTriangles ("../plys/square.ply", (prims->at(6)).getSurfels(), (prims->at(6)).getTriangles());
+  }
+  else if (strcmp(argv[1], "trees") == 0) {
+    prims->push_back( Primitives(0) );
+    readPlyTriangles ("../plys/apple_bark.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
+    prims->push_back( Primitives(1) );
+    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
+    prims->push_back( Primitives(2) );
+    readPlyTriangles ("../plys/apple_leaves.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
+
     prims->push_back( Primitives(3) );
     readPlyTriangles ("../plys/square.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
   }
@@ -515,6 +543,10 @@ int readModels (int argc, char **argv, vector<Primitives> *prims) {
       if (strstr(argv[i], ".normals") != NULL) { 
 	prims->push_back( Primitives(i-1) );
 	loadNormals (argv[i], (prims->at(i-1)).getSurfels());
+      }
+      if (strstr(argv[i], ".sls") != NULL) { 
+	prims->push_back( Primitives(i-1) );
+	loadSls (argv[i], (prims->at(i-1)).getSurfels());
       }
       else {
 	prims->push_back( Primitives(i-1) );

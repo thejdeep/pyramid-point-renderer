@@ -20,15 +20,16 @@ uniform float prefilter_size;
 uniform sampler2D textureA;
 uniform sampler2D textureB;
 
-vec2 gather_pixel_desloc[4] ={{-half_pixel_size, -half_pixel_size}, 
-			      {half_pixel_size, -half_pixel_size}, 
-			      {-half_pixel_size, half_pixel_size}, 
-			      {half_pixel_size, half_pixel_size}};
+vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size), 
+				      vec2(half_pixel_size, -half_pixel_size), 
+				      vec2(-half_pixel_size, half_pixel_size), 
+				      vec2(half_pixel_size, half_pixel_size));
+
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
 // displaced by param d.
-float pointInCircle(in vec2 d, in float radius){
+float pointInCircle(in vec2 d, in float radius) {
   float sqrt_len = d.x*d.x + d.y*d.y;
 
   radius += prefilter_size;
@@ -167,7 +168,11 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
-  normal.y /= len;
+
+  if (len == 0.0)
+    normal.y = 0.0;
+  else
+    normal.y /= len;
 
   // angle between normal and z direction
   float angle = acos(normal.y);
@@ -244,7 +249,7 @@ void main (void) {
 	}
       else {
 	// if the ellipse does not reach the center ignore it in the averaging
-	pixelA[i].w = 0.0;
+	pixelA[i].w = -1.0;
       }
     }
   }
@@ -258,7 +263,9 @@ void main (void) {
       if (pixelA[i].w > 0.0) {
 	
 	// Depth test between valid in reach ellipses
-	if ((!depth_test) || (pixelB[i].x <= zmax)) {
+	//	if ((!depth_test) || (pixelB[i].x <= zmax)) 
+	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax)) 
+	  {
 
 	  bufferA += pixelA[i];
 
@@ -275,8 +282,9 @@ void main (void) {
 
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
-  if (valid_pixels > 0.0) {
+  if (valid_pixels >= 1.0) {
     bufferA /= valid_pixels;
+    bufferA.xyz = normalize(bufferA.xyz);
     bufferB.x = zmin;
     bufferB.y = new_zmax - zmin;
     bufferB.zw /= valid_pixels;

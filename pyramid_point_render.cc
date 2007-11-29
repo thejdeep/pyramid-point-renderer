@@ -414,6 +414,7 @@ int PyramidPointRender::analysisCallbackFunc(pixels_struct dest, pixels_struct s
 
   shader_analysis->set_uniform("depth_test", depth_test);
 
+
   shader_analysis->set_uniform("textureA", 0);
   shader_analysis->set_uniform("textureB", 1);
 
@@ -491,6 +492,7 @@ int PyramidPointRender::synthesisCallbackFunc(pixels_struct dest, pixels_struct 
   shader_synthesis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
   shader_synthesis->set_uniform("depth_test", depth_test);
+  shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
 
   shader_synthesis->set_uniform("textureA", 0);
   shader_synthesis->set_uniform("textureB", 1);
@@ -778,7 +780,7 @@ void PyramidPointRender::createFBO() {
  **/
 void PyramidPointRender::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_point_projection = new GLSLKernel();
   assert( shader_point_projection->has_GLSL() );

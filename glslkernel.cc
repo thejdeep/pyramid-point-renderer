@@ -178,7 +178,6 @@ void GLSLKernel::install (bool debug) {
 
 			GLint compileFrag;
 			glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileFrag);
-			cout << fragFileName << endl;
 			assert (compileFrag == GL_TRUE);
 
 			glAttachShader(programObject, fragmentShader);

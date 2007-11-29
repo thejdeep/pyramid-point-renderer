@@ -31,8 +31,8 @@ float pointInCircle(in vec2 d, in float radius){
 
   float dif = sqrt_len / (radius*radius);
 
-  //  if (dif <= reconstruction_filter_size)
-  if (dif <= 1.0)
+  if (dif <= reconstruction_filter_size)
+    //if (dif <= 1.0)
     return dif;
   else return -1.0;
 }
@@ -97,7 +97,7 @@ int intersectEllipseLine (in vec2 p, in float rx, in float ry, in vec2 a1, in ve
  **/
 float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in float unit){
 
-  vec2 center = {0.0, 0.0};
+  vec2 center = vec2(0.0, 0.0);
 
   // rotate point to ellipse's coordinate system
   vec2 desloc_point = d;
@@ -130,18 +130,19 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
   float cos_angle = cos(angle);
   float sin_angle = sin(angle);
 
-  vec2 rot_box[4] = {
-    vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-	 -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle),
+  vec2 rot_box[4];
 
-    vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-	 -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle),
+  rot_box[0] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
+		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
-    vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-	 -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle),
+  rot_box[1] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
+		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
-    vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-	 -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle)};
+  rot_box[2] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
+		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+  
+  rot_box[3] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
+		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
 
   // ellipse intersects the pixels box
   if (((intersectEllipseLine(center, a, b, rot_box[0], rot_box[1]) > 0) ||
@@ -197,6 +198,7 @@ float pointInEllipse(in vec2 d, in float radius){
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
+  
   if (len == 0.0)
     normal.y = 0.0;
   else
@@ -207,9 +209,12 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   if (normal.x > 0.0)
     angle *= -1.0;
 
+  float cos_angle = normal.y;
+  float sin_angle = sin(angle);
+
   // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-			 -d.x*sin(angle) + d.y*cos(angle));
+  vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle,
+			 -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
   float a = 2.0*radius;
@@ -297,8 +302,8 @@ void main (void) {
       if ( (up_pixelA.w != 0.0) && (bufferB.x  - bufferB.y > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
 
-      if (up_pixelC.w != bufferC.w)
-	occluded = true;
+/*       if (up_pixelC.w != bufferC.w) */
+/* 	occluded = true; */
     }
   }
 
@@ -472,10 +477,10 @@ void main (void) {
 	  // Ellipse in range
 	  if (weights[i] > 0.0)
 	    {
-	      if (abs(pixelC[i].w - obj_id) < 0.1 ) 
+	      //if (abs(pixelC[i].w - obj_id) < 0.1 ) 
 	      {
 		// Depth test between ellipses in range
-		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  
+		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		
 		  total_weight += weights[i];	  
 		  bufferA += weights[i] * pixelA[i];
 		  bufferB += weights[i] * pixelB[i];
@@ -488,9 +493,10 @@ void main (void) {
 	if (total_weight > 0.0) 
 	  {
 	    bufferA /= total_weight;
+	    bufferA.xyz = normalize(bufferA.xyz);
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
-	    //	    bufferC.w = 1.0;
+	    //bufferC.w = 1.0;
 	    bufferC.w = obj_id;
 	  }
       }

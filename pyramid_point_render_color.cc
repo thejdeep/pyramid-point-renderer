@@ -648,7 +648,7 @@ void PyramidPointRenderColor::clearBuffers() {
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
-  glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   //glClear(GL_COLOR_BUFFER_BIT); 
   framebuffer_state = FBS_UNDEFINED;

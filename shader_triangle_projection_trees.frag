@@ -38,12 +38,12 @@ void main(void)
   if (radius_depth_w.x <= 0.0)
     discard;
 
-/*   if (normal_vec.z < 0.0) */
+/*   if (abs(normal_vec.z) >= 0.4) */
 /*     discard; */
 
   float depth_interval;
   
-  if (gl_Color.a > 0.90)
+  if (gl_Color.a > 0.9)
     depth_interval = radius_depth_w.x;
     //depth_interval = perspective_radius(radius_depth_w.x);
   else if (gl_Color.a > 0.4)

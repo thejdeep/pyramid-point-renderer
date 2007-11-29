@@ -32,13 +32,6 @@ int fps_loop;
 double start_time, end_time;
 int timing_profile;
 
-// Using clock instead of time
-// static clock_t lastUpdateTime; ///< last time the fps was updated
-// static clock_t dtStart = 0, dtTotal = 0; ///< draw time in miliseconds
-
-// static uint numFrames = 0; ///< number of rendered frames
-//static GLfloat fps = 0.0; ///< frames per second
-
 /*************************************/
 
 /// OpenGL Write text to screen

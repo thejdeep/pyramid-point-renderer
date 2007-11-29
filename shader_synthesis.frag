@@ -5,6 +5,7 @@
 
 // flag for depth test on/off
 uniform bool depth_test;
+uniform bool elliptical_weight;
 
 uniform vec2 fbo_size;
 uniform vec2 oo_fbo_size;
@@ -160,7 +161,11 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
-  normal.y /= len;
+
+  if (len == 0.0)
+    normal.y = 0.0;
+  else
+    normal.y /= len;
 
   // angle between normal and z direction
   float angle = acos(normal.y);
@@ -344,7 +349,8 @@ void main (void) {
 	  weights[i] = 0.0;
 	}
 	else {
-	  weights[i] = exp(-0.5*dist_test);
+	  if (elliptical_weight)
+	    weights[i] = exp(-0.5*dist_test);
 	  total_weight ++;
 
 	  // depth test only for ellises in range
@@ -380,7 +386,8 @@ void main (void) {
 	  if (weights[i] > 0.0)
 	    {
 	      // Depth test between ellipses in range
-	      if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
+	      //if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
+		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax))
 		{
 		  total_weight += weights[i];	  
 		  bufferA += weights[i] * pixelA[i];
@@ -391,6 +398,7 @@ void main (void) {
 
 	if (total_weight > 0.0) {
 	  bufferA /= total_weight;
+	  bufferA.xyz = normalize(bufferA.xyz);
 	  bufferB /= total_weight;
 	}
       }
