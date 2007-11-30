@@ -38,7 +38,6 @@ void main(void)
   if (radius_depth_w.x <= 0.0)
     discard;
 
-
   float depth_interval;
 
   if (gl_Color.a > 0.50)

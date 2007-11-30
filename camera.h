@@ -60,7 +60,7 @@ public:
 
   /// Destructor
   ~Camera();
-  
+
   /// Initializes modelview and projection matrices for rendering
   void setView ( void );
   /// Resets the view mode properties
@@ -132,7 +132,9 @@ public:
   const double fieldOfVision ( void ) const { return fov; }
 
   void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
-  void eyeVec ( double e[] ) const { e[0] = eye[0]; e[1] = eye[1]; e[2] = eye[2]; };
+  void eyeVec ( double e[] ) const { e[0] = eye[0]; e[1] = eye[1]; e[2] = eye[2]; };  
+  //  void eyeVec ( double e[] ) const { e[0] = position[0]; e[1] = position[1]; e[2] = position[2]; };  
+
 
 private:
 

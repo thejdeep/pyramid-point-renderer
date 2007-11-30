@@ -24,7 +24,7 @@ GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
 			    {0.1, 0.5, 0.1, 1.0},
 			    {0.35, 0.1, 0.1, 0.7}};
 
-// GLfloat obj_colors[8][4] = {{0.1, 0.05, 0.025, 1.0},
+// GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
 // 			    {0.1, 0.1, 0.3, 1.0},
 // 			    {0.3, 0.1, 0.1, 1.0},
 // 			    {0.8, 0.7, 0.2, 0.3},
@@ -55,7 +55,48 @@ void Primitives::render ( void ) {
 
     //glCallList(triangleDisplayList);
   }
-//   else if (renderer_type == PYRAMID_LINES) {
+  else if (renderer_type == PYRAMID_LINES) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glVertexPointer(4, GL_FLOAT, 0, NULL); 
+    
+    glEnableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+    glColorPointer(4, GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+    glNormalPointer(GL_FLOAT, 0, NULL); 
+    
+    glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
+
+
+  }
+  else if (renderer_type == PYRAMID_TRIANGLES) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glVertexPointer(4, GL_FLOAT, 0, NULL); 
+    
+    glEnableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+    glColorPointer(4, GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+    glNormalPointer(GL_FLOAT, 0, NULL); 
+    
+    glDrawElements(GL_TRIANGLES, number_triangles*3, GL_UNSIGNED_INT, &indices[0]);
+
+
+  }
+  else if ( (renderer_type == PYRAMID_TRIANGLES) 
+	    || (renderer_type == PYRAMID_HYBRID)
+	    || (renderer_type == PYRAMID_HYBRID_TEST)
+	    || (renderer_type == PYRAMID_LINES)) {
+    glCallList(triangleDisplayList);
+
+  }
+//   else if (renderer_type == TRIANGLES) {
 //     glEnableClientState(GL_VERTEX_ARRAY);
 //     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 //     glVertexPointer(4, GL_FLOAT, 0, NULL); 
@@ -68,17 +109,21 @@ void Primitives::render ( void ) {
 //     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
 //     glNormalPointer(GL_FLOAT, 0, NULL); 
     
-//     glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
+//     glDisable(GL_BLEND);
+//     glEnable(GL_DEPTH_TEST);
+//     glDepthMask(GL_TRUE);
+    
+//     glDisable(GL_CULL_FACE);
 
-//     //glCallList(triangleDisplayList);
+//     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+//     glShadeModel(GL_SMOOTH);
+    
+//     glColor4f(1.0, 1.0, 1.0, 1.0);
+
+//     glDrawElements(GL_TRIANGLES, number_triangles*3, GL_UNSIGNED_INT, &indices[0]);
+
 //   }
-  else if ( (renderer_type == PYRAMID_TRIANGLES) 
-	    || (renderer_type == PYRAMID_HYBRID)
-	    || (renderer_type == PYRAMID_HYBRID_TEST)
-	    || (renderer_type == PYRAMID_LINES)) {
-    glCallList(triangleDisplayList);
-
-  }
   else if (renderer_type == TRIANGLES) {
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -104,11 +149,9 @@ void Primitives::render ( void ) {
     
     glColor4f(1.0, 1.0, 1.0, 1.0);
     
-    glLineWidth(2.0);
+    glLineWidth(1.0);
 
     glCallList(triangleDisplayList);
-
-    glLineWidth(1.0);
   }
 }
 
@@ -132,15 +175,17 @@ void Primitives::setRendererType ( int type ) {
   else if (renderer_type == PYRAMID_POINTS_COLOR)
     setPyramidPointsDisplayList();
   else if (renderer_type == PYRAMID_TRIANGLES)
-    setPyramidTrianglesDisplayList();
+    setPyramidTrianglesArrays();
+  //    setPyramidTrianglesDisplayList();
   else if (renderer_type == PYRAMID_HYBRID)
     setPyramidHybridDisplayList();
   else if (renderer_type == PYRAMID_HYBRID_TEST)
     setPyramidHybridTestDisplayList();
   else if (renderer_type == PYRAMID_LINES)
-    //setPyramidLinesArraysColor();
-    setPyramidLinesDisplayList();
+    setPyramidLinesArraysColor();
+  //setPyramidLinesDisplayList();
   else if (renderer_type == TRIANGLES)
+    //setTrianglesArrays();
     setTrianglesDisplayList();
   else if (renderer_type == LINES)
     setLinesDisplayList();
@@ -278,6 +323,93 @@ void Primitives::setPyramidPointsDisplayList ( void ) {
 }
 
 /**
+ * Create arrays and VBO for pyramid line rendering.
+ **/
+void Primitives::setPyramidTrianglesArrays ( void ) {
+
+  type = 0.1;
+
+  GLfloat *vertex_array, *normal_array, *color_array;
+  number_points = surfels.size();
+  vertex_array = new GLfloat[number_points * 4];
+  normal_array = new GLfloat[number_points * 3];
+  color_array = new GLfloat[number_points * 4];
+
+  // triangles are actually lines in this representation
+  number_triangles = triangles.size();
+  indices = new GLuint[number_triangles*3];
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+  obj_colors[id][3] = type;
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
+
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
+//   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+
+  int pos = 0;
+  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+
+    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
+    vertex_array[pos*4 + 3] = 0.0001;
+
+    color_array[pos*4 + 0] = obj_colors[id][0];
+    color_array[pos*4 + 1] = obj_colors[id][1];
+    color_array[pos*4 + 2] = obj_colors[id][2];
+    color_array[pos*4 + 3] = obj_colors[id][3];
+
+    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+
+    ++pos;
+  }
+
+  int cnt = 0;
+  for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
+    indices[cnt] = (GLuint)it->verts[0];
+    ++cnt;
+    indices[cnt] = (GLuint)it->verts[1];
+    ++cnt;
+    indices[cnt] = (GLuint)it->verts[2];
+    ++cnt;
+  }
+  
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)vertex_array, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &color_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)color_array, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &normal_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)normal_array, GL_STATIC_DRAW);
+
+  delete(vertex_array);
+  delete(normal_array);
+  delete(color_array);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glVertexPointer(4, GL_FLOAT, 0, NULL); 
+  
+  glEnableClientState(GL_COLOR_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glColorPointer(4, GL_FLOAT, 0, NULL); 
+
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glNormalPointer(GL_FLOAT, 0, NULL); 
+
+}
+
+
+/**
  * Sets the pyramid triangles list.
  **/
 void Primitives::setPyramidTrianglesDisplayList( void ) {
@@ -320,7 +452,6 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
  * Create arrays and VBO for pyramid line rendering.
  **/
 void Primitives::setPyramidLinesArraysColor ( void ) {
-
 
   GLfloat *vertex_array, *normal_array, *color_array;
   number_points = surfels.size();
@@ -459,6 +590,15 @@ void Primitives::setPyramidHybridDisplayList( void ) {
   double radius = 0.00001;
   double type_id;
 
+//   GLfloat black[] = {0.0, 0.0, 0.0, 1.0};
+//   GLfloat white[] = {1.0, 1.0, 1.0, 1.0};
+
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
+
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, white);
+//   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 128);
+
   // Half as triangles.
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels.at( it->verts[0] ).position();
@@ -573,6 +713,88 @@ void Primitives::setPyramidHybridTestDisplayList( void ) {
 }
 
 /**
+ * Create arrays and VBO for pyramid line rendering.
+ **/
+void Primitives::setTrianglesArrays ( void ) {
+  GLfloat *vertex_array, *normal_array, *color_array;
+  number_points = surfels.size();
+  vertex_array = new GLfloat[number_points * 4];
+  normal_array = new GLfloat[number_points * 3];
+  color_array = new GLfloat[number_points * 4];
+
+  // triangles are actually lines in this representation
+  number_triangles = triangles.size();
+  indices = new GLuint[number_triangles*3];
+
+  GLfloat black[] = {0.0, 0.0, 0.0, 1.0};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, obj_colors[id]);
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
+  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+
+  int pos = 0;
+  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+
+    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
+    vertex_array[pos*4 + 3] = 1.0;
+
+    color_array[pos*4 + 0] = obj_colors[id][0];
+    color_array[pos*4 + 1] = obj_colors[id][1];
+    color_array[pos*4 + 2] = obj_colors[id][2];
+    color_array[pos*4 + 3] = 1.0;
+
+    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+
+    ++pos;
+  }
+
+  int cnt = 0;
+  for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
+    indices[cnt] = (GLuint)it->verts[0];
+    ++cnt;
+    indices[cnt] = (GLuint)it->verts[1];
+    ++cnt;
+    indices[cnt] = (GLuint)it->verts[2];
+    ++cnt;
+  }
+  
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)vertex_array, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &color_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)color_array, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &normal_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)normal_array, GL_STATIC_DRAW);
+
+  delete(vertex_array);
+  delete(normal_array);
+  delete(color_array);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glVertexPointer(4, GL_FLOAT, 0, NULL); 
+  
+  glEnableClientState(GL_COLOR_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glColorPointer(4, GL_FLOAT, 0, NULL); 
+
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glNormalPointer(GL_FLOAT, 0, NULL); 
+
+}
+
+
+/**
  * Sets the triangles list.
  **/
 void Primitives::setTrianglesDisplayList( void ) {
@@ -606,8 +828,7 @@ void Primitives::setTrianglesDisplayList( void ) {
     }
     glEnd();
   }
-  
-
+ 
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, black);
 
   glEndList();

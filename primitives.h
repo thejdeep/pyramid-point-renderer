@@ -64,11 +64,13 @@ class Primitives
   void setPyramidPointsArraysColor( void );
   void setPyramidPointsDisplayList( void );
   void setPyramidTrianglesDisplayList( void );
+  void setPyramidTrianglesArrays( void );
   void setPyramidHybridDisplayList( void );
   void setPyramidHybridTestDisplayList( void );
   void setPyramidLinesDisplayList( void );
   void setPyramidLinesArraysColor ( void );
   void setTrianglesDisplayList( void );
+  void setTrianglesArrays( void );
   void setLinesDisplayList( void );
 
   // Rendering type.

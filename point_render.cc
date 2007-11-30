@@ -167,7 +167,7 @@ void draw(void) {
 
   double c[4];
   for (int i = 0; i < num_objects; ++i) 
-    if ((i == selected_obj) || (selected_obj == -1))
+    if ((0 == selected_obj) || (selected_obj == -1))
     {
     // Set eye for each object separately
     camera->eyeVec(c);
@@ -206,22 +206,22 @@ void draw(void) {
 
   camera->setView();
 
-
-
   for (int i = 0; i < num_objects; ++i) 
-    if ((i == selected_obj) || (selected_obj == -1))
+    if ((1 == selected_obj) || (selected_obj == -1))
 
     {
+      objects[i].render();
 
-    vector<Primitives*>* prims = objects[i].getPrimitivesList();
-    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      
-      if (((*prim_it)->getRendererType() == TRIANGLES)
-	  || ((*prim_it)->getRendererType() == LINES))
-	(*prim_it)->render();
+      vector<Primitives*>* prims = objects[i].getPrimitivesList();
+      for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+	
+	if (((*prim_it)->getRendererType() == TRIANGLES)
+	    || ((*prim_it)->getRendererType() == LINES)) {
+	  (*prim_it)->render();
+	}
+      }
+      camera->setView();
     }
-
-  }
 
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
@@ -236,7 +236,7 @@ void draw(void) {
   // fps variable is rendered on screen text
   ++fps_loop;
 
-  if (fps_loop == 200) {
+  if (fps_loop == 30) {
 
     double end_time = timer();
     fps = (end_time - start_time) / (double)fps_loop;
@@ -345,8 +345,6 @@ Point unproject (const Point& p) {
 /// @param y Y coordinate of mouse click
 void mouse(int button, int state, int x, int y) {
   
-
-
   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT)
     active_shift = 1;
   else
@@ -490,7 +488,7 @@ void specialKey(int key_pressed, int x, int y) {
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void keyboard(unsigned char key_pressed, int x, int y) {
-
+  Quat q;
   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
     switch (key_pressed) {     
     case '+' :
@@ -580,6 +578,11 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     case '0' :
       selected_obj = -1;
       cout << "no object selected" << endl;
+      q = camera->rotationQuat();
+      cout << "quat : " << q.a << " " << q.x << " " << q.y << " " << q.z << endl;
+      double c[4];
+      camera->eyeVec(c);
+      cout << "eye : " << c[0] << " " << c[1] << " " << c[2] << endl;      
       break;
     case 't':
       fps_loop = 100;
@@ -700,7 +703,7 @@ void init(void) {
   timing_profile = 0;
 
   material_id = 0;
-  selected_obj = 0;
+  selected_obj = -1;
 
   reconstruction_filter_size = 1.0;
   prefilter_size = 0.75;
@@ -767,6 +770,10 @@ int main(int argc, char * argv []) {
     num_objects = 1;
     double x = 0.0, y = 0.0;
     Quat q;
+    q.a = 0.550476;
+    q.x = -0.498738;
+    q.y = 0.41894;
+    q.z = 0.522231;
     
     // add objects with random translations and rotations
     srand (time(NULL));
@@ -814,10 +821,20 @@ int main(int argc, char * argv []) {
   else if (strcmp(argv[1], "trees_original") == 0) {
     num_objects = 1;
 
+    double x = 0.0, y = 0.0;
+    Quat q;
+    
     // add objects with random translations and rotations
     srand (time(NULL));
     for (int i = 0; i < num_objects; ++i) {
-      objects.push_back( Object(i) );
+      x = ((rand()%200) / 10.0) - 10.0;
+      y = ((rand()%200) / 10.0) - 10.0;
+      q.a = (rand()%100) / 10.0;
+      q.x = 0.0;
+      q.y = 0.0;
+      q.z = (rand()%100) / 10.0;
+      q.normalize();
+      objects.push_back( Object(i, x, y, 0.0, q) );
     }
     
     // add primitives pointer to each tree object
@@ -842,18 +859,40 @@ int main(int argc, char * argv []) {
 	objects[i].addPrimitives( &(*it) );
       }
     }
+//     // add floor
     objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
+    objects[num_objects].addPrimitives( &(*it_end) );
+    it_end->setType( 0.1 );
+    //it_end->setRendererType( TRIANGLES );
+    it_end->setRendererType( NONE );
    
   }
   else if (strcmp(argv[1], "trees_both") == 0) {
-    num_objects = 2;
+    num_objects = 20;
+    
+    double x = 0.0, y = 0.0;
+    double *c;
+    Quat q;
     
     // add objects with random translations and rotations
     srand (time(NULL));
-    for (int i = 0; i < num_objects; ++i) {
+    for (int i = 0; i < 10; ++i) {
+      x = ((rand()%200) / 10.0) - 10.0;
+      y = ((rand()%200) / 10.0) - 10.0;
+      q.a = (rand()%100) / 10.0;
+      q.x = 0.0;
+      q.y = 0.0;
+      q.z = (rand()%100) / 10.0;
+      q.normalize();
+      objects.push_back( Object(i, x, y, 0.0, q) );
 
-      objects.push_back( Object(i) );
     }
+    for (int i = 0; i < 10; ++i) {
+      q = *(objects[i].getRotationQuat());
+      c = objects[i].getCenter();
+      objects.push_back( Object(i+10, c[0], c[1], 0.0, q) );
+    }
+
     
     // add primitives pointer to each tree object
     int k = 0;
@@ -886,10 +925,11 @@ int main(int argc, char * argv []) {
       }
 
       if (k < 3)
-	objects[0].addPrimitives( &(*it) );
+	for (int i = 0; i < 10; ++i)
+	  objects[i].addPrimitives( &(*it) );
       else
-	objects[1].addPrimitives( &(*it) );
-
+	for (int i = 10; i < 20; ++i)
+	  objects[i].addPrimitives( &(*it) );
     }
     
     // add floor

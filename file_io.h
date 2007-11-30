@@ -506,7 +506,9 @@ int readModels (int argc, char **argv, vector<Primitives> *prims) {
     readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
     prims->push_back( Primitives(2) );
     readPlyTriangles ("../plys/apple_leaves_original.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
+
     prims->push_back( Primitives(3) );
+    readPlyTriangles ("../plys/square.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
 
   }
   else if (strcmp(argv[1], "trees_both") == 0) {
@@ -544,7 +546,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims) {
 	prims->push_back( Primitives(i-1) );
 	loadNormals (argv[i], (prims->at(i-1)).getSurfels());
       }
-      if (strstr(argv[i], ".sls") != NULL) { 
+      else if (strstr(argv[i], ".sls") != NULL) { 
 	prims->push_back( Primitives(i-1) );
 	loadSls (argv[i], (prims->at(i-1)).getSurfels());
       }
