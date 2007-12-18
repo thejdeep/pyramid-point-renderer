@@ -685,6 +685,7 @@ void PyramidPointRenderColor::interpolate() {
   copyAnalysisPyramid();
 
   rasterizeSynthesisPyramid();
+
 }
 
 /**

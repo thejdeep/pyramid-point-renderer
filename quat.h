@@ -97,6 +97,12 @@ public:
     axis[1] = y * d;
     axis[2] = z * d;
   }
+
+  void invert( void ) {
+    x *= -1;
+    y *= -1;
+    z *= -1;
+  }
       
 };
 

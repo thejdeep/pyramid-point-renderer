@@ -410,7 +410,8 @@ void PyramidPointRenderTrees::projectTriangles( vector<Primitives*>::iterator pr
   // Render vertices using the vertex buffer object.
   glPointSize(1.0);
 
-  (*prim)->render();
+  //  if ((*prim)->getRendererType() != NONE)
+    (*prim)->render();
 
   shader_triangle_projection->use(0);
 }

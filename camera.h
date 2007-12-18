@@ -96,6 +96,9 @@ public:
   /// Auto rotation
   void rotate (void);
 
+  /// Compute new eye position given a rotation quaternion
+  void computeEyePosition(Quat q, double *new_eye);
+
   /// Translate light position
   void lightTranslate (int x, int y);
 
@@ -133,8 +136,7 @@ public:
 
   void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
   void eyeVec ( double e[] ) const { e[0] = eye[0]; e[1] = eye[1]; e[2] = eye[2]; };  
-  //  void eyeVec ( double e[] ) const { e[0] = position[0]; e[1] = position[1]; e[2] = position[2]; };  
-
+  void positionVec ( double e[] ) const { e[0] = position[0]; e[1] = position[1]; e[2] = -position[2]; };
 
 private:
 

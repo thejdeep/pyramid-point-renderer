@@ -622,11 +622,11 @@ void PyramidPointRender::clearBuffers() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
+  // Clears the back buffer
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  //glClear(GL_COLOR_BUFFER_BIT); 
   framebuffer_state = FBS_UNDEFINED;
 
   CHECK_FOR_OGL_ERROR();

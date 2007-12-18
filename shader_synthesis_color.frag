@@ -197,6 +197,8 @@ float pointInEllipse(in vec2 d, in float radius){
 // @param radius Ellipse major axis length * 0.5.
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
+
+  vec3 normal_vec = normal;
   float len = length(normal.xy);
   
   if (len == 0.0)
@@ -228,8 +230,16 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   //  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size)
+  if (test <= reconstruction_filter_size) {
+    //    normal_vec.xy += rotated_pos * test;
+/*     normal_vec += ((rotated_pos.x*rotated_pos.x)/(a*a)); */
+/*     normal = normalize(normal_vec); */
+
+/*     if (normal.z < 0.0) */
+/*       return -1.0; */
+    
     return test;
+  }
   else return -1.0;
 }
 
@@ -302,8 +312,6 @@ void main (void) {
       if ( (up_pixelA.w != 0.0) && (bufferB.x  - bufferB.y > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
 
-/*       if (up_pixelC.w != bufferC.w) */
-/* 	occluded = true; */
     }
   }
 
@@ -454,11 +462,11 @@ void main (void) {
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
-      if (occluded) {
-	for (int i = 0; i < 4; ++i)
-	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
-	    occluded = false;
-      }
+/*       if (occluded) { */
+/* 	for (int i = 0; i < 4; ++i) */
+/* 	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0)) */
+/* 	    occluded = false; */
+/*       } */
 
       // If the pixel was set as occluded but there are no valid
       // pixels in range to synthesize, leave as it is
@@ -480,11 +488,12 @@ void main (void) {
 	      //if (abs(pixelC[i].w - obj_id) < 0.1 ) 
 	      {
 		// Depth test between ellipses in range
-		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		
-		  total_weight += weights[i];	  
-		  bufferA += weights[i] * pixelA[i];
-		  bufferB += weights[i] * pixelB[i];
-		  bufferC += weights[i] * pixelC[i];
+		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {
+		  float w = 1.0;//abs(4.0 * 3.1416 * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+		  total_weight += weights[i] * w;
+		  bufferA += weights[i] * pixelA[i] * w;
+		  bufferB += weights[i] * pixelB[i] * w;
+		  bufferC += weights[i] * pixelC[i] * w;
 		}
 	      }
 	    }
@@ -497,6 +506,7 @@ void main (void) {
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
 	    //bufferC.w = 1.0;
+
 	    bufferC.w = obj_id;
 	  }
       }

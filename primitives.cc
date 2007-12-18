@@ -6,7 +6,7 @@
 const double rad_to_deg = 180.0/PI;
 
 // GLfloat obj_colors[8][4] = {
-// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0},
@@ -86,8 +86,6 @@ void Primitives::render ( void ) {
     glNormalPointer(GL_FLOAT, 0, NULL); 
     
     glDrawElements(GL_TRIANGLES, number_triangles*3, GL_UNSIGNED_INT, &indices[0]);
-
-
   }
   else if ( (renderer_type == PYRAMID_TRIANGLES) 
 	    || (renderer_type == PYRAMID_HYBRID)
@@ -125,6 +123,7 @@ void Primitives::render ( void ) {
 
 //   }
   else if (renderer_type == TRIANGLES) {
+
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -158,8 +157,12 @@ void Primitives::render ( void ) {
 /**
  * Changes the renderer type.
  **/
-void Primitives::setRendererType ( int type ) { 
+void Primitives::setRendererType ( point_render_type_enum type ) {
+
   renderer_type = type; 
+
+  if (renderer_type == NONE)
+    return;
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
@@ -189,6 +192,8 @@ void Primitives::setRendererType ( int type ) {
     setTrianglesDisplayList();
   else if (renderer_type == LINES)
     setLinesDisplayList();
+
+
 }
 
 /**
@@ -240,8 +245,6 @@ void Primitives::setPyramidPointsArrays ( void ) {
  * Create arrays and VBO.
  **/
 void Primitives::setPyramidPointsArraysColor ( void ) {
-
-  type = 1.0;
 
   GLfloat *vertex_array, *normal_array, *color_array;
   number_points = surfels.size();
@@ -327,8 +330,6 @@ void Primitives::setPyramidPointsDisplayList ( void ) {
  **/
 void Primitives::setPyramidTrianglesArrays ( void ) {
 
-  type = 0.1;
-
   GLfloat *vertex_array, *normal_array, *color_array;
   number_points = surfels.size();
   vertex_array = new GLfloat[number_points * 4];
@@ -413,8 +414,6 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
  * Sets the pyramid triangles list.
  **/
 void Primitives::setPyramidTrianglesDisplayList( void ) {
-
-  type = 0.1;
 
   triangleDisplayList = glGenLists(1);
 

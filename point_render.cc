@@ -47,7 +47,7 @@ void keyboard(unsigned char key, int x, int y);
 void glVertex(surfelVectorIter it);
 void createPointRender(int type);
 void changeMaterial(void);
-void changeRendererType( int type );
+void changeRendererType( point_render_type_enum type );
 
 /// Interface function and variables
 #include "interface.cc"
@@ -75,7 +75,7 @@ void glVertex(Point p) {
 /// Render all points 
 void drawPoints(void)
 {
-  glPointSize(5.0);
+  glPointSize(1.0);
   glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 
   glBegin(GL_POINTS);
@@ -93,134 +93,58 @@ void drawPoints(void)
 /// Display func
 void draw(void) {
 
-#ifdef TIMING
-  static double timings[4] = {0, 0, 0, 0};
-#endif
-
   if (fps_loop == 0) {
     start_time = timer();
   }
 
-  // Set camera position and direction
-  camera->setView();
-
+  // Clear all buffers including pyramid algorithm buffers
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-  // pyramid interpolation algorithm
-#ifdef TIMING
-
-  if (timing_profile >= 0) {
-    point_based_render->clearBuffers();
-  }
-  if (timing_profile > 0) {
-  
-    double c[4];
-    for (int i = 0; i < num_objects; ++i) {
-      // Set eye for each object separately
-      camera->eyeVec(c);
-      c[3] = 1.0;
-      
-      Quat q = camera->rotationQuat();
-      q = q.composeWith(*(objects[i].getRotationQuat()));
-      
-      //       Quat q = *(objects[i].getRotationQuat());
-      //       q = q.composeWith(camera->rotationQuat());
-      
-      // Invert quaternion -- simulates inverse of modelview
-      q.x *= -1; q.y *= -1; q.z *= -1;
-      q.rotate(c);
-      double eye[3] = {c[0], c[1], c[2]};
-      point_based_render->setEye(eye);
-      
-      objects[i].render();
-      
-      // Render objects primitives
-      vector<Primitives*>* prims = objects[i].getPrimitivesList();
-      for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-	if (((*prim_it)->getRendererType() != TRIANGLES) 
-	    && ((*prim_it)->getRendererType() != LINES)
-	    && ((*prim_it)->getRendererType() != NONE)) {       
-	  
-	  point_based_render->projectSamples( prim_it );
-	}
-      }
-      
-      camera->setView();
-    }
-  }
-  if (timing_profile > 1) {
-    point_based_render->interpolate();
-  }
-  if (timing_profile > 2) {
-    point_based_render->draw();
-  }
-
-  camera->rotate();
-
-#else
-
   point_based_render->clearBuffers();
 
-  changeMaterial();
+  // Render objects primitives with pyramid algorithm
+  for (int i = 0; i < num_objects; ++i) {
+    // Reset camera position and direction
+    camera->setView();
 
-  double c[4];
-  for (int i = 0; i < num_objects; ++i) 
-    if ((0 == selected_obj) || (selected_obj == -1))
-    {
-    // Set eye for each object separately
-    camera->eyeVec(c);
-    c[3] = 1.0;
-	
-    Quat q = camera->rotationQuat();
-    q = q.composeWith(*(objects[i].getRotationQuat()));
-    
-    //       Quat q = *(objects[i].getRotationQuat());
-    //       q = q.composeWith(camera->rotationQuat());
-    
-    // Invert quaternion -- simulates inverse of modelview
-    q.x *= -1; q.y *= -1; q.z *= -1;
-    q.rotate(c);
-    double eye[3] = {c[0], c[1], c[2]};
+    // Compute rotated eye position for this object for back face culling
+    double eye[3];
+    camera->computeEyePosition(*(objects[i].getRotationQuat()), eye);
     point_based_render->setEye(eye);
 
+    // Translate and rotate object
     objects[i].render();
 
-    // Render objects primitives
+    // Projects to image plane surfels of all primitives for this object
     vector<Primitives*>* prims = objects[i].getPrimitivesList();
     for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      if (((*prim_it)->getRendererType() != TRIANGLES) 
-	  && ((*prim_it)->getRendererType() != LINES)
-	  && ((*prim_it)->getRendererType() != NONE)) {       
-	
+      point_render_type_enum type = (*prim_it)->getRendererType();
+      if ((type != TRIANGLES) && (type != LINES) && (type != NONE))	
 	point_based_render->projectSamples( prim_it );
-      }
     }
-    
-    camera->setView();
   }
 
+  // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
+  // Computes per pixel color with deferred shading
   point_based_render->draw();
 
-  camera->setView();
-
+  // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
   for (int i = 0; i < num_objects; ++i) 
-    if ((1 == selected_obj) || (selected_obj == -1))
-
     {
+      // Reset camera position and direction
+      camera->setView();
+
+      // Translate and rotate object
       objects[i].render();
 
+      // Render primitives using opengl triangles or lines
       vector<Primitives*>* prims = objects[i].getPrimitivesList();
       for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-	
-	if (((*prim_it)->getRendererType() == TRIANGLES)
-	    || ((*prim_it)->getRendererType() == LINES)) {
-	  (*prim_it)->render();
-	}
+	point_render_type_enum type = (*prim_it)->getRendererType();
+	if ((type == TRIANGLES) || (type == LINES))
+	  (*prim_it)->render();       
       }
-      camera->setView();
     }
 
   glDisable (GL_LIGHTING);
@@ -230,10 +154,8 @@ void draw(void) {
   if (show_points)
     drawPoints();
 
-#endif
-
-  // compute frames per second
-  // fps variable is rendered on screen text
+  // compute frames per second for every 30 loops
+  // fps variable is rendered as screen text
   ++fps_loop;
 
   if (fps_loop == 30) {
@@ -241,53 +163,15 @@ void draw(void) {
     double end_time = timer();
     fps = (end_time - start_time) / (double)fps_loop;
 
-    #ifndef TIMING
+
     fps = 1000.0 / fps;
     sps = (fps * number_surfels) / 1000000;
-    #endif
+
     fps_loop = 0;
   }
 
   if (rotating)
     camera->rotate();
-
-  glFinish();
-
-#ifdef TIMING
-
-  if (fps_loop == 0) {
-      timings[timing_profile] = fps;
-      timing_profile ++;
-    }
-
-  if (timing_profile == 4) {
-    if (color_model)
-      cout << endl << "COLOR BUFFER ON" << endl;
-    else
-      cout << endl << "COLOR BUFFER OFF" << endl;
-
-    cout << "PREPARE     : " << timings[0] << endl;
-    cout << "PROJECT     : " << timings[1] - timings[0] << endl;
-    cout << "RECONSTRUCT : " << timings[2] - timings[1] << endl;
-    cout << "SHADE       : " << timings[3] - timings[2]<< endl;
-    cout << "TOTAL       : " << timings[3] << endl;
-    cout << "FPS         : " << 1000.0 / timings[3] << endl;
-    cout << "SPLATS/SEC  : " << ((double)number_surfels * (1000.0 / timings[3]) / 1000.0) << " M" << endl;
-    
-    if (color_model) {
-      color_model = false;
-      createPointRender ( PYRAMID_POINTS );
-      timings[0] = timings[1] = timings[2] = timings[3] = 0;
-      fps_loop = 0;
-      timing_profile = 0;
-    }
-    else
-      exit(0);
-  }
-
-#endif
-
-#ifndef TIMING
 
   // Render the screen text
   if (show_screen_info) {
@@ -297,8 +181,6 @@ void draw(void) {
       screenText(CANVAS_WIDTH, CANVAS_HEIGHT);
     glPopMatrix();
   }
-
-#endif
 
   glutSwapBuffers();
 }
@@ -652,12 +534,15 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   glutPostRedisplay(); 
 }
 
-void changeRendererType( int type ) {
+void changeRendererType( point_render_type_enum type ) {
   if (selected_obj != -1) {
     vector<Primitives*>* prims = objects[selected_obj].getPrimitivesList();
     for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
       (*prim_it)->setRendererType(type);
   }
+
+  // Resets the color material
+  changeMaterial();
 }
 
 void createPointRender( int type ) {
@@ -674,7 +559,7 @@ void createPointRender( int type ) {
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
 
-  glutPostRedisplay(); 
+  glutPostRedisplay();
 }
 
 
@@ -683,14 +568,13 @@ void init(void) {
   render_mode = GL_RENDER;
 
   fps_loop = 0;
-  //lastUpdateTime = clock();
 
   button_pressed = -1;
   active_shift = 0;
 
   analysis_filter_size = 0;
 
-  color_model = true;
+  color_model = false;
   elliptical_weight = true;
   depth_culling = true;
   output_type = 0;
@@ -760,228 +644,36 @@ int main(int argc, char * argv []) {
   // Initialize global variables
   init();
 
-  // Read model file (.normals)
-  //int read = readPoints(argc, argv, &surfels);
-  //int read = readPointsAndTriangles(argc, argv, &surfels, &triangles);
+  // read the models passed as command line arguments
+  int read = readFile(argc, argv, &primitives, &objects);
 
-  int read = readModels(argc, argv, &primitives);
-
-  if (strcmp(argv[1], "trees") == 0) {
-    num_objects = 1;
-    double x = 0.0, y = 0.0;
-    Quat q;
-    q.a = 0.550476;
-    q.x = -0.498738;
-    q.y = 0.41894;
-    q.z = 0.522231;
-    
-    // add objects with random translations and rotations
-    srand (time(NULL));
-    for (int i = 0; i < num_objects; ++i) {
-//       x = ((rand()%200) / 10.0) - 10.0;
-//       y = ((rand()%200) / 10.0) - 10.0;
-      q.a = (rand()%100) / 10.0;
-      q.x = 0.0;
-      q.y = 0.0;
-      q.z = (rand()%100) / 10.0;
-      q.normalize();
-      objects.push_back( Object(i, x, y, 0.0, q) );
-    }
-    
-    // add primitives pointer to each tree object
-    int k = 0;
-    vector<Primitives>::iterator it_end = primitives.end();
-    it_end --; 
-    for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
-      if (k == 0) {
-	it->setType( 0.5 );
-	it->setRendererType( PYRAMID_LINES );
-      }
-      else if (k == 1) {
-	it->setType( 0.1 );
-	it->setRendererType( PYRAMID_TRIANGLES );
-      }
-      else if (k == 2){
-	it->setType( 1.0 );
-	it->setRendererType( PYRAMID_LINES );
-      }
-      
-      for (int i = 0; i < num_objects; ++i) {
-	objects[i].addPrimitives( &(*it) );
-      }
-    }
-    
-//     // add floor
-    objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
-    objects[num_objects].addPrimitives( &(*it_end) );
-    it_end->setType( 0.1 );
-    //it_end->setRendererType( PYRAMID_TRIANGLES );
-    it_end->setRendererType( NONE );
-  }
-  else if (strcmp(argv[1], "trees_original") == 0) {
-    num_objects = 1;
-
-    double x = 0.0, y = 0.0;
-    Quat q;
-    
-    // add objects with random translations and rotations
-    srand (time(NULL));
-    for (int i = 0; i < num_objects; ++i) {
-      x = ((rand()%200) / 10.0) - 10.0;
-      y = ((rand()%200) / 10.0) - 10.0;
-      q.a = (rand()%100) / 10.0;
-      q.x = 0.0;
-      q.y = 0.0;
-      q.z = (rand()%100) / 10.0;
-      q.normalize();
-      objects.push_back( Object(i, x, y, 0.0, q) );
-    }
-    
-    // add primitives pointer to each tree object
-    int k = 0;
-    vector<Primitives>::iterator it_end = primitives.end();
-    it_end --; 
-    for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
-      if (k == 0) {
-	it->setType( 1.0 );
-	it->setRendererType( TRIANGLES );
-      }
-      else if (k == 1) {
-	it->setType( 1.0 );
-	it->setRendererType( TRIANGLES );
-      }
-      else if (k == 2){
-	it->setType( 1.0 );
-	it->setRendererType( TRIANGLES );
-      }
-      
-      for (int i = 0; i < num_objects; ++i) {
-	objects[i].addPrimitives( &(*it) );
-      }
-    }
-//     // add floor
-    objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
-    objects[num_objects].addPrimitives( &(*it_end) );
-    it_end->setType( 0.1 );
-    //it_end->setRendererType( TRIANGLES );
-    it_end->setRendererType( NONE );
-   
-  }
-  else if (strcmp(argv[1], "trees_both") == 0) {
-    num_objects = 20;
-    
-    double x = 0.0, y = 0.0;
-    double *c;
-    Quat q;
-    
-    // add objects with random translations and rotations
-    srand (time(NULL));
-    for (int i = 0; i < 10; ++i) {
-      x = ((rand()%200) / 10.0) - 10.0;
-      y = ((rand()%200) / 10.0) - 10.0;
-      q.a = (rand()%100) / 10.0;
-      q.x = 0.0;
-      q.y = 0.0;
-      q.z = (rand()%100) / 10.0;
-      q.normalize();
-      objects.push_back( Object(i, x, y, 0.0, q) );
-
-    }
-    for (int i = 0; i < 10; ++i) {
-      q = *(objects[i].getRotationQuat());
-      c = objects[i].getCenter();
-      objects.push_back( Object(i+10, c[0], c[1], 0.0, q) );
-    }
-
-    
-    // add primitives pointer to each tree object
-    int k = 0;
-    vector<Primitives>::iterator it_end = primitives.end();
-    it_end --; 
-    for (vector<Primitives>::iterator it = primitives.begin(); it != it_end; ++it, ++k) {
-      if (k == 0) {
-	it->setType( 0.5 );
-	it->setRendererType( PYRAMID_LINES );
-      }
-      else if (k == 1) {
-	it->setType( 0.1 );
-	it->setRendererType( PYRAMID_TRIANGLES );
-      }
-      else if (k == 2){
-	it->setType( 1.0 );
-	it->setRendererType( PYRAMID_LINES );
-      }
-      else if (k == 3){
-	it->setType( 1.0 );
-	it->setRendererType( TRIANGLES );
-      }
-      else if (k == 4) {
-	it->setType( 1.0 );
-	it->setRendererType( TRIANGLES );
-      }
-      else if (k == 5){
-	it->setType( 1.0 );
-	it->setRendererType( TRIANGLES );
-      }
-
-      if (k < 3)
-	for (int i = 0; i < 10; ++i)
-	  objects[i].addPrimitives( &(*it) );
-      else
-	for (int i = 10; i < 20; ++i)
-	  objects[i].addPrimitives( &(*it) );
-    }
-    
-    // add floor
-    objects.push_back( Object(num_objects, 0.0, 0.0, 0.0, Quat()) );
-    objects[num_objects].addPrimitives( &(*it_end) );
-    it_end->setType( 0.1 );
-    it_end->setRendererType( NONE );
-  }
-  else {
-    int i = 0;
-    cout << "prims : " << primitives.size() << endl;
-    for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++i) {
-      objects.push_back( Object(i) );
-      objects[i].addPrimitives( &(*it) );
-      it->setType( 1.0 );
-      it->setRendererType( PYRAMID_POINTS );
-    }
+  if (read == 0) {
+    cerr << "-- Error reading file! --" << endl;
+    exit(0);
   }
 
   num_objects = objects.size();
 
+  // Count total number of points being rendered
   number_surfels = 0;
   cout << "objects : " << num_objects << endl;
+  cout << "primitives : " << primitives.size() << endl;
   for (int i = 0; i < num_objects; ++i) {
-    vector<Primitives*>* prims = objects[i].getPrimitivesList();
-    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+    vector<Primitives*>* prims = objects[i].getPrimitivesList();    
+    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
       number_surfels += (*prim_it)->getSurfels()->size();
+    }
   }
 
-  if ((strcmp(argv[1], "trees_both") == 0) || (strcmp(argv[1], "trees") == 0) || (strcmp(argv[1], "trees_original") == 0)) {
+  // Creat the renderer instance depending if it is a normal ply file or a converted tree file
+  if (read == 2) {
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
     assert (point_based_render);
     point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
     point_based_render->setPrefilterSize(prefilter_size);
   }
-  else
+  else if (read == 1)
     createPointRender( PYRAMID_POINTS );
-
-  if (read == 0)
-    exit(0);
-
-#ifdef TIMING
-  if (argc < 2)
-    cout << "MODEL      : ../models/mannequin.sls.normals" << endl;
-  else
-    cout << "MODEL      : " << (char*)argv[1] << endl;
-  cout << "NUM POINTS : " << number_surfels << endl;
-  if (FBO_FORMAT == 34842)
-    cout << "TEX TYPE   : 16F" << endl;
-  else
-    cout << "TEX TYPE   : 32F" << endl;
-#endif
 
   glutMainLoop();
 

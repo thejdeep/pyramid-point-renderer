@@ -18,17 +18,17 @@
 
 typedef enum 
   {
-    TRIANGLES,
-    LINES,
-    PYRAMID_POINTS,
-    PYRAMID_POINTS_COLOR,
-    PYRAMID_TRIANGLES,
-    PYRAMID_HYBRID,
-    PYRAMID_HYBRID_TEST,
-    PYRAMID_LINES,
-    EWA_SPLATTING,
-    EWA_SPLATTING_INTERPOLATE_NORMALS,
-    NONE
+    TRIANGLES=0,
+    LINES=1,
+    PYRAMID_POINTS=2,
+    PYRAMID_POINTS_COLOR=3,
+    PYRAMID_TRIANGLES=4,
+    PYRAMID_HYBRID=5,
+    PYRAMID_HYBRID_TEST=6,
+    PYRAMID_LINES=7,
+    EWA_SPLATTING=8,
+    EWA_SPLATTING_INTERPOLATE_NORMALS=9,
+    NONE=10
   } point_render_type_enum;
 
 using namespace std;
@@ -39,6 +39,8 @@ class Primitives
   
   Primitives() { }
 
+  Primitives(int id_num, GLfloat t) : id(id_num), type(t) {}
+     
   Primitives(int id_num) : id(id_num) {}
 
   ~Primitives() {}
@@ -48,15 +50,15 @@ class Primitives
   vector<Surfel> * getSurfels ( void ) { return &surfels; }
   vector<Triangle> * getTriangles( void ) { return &triangles; }
 
-  int getRendererType ( void ) { return renderer_type; }
+  point_render_type_enum getRendererType ( void ) { return renderer_type; }
 
-  void setRendererType ( int type );
+  void setRendererType ( point_render_type_enum type );
 
   void setType ( GLfloat t ) {type = t;}
   GLfloat getType ( void ) {return type;}
 
-
   void setId ( int id_num ) { id = id_num; }
+  int getId ( void ) { return id; }
 
  private:
 
@@ -73,18 +75,25 @@ class Primitives
   void setTrianglesArrays( void );
   void setLinesDisplayList( void );
 
-  // Rendering type.
-  int renderer_type;
+
+  // Primitives group identification number.
+  int id;
 
   // Type of primitives (Cylinder, other)
   GLfloat type;
 
+  // Rendering type.
+  point_render_type_enum renderer_type;
+
   /// Vertex buffer
   GLuint vertex_buffer;
+
   /// Color Buffer
   GLuint color_buffer;
+
   /// Normal Buffer
   GLuint normal_buffer;
+
   /// Triangle Display List
   GLuint triangleDisplayList;
 
@@ -103,8 +112,6 @@ class Primitives
   // Vector of triangles belonging to this object.
   vector<Triangle> triangles;
 
-  // Primitives group identification number.
-  int id;
 };
 
 #endif

@@ -285,6 +285,16 @@ void Camera::rotateQuat(int x, int y, Quat *q) {
   q->normalize();
 }
 
+void Camera::computeEyePosition(Quat q, double *new_eye) {
+  Quat q_new_rot = q_rot;
+  q_new_rot = q_new_rot.composeWith(q);
+  q_new_rot.invert();
+  new_eye[0] = eye[0];
+  new_eye[1] = eye[1];
+  new_eye[2] = eye[2];
+  q_new_rot.rotate(new_eye);
+}
+
 /// Sets mouse button click position
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate

@@ -3,6 +3,8 @@
 #extension GL_ARB_draw_buffers : enable
 //#version 120
 
+const float PI = 3.1416;
+
 // flag for depth test on/off
 uniform bool depth_test;
 
@@ -292,6 +294,7 @@ void main (void) {
   }
 
   float new_zmax = zmax;
+  float cnt = 0;
 
   // Gather pixels values
   for (int i = 0; i < 4; ++i)
@@ -304,19 +307,21 @@ void main (void) {
 	{
 	  // Depth test between valid in reach ellipses
 	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax)) 
-	    {	  
+	    {
+	      float w = 1.0;//abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 		
-	    bufferA += pixelA[i];
+	      bufferA += pixelA[i] * w;
 		
-	    // Increment ellipse total path with distance from gather pixel to center
-	    bufferB.zw += pixelB[i].zw + gather_pixel_desloc[i].xy;
-		
-	    bufferC += pixelC[i];
-		
-	    // Take maximum depth range
-	    new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
-		
-	    valid_pixels += 1.0;
+	      // Increment ellipse total path with distance from gather pixel to center
+	      bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
+	      
+	      bufferC += pixelC[i] * w;
+	      
+	      // Take maximum depth range
+	      new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
+	      
+	      valid_pixels += w;
+	      cnt ++;
 	  }
 	}
       }
@@ -325,12 +330,14 @@ void main (void) {
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
   
-  if (valid_pixels >= 1.0)
+  if (valid_pixels > 0.0)
     {
       bufferA /= valid_pixels;
       bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
       bufferB.y = new_zmax - zmin;
+/*       bufferB.zw /= cnt; */
+/*       bufferC.rgb /= cnt; */
       bufferB.zw /= valid_pixels;
       bufferC.rgb /= valid_pixels;
       bufferC.w = obj_id;

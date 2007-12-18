@@ -496,67 +496,90 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
-int readModels (int argc, char **argv, vector<Primitives> *prims) {
+int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *objs) {
+  ifstream in (filename);
 
-  // For each model passed in command line
-  if (strcmp(argv[1], "trees_original") == 0) {
-    prims->push_back( Primitives(0) );
-    readPlyTriangles ("../plys/apple_bark_original.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
-    prims->push_back( Primitives(1) );
-    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
-    prims->push_back( Primitives(2) );
-    readPlyTriangles ("../plys/apple_leaves_original.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
+  if (in.fail()) return false;
+  
+  char comments[255];
+  int num_primitives, num_objects;
 
-    prims->push_back( Primitives(3) );
-    readPlyTriangles ("../plys/square.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
+  in.getline (comments, 255);
 
+  in >> comments >> num_primitives;
+  in >> comments >> num_objects;
+
+  int id;
+  char ply_file[100];
+  double type;
+  unsigned int renderer_type;
+    //char renderer_type[50];
+  for (int i = 0; i < num_primitives; ++i) {   
+    in >> id >> ply_file >> type >> renderer_type;
+    prims->push_back ( Primitives(id, type));
+    readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles());
+
+    // Must call after reading file because this next function creates
+    // the vertex array or display lists, and needs the surfels structure loaded
+   
+    prims->back().setRendererType(static_cast<point_render_type_enum>(renderer_type));
   }
-  else if (strcmp(argv[1], "trees_both") == 0) {
-    prims->push_back( Primitives(0) );
-    readPlyTriangles ("../plys/apple_bark.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
-    prims->push_back( Primitives(1) );
-    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
-    prims->push_back( Primitives(2) );
-    readPlyTriangles ("../plys/apple_leaves.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
-    prims->push_back( Primitives(3) );
-    readPlyTriangles ("../plys/apple_bark_original.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
-    prims->push_back( Primitives(4) );
-    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(4)).getSurfels(), (prims->at(4)).getTriangles());
-    prims->push_back( Primitives(5) );
-    readPlyTriangles ("../plys/apple_leaves_original.ply", (prims->at(5)).getSurfels(), (prims->at(5)).getTriangles());
 
-    prims->push_back( Primitives(6) );
-    readPlyTriangles ("../plys/square.ply", (prims->at(6)).getSurfels(), (prims->at(6)).getTriangles());
-  }
-  else if (strcmp(argv[1], "trees") == 0) {
-    prims->push_back( Primitives(0) );
-    readPlyTriangles ("../plys/apple_bark.ply", (prims->at(0)).getSurfels(), (prims->at(0)).getTriangles());
-    prims->push_back( Primitives(1) );
-    readPlyTriangles ("../plys/apple_trunk.ply", (prims->at(1)).getSurfels(), (prims->at(1)).getTriangles());
-    prims->push_back( Primitives(2) );
-    readPlyTriangles ("../plys/apple_leaves.ply", (prims->at(2)).getSurfels(), (prims->at(2)).getTriangles());
-
-    prims->push_back( Primitives(3) );
-    readPlyTriangles ("../plys/square.ply", (prims->at(3)).getSurfels(), (prims->at(3)).getTriangles());
-  }
-  // read old normals made up format
-  else {
-    for (int i = 1; i < argc; ++i) {
-      if (strstr(argv[i], ".normals") != NULL) { 
-	prims->push_back( Primitives(i-1) );
-	loadNormals (argv[i], (prims->at(i-1)).getSurfels());
-      }
-      else if (strstr(argv[i], ".sls") != NULL) { 
-	prims->push_back( Primitives(i-1) );
-	loadSls (argv[i], (prims->at(i-1)).getSurfels());
-      }
-      else {
-	prims->push_back( Primitives(i-1) );
-	readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
-      }
+  Quat q;
+  double x, y, z;
+  int n, prim_id;
+  for (int i = 0; i < num_objects; ++i) {
+    in >> id >> x >> y >> z >> q.x >> q.y >> q.z >> q.a >> n;
+    objs->push_back( Object(id, x, y, z, q) );
+    for (int j = 0; j < n; ++j) {
+      in >> prim_id;
+      (objs->at(id)).addPrimitives( &(prims->at(prim_id)) );
+      //(prims->at(prim_id)).setRendererType((prims->at(prim_id)).getRendererType());
     }
   }
-  return 1;
+
+  return true;
+}
+
+int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
+
+  for (int i = 1; i < argc; ++i) {
+    if (strstr(argv[i], ".normals") != NULL) { 
+      prims->push_back( Primitives(i-1) );
+      loadNormals (argv[i], (prims->at(i-1)).getSurfels());
+    }
+    else if (strstr(argv[i], ".sls") != NULL) { 
+      prims->push_back( Primitives(i-1) );
+      loadSls (argv[i], (prims->at(i-1)).getSurfels());
+    }
+    else {
+      prims->push_back( Primitives(i-1) );
+      readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
+    }
+  }
+
+  int i = 0;
+  for (vector<Primitives>::iterator it = prims->begin(); it != prims->end(); ++it, ++i) {
+    objs->push_back( Object(i) );
+    (objs->at(i)).addPrimitives( &(*it) );
+    it->setType( 1.0 );
+    it->setRendererType( PYRAMID_POINTS );
+  }
+
+  return true;
+}
+
+int readFile (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
+  if (strstr(argv[1], ".pol") != NULL) {
+    if (readObjsFile(argv[1], prims, objs))
+      return 2;
+  }
+  else {
+    if (readModels(argc, argv, prims, objs))
+      return 1;
+  }
+  return 0;
+
 }
 
 int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,

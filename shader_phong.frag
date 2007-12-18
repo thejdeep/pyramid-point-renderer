@@ -14,9 +14,9 @@ void main (void) {
 
     normal.xyz = normalize(normal.xyz);
 
-    // color = vec4 (0.3, 0.1, 0.1, 1.0);
+    color = vec4 (0.0, 0.0, 0.0, 1.0);
     
-    color = gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient;
+    //color = gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient;
 
     float NdotL = max(dot(normal.xyz, lightDir),0.0);    
     //float NdotL = abs(dot(normal.xyz, lightDir));
