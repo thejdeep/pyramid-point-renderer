@@ -12,6 +12,8 @@
         Created: Jan 30 2006.
 */
 
+#include <GL/glu.h>
+
 /// A simple GLSL Kernel containing at most one vertex shader and one 
 /// fragment shader
 class GLSLKernel {

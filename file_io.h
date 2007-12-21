@@ -8,7 +8,8 @@
  *
  **/
 
-#include "point_render.h"
+
+#include "application.h"
 
 extern "C" {
 #include "ply.h"
@@ -569,7 +570,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object>
   return true;
 }
 
-int readFile (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
+int readFile2 (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
   if (strstr(argv[1], ".pol") != NULL) {
     if (readObjsFile(argv[1], prims, objs))
       return 2;

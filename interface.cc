@@ -1,47 +1,12 @@
-/*****Visual interface global vars*****/
-surfelVectorIter selected_surfel;
-int selected_point_id;
-
-double reconstruction_filter_size;
-double prefilter_size;
-
-GLint render_mode;
-bool show_kd_tree;
-bool show_points;
-int show_splats;
-bool show_screen_info;
-
-bool elliptical_weight;
-bool depth_culling;
-bool rotating;
-bool color_model;
-
-int button_pressed;
-bool active_shift;
-
-int analysis_filter_size;
-
-int output_type;
-const int num_output_types = 9;
-
-double max_radius;
-
-// Frames per sencond and Surfels per second
-double sps, fps;
-int fps_loop;
-double start_time, end_time;
-int timing_profile;
-
-/*************************************/
 
 /// OpenGL Write text to screen
 /// @param x X screen coordinat
 /// @param y Y screen coordinate
 /// @param str Text to write to screen
 void glWrite(GLdouble x, GLdouble y, char *str) {
-  glRasterPos2d(x, y);
-  for (char *s = str; *s; ++s)
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+//   glRasterPos2d(x, y);
+//   for (char *s = str; *s; ++s)
+//     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
 }
 
 /// Screen text with commands info
@@ -203,6 +168,6 @@ void screenButtons (int x, int y) {
 //       key = 's';
   }
 
-  if (key != '0')
-    keyboard (key, x, y);
+//   if (key != '0')
+//     keyboard (key, x, y);
 }

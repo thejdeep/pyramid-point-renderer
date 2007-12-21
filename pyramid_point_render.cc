@@ -735,7 +735,7 @@ void PyramidPointRender::createFBO() {
 
   for (i = 0; i < FBO_BUFFERS_COUNT; i++) 
     {
-      //      fprintf(stderr, "bind fbo buffer %i\n", i);
+      //fprintf(stderr, "bind fbo buffer %i\n", i);
       glBindTexture(FBO_TYPE, fbo_textures[i]);
       glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				fbo_buffers[i], FBO_TYPE, fbo_textures[i], 0);
@@ -750,6 +750,10 @@ void PyramidPointRender::createFBO() {
   framebuffer_status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
   switch(framebuffer_status) 
     {
+    case 0:
+      fprintf(stderr, "Check Framebuffer Status Error\n");
+      exit(1);
+      break;
     case GL_FRAMEBUFFER_COMPLETE_EXT:
       break;
     case GL_FRAMEBUFFER_UNSUPPORTED_EXT:

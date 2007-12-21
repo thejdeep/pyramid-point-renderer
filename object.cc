@@ -20,5 +20,4 @@ void Object::render ( void ) {
     rot[1] = rot[2] = 0.0; rot[3] = 0.0;
   }
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
-
 }

@@ -135,9 +135,9 @@ struct Triangle {
 };
 
 
-const Point default_color (0.8, 0.4, 0.2);
-const Point bg_color (1.0, 1.0, 1.0);
-const Point black_color (0.0, 0.0, 0.0);
+static const Point default_color (0.8, 0.4, 0.2);
+static const Point bg_color (1.0, 1.0, 1.0);
+static const Point black_color (0.0, 0.0, 0.0);
 
 /**
  * Surfel class.

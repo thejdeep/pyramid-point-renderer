@@ -9,13 +9,11 @@
 #ifndef __POINT_BASED_RENDER_H__
 #define __POINT_BASED_RENDER_H__
 
-#include <GL/glut.h>
-#include "surfels.h"
-#include "materials.h"
-#include "pyramid_types.h"
 #include "glslkernel.h"
+#include "surfels.h"
+#include "pyramid_types.h"
+#include "materials.h"
 #include "object.h"
-
 
 class PointBasedRender
 {

@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "GLee.h"
-#include <GL/glu.h>
 
 #include "glslkernel.h"
 
@@ -160,6 +159,8 @@ void GLSLKernel::install (bool debug) {
 		if (fragSource || fragFileName) {
 			fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
+			if (debug) cout << fragFileName << endl;
+			
 			assert(fragmentShader != 0);
 
 			if (fragSource) {

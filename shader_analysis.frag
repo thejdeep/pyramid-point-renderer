@@ -25,7 +25,6 @@ vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size),
 				      vec2(-half_pixel_size, half_pixel_size), 
 				      vec2(half_pixel_size, half_pixel_size));
 
-
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
 // displaced by param d.

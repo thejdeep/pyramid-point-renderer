@@ -56,6 +56,8 @@ public:
     position[0] = 0.0; position[1] = 0.0; position[2] = 0.0;
     
     light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
+
+    radius = 1.0;
   }
 
   /// Destructor

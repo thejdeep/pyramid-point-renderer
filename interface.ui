@@ -1,0 +1,110 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>980</width>
+    <height>831</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <widget class="openGLWidget" native="1" name="widget" >
+    <property name="geometry" >
+     <rect>
+      <x>190</x>
+      <y>10</y>
+      <width>781</width>
+      <height>751</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="ModelsTreeWidget" name="modelsTreeWidget" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>400</y>
+      <width>191</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <column>
+     <property name="text" >
+      <string>Id</string>
+     </property>
+    </column>
+    <column>
+     <property name="text" >
+      <string>Models</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>980</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen" />
+    <addaction name="separator" />
+    <addaction name="actionQuit" />
+   </widget>
+   <addaction name="menuFile" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <action name="actionOpen" >
+   <property name="text" >
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionQuit" >
+   <property name="text" >
+    <string>Quit</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>openGLWidget</class>
+   <extends>QWidget</extends>
+   <header>openGLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ModelsTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>modelsTreeWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>399</x>
+     <y>415</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

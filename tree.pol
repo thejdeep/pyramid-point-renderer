@@ -1,0 +1,9 @@
+# Single apple tree
+PRIMITIVES 4
+OBJECTS 1
+0 ../plys/apple_bark.ply 0.5 7
+1 ../plys/apple_trunk.ply 0.1 4
+2 ../plys/apple_leaves.ply 1.0 7
+3 ../plys/square.ply 1.0 4
+0 0 0 0 0 0 0 1 3 0 1 2
+

@@ -30,9 +30,6 @@ void Camera::initLight (void) {
   glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
   glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-  
-  GLfloat model_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-  //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_ambient);
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
@@ -51,12 +48,7 @@ void Camera::setView (void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  //  GLfloat lposition[] = {light_position[0], light_position[1], light_position[2], light_position[3]};  
-  //GLfloat lposition[] = {light_position[0], light_position[1], light_position[2], 1.0};  
-  //glLightfv(GL_LIGHT0, GL_POSITION, lposition);
   initLight();
-
-  //glScalef(zoom_factor, zoom_factor, zoom_factor);
 
   glTranslatef(position[0], position[1], position[2]);
   glTranslatef(-eye[0], -eye[1], -eye[2]);
@@ -107,7 +99,6 @@ void Camera::resetViewMode ( void ) {
   //gluPerspective( 45, (w/h), z_near, z_far );
   else
     glOrtho( -x, x, -y, y, z_near, z_far );
-
 }
 
 /// Switch between orthograpic and perspective modes
@@ -160,13 +151,12 @@ void Camera::reshape(int w, int h) {
 /// Starts a rotation procedure
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
-void Camera::startRotation(int x, int y) {
+void Camera::startRotation(int x, int y) { 
 
   // Save initial click
   mouse_start[0] = x;
   mouse_start[1] = screen_height - y;
   mouse_start[2] = 0.0;
-
 }
 
 /// Starts a rotation procedure
@@ -228,7 +218,6 @@ void Camera::rotate() {
   q_rot = new_rot.composeWith(q_last);
   q_rot.normalize();
   q_last = q_rot;
-
 }
 
 /// Rotate world
@@ -254,8 +243,8 @@ void Camera::rotate(int x, int y) {
 
   // Multiply local rotation by total rotation (order matters!)
   q_rot = new_rot.composeWith(q_last);
-
   q_rot.normalize();
+
 }
 
 /// Rotate given quaternion
@@ -285,6 +274,11 @@ void Camera::rotateQuat(int x, int y, Quat *q) {
   q->normalize();
 }
 
+/// Computes inverse rotation for eye position,
+/// composes given rotation with current camera rotation.
+/// Used for back face culling
+/// @param q Given rotation.
+/// @param new_eye New computed eye position.
 void Camera::computeEyePosition(Quat q, double *new_eye) {
   Quat q_new_rot = q_rot;
   q_new_rot = q_new_rot.composeWith(q);

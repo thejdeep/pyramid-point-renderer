@@ -14,7 +14,7 @@
 #include "surfels.h"
 #include "quat.h"
 
-#include "GL/glut.h"
+#include "GL/glu.h"
 
 typedef enum 
   {
