@@ -68,7 +68,8 @@ class Application
   void changeMaterial ( void );
   void changeRendererType ( point_render_type_enum type );
 
-  void setSelectedObject ( int id ) { selected_obj = id; }
+  void clearSelectedObjects ( void );
+  void setSelectedObject ( int id );
 
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
@@ -88,7 +89,7 @@ class Application
   Camera * camera;
 
   int material_id;
-  int selected_obj;
+  vector< int > selected_objs;
   int num_objects;
 
   vector<Object> objects;

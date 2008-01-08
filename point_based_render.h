@@ -37,7 +37,7 @@ class PointBasedRender
    virtual void draw( ) {}
    virtual void draw(int) {}
    virtual void interpolate( ) {}
-   virtual void projectSamples(vector<Primitives*>::iterator) {}
+   virtual void projectSamples(Primitives*) {}
    virtual void clearBuffers( ) {}
 
    virtual void setVertices( std::vector<Surfel> *surfels ) {}

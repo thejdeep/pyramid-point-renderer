@@ -374,7 +374,7 @@ int PyramidPointRender::projectionTrianglesCallbackFunc(pixels_struct dest, pixe
 }
 
 /// Project point sized samples to screen space
-void PyramidPointRender::projectTriangles( vector<Primitives*>::iterator prim )
+void PyramidPointRender::projectTriangles( Primitives* prim )
 {
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
@@ -389,7 +389,7 @@ void PyramidPointRender::projectTriangles( vector<Primitives*>::iterator prim )
   // Render vertices using the vertex buffer object.
   glPointSize(1.0);
 
-  (*prim)->render();
+  prim->render();
 
   shader_triangle_projection->use(0);
 }
@@ -635,7 +635,7 @@ void PyramidPointRender::clearBuffers() {
 /**
  * Reconstructs the surface for visualization.
  **/
-void PyramidPointRender::projectSamples(vector<Primitives*>::iterator prim) {
+void PyramidPointRender::projectSamples(Primitives* prim) {
   // Project points to framebuffer with depth test on.
 
   //projectPoints( obj );

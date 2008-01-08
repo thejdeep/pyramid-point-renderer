@@ -18,16 +18,7 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   
   virtual void fileOpen( void );
 
-
-  void on_modelsTreeWidget_itemClicked ( QTreeWidgetItem * item, int column )  {
-/*     if (item == 0) */
-/*       application->setSelectedObject( -1 ); */
-/*     else */
-      application->setSelectedObject( (item->text(0)).toInt() );
-
-    //modelsTreeWidget->itemChanged(item);
-  }
-
+  void on_modelsTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
 
 };
 

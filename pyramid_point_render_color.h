@@ -42,7 +42,7 @@ class PyramidPointRenderColor : public PointBasedRender
   int projectionPointsCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
   void projectPoints( Object * );
   int projectionTrianglesCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  void projectTriangles( vector<Primitives*>::iterator prim );
+  void projectTriangles( Primitives* prim );
 
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
@@ -58,7 +58,7 @@ class PyramidPointRenderColor : public PointBasedRender
   void draw();
   
   void clearBuffers (void);
-  void projectSamples ( vector<Primitives*>::iterator prim );
+  void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
   void setVertices( vector<Surfel> *surfels );

@@ -534,7 +534,7 @@ int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *obj
     objs->push_back( Object(id, x, y, z, q) );
     for (int j = 0; j < n; ++j) {
       in >> prim_id;
-      (objs->at(id)).addPrimitives( &(prims->at(prim_id)) );
+      (objs->at(id)).addPrimitives( prim_id );
       //(prims->at(prim_id)).setRendererType((prims->at(prim_id)).getRendererType());
     }
   }
@@ -562,7 +562,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object>
   int i = 0;
   for (vector<Primitives>::iterator it = prims->begin(); it != prims->end(); ++it, ++i) {
     objs->push_back( Object(i) );
-    (objs->at(i)).addPrimitives( &(*it) );
+    (objs->at(i)).addPrimitives( it->getId() );
     it->setType( 1.0 );
     it->setRendererType( PYRAMID_POINTS );
   }

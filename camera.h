@@ -86,6 +86,8 @@ public:
   /// Reshape function
   void reshape (int w, int h);
 
+  void updateMouse ( void );
+
   /// Starts a quat rotation procedure
   void startQuatRotation(int x, int y, Quat*);
   /// Starts a rotation procedure

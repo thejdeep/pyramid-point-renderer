@@ -73,8 +73,8 @@ class Object
   Quat* getRotationQuat ( void ) { return &q_rot; }
   void setRotationQuat ( Quat* q ) { q_rot = *q; }
 
-  void addPrimitives( Primitives * p) {primitives_list.push_back(p);}
-  vector<Primitives*> * getPrimitivesList( void ) {return &primitives_list;}
+  void addPrimitives( int p_id) { primitives_ids_list.push_back(p_id); }
+  vector< int > * getPrimitivesList( void ) { return &primitives_ids_list; }
 
  private:
 
@@ -90,7 +90,8 @@ class Object
   int instances;
 
   // Pointer to instance of class cointaing primitives (verts, lines, triangles)
-  vector<Primitives*> primitives_list;
+  vector< int > primitives_ids_list;
+
 
   // Object identification number.
   int id;

@@ -46,7 +46,7 @@ Application::Application( void ) {
 
   timing_profile = 0;
   material_id = 0;
-  selected_obj = -1;
+  selected_objs.clear();
 
   reconstruction_filter_size = 1.0;
   prefilter_size = 0.75;
@@ -107,9 +107,9 @@ void Application::drawPoints(void)
   glBegin(GL_POINTS);
   
   for (int i = 0; i < num_objects; ++i) {
-    vector<Primitives*> *prims = objects[i].getPrimitivesList();
-    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-      for (surfelVectorIter it = (*prim_it)->getSurfels()->begin(); it != (*prim_it)->getSurfels()->end(); ++it)
+    vector< int > *prims = objects[i].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+      for (surfelVectorIter it = primitives[*prim_it].getSurfels()->begin(); it != primitives[*prim_it].getSurfels()->end(); ++it)
 	glVertex(it);
   }
   glEnd();
@@ -135,7 +135,6 @@ void Application::draw(void) {
 
     // Reset camera position and direction
     camera->setView();
-    cout << i << " ";
 
     // Compute rotated eye position for this object for back face culling
     double eye[3];
@@ -146,15 +145,14 @@ void Application::draw(void) {
     objects[i].render();
 
     // Projects to image plane surfels of all primitives for this object
-    vector<Primitives*>* prims = objects[i].getPrimitivesList();
-    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      point_render_type_enum type = (*prim_it)->getRendererType();
+    vector< int >* prims = objects[i].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+      Primitives * prim = &(primitives[*prim_it]);
+      point_render_type_enum type = prim->getRendererType();
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	cout << " + ";
-	point_based_render->projectSamples( prim_it );
+	point_based_render->projectSamples( prim );
       }
     }
-    cout << endl;
   }
 
   // Interpolates projected surfels using pyramid algorithm
@@ -173,12 +171,12 @@ void Application::draw(void) {
       objects[i].render();
 
       // Render primitives using opengl triangles or lines
-      vector<Primitives*>* prims = objects[i].getPrimitivesList();
-      for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-
-	point_render_type_enum type = (*prim_it)->getRendererType();
+      vector< int >* prims = objects[i].getPrimitivesList();
+      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+	Primitives * prim = &(primitives[*prim_it]);
+	point_render_type_enum type = prim->getRendererType();
 	if ((type == TRIANGLES) || (type == LINES))
-	  (*prim_it)->render();       
+	  prim->render();
       }
     }
 
@@ -271,10 +269,12 @@ void Application::changeMaterial(void) {
 }
 
 void Application::changeRendererType( point_render_type_enum type ) {
-  if (selected_obj != -1) {
-    vector<Primitives*>* prims = objects[selected_obj].getPrimitivesList();
-    for (vector<Primitives*>::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-      (*prim_it)->setRendererType(type);
+  if (!selected_objs.empty()) {
+    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+      vector< int >* prims = objects[*it].getPrimitivesList();
+      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+	primitives[*prim_it].setRendererType(type);
+    }
   }
 
   // Resets the color material
@@ -309,21 +309,18 @@ int Application::readFile ( char * filename ) {
 
   cout << "reading " << filename << endl;
 
+  // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
   readPlyTriangles (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
   int id = objects.size();
   //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
 
+  // Create a new object and connect to new primitive
   objects.push_back( Object( id ) );
-  objects.back().addPrimitives( &(primitives.back()) );
+  objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
   primitives.back().setRendererType( PYRAMID_POINTS );
-
-  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it) {
-    it->setType ( 1.0 );
-    it->setRendererType ( PYRAMID_POINTS );
-  }
 
   num_objects = objects.size();
 
@@ -335,9 +332,7 @@ int Application::readFile ( char * filename ) {
   cout << "number of surfels : " << number_surfels << endl;
   
   //  if (!point_based_render)
-    createPointRender( 0 );
-
-  selected_obj = -1;
+  createPointRender( 0 );
 
   return id;
 }
@@ -354,10 +349,12 @@ void Application::mouseLeftButton(int x, int y) {
 
   //Point click = unproject(Point (x, y, 0.0));
 
-  if (selected_obj == -1)
+  if (selected_objs.empty())
     camera->startRotation(x, y);
-  else
-    camera->startQuatRotation(x, y, objects[selected_obj].getRotationQuat());     
+  else {
+    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
+      camera->startQuatRotation(x, y, objects[*it].getRotationQuat());     
+  }
 }
 
 /// Mouse Middle Button Function, zoom
@@ -384,30 +381,38 @@ void Application::mouseReleaseButton( void ) {
 /// @param y Y coordinate of mouse pointer
 void Application::mouseLeftMotion(int x, int y) {
 
-  if (selected_obj == -1)
+  if (selected_objs.empty())
     camera->rotate(x, y);
-  else
-    camera->rotateQuat(x, y, objects[selected_obj].getRotationQuat());
+  else {
+    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
+      camera->rotateQuat(x, y, objects[*it].getRotationQuat());
+  }
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotion(int x, int y) {
-  if (selected_obj == -1)
+  if (selected_objs.empty())
     camera->zooming (x, y);
-  else 
-    camera->zoomingVec(x, y, objects[selected_obj].getCenter());
+  else {
+    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
+      camera->zoomingVec(x, y, objects[*it].getCenter());
+    camera->updateMouse();
+  }
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotionShift(int x, int y) {
-  if (selected_obj == -1)
+  if (selected_objs.empty())
     camera->translate(x, y);
-  else
-    camera->translateVec(x, y, objects[selected_obj].getCenter());
+  else {
+    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
+      camera->translateVec(x, y, objects[*it].getCenter());
+    camera->updateMouse();
+  }
 }
 
 /// Mouse right movement func, light translation
@@ -415,6 +420,16 @@ void Application::mouseMiddleMotionShift(int x, int y) {
 /// @param y Y coordinate of mouse pointer
 void Application::mouseRightMotion(int x, int y) {
   camera->lightTranslate(x, y);
+}
+
+void Application::clearSelectedObjects ( void ) {
+  selected_objs.clear();
+}
+
+void Application::setSelectedObject ( int id ) {
+  selected_objs.push_back( id );
+//   for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
+//     cout << *it << endl;
 }
 
 
