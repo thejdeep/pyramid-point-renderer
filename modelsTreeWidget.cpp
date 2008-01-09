@@ -14,5 +14,7 @@ void ModelsTreeWidget::insert ( QString name, int id ) {
   QStringList name_list = (QStringList() << QString::number(id) << name );
   QTreeWidgetItem * newItem = new QTreeWidgetItem ( name_list, 0 );
   
-  addTopLevelItem ( newItem );
+  addTopLevelItem ( newItem );    
+  newItem->setSelected(1);
+  setCurrentItem( newItem );
 }

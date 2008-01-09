@@ -18,17 +18,18 @@
 
 typedef enum 
   {
-    TRIANGLES=0,
-    LINES=1,
-    PYRAMID_POINTS=2,
-    PYRAMID_POINTS_COLOR=3,
-    PYRAMID_TRIANGLES=4,
-    PYRAMID_HYBRID=5,
-    PYRAMID_HYBRID_TEST=6,
-    PYRAMID_LINES=7,
-    EWA_SPLATTING=8,
-    EWA_SPLATTING_INTERPOLATE_NORMALS=9,
-    NONE=10
+    TRIANGLES,
+    LINES,
+    PYRAMID_POINTS,
+    PYRAMID_TRIANGLES,
+    PYRAMID_LINES,
+    PYRAMID_HYBRID,
+    NONE,
+    PYRAMID_POINTS_COLOR,
+    EWA_SPLATTING,
+    EWA_SPLATTING_INTERPOLATE_NORMALS,
+    PYRAMID_HYBRID_TEST
+
   } point_render_type_enum;
 
 using namespace std;
@@ -51,7 +52,6 @@ class Primitives
   vector<Triangle> * getTriangles( void ) { return &triangles; }
 
   point_render_type_enum getRendererType ( void ) { return renderer_type; }
-
   void setRendererType ( point_render_type_enum type );
 
   void setType ( GLfloat t ) {type = t;}
@@ -59,6 +59,10 @@ class Primitives
 
   void setId ( int id_num ) { id = id_num; }
   int getId ( void ) { return id; }
+
+  int numberPoints ( void ) const { return number_points; }
+  int numberTriangles ( void ) const { return number_triangles; }
+
 
  private:
 

@@ -35,7 +35,7 @@ Application::Application( void ) {
   active_shift = 0;
   analysis_filter_size = 0;
 
-  color_model = false;
+  color_model = true;
   elliptical_weight = true;
   depth_culling = true;
   rotating = 0;
@@ -45,7 +45,7 @@ Application::Application( void ) {
   show_splats = 1;
 
   timing_profile = 0;
-  material_id = 0;
+  material_id = 9;
   selected_objs.clear();
 
   reconstruction_filter_size = 1.0;
@@ -131,8 +131,7 @@ void Application::draw(void) {
   point_based_render->clearBuffers();
   
   // Render objects primitives with pyramid algorithm
-  for (int i = 0; i < num_objects; ++i) {
-
+  for (int i = 0; i < objects.size(); ++i){
     // Reset camera position and direction
     camera->setView();
 
@@ -161,25 +160,23 @@ void Application::draw(void) {
   point_based_render->draw();
 
   // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-  for (int i = 0; i < num_objects; ++i) 
-    {
+  for (int i = 0; i < objects.size(); ++i){
+    // Reset camera position and direction
+    camera->setView();
+    
+    // Translate and rotate object
+    objects[i].render();
 
-      // Reset camera position and direction
-      camera->setView();
-
-      // Translate and rotate object
-      objects[i].render();
-
-      // Render primitives using opengl triangles or lines
-      vector< int >* prims = objects[i].getPrimitivesList();
-      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-	Primitives * prim = &(primitives[*prim_it]);
-	point_render_type_enum type = prim->getRendererType();
-	if ((type == TRIANGLES) || (type == LINES))
-	  prim->render();
-      }
+    // Render primitives using opengl triangles or lines
+    vector< int >* prims = objects[i].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+      Primitives * prim = &(primitives[*prim_it]);
+      point_render_type_enum type = prim->getRendererType();
+      if ((type == TRIANGLES) || (type == LINES))
+	prim->render();
     }
-
+  }
+  
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
@@ -268,18 +265,24 @@ void Application::changeMaterial(void) {
   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, material_shininess);
 }
 
-void Application::changeRendererType( point_render_type_enum type ) {
-  if (!selected_objs.empty()) {
-    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-      vector< int >* prims = objects[*it].getPrimitivesList();
-      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-	primitives[*prim_it].setRendererType(type);
-    }
-  }
+void Application::changeMaterial( int mat ) {
+  material_id = mat;
+  changeMaterial();
+}
+
+void Application::changeRendererType( point_render_type_enum type, int object_id ) {
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+    primitives[*prim_it].setRendererType(type);
 
   // Resets the color material
   changeMaterial();
 }
+
+void Application::changeRendererType( int type, int object_id ) {
+  changeRendererType ( (point_render_type_enum)type, object_id );
+}
+
 
 void Application::createPointRender( int type ) {
 
@@ -428,8 +431,55 @@ void Application::clearSelectedObjects ( void ) {
 
 void Application::setSelectedObject ( int id ) {
   selected_objs.push_back( id );
-//   for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-//     cout << *it << endl;
+}
+
+int Application::getRendererType ( int object_id ) {
+
+    // Projects to image plane surfels of all primitives for this object
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  Primitives * prim = &(primitives[prims->front()]);
+  return (int)prim->getRendererType();
+
+}
+
+int Application::getNumberPoints ( int object_id ) {
+
+  int num = 0;
+  // Projects to image plane surfels of all primitives for this object
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+    Primitives * prim = &(primitives[*prim_it]);
+    num += prim->numberPoints();
+  }
+
+  return num;
+
+}
+
+int Application::getNumberTriangles ( int object_id ) {
+
+  int num = 0;
+  // Projects to image plane surfels of all primitives for this object
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+    Primitives * prim = &(primitives[*prim_it]);
+    num += prim->numberTriangles();
+  }
+
+  return num;
+
+}
+
+void Application::setReconstructionFilter ( double s ) { 
+  reconstruction_filter_size = s;
+  if (point_based_render)
+    point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
+}
+
+void Application::setPrefilter ( double s ) { 
+  prefilter_size = s;
+  if (point_based_render)
+    point_based_render->setPrefilterSize(prefilter_size);
 }
 
 

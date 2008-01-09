@@ -56,6 +56,10 @@ class Application
   void glVertex ( surfelVectorIter it );
   void glVertex ( Point p );
 
+  void changeMaterial ( void );
+  void changeRendererType ( point_render_type_enum type, int object_id );
+
+
  public :
 
   Application();
@@ -65,8 +69,19 @@ class Application
   void drawPoints ( void );
   void draw ( void );
   void reshape ( int w, int h );
-  void changeMaterial ( void );
-  void changeRendererType ( point_render_type_enum type );
+
+  void changeRendererType ( int type, int object_id );
+  void changeMaterial( int mat );
+
+  int getRendererType ( int object_id );
+  int getNumberPoints ( int object_id );
+  int getNumberTriangles ( int object_id );
+  double getReconstructionFilter ( void ) const { return reconstruction_filter_size; }
+  double getPrefilter ( void ) const { return prefilter_size; }
+  int getMaterial ( void ) const { return material_id; }
+
+  void setReconstructionFilter ( double s );
+  void setPrefilter ( double s );
 
   void clearSelectedObjects ( void );
   void setSelectedObject ( int id );

@@ -5,6 +5,15 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
+GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0}};
+
 // GLfloat obj_colors[8][4] = {
 // 			    {0.0, 0.0, 0.0, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0},
@@ -15,14 +24,14 @@ const double rad_to_deg = 180.0/PI;
 // 			    {0.1, 0.5, 0.1, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0}};
 
-GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
-			    {0.7, 0.2, 0.2, 0.1},
-			    {0.2, 1.0, 0.2, 1.0},
-			    {0.7, 0.2, 0.2, 1.0},
-			    {0.7, 0.2, 0.2, 1.0},
-			    {0.2, 1.0, 0.2, 1.0},
-			    {0.1, 0.5, 0.1, 1.0},
-			    {0.35, 0.1, 0.1, 0.7}};
+// GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
+// 			    {0.7, 0.2, 0.2, 0.1},
+// 			    {0.2, 1.0, 0.2, 1.0},
+// 			    {0.7, 0.2, 0.2, 1.0},
+// 			    {0.7, 0.2, 0.2, 1.0},
+// 			    {0.2, 1.0, 0.2, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.35, 0.1, 0.1, 0.7}};
 
 // GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
 // 			    {0.1, 0.1, 0.3, 1.0},
@@ -159,6 +168,9 @@ void Primitives::render ( void ) {
  **/
 void Primitives::setRendererType ( point_render_type_enum type ) {
 
+  number_points = surfels.size();
+  number_triangles = triangles.size();
+
   renderer_type = type; 
 
   if (renderer_type == NONE)
@@ -192,7 +204,6 @@ void Primitives::setRendererType ( point_render_type_enum type ) {
     setTrianglesDisplayList();
   else if (renderer_type == LINES)
     setLinesDisplayList();
-
 
 }
 

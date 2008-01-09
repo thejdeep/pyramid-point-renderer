@@ -163,14 +163,12 @@ void Camera::startRotation(int x, int y) {
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
 void Camera::startQuatRotation(int x, int y, Quat* q) {
-
   q_last = *q;
 
   // Save initial click
   mouse_start[0] = x;
   mouse_start[1] = screen_height - y;
   mouse_start[2] = 0.0;
-
 }
 
 /// Ends a rotation procedure

@@ -25,10 +25,10 @@
 #define NUM_MATERIALS 20
 
 enum mat_name {
-  chocolate, brass, bronze, polished_bronze, chrome, copper, polished_copper,
+  brass, bronze, polished_bronze, chrome, copper, polished_copper,
   gold, polished_gold, pewter, silver, polished_silver, emerald,
   jade, obsidian, pearl, ruby, turquoise, black_plastic,
-  black_rubber
+  black_rubber, chocolate
 }; // following materials.h matrix order
 
 // ambient
@@ -56,12 +56,7 @@ const GLfloat Mats[NUM_MATERIALS][14] = {
 /* 	0.0000, 0.0000, 0.00000, 1.000000, */
 /* 	0.000000 */
 /*   }, */
-  {//chocolate
-	0.000000, 0.00000, 0.000000, 1.000000,
-	0.80000, 0.40000, 0.20000, 1.000000,
-	0.50000, 0.50000, 0.500000, 1.000000,
-	128.000000
-  },
+
 
   {//brass
 	0.329412, 0.223529, 0.027451, 1.000000,
@@ -178,6 +173,7 @@ const GLfloat Mats[NUM_MATERIALS][14] = {
 	0.50000, 0.50000, 0.500000, 1.000000,
 	128.000000
   }
+
 
 /*   {//black_rubber */
 /* 	0.020000, 0.020000, 0.020000, 1.000000, */

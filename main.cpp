@@ -27,6 +27,7 @@ int main(int argc, char * argv []) {
 
   form->application = application;
   form->widget->application = application;
+  form->init();
 
   form->show();
   return app.exec();
