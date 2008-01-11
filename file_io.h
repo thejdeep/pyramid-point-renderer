@@ -497,11 +497,11 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
-int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *objs) {
+int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids) {
   ifstream in (filename);
 
   if (in.fail()) return false;
-  
+
   char comments[255];
   int num_primitives, num_objects;
 
@@ -513,33 +513,34 @@ int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *obj
   int id;
   char ply_file[100];
   double type;
-  unsigned int renderer_type;
-    //char renderer_type[50];
+  int renderer_type;
+
   for (int i = 0; i < num_primitives; ++i) {   
     in >> id >> ply_file >> type >> renderer_type;
-    prims->push_back ( Primitives(id, type));
+    prims->push_back ( Primitives(id, type) );
+    prims->back().setType( 1.0 );
     readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles());
 
     // Must call after reading file because this next function creates
     // the vertex array or display lists, and needs the surfels structure loaded
-   
-    prims->back().setRendererType(static_cast<point_render_type_enum>(renderer_type));
+    prims->back().setRendererType( renderer_type );
   }
 
   Quat q;
   double x, y, z;
   int n, prim_id;
-  for (int i = 0; i < num_objects; ++i) {
+  for (int i = 0; i < num_objects; ++i) {    
     in >> id >> x >> y >> z >> q.x >> q.y >> q.z >> q.a >> n;
+    objs_ids->push_back (id);
     objs->push_back( Object(id, x, y, z, q) );
     for (int j = 0; j < n; ++j) {
       in >> prim_id;
       (objs->at(id)).addPrimitives( prim_id );
-      //(prims->at(prim_id)).setRendererType((prims->at(prim_id)).getRendererType());
+      //(prims->at(prim_id)).setRendererType( (prims->at(prim_id)).getRendererType() );
     }
   }
 
-  return true;
+  return num_objects;
 }
 
 int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
@@ -571,8 +572,9 @@ int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object>
 }
 
 int readFile2 (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
+  vector<int> ids;
   if (strstr(argv[1], ".pol") != NULL) {
-    if (readObjsFile(argv[1], prims, objs))
+    if (readObjsFile(argv[1], prims, objs, &ids))
       return 2;
   }
   else {

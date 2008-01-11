@@ -66,6 +66,7 @@ class Application
   ~Application() {};
 
   int readFile ( char * filename );
+  int readPolFile (char * filename, vector<int> * ids);
   void drawPoints ( void );
   void draw ( void );
   void reshape ( int w, int h );

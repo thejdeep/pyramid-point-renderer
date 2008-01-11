@@ -32,6 +32,8 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
 
   void selectCurrObject ( void );
 
+  void keyPressEvent( QKeyEvent* event);
+
 };
 
 #endif

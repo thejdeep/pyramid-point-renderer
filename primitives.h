@@ -51,8 +51,9 @@ class Primitives
   vector<Surfel> * getSurfels ( void ) { return &surfels; }
   vector<Triangle> * getTriangles( void ) { return &triangles; }
 
-  point_render_type_enum getRendererType ( void ) { return renderer_type; }
-  void setRendererType ( point_render_type_enum type );
+  int getRendererType ( void ) { return renderer_type; }
+  void setRendererType ( int type );
+
 
   void setType ( GLfloat t ) {type = t;}
   GLfloat getType ( void ) {return type;}
@@ -87,7 +88,7 @@ class Primitives
   GLfloat type;
 
   // Rendering type.
-  point_render_type_enum renderer_type;
+  int renderer_type;
 
   /// Vertex buffer
   GLuint vertex_buffer;

@@ -35,7 +35,7 @@ PyramidPointRender::PyramidPointRender(int w, int h) : PointBasedRender(w, h),
 }
 
 PyramidPointRender::~PyramidPointRender() {
-  delete shader_point_projection;
+  delete shader_projection;
   delete shader_analysis;
   delete shader_copy;
   delete shader_synthesis;
@@ -177,7 +177,7 @@ void PyramidPointRender::rasterizePixels(pixels_struct dest, pixels_struct src0,
       bool ret = TRUE;
       switch(phase) {
       case PROJECTION:
-	ret = projectionTrianglesCallbackFunc(dest, src0, src1);	
+	ret = projectionCallbackFunc(dest, src0, src1);	
 	break;
       case ANALYSIS:
 	ret = analysisCallbackFunc(dest, src0, src1);
@@ -336,45 +336,16 @@ pixels_struct PyramidPointRender::generatePixels(int level,
 }
 
 
-int PyramidPointRender::projectionPointsCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRender::projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
 {
-  shader_point_projection->use();
-  shader_point_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+  shader_projection->use();
+  shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
 
   return TRUE;
 }
 
 /// Project point sized samples to screen space
-void PyramidPointRender::projectPoints( Object *obj )
-{
-  pixels_struct nullPixels;
-  pixels_struct destinationPixels;
-
-  nullPixels = generatePixels(0, 0, 0, 0, 0);
-
-  framebuffer_state = FBS_APPLICATION_CREATED;
-
-  destinationPixels = generatePixels(0, fbo, 2, fbo_buffers[0], fbo_buffers[2]);
-  rasterizePixels(destinationPixels, nullPixels, nullPixels, PROJECTION);
-
-  // Render vertices using the vertex buffer object.
-  glPointSize(1.0);
-
-  obj->render();
-  
-  shader_point_projection->use(0);
-}
-
-int PyramidPointRender::projectionTrianglesCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
-{
-  shader_triangle_projection->use();
-  shader_triangle_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
-
-  return TRUE;
-}
-
-/// Project point sized samples to screen space
-void PyramidPointRender::projectTriangles( Primitives* prim )
+void PyramidPointRender::projectSurfels ( Primitives* prim )
 {
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
@@ -391,7 +362,7 @@ void PyramidPointRender::projectTriangles( Primitives* prim )
 
   prim->render();
 
-  shader_triangle_projection->use(0);
+  shader_projection->use(0);
 }
 
 double PyramidPointRender::computeHalfPixelSize(int level) {
@@ -551,7 +522,7 @@ void PyramidPointRender::rasterizePhongShading(int bufferIndex)
 
   nullPixels = generatePixels(0, 0, 0, 0, 0);
 
-  shader_point_projection->use(0);
+  shader_projection->use(0);
   shader_analysis->use(0);
   shader_copy->use(0);
   shader_synthesis->use(0);
@@ -584,7 +555,7 @@ void PyramidPointRender::showPixels(int bufferIndex)
 
   nullPixels = generatePixels(0, 0, 0, 0, 0);
 
-  shader_point_projection->use(0);
+  shader_projection->use(0);
   shader_analysis->use(0);
   shader_copy->use(0);
   shader_synthesis->use(0);
@@ -638,8 +609,7 @@ void PyramidPointRender::clearBuffers() {
 void PyramidPointRender::projectSamples(Primitives* prim) {
   // Project points to framebuffer with depth test on.
 
-  //projectPoints( obj );
-  projectTriangles( prim );
+  projectSurfels( prim );
 
   CHECK_FOR_OGL_ERROR();
 }
@@ -786,17 +756,11 @@ void PyramidPointRender::createShaders ( void ) {
 
   bool shader_inst_debug = 0;
 
-  shader_point_projection = new GLSLKernel();
-  assert( shader_point_projection->has_GLSL() );
-  shader_point_projection->vertex_source("shader_point_projection.vert");
-  shader_point_projection->fragment_source("shader_point_projection.frag");
-  shader_point_projection->install( shader_inst_debug );
-
-  shader_triangle_projection = new GLSLKernel();
-  assert( shader_triangle_projection->has_GLSL() );
-  shader_triangle_projection->vertex_source("shader_triangle_projection.vert");
-  shader_triangle_projection->fragment_source("shader_triangle_projection.frag");
-  shader_triangle_projection->install( shader_inst_debug );
+  shader_projection = new GLSLKernel();
+  assert( shader_projection->has_GLSL() );
+  shader_projection->vertex_source("shader_point_projection.vert");
+  shader_projection->fragment_source("shader_point_projection.frag");
+  shader_projection->install( shader_inst_debug );
 
   shader_analysis = new GLSLKernel();
   assert( shader_analysis->has_GLSL() );

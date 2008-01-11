@@ -131,7 +131,7 @@ void Application::draw(void) {
   point_based_render->clearBuffers();
   
   // Render objects primitives with pyramid algorithm
-  for (int i = 0; i < objects.size(); ++i){
+  for (unsigned int i = 0; i < objects.size(); ++i){
     // Reset camera position and direction
     camera->setView();
 
@@ -147,7 +147,7 @@ void Application::draw(void) {
     vector< int >* prims = objects[i].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
       Primitives * prim = &(primitives[*prim_it]);
-      point_render_type_enum type = prim->getRendererType();
+      int type = prim->getRendererType();
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
 	point_based_render->projectSamples( prim );
       }
@@ -160,7 +160,7 @@ void Application::draw(void) {
   point_based_render->draw();
 
   // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-  for (int i = 0; i < objects.size(); ++i){
+  for (unsigned int i = 0; i < objects.size(); ++i){
     // Reset camera position and direction
     camera->setView();
     
@@ -171,7 +171,7 @@ void Application::draw(void) {
     vector< int >* prims = objects[i].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
       Primitives * prim = &(primitives[*prim_it]);
-      point_render_type_enum type = prim->getRendererType();
+      int type = prim->getRendererType();
       if ((type == TRIANGLES) || (type == LINES))
 	prim->render();
     }
@@ -305,12 +305,35 @@ void Application::createPointRender( int type ) {
   point_based_render->setPrefilterSize(prefilter_size);
 }
 
+int Application::readPolFile (char * filename, vector<int> *objs_ids) {
+  // Create a new primitive from given file
 
+  int num_objs = readObjsFile (filename, &primitives, &objects, objs_ids);
+  if ( num_objs > 0  ) {
+
+    num_objects = objects.size();
+
+    // Count total number of points being rendered
+    number_surfels += primitives.back().getSurfels()->size();
+    
+    //  if (!point_based_render)
+    createPointRender( 0 );
+
+    return num_objs;
+  }
+
+  return -1;
+}
+
+/**
+ * Reads a ply file, creates an object and
+ * loads the vertices and triangles in the associated primitive.
+ * @param filename Given file name.
+ * @return Id number of created object.
+ **/
 int Application::readFile ( char * filename ) {
   // read the models passed as command line arguments
   //  int read = readFile(argc, argv, &primitives, &objects);
-
-  cout << "reading " << filename << endl;
 
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
@@ -321,6 +344,7 @@ int Application::readFile ( char * filename ) {
 
   // Create a new object and connect to new primitive
   objects.push_back( Object( id ) );
+  objects.back().setFilename( filename );
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
   primitives.back().setRendererType( PYRAMID_POINTS );
@@ -329,10 +353,6 @@ int Application::readFile ( char * filename ) {
 
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
-
-  cout << "objects : " << num_objects << endl;
-  cout << "primitives : " << primitives.size() << endl;
-  cout << "number of surfels : " << number_surfels << endl;
   
   //  if (!point_based_render)
   createPointRender( 0 );
@@ -439,7 +459,6 @@ int Application::getRendererType ( int object_id ) {
   vector< int >* prims = objects[object_id].getPrimitivesList();
   Primitives * prim = &(primitives[prims->front()]);
   return (int)prim->getRendererType();
-
 }
 
 int Application::getNumberPoints ( int object_id ) {

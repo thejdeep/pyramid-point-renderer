@@ -166,12 +166,13 @@ void Primitives::render ( void ) {
 /**
  * Changes the renderer type.
  **/
-void Primitives::setRendererType ( point_render_type_enum type ) {
+//void Primitives::setRendererType ( point_render_type_enum type ) {
+void Primitives::setRendererType ( int type ) {
 
   number_points = surfels.size();
   number_triangles = triangles.size();
 
-  renderer_type = type; 
+  renderer_type = type;
 
   if (renderer_type == NONE)
     return;

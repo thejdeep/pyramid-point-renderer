@@ -36,14 +36,14 @@ class Object
   
   Object() { }
 
-  Object(int id_num, double x, double y, double z, Quat q) : id(id_num) {
+  Object(int id_num, double x, double y, double z, Quat q) : _id(id_num) {
     center[0] = x;
     center[1] = y;
     center[2] = z;
     q_rot = q;
   }
 
-  Object(int id_num, double x, double y, double z) : id(id_num) {
+  Object(int id_num, double x, double y, double z) : _id(id_num) {
     center[0] = x;
     center[1] = y;
     center[2] = z;
@@ -53,7 +53,7 @@ class Object
     q_rot.z = 0.0;
   }
 
-  Object(int id_num) : id(id_num) {
+  Object(int id_num) : _id(id_num) {
     center[0] = center[1] = center[2] = 0.0;
     q_rot.a = 1; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
   }
@@ -62,7 +62,14 @@ class Object
 
   void render ( void );
 
-  void setId ( int id_num ) { id = id_num; }
+  void setId ( int id_num ) { _id = id_num; }
+  int id ( void ) const { return _id; }
+
+  char* filename( void ) { return _filename; }
+  void setFilename ( char* name ) { 
+    _filename = new char[100];
+    _filename = name; 
+  }
 
   double* getCenter ( void ) { return &center[0]; }
   void setCenter ( double c[3] ) { 
@@ -92,9 +99,11 @@ class Object
   // Pointer to instance of class cointaing primitives (verts, lines, triangles)
   vector< int > primitives_ids_list;
 
+  // Object filename
+  char* _filename;
 
   // Object identification number.
-  int id;
+  int _id;
 };
 
 #endif

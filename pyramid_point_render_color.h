@@ -39,10 +39,8 @@ class PyramidPointRenderColor : public PointBasedRender
   int copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
   void rasterizeAnalysisPyramid( void );
   int analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  int projectionPointsCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  void projectPoints( Object * );
-  int projectionTrianglesCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  void projectTriangles( Primitives* prim );
+  int projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  void projectSurfels( Primitives* prim );
 
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
@@ -80,10 +78,8 @@ class PyramidPointRenderColor : public PointBasedRender
   /// Canvas border height.
   int canvas_border_height;
 
-  /// Point projection shader.
-  GLSLKernel *shader_point_projection;
-  /// Triangle projection shader.
-  GLSLKernel *shader_triangle_projection;
+  /// Projection shader.
+  GLSLKernel *shader_projection;
   /// Pyramid copy phase shader.
   GLSLKernel *shader_copy;
   /// Pyramid analysis phase shader.
