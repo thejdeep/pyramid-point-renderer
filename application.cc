@@ -283,7 +283,6 @@ void Application::changeRendererType( int type, int object_id ) {
   changeRendererType ( (point_render_type_enum)type, object_id );
 }
 
-
 void Application::createPointRender( int type ) {
 
   if (point_based_render)
@@ -309,15 +308,21 @@ int Application::readPolFile (char * filename, vector<int> *objs_ids) {
   // Create a new primitive from given file
 
   int num_objs = readObjsFile (filename, &primitives, &objects, objs_ids);
+
   if ( num_objs > 0  ) {
 
     num_objects = objects.size();
 
     // Count total number of points being rendered
-    number_surfels += primitives.back().getSurfels()->size();
-    
+    for (vector<int>::iterator it = objs_ids->begin(); it < objs_ids->end(); ++it) {
+      vector< int >* prims = objects[*it].getPrimitivesList();
+      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+	number_surfels += primitives[*prim_it].getSurfels()->size();
+      }
+    }
+
     //  if (!point_based_render)
-    createPointRender( 0 );
+    createPointRender( 1 );
 
     return num_objs;
   }

@@ -299,8 +299,8 @@ void main (void) {
       if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
 
-      if (up_pixelC.w != bufferC.w)
-	occluded = true;
+/*       if (up_pixelC.w != bufferC.w) */
+/* 	occluded = true; */
     }
   }
 
@@ -494,6 +494,7 @@ void main (void) {
 	if (total_weight > 0.0) 
 	  {
 	    bufferA /= total_weight;
+	    bufferA.xyz = normalize(bufferA.xyz);
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
 	    bufferC.w = obj_id;

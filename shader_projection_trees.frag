@@ -43,12 +43,15 @@ void main(void)
 
   float depth_interval;
   
+  // Leaves
   if (gl_Color.a > 0.9)
-    //depth_interval = radius_depth_w.x;
-    depth_interval = perspective_radius(radius_depth_w.x);
+    depth_interval = radius_depth_w.x;
+    //depth_interval = perspective_radius(radius_depth_w.x);
+  // Bark
   else if (gl_Color.a > 0.4)
-    depth_interval = perspective_radius(radius_depth_w.x);
-  //    depth_interval = radius_depth_w.x;
+    //depth_interval = perspective_radius(radius_depth_w.x);
+    depth_interval = radius_depth_w.x;
+  // Trunk
   else
     depth_interval = 0.0;
 

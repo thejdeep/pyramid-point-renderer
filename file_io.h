@@ -518,7 +518,7 @@ int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *obj
   for (int i = 0; i < num_primitives; ++i) {   
     in >> id >> ply_file >> type >> renderer_type;
     prims->push_back ( Primitives(id, type) );
-    prims->back().setType( 1.0 );
+    prims->back().setType( type );
     readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles());
 
     // Must call after reading file because this next function creates
@@ -536,7 +536,6 @@ int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *obj
     for (int j = 0; j < n; ++j) {
       in >> prim_id;
       (objs->at(id)).addPrimitives( prim_id );
-      //(prims->at(prim_id)).setRendererType( (prims->at(prim_id)).getRendererType() );
     }
   }
 

@@ -5,14 +5,14 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0}};
+// GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0},
+// 			    {0.0, 0.0, 0.0, 1.0}};
 
 // GLfloat obj_colors[8][4] = {
 // 			    {0.0, 0.0, 0.0, 1.0},
@@ -24,14 +24,16 @@ GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0},
 // 			    {0.1, 0.5, 0.1, 1.0}};
 
-// GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
-// 			    {0.7, 0.2, 0.2, 0.1},
-// 			    {0.2, 1.0, 0.2, 1.0},
-// 			    {0.7, 0.2, 0.2, 1.0},
-// 			    {0.7, 0.2, 0.2, 1.0},
-// 			    {0.2, 1.0, 0.2, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.35, 0.1, 0.1, 0.7}};
+
+// For apple tree
+GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
+			    {0.7, 0.2, 0.2, 0.1},
+			    {0.2, 1.0, 0.2, 1.0},
+			    {0.7, 0.2, 0.2, 1.0},
+			    {0.7, 0.2, 0.2, 1.0},
+			    {0.2, 1.0, 0.2, 1.0},
+			    {0.1, 0.5, 0.1, 1.0},
+			    {0.35, 0.1, 0.1, 0.7}};
 
 // GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
 // 			    {0.1, 0.1, 0.3, 1.0},
@@ -65,6 +67,7 @@ void Primitives::render ( void ) {
     //glCallList(triangleDisplayList);
   }
   else if (renderer_type == PYRAMID_LINES) {
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glVertexPointer(4, GL_FLOAT, 0, NULL); 
@@ -78,7 +81,6 @@ void Primitives::render ( void ) {
     glNormalPointer(GL_FLOAT, 0, NULL); 
     
     glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
-
 
   }
   else if (renderer_type == PYRAMID_TRIANGLES) {
@@ -167,12 +169,12 @@ void Primitives::render ( void ) {
  * Changes the renderer type.
  **/
 //void Primitives::setRendererType ( point_render_type_enum type ) {
-void Primitives::setRendererType ( int type ) {
+void Primitives::setRendererType ( int rtype ) {
 
   number_points = surfels.size();
   number_triangles = triangles.size();
 
-  renderer_type = type;
+  renderer_type = rtype;
 
   if (renderer_type == NONE)
     return;
@@ -192,14 +194,14 @@ void Primitives::setRendererType ( int type ) {
     setPyramidPointsDisplayList();
   else if (renderer_type == PYRAMID_TRIANGLES)
     setPyramidTrianglesArrays();
-  //    setPyramidTrianglesDisplayList();
+    //setPyramidTrianglesDisplayList();
   else if (renderer_type == PYRAMID_HYBRID)
     setPyramidHybridDisplayList();
   else if (renderer_type == PYRAMID_HYBRID_TEST)
     setPyramidHybridTestDisplayList();
   else if (renderer_type == PYRAMID_LINES)
     setPyramidLinesArraysColor();
-  //setPyramidLinesDisplayList();
+    //setPyramidLinesDisplayList();
   else if (renderer_type == TRIANGLES)
     //setTrianglesArrays();
     setTrianglesDisplayList();
@@ -277,12 +279,10 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
 //     color_array[pos*4 + 2] = (GLfloat)(it->color().z());
 //     color_array[pos*4 + 3] = (GLfloat)(it->color().w());
 
-
     color_array[pos*4 + 0] = obj_colors[id][0];
     color_array[pos*4 + 1] = obj_colors[id][1];
     color_array[pos*4 + 2] = obj_colors[id][2];
     color_array[pos*4 + 3] = type;
-
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
     normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
@@ -536,7 +536,6 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
  **/
 void Primitives::setPyramidLinesDisplayList( void ) {
 
-  //  type = 0.8;
   triangleDisplayList = glGenLists(1);
 
   Point p[3];

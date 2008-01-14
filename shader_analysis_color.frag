@@ -294,7 +294,6 @@ void main (void) {
   }
 
   float new_zmax = zmax;
-  float cnt = 0;
 
   // Gather pixels values
   for (int i = 0; i < 4; ++i)
@@ -321,7 +320,6 @@ void main (void) {
 	      new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
 	      
 	      valid_pixels += w;
-	      cnt ++;
 	  }
 	}
       }
@@ -335,13 +333,9 @@ void main (void) {
       bufferA /= valid_pixels;
       bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
-      bufferB.y = new_zmax - zmin;
-/*       bufferB.zw /= cnt; */
-/*       bufferC.rgb /= cnt; */
       bufferB.zw /= valid_pixels;
       bufferC.rgb /= valid_pixels;
       bufferC.w = obj_id;
-      //bufferC.w = 1.0;
     }
 
   // first buffer = (n.x, n.y, n.z, radius)

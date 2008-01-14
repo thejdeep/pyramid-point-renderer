@@ -34,7 +34,7 @@ void pprMainWindow::fileOpen( void )
   QImage textura,buf;
   QString sfile;
 		
-  sfile = QFileDialog::getOpenFileName(this,				       tr("Open Model"), "../plys/", tr("Files (*.ply *.pol)"));
+  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol)"));
 
   char *filename = QFile::encodeName( sfile ).data();
   vector<int> objs_ids;
@@ -42,27 +42,24 @@ void pprMainWindow::fileOpen( void )
   QStringList name_split = sfile.split("/");
   QStringList name_split2 = name_split.back().split(".");
 
-  if ( !sfile.isEmpty() )
-    {
-      QString filetype = name_split2.back();
-      if (filetype.compare("ply") == 0)
-	objs_ids.push_back( application->readFile( filename ) );
-      else if (filetype.compare("pol") == 0)
-	application->readPolFile( filename, &objs_ids );
-      else
-	cout << "File extension not supported" << endl;	  
-    }
-  else
-    {
-      // statusBar()->message( "Loading cancelled.Could not read image file.", 2000 );
-    }
+  if ( !sfile.isEmpty() ) {
+    QString filetype = name_split2.back();
+    if (filetype.compare("ply") == 0)
+      objs_ids.push_back( application->readFile( filename ) );
+    else if (filetype.compare("pol") == 0)
+      application->readPolFile( filename, &objs_ids );
+    else
+      cout << "File extension not supported" << endl;
+  }
+  else {
+    // statusBar()->message( "Loading cancelled.Could not read image file.", 2000 );
+  }
 
   modelsTreeWidget->clearSelection();
 
-  for (int i = 0; i < objs_ids.size(); ++i) {    
+  for (unsigned int i = 0; i < objs_ids.size(); ++i) {
     modelsTreeWidget->insert( name_split2.front(), objs_ids[i] );
     application->setSelectedObject( objs_ids[i] );
-
   }
 
   selectCurrObject();
@@ -116,7 +113,7 @@ void pprMainWindow::on_modelsTreeWidget_itemClicked ( QTreeWidgetItem * item, in
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  //application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
 }
 
