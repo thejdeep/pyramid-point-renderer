@@ -20,11 +20,6 @@ uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
 
-/* vec2 gather_pixel_desloc[4] ={{-half_pixel_size, -half_pixel_size},  */
-/* 			      {half_pixel_size, -half_pixel_size},  */
-/* 			      {-half_pixel_size, half_pixel_size},  */
-/* 			      {half_pixel_size, half_pixel_size}}; */
-
 vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size), 
 				      vec2(half_pixel_size, -half_pixel_size), 
 				      vec2(-half_pixel_size, half_pixel_size), 
@@ -272,10 +267,10 @@ void main (void) {
   for (int i = 0; i < 4; ++i) {
     if (pixelA[i].w > 0.0) {
       // test if this ellipse reaches the center of the pixel being constructed
-/*       if (abs(pixelC[i].w - 0.5) < 0.1) */
-/* 	dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w); */
-/*       //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w); */
-/*       else */
+      if (abs(pixelC[i].w - 0.5) < 0.1)
+	//dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
+	dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
+      else
 	dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
@@ -304,7 +299,7 @@ void main (void) {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) {
 	
-	//if (abs(pixelC[i].w - obj_id) < 0.0001)
+	if (abs(pixelC[i].w - obj_id) < 0.1)
 	{
 	  // Depth test between valid in reach ellipses
 	  if ((!depth_test) || (pixelB[i].x <= zmax)) {
@@ -333,7 +328,7 @@ void main (void) {
       bufferA /= valid_pixels;
       bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
-      //bufferB.y = new_zmax - zmin;
+      bufferB.y = new_zmax - zmin;
       bufferB.zw /= valid_pixels;
       bufferC.rgb /= valid_pixels;
       bufferC.w = obj_id;

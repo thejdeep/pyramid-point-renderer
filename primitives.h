@@ -38,12 +38,12 @@ class Primitives
 {
  public:
   
-  Primitives() { }
+  Primitives() : color_model(0) { }
 
-  Primitives(int id_num, GLfloat t) : id(id_num), type(t) {}
-     
-  Primitives(int id_num) : id(id_num) {}
-
+  Primitives(int id_num, GLfloat t) : id(id_num), type(t), color_model(0) {}
+      
+  Primitives(int id_num) : id(id_num), color_model(0) {}
+      
   ~Primitives() {}
 
   void render ( void );
@@ -54,7 +54,6 @@ class Primitives
   int getRendererType ( void ) { return renderer_type; }
   void setRendererType ( int type );
 
-
   void setType ( GLfloat t ) {type = t;}
   GLfloat getType ( void ) {return type;}
 
@@ -64,6 +63,8 @@ class Primitives
   int numberPoints ( void ) const { return number_points; }
   int numberTriangles ( void ) const { return number_triangles; }
 
+  void setColorModel( bool c ) { color_model = c; }
+  bool getColorModel( void ) const { return color_model; }
 
  private:
 
@@ -86,6 +87,9 @@ class Primitives
 
   // Type of primitives (Cylinder, other)
   GLfloat type;
+  
+  // Flag to indicate per vertex color component
+  bool color_model;
 
   // Rendering type.
   int renderer_type;

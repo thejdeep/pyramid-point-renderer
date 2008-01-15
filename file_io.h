@@ -43,6 +43,19 @@ PlyProperty vert_props[] = { /* list of property information for a vertex */
   {"radius", Float32, Float32, offsetof(Vertex,radius), 0, 0, 0, 0},
 };
 
+PlyProperty vert_props_color[] = { /* list of property information for a vertex */
+  {"x", Float32, Float32, offsetof(Vertex,x), 0, 0, 0, 0},
+  {"y", Float32, Float32, offsetof(Vertex,y), 0, 0, 0, 0},
+  {"z", Float32, Float32, offsetof(Vertex,z), 0, 0, 0, 0},
+  {"r", Float32, Float32, offsetof(Vertex,r), 0, 0, 0, 0},
+  {"g", Float32, Float32, offsetof(Vertex,g), 0, 0, 0, 0},
+  {"b", Float32, Float32, offsetof(Vertex,b), 0, 0, 0, 0},
+  {"nx", Float32, Float32, offsetof(Vertex,nx), 0, 0, 0, 0},
+  {"ny", Float32, Float32, offsetof(Vertex,ny), 0, 0, 0, 0},
+  {"nz", Float32, Float32, offsetof(Vertex,nz), 0, 0, 0, 0},
+  {"radius", Float32, Float32, offsetof(Vertex,radius), 0, 0, 0, 0},
+};
+
 PlyProperty face_props[] = { /* list of property information for a face */
   {"vertex_indices", Int32, Int32, offsetof(Face,verts),
    1, Uint8, Uint8, offsetof(Face,nverts)},
@@ -109,12 +122,17 @@ void normalize (vector<Surfel> * surfels) {
 
   compX = compY = compZ = 0;
 
+  Vector n;
   for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
     p = it->position();    
     p = Point ((((p[0] - xMin) / (max - min))) * 2.0 - 1.0 + compX,
 	       (((p[1] - yMin) / (max - min))) * 2.0 - 1.0 + compY,
 	       (((p[2] - zMin) / (max - min))) * 2.0 - 1.0 + compZ);
+    n = it->normal();
+    n.normalize();
     ((Surfel*)&(*it))->setPosition( (Point) p );
+    ((Surfel*)&(*it))->setNormal( (Vector) n );
+
   }
 
 }
@@ -417,6 +435,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
 
+
   int i,j;
   int elem_count;
   char *elem_name;
@@ -432,28 +451,30 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
       nverts = elem_count;
 
       /* set up for getting vertex elements */
-      setup_property_ply (in_ply, &vert_props[0]);
-      setup_property_ply (in_ply, &vert_props[1]);
-      setup_property_ply (in_ply, &vert_props[2]);
+      setup_property_ply (in_ply, &vert_props_color[0]);
+      setup_property_ply (in_ply, &vert_props_color[1]);
+      setup_property_ply (in_ply, &vert_props_color[2]);
 
       for (j = 0; j < in_ply->elems[i]->nprops; j++) {
 	PlyProperty *prop;
 	prop = in_ply->elems[i]->props[j];
-	if (equal_strings ("nx", prop->name))
-	  setup_property_ply (in_ply, &vert_props[3]);
-	if (equal_strings ("ny", prop->name))
-	  setup_property_ply (in_ply, &vert_props[4]);
-	if (equal_strings ("nz", prop->name))
-	  setup_property_ply (in_ply, &vert_props[5]);
-	if (equal_strings ("radius", prop->name))
-	  setup_property_ply (in_ply, &vert_props[6]);
 	if (equal_strings ("r", prop->name))
-	  setup_property_ply (in_ply, &vert_props[7]);
+	  setup_property_ply (in_ply, &vert_props_color[3]);
 	if (equal_strings ("g", prop->name))
-	  setup_property_ply (in_ply, &vert_props[8]);
+	  setup_property_ply (in_ply, &vert_props_color[4]);
 	if (equal_strings ("b", prop->name))
-	  setup_property_ply (in_ply, &vert_props[9]);
+	  setup_property_ply (in_ply, &vert_props_color[5]);
+	if (equal_strings ("nx", prop->name))
+	  setup_property_ply (in_ply, &vert_props_color[6]);
+	if (equal_strings ("ny", prop->name))
+	  setup_property_ply (in_ply, &vert_props_color[7]);
+	if (equal_strings ("nz", prop->name))
+	  setup_property_ply (in_ply, &vert_props_color[8]);
+	if (equal_strings ("radius", prop->name))
+	  setup_property_ply (in_ply, &vert_props_color[9]);
+
       }
+
 
       vert_other = get_other_properties_ply (in_ply, 
 					     offsetof(Vertex,other_props));
@@ -466,7 +487,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 
 	Point p (v.x, v.y, v.z);
 	Vector n (v.nx, v.ny, v.nz);
-	Point c (v.r, v.g, v.b);
+	Point c (v.r/255.0, v.g/255.0, v.b/255.0);
 	
 	surfels->push_back ( Surfel (p, n, c, (double)v.radius, j) );
       }

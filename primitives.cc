@@ -5,35 +5,27 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-// GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.0, 0.0, 0.0, 1.0}};
+GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0},
+			    {0.0, 0.0, 0.0, 1.0}};
 
-// GLfloat obj_colors[8][4] = {
-// 			    {0.0, 0.0, 0.0, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0}};
+
 
 
 // For apple tree
-GLfloat obj_colors[8][4] = {{0.7, 0.2, 0.2, 0.5},
-			    {0.7, 0.2, 0.2, 0.1},
-			    {0.2, 1.0, 0.2, 1.0},
-			    {0.7, 0.2, 0.2, 1.0},
-			    {0.7, 0.2, 0.2, 1.0},
-			    {0.2, 1.0, 0.2, 1.0},
-			    {0.1, 0.5, 0.1, 1.0},
-			    {0.35, 0.1, 0.1, 0.7}};
+// GLfloat obj_colors[8][4] = {{0.2, 1.0, 0.2, 1.0},
+// 			    {0.7, 0.2, 0.2, 0.1},
+// 			    {0.7, 0.2, 0.2, 0.1},
+// 			    {0.2, 1.0, 0.2, 1.0},
+// 			    {0.7, 0.2, 0.2, 1.0},
+// 			    {0.7, 0.2, 0.2, 1.0},
+// 			    {0.1, 0.5, 0.1, 1.0},
+// 			    {0.35, 0.1, 0.1, 0.7}};
 
 // GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
 // 			    {0.1, 0.1, 0.3, 1.0},
@@ -274,14 +266,16 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
     vertex_array[pos*4 + 3] = (GLfloat)(it->radius());
 
-//     color_array[pos*4 + 0] = (GLfloat)(it->color().x());
-//     color_array[pos*4 + 1] = (GLfloat)(it->color().y());
-//     color_array[pos*4 + 2] = (GLfloat)(it->color().z());
-//     color_array[pos*4 + 3] = (GLfloat)(it->color().w());
-
-    color_array[pos*4 + 0] = obj_colors[id][0];
-    color_array[pos*4 + 1] = obj_colors[id][1];
-    color_array[pos*4 + 2] = obj_colors[id][2];
+    if (color_model) {
+      color_array[pos*4 + 0] = (GLfloat)(it->color().x());
+      color_array[pos*4 + 1] = (GLfloat)(it->color().y());
+      color_array[pos*4 + 2] = (GLfloat)(it->color().z());
+    }
+    else {
+      color_array[pos*4 + 0] = obj_colors[id][0];
+      color_array[pos*4 + 1] = obj_colors[id][1];
+      color_array[pos*4 + 2] = obj_colors[id][2];
+    }
     color_array[pos*4 + 3] = type;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());

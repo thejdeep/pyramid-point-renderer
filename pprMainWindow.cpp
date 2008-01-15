@@ -20,8 +20,8 @@ void pprMainWindow::init( void ) {
  doubleSpinBoxPrefilter->setValue( application->getPrefilter() );
  doubleSpinBoxReconstructionFilter->setDecimals(3);
  doubleSpinBoxPrefilter->setDecimals(3);
- doubleSpinBoxReconstructionFilter->setSingleStep(0.01);
- doubleSpinBoxPrefilter->setSingleStep(0.01);
+ doubleSpinBoxReconstructionFilter->setSingleStep(0.1);
+ doubleSpinBoxPrefilter->setSingleStep(0.1);
 
  comboColors->setCurrentIndex( application->getMaterial() );
 }

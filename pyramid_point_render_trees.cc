@@ -32,6 +32,7 @@ PyramidPointRenderTrees::PyramidPointRenderTrees(int w, int h) : PointBasedRende
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
+  depth_test = 1;
 }
 
 PyramidPointRenderTrees::~PyramidPointRenderTrees() {
@@ -491,6 +492,8 @@ int PyramidPointRenderTrees::synthesisCallbackFunc(pixels_struct dest, pixels_st
   shader_synthesis->set_uniform("textureA", 0);
   shader_synthesis->set_uniform("textureB", 1);
   shader_synthesis->set_uniform("textureC", 2);
+
+  shader_synthesis->set_uniform("level", (GLint)cur_level);
 
   return FALSE; /* not done, rasterize quad */
 }

@@ -333,6 +333,7 @@ void main (void) {
       bufferA /= valid_pixels;
       bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
+      bufferB.y = new_zmax - zmin;
       bufferB.zw /= valid_pixels;
       bufferC.rgb /= valid_pixels;
       bufferC.w = obj_id;

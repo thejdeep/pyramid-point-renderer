@@ -77,7 +77,6 @@ Application::Application( void ) {
   CHECK_FOR_OGL_ERROR()	;
 }
 
-
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
 void Application::glVertex(const Surfel * s) {
@@ -131,7 +130,9 @@ void Application::draw(void) {
   point_based_render->clearBuffers();
   
   // Render objects primitives with pyramid algorithm
-  for (unsigned int i = 0; i < objects.size(); ++i){
+  //  for (unsigned int i = 0; i < objects.size(); ++i){
+  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    int i = *it;
     // Reset camera position and direction
     camera->setView();
 
@@ -160,7 +161,9 @@ void Application::draw(void) {
   point_based_render->draw();
 
   // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-  for (unsigned int i = 0; i < objects.size(); ++i){
+  //  for (unsigned int i = 0; i < objects.size(); ++i){
+  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    int i = *it;
     // Reset camera position and direction
     camera->setView();
     
@@ -342,6 +345,9 @@ int Application::readFile ( char * filename ) {
 
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
+
+  primitives.back().setColorModel(0);
+  cout << "reading" << endl;
   readPlyTriangles (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
   int id = objects.size();

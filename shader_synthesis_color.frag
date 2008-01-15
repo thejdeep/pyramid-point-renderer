@@ -506,7 +506,6 @@ void main (void) {
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
 	    //bufferC.w = 1.0;
-
 	    bufferC.w = obj_id;
 	  }
       }

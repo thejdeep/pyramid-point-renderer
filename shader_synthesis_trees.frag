@@ -20,6 +20,8 @@ uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
 
+uniform int level;
+
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
 // displaced by param d.
@@ -299,10 +301,13 @@ void main (void) {
       if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
 
-/*       if (up_pixelC.w != bufferC.w) */
-/* 	occluded = true; */
+      if (up_pixelC.w != bufferC.w)
+	occluded = true;
     }
   }
+
+  if (level == 0)
+    occluded = true;
 
   // unspecified pixel (weight == 0.0) or occluded pixel
   // synthesize pixel
@@ -426,8 +431,8 @@ void main (void) {
 	if (pixelA[i].w > 0.0) {
 	  //dist_test = pointInRectangle(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
 	  if (abs(pixelC[i].w - 0.5) < 0.1)
-	    dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
-	  //	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w);
+	    //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w);
 	  else
 	    dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
 	    //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
@@ -456,7 +461,7 @@ void main (void) {
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
-      if (occluded) {
+      if (occluded && (level > 0)) {
 	for (int i = 0; i < 4; ++i)
 	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
 	    occluded = false;
@@ -479,7 +484,8 @@ void main (void) {
 	  // Ellipse in range
 	  if (weights[i] > 0.0)
 	    {
-	      if (pixelC[i].w == obj_id) {
+	      if (abs(pixelC[i].w - obj_id) < 0.1) 
+		{
 		// Depth test between ellipses in range
 		if ((!depth_test) || (pixelB[i].x <= zmin + zmax)) {		  
 		  total_weight += weights[i];	  
