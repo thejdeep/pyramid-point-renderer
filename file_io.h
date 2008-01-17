@@ -437,11 +437,17 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
 
-
   int i,j;
   int elem_count;
   char *elem_name;
-  
+
+  cout << filename << endl;
+
+  if (!in_ply) {
+    cerr << "bad filename!" << endl;
+    return;
+  }
+
   for (i = 0; i < in_ply->num_elem_types; i++) {
 
     /* prepare to read the i'th list of elements */
@@ -519,7 +525,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
-int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids) {
+int readObjsFile (const char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids) {
   ifstream in (filename);
 
   if (in.fail()) return false;

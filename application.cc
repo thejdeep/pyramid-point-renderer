@@ -279,7 +279,7 @@ void Application::createPointRender( int type ) {
   point_based_render->setPrefilterSize(prefilter_size);
 }
 
-int Application::readPolFile (char * filename, vector<int> *objs_ids) {
+int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
   // Create a new primitive from given file
 
   int num_objs = readObjsFile (filename, &primitives, &objects, objs_ids);
@@ -311,7 +311,7 @@ int Application::readPolFile (char * filename, vector<int> *objs_ids) {
  * @param filename Given file name.
  * @return Id number of created object.
  **/
-int Application::readFile ( char * filename ) {
+int Application::readFile ( const char * filename ) {
   // read the models passed as command line arguments
   //  int read = readFile(argc, argv, &primitives, &objects);
 
@@ -319,6 +319,7 @@ int Application::readFile ( char * filename ) {
   primitives.push_back( Primitives( primitives.size() ) );
 
   primitives.back().setPerVertexColor(0);
+
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
   int id = objects.size();

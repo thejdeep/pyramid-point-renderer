@@ -66,9 +66,9 @@ class Object
   int id ( void ) const { return _id; }
 
   char* filename( void ) { return _filename; }
-  void setFilename ( char* name ) { 
+  void setFilename ( const char* name ) { 
     _filename = new char[100];
-    _filename = name; 
+    _filename = (char*)name; 
   }
 
   double* getCenter ( void ) { return &center[0]; }

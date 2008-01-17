@@ -37,11 +37,15 @@ void pprMainWindow::fileOpen( void )
 		
   sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol)"));
 
-  char *filename = QFile::encodeName( sfile ).data();
+  const char* filename = sfile.toLatin1();
+
+  //  char *filename = QFile::encodeName( sfile ).data();
   vector<int> objs_ids;
 
   QStringList name_split = sfile.split("/");
   QStringList name_split2 = name_split.back().split(".");
+
+  cout << sfile.toLatin1().data() << endl;
 
   if ( !sfile.isEmpty() ) {
     QString filetype = name_split2.back();
