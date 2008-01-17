@@ -3,24 +3,57 @@
 
 #include <QtOpenGL/QGLWidget>
 #include <QtGui/QFrame>
+#include <QTime>
+#include <QtGui/QLCDNumber>
 
 #include "application.h"
 
 // A wrapper over QGLWidget
 class openGLWidget: public QGLWidget {
     
+ private:
+
+  QTime timer;
+  double fps;
+  QLCDNumber *fpsDisplay;
+
+ protected:
+  // idle function called every 1 millisecond
+  void timerEvent(QTimerEvent *event) {
+    updateGL();
+  }
+
  public:
 
   // These are all the MyOpenGLWidget constructors
   openGLWidget(QWidget* parent=0,
 	       const QGLWidget* shareWidget = 0, Qt::WFlags f=0)
-    : QGLWidget (parent, shareWidget, f) {};
+    : QGLWidget (parent, shareWidget, f) {
+    startTimer(1);
+  }
 
     // A simple opengl drawing callback
     void paintGL() {
+      static int elapsed_millisecs = 0;
+      static int fps_loop = 0;      
+
+      timer.restart(); 
       application->draw();
+      elapsed_millisecs += timer.elapsed();
+
+      fps_loop ++;
+      if (fps_loop == 100) {
+	fps = (elapsed_millisecs) / (double)fps_loop;
+	fps =  1000.0 / fps;
+	fpsDisplay->display(fps);
+
+	elapsed_millisecs = 0;
+	fps_loop = 0;	
+      }
     }
     
+    void setFpsDisplay ( QLCDNumber * d ) { fpsDisplay = d; }
+
     // A simple resize callback
     void resizeGL (int width, int height) {
       int side = width < height ? width : height;

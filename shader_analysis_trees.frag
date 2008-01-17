@@ -326,7 +326,7 @@ void main (void) {
   if (valid_pixels != 0.0)
     {
       bufferA /= valid_pixels;
-      bufferA.xyz = normalize(bufferA.xyz);
+      //bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
       bufferB.y = new_zmax - zmin;
       bufferB.zw /= valid_pixels;

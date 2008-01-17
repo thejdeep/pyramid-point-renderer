@@ -81,6 +81,10 @@ class Application
   double getPrefilter ( void ) const { return prefilter_size; }
   int getMaterial ( void ) const { return material_id; }
 
+  void setPerVertexColor ( bool b, int object_id );
+  void setAutoRotate ( bool r );
+
+
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
 

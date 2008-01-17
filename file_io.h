@@ -348,7 +348,9 @@ void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
 }
 
 void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
-		       vector<Triangle> *triangles) {
+		       vector<Triangle> *triangles, Point rgb = Point()) {
+
+  cout << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
 
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
@@ -397,7 +399,7 @@ void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
 	Point p (v.x, v.y, v.z);
 	Vector n (v.nx, v.ny, v.nz);
 	
-	surfels->push_back ( Surfel (p, n, (double)v.radius, j) );
+	surfels->push_back ( Surfel (p, n, rgb, (double)v.radius, j) );
       }
     }
     else if (equal_strings ("face", elem_name)) {
@@ -475,7 +477,6 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 
       }
 
-
       vert_other = get_other_properties_ply (in_ply, 
 					     offsetof(Vertex,other_props));
 
@@ -535,12 +536,15 @@ int readObjsFile (char* filename, vector<Primitives> *prims, vector<Object> *obj
   char ply_file[100];
   double type;
   int renderer_type;
+  Point rgb;
 
   for (int i = 0; i < num_primitives; ++i) {   
-    in >> id >> ply_file >> type >> renderer_type;
+    in >> id >> ply_file >> type >> renderer_type >> rgb[0] >> rgb[1] >> rgb[2];
     prims->push_back ( Primitives(id, type) );
     prims->back().setType( type );
-    readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles());
+    prims->back().setPerVertexColor( 1 );
+
+    readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
 
     // Must call after reading file because this next function creates
     // the vertex array or display lists, and needs the surfels structure loaded

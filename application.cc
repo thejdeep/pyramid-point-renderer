@@ -120,10 +120,6 @@ void Application::draw(void) {
   if (primitives.size() == 0)
     return;
 
-  if (fps_loop == 0) {
-    start_time = timer();
-  }
-
   // Clear all buffers including pyramid algorithm buffers
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -187,34 +183,10 @@ void Application::draw(void) {
   if (show_points)
     drawPoints();
 
-  // compute frames per second for every 30 loops
-  // fps variable is rendered as screen text
-  ++fps_loop;
-
-  if (fps_loop == 30) {
-
-    double end_time = timer();
-    fps = (end_time - start_time) / (double)fps_loop;
-
-    fps = 1000.0 / fps;
-    sps = (fps * number_surfels) / 1000000;
-
-    fps_loop = 0;
-  }
-
   if (rotating)
     camera->rotate();
 
-  // Render the screen text
-  if (show_screen_info) {
-    glPushMatrix();
-    glLoadIdentity();
-//     if (render_mode == GL_RENDER)
-//       screenText(CANVAS_WIDTH, CANVAS_HEIGHT);
-    glPopMatrix();
-  }
-
-  //  glutSwapBuffers();
+  glFinish();
 }
 
 /// Reshape func
@@ -346,9 +318,8 @@ int Application::readFile ( char * filename ) {
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
 
-  primitives.back().setColorModel(0);
-  cout << "reading" << endl;
-  readPlyTriangles (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+  primitives.back().setPerVertexColor(0);
+  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
   int id = objects.size();
   //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
@@ -512,52 +483,19 @@ void Application::setPrefilter ( double s ) {
     point_based_render->setPrefilterSize(prefilter_size);
 }
 
+void Application::setPerVertexColor ( bool b, int object_id ) {
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+    {
+      primitives[*prim_it].setPerVertexColor(b);
+      // Reset renderer type to load per vertex color or default color in vertex array
+      primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
+    }
+}
 
-/// Keyboard special keys function
-/// @param key Pressed key
-/// @param x X coordinate of mouse pointer
-/// @param y Y coordinate of mouse pointer
-//void specialKey(int key_pressed, int x, int y) {
-//   switch (key_pressed) {
-//   case GLUT_KEY_F1:
-//     changeRendererType(PYRAMID_POINTS);
-//     show_splats = 1;
-//     break;
-//   case GLUT_KEY_F2:
-//     changeRendererType(PYRAMID_TRIANGLES);
-//     show_splats = 2;
-//     break;
-//   case GLUT_KEY_F3:
-//     changeRendererType(PYRAMID_HYBRID);
-//     show_splats = 3;
-//     break;
-//   case GLUT_KEY_F4:
-//     changeRendererType(PYRAMID_LINES);
-//     show_splats = 4;
-//     break;
-//   case GLUT_KEY_F5:
-//     changeRendererType(TRIANGLES);
-//     show_splats = 5;
-//     break;
-//   case GLUT_KEY_F6:
-//     changeRendererType(LINES);
-//     show_splats = 6;
-//     break;
-//   case GLUT_KEY_F7:
-//     changeRendererType(PYRAMID_HYBRID_TEST);
-//     show_splats = 7;
-//     break;
-//   case GLUT_KEY_F10:
-//     changeRendererType(NONE);
-//     show_splats = 10;
-//     break;
-//   case GLUT_KEY_F12:
-//     show_splats = 0;
-//     show_points = true;
-//     break;
-//   };
-//   glutPostRedisplay();
-//}
+void Application::setAutoRotate ( bool r ) {
+  rotating = r;
+}
 
 /// Keyboard keys function
 /// @param key Pressed key

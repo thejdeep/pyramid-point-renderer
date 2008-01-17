@@ -63,8 +63,8 @@ class Primitives
   int numberPoints ( void ) const { return number_points; }
   int numberTriangles ( void ) const { return number_triangles; }
 
-  void setColorModel( bool c ) { color_model = c; }
-  bool getColorModel( void ) const { return color_model; }
+  void setPerVertexColor( bool c ) { color_model = c; }
+  bool getPerVertexColor( void ) const { return color_model; }
 
  private:
 

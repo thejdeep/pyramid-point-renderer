@@ -500,7 +500,7 @@ void main (void) {
 	if (total_weight > 0.0) 
 	  {
 	    bufferA /= total_weight;
-	    bufferA.xyz = normalize(bufferA.xyz);
+	    //bufferA.xyz = normalize(bufferA.xyz);
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
 	    bufferC.w = obj_id;

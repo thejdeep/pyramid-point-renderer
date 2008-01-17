@@ -10,6 +10,7 @@ pprMainWindow::pprMainWindow (QMainWindow *parent): QMainWindow(parent)
   connect( actionOpen, SIGNAL( triggered() ), this, SLOT( fileOpen() ) );
 
   modelsTreeWidget->setSelectionMode( QAbstractItemView::ExtendedSelection );
+  widget->setFpsDisplay ( lcdNumberFps ); 
 }
 
 /**
@@ -46,8 +47,10 @@ void pprMainWindow::fileOpen( void )
     QString filetype = name_split2.back();
     if (filetype.compare("ply") == 0)
       objs_ids.push_back( application->readFile( filename ) );
-    else if (filetype.compare("pol") == 0)
+    else if (filetype.compare("pol") == 0) {
       application->readPolFile( filename, &objs_ids );
+      
+    }
     else
       cout << "File extension not supported" << endl;
   }
@@ -109,6 +112,22 @@ void pprMainWindow::on_modelsTreeWidget_itemClicked ( QTreeWidgetItem * item, in
   }
 
   selectCurrObject ();
+  widget->updateGL();
+}
+
+void pprMainWindow::on_checkBoxPerVertexColor_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->setPerVertexColor(true, (modelsTreeWidget->currentItem()->text(0)).toInt());
+  else
+    application->setPerVertexColor(false, (modelsTreeWidget->currentItem()->text(0)).toInt());
+  widget->updateGL();
+}
+
+void pprMainWindow::on_checkBoxAutoRotate_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->setAutoRotate(true);
+  else
+    application->setAutoRotate(false);
   widget->updateGL();
 }
 

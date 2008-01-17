@@ -27,6 +27,8 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   void on_doubleSpinBoxReconstructionFilter_valueChanged( double d );
   void on_doubleSpinBoxPrefilter_valueChanged( double d );
 
+  void on_checkBoxPerVertexColor_stateChanged( int state );
+  void on_checkBoxAutoRotate_stateChanged( int state );
 
  private:
 
