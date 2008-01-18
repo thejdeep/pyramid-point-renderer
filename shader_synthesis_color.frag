@@ -435,8 +435,8 @@ void main (void) {
 
 	// if specified scatter pixel test distance to center of ellipse
 	if (pixelA[i].w > 0.0) {
-	  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+	  //dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	  dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
 	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
 	}
 	else
@@ -447,8 +447,9 @@ void main (void) {
 	  weights[i] = 0.0;
 	}
 	else {
-	  if (elliptical_weight)
+	  if (!elliptical_weight)
 	    weights[i] = exp(-0.5*dist_test);
+
 	  total_weight ++;
 
 	  // depth test only for ellises in range
@@ -462,11 +463,11 @@ void main (void) {
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
-/*       if (occluded) { */
-/* 	for (int i = 0; i < 4; ++i) */
-/* 	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0)) */
-/* 	    occluded = false; */
-/*       } */
+      if (occluded) {
+	for (int i = 0; i < 4; ++i)
+	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
+	    occluded = false;
+      }
 
       // If the pixel was set as occluded but there are no valid
       // pixels in range to synthesize, leave as it is
@@ -489,7 +490,7 @@ void main (void) {
 	      {
 		// Depth test between ellipses in range
 		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {
-		  float w = 1.0;//abs(4.0 * 3.1416 * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+		  float w = abs(4.0 * 3.1416 * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 		  total_weight += weights[i] * w;
 		  bufferA += weights[i] * pixelA[i] * w;
 		  bufferB += weights[i] * pixelB[i] * w;

@@ -12,25 +12,41 @@
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
 
-float perspective_radius(in float r)
-{
-  // Included border
-  float w = 768.0 + 48.0;
-  float h = 768.0 + 48.0;
+/* float perspective_radius(in float r) */
+/* { */
+/*   // Included border */
+/*   float w = 768.0 + 48.0; */
+/*   float h = 768.0 + 48.0; */
 
-  float fov = 1.0;
-  float z_near = 1.0;
+/*   float fov = 1.0; */
+/*   float z_near = 1.0; */
 
-  float diag = sqrt (w*w + h*h);
-  float h_near = (h / diag) * fov * z_near * 2.0;
+/*   float diag = sqrt (w*w + h*h); */
+/*   float h_near = (h / diag) * fov * z_near * 2.0; */
 
-  float r_p = r * (z_near / radius_depth_w.y) * (1.0 / (h_near) );
+/*   float r_p = r * (z_near / radius_depth_w.y) * (1.0 / (h_near) ); */
   
-/*   if (r_p < 10000000.0) */
-/*     return 0.000001; */
-/*   else */
+/* /\*   if (r_p < 10000000.0) *\/ */
+/* /\*     return 0.000001; *\/ */
+/* /\*   else *\/ */
 
-    return r_p;
+/*     return r_p; */
+/* } */
+
+float perspective_radius(in float r, in vec3 n) {
+
+  float len = length(n.xy);
+
+  if (len == 0.0)
+    n.y = 0.0;
+  else
+    n.y /= len;
+
+  // angle between normal and z direction
+  float angle = acos(n.y);
+  float sin_angle = sin(angle);
+
+  return r * sin_angle;
 }
 
 void main(void)
@@ -41,8 +57,8 @@ void main(void)
   float depth_interval;
 
   if (gl_Color.a > 0.50)
-    depth_interval = radius_depth_w.x;
-    //depth_interval = perspective_radius(radius_depth_w.x);
+    //depth_interval = radius_depth_w.x;
+    depth_interval = perspective_radius(radius_depth_w.x / radius_depth_w.z, normal_vec);
   else
     depth_interval = 0.0;
 

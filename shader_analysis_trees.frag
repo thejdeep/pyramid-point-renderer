@@ -323,7 +323,7 @@ void main (void) {
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
   
-  if (valid_pixels != 0.0)
+  if (valid_pixels >= 1.0)
     {
       bufferA /= valid_pixels;
       //bufferA.xyz = normalize(bufferA.xyz);

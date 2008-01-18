@@ -45,8 +45,6 @@ void pprMainWindow::fileOpen( void )
   QStringList name_split = sfile.split("/");
   QStringList name_split2 = name_split.back().split(".");
 
-  cout << sfile.toLatin1().data() << endl;
-
   if ( !sfile.isEmpty() ) {
     QString filetype = name_split2.back();
     if (filetype.compare("ply") == 0)
@@ -136,7 +134,7 @@ void pprMainWindow::on_checkBoxAutoRotate_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  //application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
 }
 

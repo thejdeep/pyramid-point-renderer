@@ -350,8 +350,6 @@ void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
 void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
 		       vector<Triangle> *triangles, Point rgb = Point()) {
 
-  cout << rgb[0] << " " << rgb[1] << " " << rgb[2] << endl;
-
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
 
@@ -440,8 +438,6 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
   int i,j;
   int elem_count;
   char *elem_name;
-
-  cout << filename << endl;
 
   if (!in_ply) {
     cerr << "bad filename!" << endl;

@@ -828,7 +828,14 @@ void Primitives::setTrianglesDisplayList( void ) {
   glNewList(triangleDisplayList, GL_COMPILE);
 
   GLfloat black[] = {0.0, 0.0, 0.0, 1.0};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, obj_colors[id]);
+
+  surfelVectorIter it_s = surfels.begin();
+
+  GLfloat color[] = {(GLfloat)(it_s->color().x()),
+		     (GLfloat)(it_s->color().y()), 
+		     (GLfloat)(it_s->color().z())};
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
 
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
