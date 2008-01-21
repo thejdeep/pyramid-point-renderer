@@ -151,7 +151,7 @@ void pprMainWindow::on_checkBoxLOD_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  //application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
 }
 
@@ -168,6 +168,22 @@ void pprMainWindow::on_doubleSpinBoxReconstructionFilter_valueChanged( double d 
 void pprMainWindow::on_doubleSpinBoxPrefilter_valueChanged( double d ) {
   application->setPrefilter ( d );
   widget->updateGL();
+}
+
+void pprMainWindow::on_actionCreateKeyFrame_triggered( bool ckecked ) {
+  application->createKeyFrame();
+}
+
+void pprMainWindow::on_actionRunKeyFrames_triggered( bool ckecked ) {
+  application->runFrames();
+}
+
+void pprMainWindow::on_actionLoadKeyFrames_triggered( bool ckecked ) {
+  application->loadKeyFrames();
+}
+
+void pprMainWindow::on_actionWriteKeyFrames_triggered( bool ckecked ) {
+  application->writeKeyFrames();
 }
 
 void pprMainWindow::keyPressEvent( QKeyEvent* event) {

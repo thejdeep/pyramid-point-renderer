@@ -56,8 +56,9 @@ void Camera::setView (void) {
 	  double step = frameVideo - frame;
 	  double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
 
-	  if ( keyFrames.size() == (frame - 1) )
-		  frameVideo = -1.0;
+	  if ( keyFrames.size() - 1 == frame ) {
+	    frameVideo = -1.0;
+	  }
 	  else {
 		  position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
 		  position[1] = keyFrames[frame].pos[1] + (keyFrames[frame+1].pos[1]-keyFrames[frame].pos[1])*(step);
@@ -69,20 +70,20 @@ void Camera::setView (void) {
 				(keyFrames[frame].rot.a * keyFrames[frame+1].rot.a) );
 
 		  sin_theta = sin( theta );
-		  coef_a = ( sin( ( 1.0 - step ) * theta ) / sin_theta );
-		  coef_b = ( sin( step * theta ) / sin_theta );
+		  if ((theta == 0.0) || (sin_theta == 0.0)) {
+		    coef_a = 1.0;
+		    coef_b = 0.0;
+		  }
+		  else {
+		    coef_a = ( sin( ( 1.0 - step ) * theta ) / sin_theta );
+		    coef_b = ( sin( step * theta ) / sin_theta );
+		  }
 
 		  q_rot.x = ( coef_a * keyFrames[frame].rot.x ) + ( coef_b * keyFrames[frame+1].rot.x );
 		  q_rot.y = ( coef_a * keyFrames[frame].rot.y ) + ( coef_b * keyFrames[frame+1].rot.y );
 		  q_rot.z = ( coef_a * keyFrames[frame].rot.z ) + ( coef_b * keyFrames[frame+1].rot.z );
-		  q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );
+		  q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );		  
 		  
-		  /*
-		  q_rot.x = keyFrames[frame].rot.x + (keyFrames[frame+1].rot.x-keyFrames[frame].rot.x)*(step);
-		  q_rot.y = keyFrames[frame].rot.y + (keyFrames[frame+1].rot.y-keyFrames[frame].rot.y)*(step);
-		  q_rot.z = keyFrames[frame].rot.z + (keyFrames[frame+1].rot.z-keyFrames[frame].rot.z)*(step);
-		  q_rot.a = keyFrames[frame].rot.a + (keyFrames[frame+1].rot.a-keyFrames[frame].rot.a)*(step);
-		  */
 		  frameVideo += 0.01;
 	  }
   }

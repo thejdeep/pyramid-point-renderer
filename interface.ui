@@ -488,7 +488,19 @@
     <addaction name="separator" />
     <addaction name="actionQuit" />
    </widget>
+   <widget class="QMenu" name="menuKeyFrames" >
+    <property name="title" >
+     <string>KeyFrames</string>
+    </property>
+    <addaction name="actionRunKeyFrames" />
+    <addaction name="separator" />
+    <addaction name="actionCreateKeyFrame" />
+    <addaction name="separator" />
+    <addaction name="actionLoadKeyFrames" />
+    <addaction name="actionWriteKeyFrames" />
+   </widget>
    <addaction name="menuFile" />
+   <addaction name="menuKeyFrames" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
   <widget class="QToolBar" name="toolBar" >
@@ -537,6 +549,26 @@
   <action name="actionWrite_LOD" >
    <property name="text" >
     <string>Write LOD</string>
+   </property>
+  </action>
+  <action name="actionCreateKeyFrame" >
+   <property name="text" >
+    <string>Create</string>
+   </property>
+  </action>
+  <action name="actionLoadKeyFrames" >
+   <property name="text" >
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionWriteKeyFrames" >
+   <property name="text" >
+    <string>Write</string>
+   </property>
+  </action>
+  <action name="actionRunKeyFrames" >
+   <property name="text" >
+    <string>Run</string>
    </property>
   </action>
  </widget>

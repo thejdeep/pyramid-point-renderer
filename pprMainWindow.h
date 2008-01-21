@@ -32,6 +32,12 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   void on_checkBoxAutoRotate_stateChanged( int state );
   void on_checkBoxLOD_stateChanged( int state );
 
+  void on_actionCreateKeyFrame_triggered( bool ckecked = false );
+  void on_actionRunKeyFrames_triggered( bool ckecked = false );
+  void on_actionLoadKeyFrames_triggered( bool ckecked = false );
+  void on_actionWriteKeyFrames_triggered( bool ckecked = false );
+
+
  private:
 
   void selectCurrObject ( void );

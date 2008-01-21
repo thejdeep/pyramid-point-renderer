@@ -76,8 +76,8 @@ public:
     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     std::copy (identity, identity+16, rotation_matrix);
 
-    q_last.a = 1; q_last.x = 0.0; q_last.y = 0.0; q_last.z = 0.0;
-    q_rot.a = 1; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
+    q_last.a = 1.0; q_last.x = 0.0; q_last.y = 0.0; q_last.z = 0.0;
+    q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
 
     eye[0] = 0.0; eye[1] = 0.0; eye[2] = 3.0;
     eye_rot[0] = 0.0; eye_rot[1] = 0.0; eye_rot[2] = 3.0;
@@ -179,32 +179,32 @@ public:
   }
 
   void writeKeyFrames( const char* fn ) {
-	  ofstream out(fn);
-	  if (out.fail()) return;
-	  if (keyFrames.size() == 0) return;
-	  out << keyFrames.size() << endl;
-	  for (uint i=0; i<keyFrames.size(); i++)
-		  out << keyFrames[i] << endl;
+    ofstream out(fn);
+    if (out.fail()) return;
+    if (keyFrames.size() == 0) return;
+    out << keyFrames.size() << endl;
+    for (uint i=0; i<keyFrames.size(); i++)
+      out << keyFrames[i] << endl;
   }
 
   void loadKeyFrames( const char* fn ) {
-	  ifstream in(fn);
-	  if (in.fail()) return;
-	  keyFrames.clear();
-	  uint numFrames;
-	  in >> numFrames;
-	  keyframe k;
-	  for (uint i=0; i<numFrames; i++) {
-		  in >> k;
-		  keyFrames.push_back( k );
-	  }
-	  frameVideo = -1.0;
+    ifstream in(fn);
+    if (in.fail()) return;
+    keyFrames.clear();
+    uint numFrames;
+    in >> numFrames;
+    keyframe k;
+    for (uint i=0; i<numFrames; i++) {
+      in >> k;
+      keyFrames.push_back( k );
+    }
+    frameVideo = -1.0;
   }
 
   void runFrames( void ) { frameVideo = 0.0; }
 
   bool runningFrames( void ) {
-	  return ( (frameVideo >= 0.0) && (keyFrames.size() > 0) );
+    return ( (frameVideo >= 0.0) && (keyFrames.size() > 0) );
   }
 
 private:

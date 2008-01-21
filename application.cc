@@ -125,9 +125,9 @@ void Application::draw(void) {
   point_based_render->clearBuffers();
   
   // Render objects primitives with pyramid algorithm
-  //  for (unsigned int i = 0; i < objects.size(); ++i){
-  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    int i = *it;
+  for (unsigned int i = 0; i < objects.size(); ++i){
+  //for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    //int i = *it;
     // Reset camera position and direction
     camera->setView();
 
@@ -156,9 +156,9 @@ void Application::draw(void) {
   point_based_render->draw();
 
   // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-  //  for (unsigned int i = 0; i < objects.size(); ++i){
-  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    int i = *it;
+  for (unsigned int i = 0; i < objects.size(); ++i){
+//   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+//     int i = *it;
     // Reset camera position and direction
     camera->setView();
     
@@ -537,6 +537,7 @@ void Application::clearSelectedObjects ( void ) {
 
 void Application::setSelectedObject ( int id ) {
   selected_objs.push_back( id );
+  //selected_objs.clear();
 }
 
 int Application::getRendererType ( int object_id ) {
@@ -558,7 +559,6 @@ int Application::getNumberPoints ( int object_id ) {
   }
 
   return num;
-
 }
 
 int Application::getNumberTriangles ( int object_id ) {

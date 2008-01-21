@@ -105,6 +105,22 @@ class Application
   void mouseMiddleMotionShift( int x, int y );
   void mouseRightMotion( int x, int y );
 
+  void createKeyFrame( void ) {
+    if (camera) camera->createKeyFrame();
+  }
+  void writeKeyFrames( void ) {
+    if (camera) camera->writeKeyFrames("frames.camera");
+  }
+  void loadKeyFrames( void ) {
+    if (camera) camera->loadKeyFrames("frames.camera");
+  }
+  void runFrames( void ) {
+    if (camera) camera->runFrames();
+  }
+  bool runningFrames( void ) {
+    return (camera) ? camera->runningFrames() : false;
+  }
+
  private :
 
   unsigned int number_surfels;
