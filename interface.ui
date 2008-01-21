@@ -158,9 +158,9 @@
     <property name="geometry" >
      <rect>
       <x>0</x>
-      <y>420</y>
+      <y>460</y>
       <width>191</width>
-      <height>361</height>
+      <height>321</height>
      </rect>
     </property>
     <column>
@@ -454,6 +454,19 @@
     </property>
     <property name="text" >
      <string>AutoRotate</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxLOD" >
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>420</y>
+      <width>51</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>LOD</string>
     </property>
    </widget>
   </widget>

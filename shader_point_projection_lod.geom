@@ -31,6 +31,11 @@ varying in vec3 radius_depth_w_vertex[1];
 
 varying in float radius_ratio[1];
 
+vec4 lodColors [4] = vec4[4] ( vec4(1.0, 0.0, 0.0, 1.0),
+				  vec4(0.0, 1.0, 0.0, 1.0),
+				  vec4(0.0, 0.0, 1.0, 1.0),
+				  vec4(0.3, 0.3, 0.0, 1.0));
+
 void main() {
 
   vec4 v = gl_PositionIn[0];
@@ -54,13 +59,14 @@ void main() {
       radius_depth_w = radius_depth_w_vertex[0];
       normal_vec = normal_vec_vertex[0];
 
+      gl_FrontColor = lodColors[3];
       gl_Position = gl_PositionIn[0];
       EmitVertex();
       EndPrimitive();
 
     }
     else {
-
+      vec4 color = vec4(1.0);
       vec4 surfels_per_level = gl_FrontColorIn[0].rgba;
       surfels_per_level *= vec4(1.0, 4.0, 16.0, 64.0);
 
@@ -70,18 +76,19 @@ void main() {
       if (radius_ratio[0] < 6*pixel_size) {
 
 	num_surfels = int(surfels_per_level.y);
+	color = lodColors[2];
 
       } else if (radius_ratio[0] < 9*pixel_size) {
 
         lod_id += int(surfels_per_level.y);
 	num_surfels = int(surfels_per_level.z);
-
+	color = lodColors[1];
       }
       else {
 
 	lod_id += int(surfels_per_level.y + surfels_per_level.z);
 	num_surfels = int(surfels_per_level.w);
-
+	color = lodColors[0];
       }
            
       for (int i = 0; i < num_surfels; ++i) {
@@ -98,6 +105,7 @@ void main() {
 	  radius_depth_w = vec3(orig_v.w, -(gl_ModelViewMatrix * vec4(orig_v.xyz, 1.0)).z, v.w);
 	  normal_vec = normalize(gl_NormalMatrix * normal_vec);
 
+	  gl_FrontColor = color;
 	  gl_Position = v;
 	  EmitVertex();
 	  EndPrimitive();

@@ -8,12 +8,6 @@
 #ifndef __PYRAMID_POINT_RENDER_COLOR_H__
 #define __PYRAMID_POINT_RENDER_COLOR_H__
 
-#define GL_GLEXT_PROTOTYPES
-
-extern "C" {
-#include "timer.h"
-}
-
 #include <math.h>
 #include <assert.h>
 #include <stdio.h>
@@ -66,6 +60,14 @@ class PyramidPointRenderColor : public PointBasedRender
   void setEye (double e[3]);
   void setLight (double l[3]);
 
+  void useLOD( bool l ) {
+    use_lod = l;
+    if (l)
+      shader_projection = shader_projection_lod;
+    else
+      shader_projection = shader_projection_no_lod;
+  }
+
  private:
   /// Frame buffer object width.
   int fbo_width;
@@ -78,8 +80,12 @@ class PyramidPointRenderColor : public PointBasedRender
   /// Canvas border height.
   int canvas_border_height;
 
-  /// Projection shader.
+  /// Pointer to the projection shader being used (no_lod or lod)
   glslKernel *shader_projection;
+  /// Projection shader without LOD rendering
+  glslKernel *shader_projection_no_lod;
+  /// Projection shader with LOD rendering
+  glslKernel *shader_projection_lod;
   /// Pyramid copy phase shader.
   glslKernel *shader_copy;
   /// Pyramid analysis phase shader.
@@ -119,6 +125,9 @@ class PyramidPointRenderColor : public PointBasedRender
   
   /// Current rendering mode.
   render_state_enum render_state;
+
+  /// Num of primitives to be passed to the geom shader when using LOD
+  int num_primitives;
 
 };
 

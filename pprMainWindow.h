@@ -30,6 +30,7 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
 
   void on_checkBoxPerVertexColor_stateChanged( int state );
   void on_checkBoxAutoRotate_stateChanged( int state );
+  void on_checkBoxLOD_stateChanged( int state );
 
  private:
 

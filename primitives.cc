@@ -369,7 +369,7 @@ void Primitives::setPyramidPointsArraysLOD ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL); 
 
-  glActiveTexture( GL_TEXTURE4);
+  glActiveTexture( GL_TEXTURE6);
   glGenTextures(1, &vertTextBufferObject);
   glBindTexture(GL_TEXTURE_BUFFER_EXT, vertTextBufferObject);
   glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, vertex_buffer);
@@ -382,7 +382,7 @@ void Primitives::setPyramidPointsArraysLOD ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL);
 
-  glActiveTexture( GL_TEXTURE5);
+  glActiveTexture( GL_TEXTURE7);
   glGenTextures(1, &normalTextBufferObject);
   glBindTexture(GL_TEXTURE_BUFFER_EXT, normalTextBufferObject);
   glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, normal_buffer);
@@ -1333,7 +1333,7 @@ void Primitives::readFileLOD ( const char* fn ) {
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glVertexPointer(4, GL_FLOAT, 0, NULL); 
 
-	glActiveTexture( GL_TEXTURE4);
+	glActiveTexture( GL_TEXTURE6 );
 	glGenTextures(1, &vertTextBufferObject);
 	glBindTexture(GL_TEXTURE_BUFFER_EXT, vertTextBufferObject);
 	glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, vertex_buffer);
@@ -1346,7 +1346,7 @@ void Primitives::readFileLOD ( const char* fn ) {
 	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
 	glVertexPointer(4, GL_FLOAT, 0, NULL);
 
-	glActiveTexture( GL_TEXTURE5);
+	glActiveTexture( GL_TEXTURE7 );
 	glGenTextures(1, &normalTextBufferObject);
 	glBindTexture(GL_TEXTURE_BUFFER_EXT, normalTextBufferObject);
 	glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, normal_buffer);

@@ -50,8 +50,8 @@ void pprMainWindow::fileOpen( void )
   QStringList name_split = sfile.split("/");
   QStringList name_split2 = name_split.back().split("."); 
 
-  if ( !sfile.isEmpty() ) {
-    QString filetype = name_split2.back();
+  QString filetype = name_split2.back();
+  if ( !sfile.isEmpty() ) {  
     if (filetype.compare("ply") == 0)
       objs_ids.push_back( application->readFile( filename ) );
     else if (filetype.compare("pol") == 0)
@@ -73,6 +73,9 @@ void pprMainWindow::fileOpen( void )
   }
 
   selectCurrObject();
+
+  if (filetype.compare("lod") == 0)
+    checkBoxLOD->setCheckState( (Qt::CheckState) 2 );
 }
 
 /**
@@ -138,8 +141,17 @@ void pprMainWindow::on_checkBoxAutoRotate_stateChanged( int state ) {
   widget->updateGL();
 }
 
+void pprMainWindow::on_checkBoxLOD_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->useLOD(true, (modelsTreeWidget->currentItem()->text(0)).toInt());
+  else
+    application->useLOD(false, (modelsTreeWidget->currentItem()->text(0)).toInt());
+  selectCurrObject();
+  widget->updateGL();
+}
+
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  //application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
 }
 

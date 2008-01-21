@@ -272,7 +272,8 @@ void Application::createPointRender( int type ) {
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
   else if (type == 2) {
-    point_based_render = new PyramidPointRenderLod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+    point_based_render->useLOD(true);
   }
 
   assert (point_based_render);
@@ -600,3 +601,14 @@ void Application::setAutoRotate ( bool r ) {
   rotating = r;
 }
 
+void Application::useLOD ( bool lod, int object_id ) {
+  int type = PYRAMID_POINTS;
+  if ( lod )
+    type = PYRAMID_POINTS_LOD;
+
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+    primitives[*prim_it].setRendererType( type );
+
+  point_based_render->useLOD( lod );
+}

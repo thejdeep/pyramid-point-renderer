@@ -11,24 +11,24 @@
  * Default constructor.
  **/
 PyramidPointRenderColor::PyramidPointRenderColor() : PointBasedRender(),
-					   fbo_width(1800),
-					   fbo_height(1200),
-					   fbo_buffers_count(6),
-					   canvas_border_width(32),
-					   canvas_border_height(32),
-					   render_state(RS_BUFFER0) {
+						     fbo_width(1800),
+						     fbo_height(1200),
+						     fbo_buffers_count(6),
+						     canvas_border_width(32),
+						     canvas_border_height(32),
+						     render_state(RS_BUFFER0) {
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
 PyramidPointRenderColor::PyramidPointRenderColor(int w, int h) : PointBasedRender(w, h),
-					   fbo_width(1800),
-					   fbo_height(1200),
-					   fbo_buffers_count(6),
-					   canvas_border_width(w/32),
-					   canvas_border_height(h/32),
-					   render_state(RS_BUFFER0) {
+								 fbo_width(1800),
+								 fbo_height(1200),
+								 fbo_buffers_count(6),
+								 canvas_border_width(w/32),
+								 canvas_border_height(h/32),
+								 render_state(RS_BUFFER0) {
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
@@ -362,6 +362,11 @@ int PyramidPointRenderColor::projectionCallbackFunc(pixels_struct dest, pixels_s
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
 
+  if (use_lod) {
+    shader_projection->set_uniform("vertex_buffer", 6);
+    shader_projection->set_uniform("normal_buffer", 7);
+    shader_projection->set_uniform("total_surfels", (GLint)num_primitives);
+  }
   return TRUE;
 }
 
@@ -370,6 +375,9 @@ void PyramidPointRenderColor::projectSurfels( Primitives* prim )
 {
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
+
+  if (use_lod)
+    num_primitives = prim->numPrimitivesLOD();
 
   nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
 
@@ -780,10 +788,21 @@ void PyramidPointRenderColor::createShaders ( void ) {
 
   bool shader_inst_debug = 0;
 
-  shader_projection = new glslKernel();
-  shader_projection->vertex_source("shader_point_projection_color.vert");
-  shader_projection->fragment_source("shader_point_projection_color.frag");
-  shader_projection->install( shader_inst_debug );
+  shader_projection_no_lod = new glslKernel();
+  shader_projection_no_lod->vertex_source("shader_point_projection_color.vert");
+  shader_projection_no_lod->fragment_source("shader_point_projection_color.frag");
+  shader_projection_no_lod->install( shader_inst_debug );
+
+  shader_projection_lod = new glslKernel();
+  shader_projection_lod->vertex_source("shader_point_projection_lod.vert");
+  shader_projection_lod->geometry_source("shader_point_projection_lod.geom");
+  shader_projection_lod->set_geom_max_output_vertices( (int)pow(MAX_LEAF_SURFELS, LOD_LEVELS-1) );
+  shader_projection_lod->set_geom_input_type(GL_POINTS);
+  shader_projection_lod->set_geom_output_type(GL_POINTS);
+  shader_projection_lod->fragment_source("shader_point_projection_color.frag");
+  shader_projection_lod->install( shader_inst_debug );
+
+  shader_projection = shader_projection_no_lod;
 
   shader_analysis = new glslKernel();
   shader_analysis->vertex_source("shader_analysis_color.vert");
