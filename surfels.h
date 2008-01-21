@@ -14,6 +14,8 @@
 #include <vector.h>
 #include <math.h>
 
+
+
 struct Vector
 {
   /// Constructor
@@ -46,7 +48,7 @@ struct Vector
   }
 
   // dot product
-  const double operator *(const Vector v) {
+  double operator *(const Vector v) const {
     return (this->_x * v.x() + this->_y * v.y() + this->_z * v.z());
   }
 
@@ -57,14 +59,34 @@ struct Vector
 		  (this->_x * v.y()) - (this->_y * v.x()));
   }
 
+  Vector operator /= (const double d) {
+    *this = *this / d;
+    return *this;
+  }
+
+  Vector operator += (const Vector v) {
+    *this = *this + v;
+    return *this;
+  }
+
+  // add by scalar, vector (s,s,s)
+  const Vector operator +(const Vector v) {
+    return Vector (this->_x + v.x(), this->_y + v.y(), this->_z + v.z());
+  }
+
   // divide by scalar
   const Vector operator /(const double div) {
     return Vector (this->_x / div, this->_y / div, this->_z / div);
   }
 
   // multiply by scalar
-  const Vector operator *(const double mult) {
+  Vector operator *(const double mult) const {
     return Vector (this->_x * mult, this->_y * mult, this->_z * mult);
+  }
+
+  // multiply by scalar
+  inline friend Vector operator *(const double mult, const Vector v) {
+    return v * mult;
   }
 
   // subtract by scalar, vector (s,s,s)
@@ -101,8 +123,20 @@ struct Point
 /*     return (i==0) ? this->_x : ( (i==1) ? this->_y : ( (i==2) ? this->_z : ( (i==3) ? this->_w : (this->_w) ) ) ); */
 /*   } */
 
+  double squared_distance ( const Point p ) const {
+    return pow(p.x() - this->_x, 2) + pow(p.y() - this->_y, 2) + pow(p.z() - this->_z, 2);
+  }
+
   double& operator [](const uint i) {
     return (i==0) ? this->_x : ( (i==1) ? this->_y : ( (i==2) ? this->_z : ( (i==3) ? this->_w : (this->_w) ) ) );
+  }
+
+
+  Point operator /=(const double d) {
+    this->_x /= d;
+    this->_y /= d; 
+    this->_z /= d;
+    return *this;
   }
 
 
@@ -119,13 +153,52 @@ struct Point
   inline friend const Point operator -(const Point p, const Vector v) {
     return Point (p.x() - v.x(), p.y() - v.y(), p.z() - v.z());
   }
+ 
 
+  bool operator ==(const Point p) const {
+    return ((this->_x == p.x()) && (this->_y == p.y()) && (this->_z == p.z()));
+  }
+
+  bool operator !=(const Point p) const {
+    return !(*this == p);
+  }
+
+
+  inline friend double squared_distance (const Point p, const Point q) {
+    return p.squared_distance(q);
+  }
+
+  const double pos ( int i ) const {
+    return (i==0) ? this->_x : ( (i==1) ? this->_y : ( (i==2) ? this->_z : ( (i==3) ? this->_w : (this->_w) ) ) );
+  }
   const double x ( void) const { return _x; }
   const double y ( void) const { return _y; }
   const double z ( void) const { return _z; }
   const double w ( void) const { return _w; }
  
   double _x, _y, _z, _w;
+};
+
+
+struct Box
+{
+  Box() {}
+
+  Box(Point a, Point b) : _min(a), _max(b) {}
+
+
+  const Point min ( void ) const { return _min; }
+  const Point max ( void ) const { return _max; }
+
+  const double xmin ( void ) const { return _min.x(); }
+  const double ymin ( void ) const { return _min.y(); }
+  const double zmin ( void ) const { return _min.z(); }
+  const double xmax ( void ) const { return _max.x(); }
+  const double ymax ( void ) const { return _max.y(); }
+  const double zmax ( void ) const { return _max.z(); }
+
+  Point _min, _max;
+
 };
 
 
@@ -204,6 +277,7 @@ class Surfel
 
   const double radius (void) const { return r; }
   void setRadius (double _r) { r = _r; }
+  
 
   /// Point coordinates
   Point p;

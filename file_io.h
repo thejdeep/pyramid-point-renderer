@@ -519,6 +519,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
       get_other_element_ply (in_ply);
   }
   close_ply(in_ply);
+
 }
 
 int readObjsFile (const char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids) {

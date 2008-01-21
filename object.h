@@ -66,9 +66,8 @@ class Object
   int id ( void ) const { return _id; }
 
   char* filename( void ) { return _filename; }
-  void setFilename ( const char* name ) { 
-    _filename = new char[100];
-    _filename = (char*)name; 
+  void setFilename ( const char* name ) {
+    strcpy (&_filename[0], name);
   }
 
   double* getCenter ( void ) { return &center[0]; }
@@ -100,7 +99,7 @@ class Object
   vector< int > primitives_ids_list;
 
   // Object filename
-  char* _filename;
+  char _filename[200];
 
   // Object identification number.
   int _id;

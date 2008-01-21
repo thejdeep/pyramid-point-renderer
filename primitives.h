@@ -9,12 +9,16 @@
 #ifndef __PRIMITIVES_H__
 #define __PRIMITIVES_H__
 
-#define GL_GLEXT_PROTOTYPES
+//#define GL_GLEXT_PROTOTYPES
 
 #include "surfels.h"
 #include "quat.h"
+#include "kd-tree.h"
 
 #include "GL/glu.h"
+
+#define LOD_LEVELS 4
+#define MAX_LEAF_SURFELS 4 // the code expects this to be 4
 
 typedef enum 
   {
@@ -24,6 +28,7 @@ typedef enum
     PYRAMID_TRIANGLES,
     PYRAMID_LINES,
     PYRAMID_HYBRID,
+    PYRAMID_POINTS_LOD,
     NONE,
     PYRAMID_POINTS_COLOR,
     EWA_SPLATTING,
@@ -33,6 +38,9 @@ typedef enum
   } point_render_type_enum;
 
 using namespace std;
+
+typedef KdTree<Surfel*, OverflowRefine <Surfel*, MAX_LEAF_SURFELS> > KdTree3D;
+typedef KdTree3D::Node KdTree3DNode;
 
 class Primitives
 {
@@ -48,7 +56,7 @@ class Primitives
 
   void render ( void );
 
-  vector<Surfel> * getSurfels ( void ) { return &surfels; }
+  vector<Surfel> * getSurfels ( void ) { return &surfels[0]; }
   vector<Triangle> * getTriangles( void ) { return &triangles; }
 
   int getRendererType ( void ) { return renderer_type; }
@@ -66,7 +74,22 @@ class Primitives
   void setPerVertexColor( bool c ) { color_model = c; }
   bool getPerVertexColor( void ) const { return color_model; }
 
+  void createLOD ( void );
+
+  void writeFileLOD ( const char* fn );
+  void readFileLOD ( const char* fn );
+
+  inline uint numPrimitivesIn(void) { return numPatches; }
+  inline uint numPrimitivesLOD(void) { return numVertsArray; }
+
  private:
+
+  void reorderSurfels ( void );
+  void createLOD ( int lod );
+  void createKdTree( int lod );
+
+  void setPyramidPointsArraysLOD( void );
+  void setPatchesArray ( void );
 
   void setPyramidPointsArrays( void );
   void setPyramidPointsArraysColor( void );
@@ -116,10 +139,29 @@ class Primitives
   GLuint *indices;
 
   // Vector of surfels belonging to this object.
-  vector<Surfel> surfels;
+  //  vector<Surfel> surfels;
 
   // Vector of triangles belonging to this object.
   vector<Triangle> triangles;
+
+  GLuint vertex_patches_buffer;
+  GLuint normal_patches_buffer;
+  GLuint surfels_per_level_patches_buffer;
+
+  GLuint vertTextBufferObject; ///< Texture buffer object
+  GLuint normalTextBufferObject; ///< Texture buffer object
+
+  uint numPatches, numVertsArray;
+
+  // Vector of surfels belonging to this object.
+  vector<Surfel> surfels[LOD_LEVELS];
+
+  GLint * merged_ids[LOD_LEVELS];
+
+  vector<Surfel> surfels_lod;
+  vector<GLuint> surfels_per_level;
+
+  KdTree3D * kdTree;
 
 };
 

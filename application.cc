@@ -14,8 +14,7 @@
 // #define CANVAS_WIDTH  1024
 // #define CANVAS_HEIGHT 1024
  
-#define CANVAS_WIDTH  768
-#define CANVAS_HEIGHT 768
+
 
 // #define CANVAS_WIDTH  512
 // #define CANVAS_HEIGHT 512
@@ -269,8 +268,11 @@ void Application::createPointRender( int type ) {
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
-  else {
+  else if (type == 1){
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
+  }
+  else if (type == 2) {
+    point_based_render = new PyramidPointRenderLod(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
 
   assert (point_based_render);
@@ -320,14 +322,17 @@ int Application::readFile ( const char * filename ) {
 
   primitives.back().setPerVertexColor(0);
 
-  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
-
+  // Create a new object
   int id = objects.size();
-  //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
-
-  // Create a new object and connect to new primitive
   objects.push_back( Object( id ) );
   objects.back().setFilename( filename );
+
+  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+
+
+  //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
+
+  // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
   primitives.back().setRendererType( PYRAMID_POINTS );
@@ -341,6 +346,103 @@ int Application::readFile ( const char * filename ) {
   createPointRender( 0 );
 
   return id;
+}
+
+int Application::readLodFile ( const char * filename ) {
+
+  char lodFilename[200];
+  strcpy(lodFilename, filename);
+  char* ptr = strstr(filename, ".lod");
+  strncpy (ptr, "", 4);
+
+  int id = objects.size();
+  //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
+
+  // Create a new object and connect to new primitive
+  objects.push_back( Object( id ) );
+  objects.back().setFilename( filename );
+
+  primitives.push_back( Primitives( primitives.size() ) );
+
+  cout << "file " << filename << "  founded, reading it... " << endl;
+  
+  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+
+  cout << "lodfile " << lodFilename << "  founded, reading it... " << endl;
+  
+  primitives.back().readFileLOD(lodFilename);
+  
+  cout << "readed! " << endl;
+
+//   } else {
+
+//     cout << "reading " << filename << " ..." << flush;
+
+//     // Create a new primitive from given file
+//     readPlyTriangles (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+//     //    readPlyTriangles (filename, (primitives.back()).getSurfels());
+
+//     cout << " readed! " << endl;
+
+//     primitives.back().createLOD();
+
+//     cout << "writting in file " << str << flush;
+
+//     primitives.back().writeFileLOD(str.c_str());
+
+//     cout << " written! " << endl;
+
+    primitives.back().setType( 1.0 );
+    primitives.back().setRendererType( PYRAMID_POINTS_LOD );
+
+//   }
+
+  cout << endl
+       << "### Number of PATCHES in ###" << endl
+       << "Lowest Resolution : " << primitives.back().numPrimitivesIn()  << endl
+       << "All Resolutions   : " << primitives.back().numPrimitivesLOD() << endl
+       << endl;
+
+
+  objects.back().addPrimitives( primitives.back().getId() );
+
+  num_objects = objects.size();
+
+  // Count total number of points being rendered
+  number_surfels += primitives.back().getSurfels()->size();
+
+  cout << "objects : " << num_objects << endl;
+  cout << "primitives : " << primitives.size() << endl;
+  cout << "number of surfels : " << number_surfels << endl;
+  
+  //  if (!point_based_render)
+  createPointRender( 2 );
+
+  cout << "created point renderer" << endl;
+
+  return id;
+}
+
+int Application::writeLodFile ( void ) {
+  if (selected_objs.empty())
+    return -1;
+
+  Object *obj = &objects[selected_objs.front()];
+
+  Primitives *prim = &primitives[obj->getPrimitivesList()->front()];
+
+  prim->createLOD();
+
+  char lodFilename[200];
+  strcpy (lodFilename, obj->filename());
+  strcat (lodFilename, ".lod");
+
+  cout << "writting in file " << lodFilename << flush;
+
+  prim->writeFileLOD( lodFilename );
+  
+  cout << " written! " << endl;
+  return 1;
 }
 
 /// Mouse Left Button Function, starts rotation
@@ -497,173 +599,4 @@ void Application::setPerVertexColor ( bool b, int object_id ) {
 void Application::setAutoRotate ( bool r ) {
   rotating = r;
 }
-
-/// Keyboard keys function
-/// @param key Pressed key
-/// @param x X coordinate of mouse pointer
-/// @param y Y coordinate of mouse pointer
-//void keyboard(unsigned char key_pressed, int x, int y) {
- //  Quat q;
-//   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
-//     switch (key_pressed) {     
-//     case '+' :
-//     case '=' :
-//       prefilter_size += 0.25;
-//       point_based_render->setPrefilterSize(prefilter_size);
-//       break;
-//     case '-' :
-//     case '_' :
-//       if (prefilter_size > 0.0)
-// 	prefilter_size -= 0.25;
-//       point_based_render->setPrefilterSize(prefilter_size);
-//       break;
-//     };
-//   }
-//   else {
-//     switch (key_pressed) {
-//     case 27 :
-//     case 'q' :
-//     case 'Q' :
-//       exit(0);
-//       break;
-//     case 'h' : 
-//     case 'H' :
-//       show_screen_info = !show_screen_info;
-//       break;
-//     case 'v' :
-//     case 'V' :
-//       camera->switchViewMode();  
-//       break;
-//     case 'p' :
-//     case 'P' :
-//       show_points = !show_points;
-//       break;
-//     case 'r' :
-//     case 'R' :
-//       rotating = !rotating;
-//       break;
-//     case '1' :
-//       selected_obj = 0;
-//       cout << "selected : 1" << endl;
-//       break;
-//     case '2' :
-//       if (num_objects > 1) {
-// 	selected_obj = 1;
-// 	cout << "selected : 2" << endl;
-//       }
-//       break;
-//     case '3' :
-//       if (num_objects > 2) {
-// 	selected_obj = 2;
-// 	cout << "selected : 3" << endl;
-//       }
-//       break;
-//     case '4' :
-//       if (num_objects > 3) {
-// 	selected_obj = 3;
-// 	cout << "selected : 4" << endl;
-//       }
-//       break;
-//     case '5' :
-//       if (num_objects > 4) {
-// 	selected_obj = 4;
-// 	cout << "selected : 5" << endl;
-//       }
-//     case '6' :
-//       if (num_objects > 5) {
-// 	selected_obj = 5;
-// 	cout << "selected : 6" << endl;
-//       }
-//     case '7' :
-//       if (num_objects > 6) {
-// 	selected_obj = 6;
-// 	cout << "selected : 7" << endl;
-//       }
-//     case '8' :
-//       if (num_objects > 7) {
-// 	selected_obj = 7;
-// 	cout << "selected : 8" << endl;
-//       }
-//     case '9' :
-//       if (num_objects > 8) {
-// 	selected_obj = 8;
-// 	cout << "selected : 9" << endl;
-//       }
-//       break;
-//     case '0' :
-//       selected_obj = -1;
-//       cout << "no object selected" << endl;
-//       q = camera->rotationQuat();
-//       cout << "quat : " << q.a << " " << q.x << " " << q.y << " " << q.z << endl;
-//       double c[4];
-//       camera->eyeVec(c);
-//       cout << "eye : " << c[0] << " " << c[1] << " " << c[2] << endl;      
-//       break;
-//     case 't':
-//       fps_loop = 100;
-//       break;
-//     case 'z' :
-//       depth_culling = !depth_culling;
-//       point_based_render->setDepthTest(depth_culling);
-//       cout << "depth test : " << depth_culling << endl;
-//       break;
-//     case 'e' :
-//       elliptical_weight = !elliptical_weight;
-//       point_based_render->setEllipticalWeight(elliptical_weight);
-//       cout << "elliptical_weight : " << elliptical_weight << endl;
-//       break;
-//     case 'c' :
-//       color_model = !color_model;
-//       createPointRender ( PYRAMID_POINTS );
-//       cout << "color_model : " << color_model << endl;
-//       break;
-//     case ']' :
-//       ++material_id;
-//       if (material_id == NUM_MATERIALS)
-// 	material_id = 0;
-//       changeMaterial();
-//       cout << "material : " << material_id << endl;
-//       break;
-//     case '[' :
-//       --material_id;
-//       if (material_id < 0)
-// 	material_id = NUM_MATERIALS - 1;
-//       changeMaterial();
-//       cout << "material : " << material_id << endl;
-//       break;
-//     case '.' :
-//       analysis_filter_size += 1;
-//       if (analysis_filter_size > 10)
-// 	analysis_filter_size = 0;
-//       cout << "analysis_filter_size : " << analysis_filter_size << endl;
-//       break;
-//     case ',' :
-//       analysis_filter_size -= 1;
-//       if (analysis_filter_size < 0)
-// 	analysis_filter_size = 0;
-//       cout << "analysis_filter_size : " << analysis_filter_size << endl;
-//       break;
-//     case '+' :
-//     case '=' :
-//       if (reconstruction_filter_size > 0.1)
-// 	reconstruction_filter_size += 0.1;
-//       else
-// 	reconstruction_filter_size += 0.01;
-//       point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
-//       break;
-//     case '-' :
-//     case '_' :
-//       if (reconstruction_filter_size > 0.0) {
-// 	if (reconstruction_filter_size > 0.2)
-// 	  reconstruction_filter_size -= 0.1;
-// 	else	
-// 	  reconstruction_filter_size -= 0.01;
-//       }
-
-//       point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
-//       break;
-//     };
-//   }
-//   glutPostRedisplay(); 
-//}
 

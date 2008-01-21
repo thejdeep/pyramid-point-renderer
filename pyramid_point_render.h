@@ -9,11 +9,11 @@
 #ifndef __PYRAMID_POINT_RENDER_H__
 #define __PYRAMID_POINT_RENDER_H__
 
-#define GL_GLEXT_PROTOTYPES
+/* #define GL_GLEXT_PROTOTYPES */
 
-extern "C" {
-#include "timer.h"
-}
+/* extern "C" { */
+/* #include "timer.h" */
+/* } */
 
 #include <math.h>
 #include <assert.h>
@@ -78,18 +78,18 @@ class PyramidPointRender : public PointBasedRender
   int canvas_border_height;
 
   /// Projection shader.
-  GLSLKernel *shader_projection;
+  glslKernel *shader_projection;
 
   /// Pyramid copy phase shader.
-  GLSLKernel *shader_copy;
+  glslKernel *shader_copy;
   /// Pyramid analysis phase shader.
-  GLSLKernel *shader_analysis;
+  glslKernel *shader_analysis;
   /// Pyramid synthesis phase shader.
-  GLSLKernel *shader_synthesis;
+  glslKernel *shader_synthesis;
   /// Phong shading shader.
-  GLSLKernel *shader_phong;
+  glslKernel *shader_phong;
   /// Pixel shader.
-  GLSLKernel *shader_show;
+  glslKernel *shader_show;
 
   /// The application-created framebuffer object.
   GLuint fbo;

@@ -9,7 +9,7 @@
 #ifndef __POINT_BASED_RENDER_H__
 #define __POINT_BASED_RENDER_H__
 
-#include "glslkernel.h"
+#include "glslKernel.h"
 #include "surfels.h"
 #include "pyramid_types.h"
 #include "materials.h"
@@ -33,6 +33,7 @@ class PointBasedRender
     {}
 
    virtual ~PointBasedRender() {};
+
    
    virtual void draw( ) {}
    virtual void draw(int) {}

@@ -16,6 +16,8 @@
 #include "math.h"
 #include <algorithm>
 #include <iostream>
+#include <vector>
+#include <fstream>
 
 #include "quat.h"
 
@@ -23,6 +25,33 @@
 enum renderMode {ORTHOGRAPHIC, PERSPECTIVE};
 
 using namespace std;
+
+// Key Frame type
+typedef struct _keyframe {
+	/// Constructor - void
+	_keyframe(void) : rot() {
+		pos[0] = pos[1] = pos[2] = 0.0;
+	}
+	/// Constructor
+	_keyframe(double _p[], Quat _r) : rot(_r) {
+		pos[0] = _p[0]; pos[1] = _p[1]; pos[2] = _p[2];
+	}
+	/// I/O operator - output
+        inline friend ostream& operator << (ostream& out, const struct _keyframe& k) {
+		out << k.rot.x << " " << k.rot.y << " " << k.rot.z << " " << k.rot.a << " "
+		    << k.pos[0] << " " << k.pos[1] << " " << k.pos[2];
+                return out;
+        }
+	/// I/O operator - input
+        inline friend istream& operator >> (istream& in, struct _keyframe& k) {
+		in >> k.rot.x >> k.rot.y >> k.rot.z >> k.rot.a
+		   >> k.pos[0] >> k.pos[1] >> k.pos[2];
+                return in;
+        }
+	/// Data
+	Quat rot;
+	double pos[3];
+} keyframe;
 
 /// Camera class
 /// Controls manipulation in 3D using a trackball with quaternions.
@@ -55,9 +84,11 @@ public:
 
     position[0] = 0.0; position[1] = 0.0; position[2] = 0.0;
     
-    light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 10.0; light_position[3] = 0.0;
+    light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
 
     radius = 1.0;
+
+    frameVideo = -1.0;
   }
 
   /// Destructor
@@ -142,6 +173,40 @@ public:
   void eyeVec ( double e[] ) const { e[0] = eye[0]; e[1] = eye[1]; e[2] = eye[2]; };  
   void positionVec ( double e[] ) const { e[0] = position[0]; e[1] = position[1]; e[2] = -position[2]; };
 
+  void createKeyFrame( void ) {
+	  keyframe k( position, q_rot );
+	  keyFrames.push_back( k );
+  }
+
+  void writeKeyFrames( const char* fn ) {
+	  ofstream out(fn);
+	  if (out.fail()) return;
+	  if (keyFrames.size() == 0) return;
+	  out << keyFrames.size() << endl;
+	  for (uint i=0; i<keyFrames.size(); i++)
+		  out << keyFrames[i] << endl;
+  }
+
+  void loadKeyFrames( const char* fn ) {
+	  ifstream in(fn);
+	  if (in.fail()) return;
+	  keyFrames.clear();
+	  uint numFrames;
+	  in >> numFrames;
+	  keyframe k;
+	  for (uint i=0; i<numFrames; i++) {
+		  in >> k;
+		  keyFrames.push_back( k );
+	  }
+	  frameVideo = -1.0;
+  }
+
+  void runFrames( void ) { frameVideo = 0.0; }
+
+  bool runningFrames( void ) {
+	  return ( (frameVideo >= 0.0) && (keyFrames.size() > 0) );
+  }
+
 private:
 
   // Screen size
@@ -183,7 +248,6 @@ private:
   // Quaternion accumulation during rotation
   Quat q_rot;
 
-
   // Light position
   GLfloat light_position[4];
 
@@ -192,6 +256,10 @@ private:
   double mouse_start[3], mouse_curr[3];
   // Mouse button
   int button_pressed;
+
+  vector< keyframe > keyFrames;
+
+  double frameVideo;
 
   double squaredDistance(const double [3], const double [3]) const;
 

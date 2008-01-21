@@ -8,6 +8,7 @@ pprMainWindow::pprMainWindow (QMainWindow *parent): QMainWindow(parent)
   setupUi (this);
 
   connect( actionOpen, SIGNAL( triggered() ), this, SLOT( fileOpen() ) );
+  connect( actionWrite_LOD, SIGNAL( triggered() ), this, SLOT( writeLod() ) );
 
   modelsTreeWidget->setSelectionMode( QAbstractItemView::ExtendedSelection );
   widget->setFpsDisplay ( lcdNumberFps ); 
@@ -27,6 +28,10 @@ void pprMainWindow::init( void ) {
  comboColors->setCurrentIndex( application->getMaterial() );
 }
 
+void pprMainWindow::writeLod( void ) {
+  application->writeLodFile();
+}
+
 /**
  * Opens a file with the dialog box.
  **/
@@ -35,7 +40,7 @@ void pprMainWindow::fileOpen( void )
   QImage textura,buf;
   QString sfile;
 		
-  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol)"));
+  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol *.lod)"));
 
   const char* filename = sfile.toLatin1();
 
@@ -43,16 +48,16 @@ void pprMainWindow::fileOpen( void )
   vector<int> objs_ids;
 
   QStringList name_split = sfile.split("/");
-  QStringList name_split2 = name_split.back().split(".");
+  QStringList name_split2 = name_split.back().split("."); 
 
   if ( !sfile.isEmpty() ) {
     QString filetype = name_split2.back();
     if (filetype.compare("ply") == 0)
       objs_ids.push_back( application->readFile( filename ) );
-    else if (filetype.compare("pol") == 0) {
+    else if (filetype.compare("pol") == 0)
       application->readPolFile( filename, &objs_ids );
-      
-    }
+    else if (filetype.compare("lod") == 0)
+      objs_ids.push_back( application->readLodFile( filename ) );
     else
       cout << "File extension not supported" << endl;
   }
@@ -134,7 +139,7 @@ void pprMainWindow::on_checkBoxAutoRotate_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  //application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
 }
 

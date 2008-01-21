@@ -756,38 +756,32 @@ void PyramidPointRender::createShaders ( void ) {
 
   bool shader_inst_debug = 0;
 
-  shader_projection = new GLSLKernel();
-  assert( shader_projection->has_GLSL() );
+  shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_point_projection.vert");
   shader_projection->fragment_source("shader_point_projection.frag");
   shader_projection->install( shader_inst_debug );
 
-  shader_analysis = new GLSLKernel();
-  assert( shader_analysis->has_GLSL() );
+  shader_analysis = new glslKernel();
   shader_analysis->vertex_source("shader_analysis.vert");
   shader_analysis->fragment_source("shader_analysis.frag");
   shader_analysis->install( shader_inst_debug );
 
-  shader_copy = new GLSLKernel();
-  assert( shader_copy->has_GLSL() );
+  shader_copy = new glslKernel();
   shader_copy->vertex_source("shader_copy.vert");  
   shader_copy->fragment_source("shader_copy.frag");
   shader_copy->install( shader_inst_debug );
 
-  shader_synthesis = new GLSLKernel();
-  assert( shader_synthesis->has_GLSL() );
+  shader_synthesis = new glslKernel();
   shader_synthesis->vertex_source("shader_synthesis.vert");
   shader_synthesis->fragment_source("shader_synthesis.frag");
   shader_synthesis->install( shader_inst_debug );
 
-  shader_phong = new GLSLKernel();
-  assert( shader_phong->has_GLSL() );
+  shader_phong = new glslKernel();
   shader_phong->vertex_source("shader_phong.vert");
   shader_phong->fragment_source("shader_phong.frag");
   shader_phong->install( shader_inst_debug );
 
-  shader_show = new GLSLKernel();
-  assert( shader_phong->has_GLSL() );
+  shader_show = new glslKernel();
   shader_show->vertex_source("shader_show.vert");
   shader_show->fragment_source("shader_show.frag");
   shader_show->install( shader_inst_debug );

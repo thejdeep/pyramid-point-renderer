@@ -225,6 +225,11 @@
     </item>
     <item>
      <property name="text" >
+      <string>Pyramid Points LOD</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
       <string>None</string>
      </property>
     </item>
@@ -466,6 +471,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen" />
+    <addaction name="actionWrite_LOD" />
     <addaction name="separator" />
     <addaction name="actionQuit" />
    </widget>
@@ -513,6 +519,11 @@
   <action name="actionQuit" >
    <property name="text" >
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionWrite_LOD" >
+   <property name="text" >
+    <string>Write LOD</string>
    </property>
   </action>
  </widget>

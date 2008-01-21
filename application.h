@@ -26,24 +26,26 @@
 #include <list>
 #include <vector>
 
-
-#include "camera.h"
-#include "materials.h"
-
 //#include "ewa_surface_splatting.h"
 //#include "pyramid_triangle_renderer.h"
 //#include "triangle_renderer.h"
 
 #include "pyramid_point_render.h"
 #include "pyramid_point_render_color.h"
+#include "pyramid_point_render_lod.h"
 #include "pyramid_point_render_trees.h"
 
 #include "object.h"
+#include "camera.h"
+#include "materials.h"
 
 #define PI 3.14159265
 #define HALF_PI 1.570796325
 #define QUARTER_PI 0.785398163
 #define E 2.71828183
+
+#define CANVAS_WIDTH  768
+#define CANVAS_HEIGHT 768
 
 class Application
 {
@@ -65,7 +67,10 @@ class Application
   Application();
   ~Application() {};
 
+
+  int writeLodFile ( void );
   int readFile ( const char * filename );
+  int readLodFile ( const char * filename );
   int readPolFile (const char * filename, vector<int> * ids);
   void drawPoints ( void );
   void draw ( void );

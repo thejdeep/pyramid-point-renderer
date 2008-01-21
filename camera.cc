@@ -50,6 +50,43 @@ void Camera::setView (void) {
 
   initLight();
 
+  if ( runningFrames() ) {
+
+	  unsigned int frame = (unsigned int)frameVideo;
+	  double step = frameVideo - frame;
+	  double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
+
+	  if ( keyFrames.size() == (frame - 1) )
+		  frameVideo = -1.0;
+	  else {
+		  position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
+		  position[1] = keyFrames[frame].pos[1] + (keyFrames[frame+1].pos[1]-keyFrames[frame].pos[1])*(step);
+		  position[2] = keyFrames[frame].pos[2] + (keyFrames[frame+1].pos[2]-keyFrames[frame].pos[2])*(step);
+
+		  theta = acos( (keyFrames[frame].rot.x * keyFrames[frame+1].rot.x) +
+				(keyFrames[frame].rot.y * keyFrames[frame+1].rot.y) +
+				(keyFrames[frame].rot.z * keyFrames[frame+1].rot.z) +
+				(keyFrames[frame].rot.a * keyFrames[frame+1].rot.a) );
+
+		  sin_theta = sin( theta );
+		  coef_a = ( sin( ( 1.0 - step ) * theta ) / sin_theta );
+		  coef_b = ( sin( step * theta ) / sin_theta );
+
+		  q_rot.x = ( coef_a * keyFrames[frame].rot.x ) + ( coef_b * keyFrames[frame+1].rot.x );
+		  q_rot.y = ( coef_a * keyFrames[frame].rot.y ) + ( coef_b * keyFrames[frame+1].rot.y );
+		  q_rot.z = ( coef_a * keyFrames[frame].rot.z ) + ( coef_b * keyFrames[frame+1].rot.z );
+		  q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );
+		  
+		  /*
+		  q_rot.x = keyFrames[frame].rot.x + (keyFrames[frame+1].rot.x-keyFrames[frame].rot.x)*(step);
+		  q_rot.y = keyFrames[frame].rot.y + (keyFrames[frame+1].rot.y-keyFrames[frame].rot.y)*(step);
+		  q_rot.z = keyFrames[frame].rot.z + (keyFrames[frame+1].rot.z-keyFrames[frame].rot.z)*(step);
+		  q_rot.a = keyFrames[frame].rot.a + (keyFrames[frame+1].rot.a-keyFrames[frame].rot.a)*(step);
+		  */
+		  frameVideo += 0.01;
+	  }
+  }
+
   glTranslatef(position[0], position[1], position[2]);
   glTranslatef(-eye[0], -eye[1], -eye[2]);
 
@@ -163,12 +200,14 @@ void Camera::startRotation(int x, int y) {
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
 void Camera::startQuatRotation(int x, int y, Quat* q) {
+
   q_last = *q;
 
   // Save initial click
   mouse_start[0] = x;
   mouse_start[1] = screen_height - y;
   mouse_start[2] = 0.0;
+
 }
 
 /// Ends a rotation procedure
@@ -348,6 +387,10 @@ void Camera::translateVec (int x, int y, double* vec) {
   rotVec[0] = 10*(mouse_curr[0] - mouse_start[0]) / screen_width;
   rotVec[1] = 10*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
+  mouse_start[0] = mouse_curr[0];
+  mouse_start[1] = mouse_curr[1];
+  mouse_start[2] = mouse_curr[2];
+
   // rotates displacement to align with object axis
   Quat q = q_rot;
   q.x *= -1; q.y *= -1; q.z *= -1;
@@ -381,6 +424,9 @@ void Camera::zoomingVec (int x, int y, double* vec) {
 
   rotVec[2] -= 15.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
+  mouse_start[0] = mouse_curr[0];
+  mouse_start[1] = mouse_curr[1];
+  mouse_start[2] = mouse_curr[2];
 
   // rotates displacement to align with object axis
   Quat q = q_rot;
