@@ -87,7 +87,6 @@ class Primitives
 
   void reorderSurfels ( void );
   void createLOD ( int lod );
-  void createKdTree( int lod );
 
   void setPyramidPointsArraysLOD( void );
   void setPatchesArray ( void );
@@ -104,7 +103,6 @@ class Primitives
   void setTrianglesDisplayList( void );
   void setTrianglesArrays( void );
   void setLinesDisplayList( void );
-
 
   // Primitives group identification number.
   int id;

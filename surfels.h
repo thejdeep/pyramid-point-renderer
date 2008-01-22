@@ -278,6 +278,12 @@ class Surfel
   const double radius (void) const { return r; }
   void setRadius (double _r) { r = _r; }
   
+  /// I/O operator - output
+  inline friend ostream& operator << (ostream& out, const Surfel &s) {
+    out << s.id_num << " " << s.p.x() << " " << s.p.y() << " " << s.p.z() << " " << s.r << " "
+	<< s.n.x() << " " << s.n.y() << " " << s.n.z();
+    return out;
+  }
 
   /// Point coordinates
   Point p;

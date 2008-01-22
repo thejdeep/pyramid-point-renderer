@@ -20,8 +20,8 @@ pprMainWindow::pprMainWindow (QMainWindow *parent): QMainWindow(parent)
 void pprMainWindow::init( void ) {
  doubleSpinBoxReconstructionFilter->setValue( application->getReconstructionFilter() );
  doubleSpinBoxPrefilter->setValue( application->getPrefilter() );
- doubleSpinBoxReconstructionFilter->setDecimals(3);
- doubleSpinBoxPrefilter->setDecimals(3);
+ doubleSpinBoxReconstructionFilter->setDecimals(5);
+ doubleSpinBoxPrefilter->setDecimals(5);
  doubleSpinBoxReconstructionFilter->setSingleStep(0.1);
  doubleSpinBoxPrefilter->setSingleStep(0.1);
 

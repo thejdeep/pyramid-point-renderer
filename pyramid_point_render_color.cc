@@ -365,7 +365,10 @@ int PyramidPointRenderColor::projectionCallbackFunc(pixels_struct dest, pixels_s
   if (use_lod) {
     shader_projection->set_uniform("vertex_buffer", 6);
     shader_projection->set_uniform("normal_buffer", 7);
-    shader_projection->set_uniform("total_surfels", (GLint)num_primitives);
+    //    shader_projection->set_uniform("total_surfels", (GLint)num_primitives);
+    //GLint index = shader_projection->get_attribute_index("surfels_per_level");
+    //cout << "index : " << index << endl;
+    //    shader_projection->bind_attribute_location("surfels_per_level", 6);
   }
   return TRUE;
 }
@@ -786,7 +789,7 @@ void PyramidPointRenderColor::createFBO() {
  **/
 void PyramidPointRenderColor::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
   shader_projection_no_lod = new glslKernel();
   shader_projection_no_lod->vertex_source("shader_point_projection_color.vert");

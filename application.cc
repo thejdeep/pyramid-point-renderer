@@ -47,8 +47,8 @@ Application::Application( void ) {
   material_id = 9;
   selected_objs.clear();
 
-  reconstruction_filter_size = 0.01;
-  prefilter_size = 0.0;
+  reconstruction_filter_size = 1.0;
+  prefilter_size = 1.0;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);

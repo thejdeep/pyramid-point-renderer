@@ -25,6 +25,8 @@ void main() {
 
   gl_FrontColor = gl_Color;
 
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+
   if ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < 0.00 ) {
 
     radius_depth_w_vertex.x = 0.0;

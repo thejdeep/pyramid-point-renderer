@@ -10,6 +10,8 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
+#define ATTRIB_INDEX 6
+
 GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
@@ -61,19 +63,29 @@ void Primitives::render ( void ) {
     //glCallList(triangleDisplayList);
   }
   else if (renderer_type == PYRAMID_POINTS_LOD) {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
-    glVertexPointer(4, GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
+    glTexCoordPointer(4, GL_INT, 0, NULL);
+
+//     glEnableVertexAttribArray(ATTRIB_INDEX);
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+//     glVertexAttribPointer(ATTRIB_INDEX, 4, GL_INT, GL_FALSE, 0, (const void*)surfels_per_level_array);
 
     glEnableClientState(GL_NORMAL_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
     glNormalPointer(GL_FLOAT, 0, NULL);
 
-    glEnableClientState(GL_COLOR_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
-    glColorPointer(4, GL_FLOAT, 0, NULL);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
+    glVertexPointer(4, GL_FLOAT, 0, NULL);
 
     glDrawArrays(GL_POINTS, 0, numPatches);
+
+    //glDisableVertexAttribArray(ATTRIB_INDEX);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
   else if (renderer_type == PYRAMID_LINES) {
 
@@ -200,8 +212,8 @@ void Primitives::setRendererType ( int rtype ) {
   if (renderer_type == PYRAMID_POINTS)
     setPyramidPointsArraysColor();
   if (renderer_type == PYRAMID_POINTS_LOD) {
-//     setPyramidPointsArraysLOD();
-//     setPatchesArray();
+    setPyramidPointsArraysLOD();
+    setPatchesArray();
   }
   else if (renderer_type == PYRAMID_POINTS_COLOR)
     setPyramidPointsDisplayList();
@@ -394,12 +406,12 @@ void Primitives::setPyramidPointsArraysLOD ( void ) {
 void Primitives::setPatchesArray ( void ) {
 
   GLfloat *vertex_array, *normal_array;
-  GLfloat *surfels_per_level_array;
+  GLint *surfels_per_level_array;
   vertex_array = new GLfloat[numPatches*4];
   normal_array = new GLfloat[numPatches*3];
-  surfels_per_level_array = new GLfloat[numPatches*4];
+  surfels_per_level_array = new GLint[numPatches*4];
   
-  int total_surfels = surfels_lod.size();
+  //int total_surfels = surfels_lod.size();
 
   for (uint i = 0; i < numPatches; ++i) {
     Point p = surfels[LOD_LEVELS-1][i].position();
@@ -413,11 +425,15 @@ void Primitives::setPatchesArray ( void ) {
     normal_array[i*3 + 1] = n.y();
     normal_array[i*3 + 2] = n.z();
 
-    surfels_per_level_array[i*4 + 0] = (GLfloat)(surfels_per_level[i*4 + 0] / (GLfloat)total_surfels);
-    surfels_per_level_array[i*4 + 1] = (GLfloat)surfels_per_level[i*4 + 3] / 4.0;
-    surfels_per_level_array[i*4 + 2] = (GLfloat)surfels_per_level[i*4 + 2] / 16.0;
-    surfels_per_level_array[i*4 + 3] = (GLfloat)surfels_per_level[i*4 + 1] / 64.0;
+//     surfels_per_level_array[i*4 + 0] = (GLfloat)(surfels_per_level[i*4 + 0] / (GLfloat)total_surfels);
+//     surfels_per_level_array[i*4 + 1] = (GLfloat)surfels_per_level[i*4 + 1] / 4.0;
+//     surfels_per_level_array[i*4 + 2] = (GLfloat)surfels_per_level[i*4 + 2] / 16.0;
+//     surfels_per_level_array[i*4 + 3] = (GLfloat)surfels_per_level[i*4 + 3] / 64.0;
 
+    surfels_per_level_array[i*4 + 0] = (GLint)surfels_per_level[i*4 + 0];
+    surfels_per_level_array[i*4 + 1] = (GLint)surfels_per_level[i*4 + 1];
+    surfels_per_level_array[i*4 + 2] = (GLint)surfels_per_level[i*4 + 2];
+    surfels_per_level_array[i*4 + 3] = (GLint)surfels_per_level[i*4 + 3];
   }
 
   glGenBuffers(1, &vertex_patches_buffer);
@@ -430,24 +446,24 @@ void Primitives::setPatchesArray ( void ) {
 
   glGenBuffers(1, &surfels_per_level_patches_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
-  glBufferData(GL_ARRAY_BUFFER, numPatches * 4 * sizeof(GLfloat), (const void*)surfels_per_level_array, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, numPatches * 4 * sizeof(GLint), (const void*)surfels_per_level_array, GL_STATIC_DRAW);
+
 
   delete [] vertex_array;
   delete [] normal_array;
   delete [] surfels_per_level_array;
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
-  glVertexPointer(4, GL_FLOAT, 0, NULL);
-
   glEnableClientState(GL_NORMAL_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
   glNormalPointer(GL_FLOAT, 0, NULL);
 
-  glEnableClientState(GL_COLOR_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
-  glColorPointer(4, GL_FLOAT, 0, NULL);
+  glTexCoordPointer(4, GL_INT, 0, NULL);
 
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
+  glVertexPointer(4, GL_FLOAT, 0, NULL);
 }
 
 
@@ -1047,10 +1063,9 @@ void Primitives::setLinesDisplayList( void ) {
 }
 
 
+void Primitives::createLOD ( int lod ) {
 
-/// Initializes an empty kd-tree
-void Primitives::createKdTree( int lod ) {
-
+  /** Create KdTree **/
   if (kdTree)
     delete kdTree;
 
@@ -1059,15 +1074,11 @@ void Primitives::createKdTree( int lod ) {
   Box worldCoords(min, max);
   kdTree = new KdTree3D(worldCoords);
 
-  for (surfelVectorIter it = surfels[lod].begin(); it != surfels[lod].end(); ++it) {
+  vector<Surfel> s = surfels[lod-1];
+
+  for (surfelVectorIter it = s.begin(); it != s.end(); ++it) {
     kdTree->insert ( &(*it) );
   }
-
-}
-
-void Primitives::createLOD ( int lod ) {
-
-  createKdTree(lod-1);
 
   cout << "created kd-tree " << lod << endl;
 
@@ -1077,13 +1088,13 @@ void Primitives::createLOD ( int lod ) {
 
     if ( node->isLeaf() )
       {
-      if (node->itemPtrCount() > 0) {
-	Surfel s = *(node->element(0));
-	s.setId(id);
-	surfels[lod].push_back( s );
-	++id;
+	if (node->itemPtrCount() > 0) {
+	  Surfel s = *(node->element(0));
+	  s.setId(id);
+	  surfels[lod].push_back( s );
+	  ++id;
+	}
       }
-    }
 
     node = (KdTree3DNode*)node->next();
   }
@@ -1123,11 +1134,10 @@ void Primitives::reorderSurfels ( void ) {
   cout << "ordering surfels " <<  endl;
 
   int num_surfels = 0;
-  for (int i = 0; i < LOD_LEVELS; ++i)
+  for (int i = 0; i < LOD_LEVELS-1; ++i)
     num_surfels += surfels[i].size();
 
   surfels_per_level.reserve( surfels[LOD_LEVELS-1].size()*4 );
-  //***** including level 3 ?!?!?!?!?!?!
   surfels_lod.reserve( num_surfels );
 
   int num_surfels_per_level[LOD_LEVELS];
@@ -1141,13 +1151,13 @@ void Primitives::reorderSurfels ( void ) {
     surfels_per_level.push_back( surfels_lod.size() );
 
     patch_id = it->id();
-    
+
     for (int i = LOD_LEVELS-2; i >= 0; --i) {
 
       num_surfels_per_level[i] = 0;
       
       for (int k = 0; k < num_surfels_per_level[i+1]; ++k) {
-       
+
 	for (int j = 0; j < 4; ++j) {
 	  int merged_id = merged_ids[i+1][patch_id*4 + j];
 	  if (merged_id != -1) {
@@ -1156,25 +1166,26 @@ void Primitives::reorderSurfels ( void ) {
 	  }
 	}
       
-	if ( it == surfels[LOD_LEVELS-1].begin() && (i == LOD_LEVELS-2))
+	if ( (it == surfels[LOD_LEVELS-1].begin()) && (i == LOD_LEVELS-2))
 	  curr_surfel = surfels_lod.begin();
 	else
 	  curr_surfel++;
+
 	patch_id = curr_surfel->id();
-	
+
       }
     }
 
-    for (int i = 0; i < LOD_LEVELS-1; ++i) {    
+
+    for (int i = LOD_LEVELS-2; i >= 0; --i) {
       surfels_per_level.push_back( (GLuint)num_surfels_per_level[i] );
-    }   
+    }  
+
 
     curr_surfel = surfels_lod.end();
     curr_surfel--;
-  }
+  } // it
 
-
-  cout << "surfels " << LOD_LEVELS-1 << " : " << surfels[LOD_LEVELS-1].size() << endl;
 
   int cnt = 0;
   int cnt_lods[3] = {0, 0, 0};
@@ -1282,10 +1293,10 @@ void Primitives::writeFileLOD ( const char* fn ) {
 		out << px << " " << py << " " << pz << " " << r << " "
 		    << nx << " " << ny << " " << nz << endl;
 	
-		out << (GLfloat)(surfels_per_level[i*4 + 0] / (GLfloat)total_surfels) << " "
-		    << (GLfloat)(surfels_per_level[i*4 + 3] / 4.0) << " "
-		    << (GLfloat)(surfels_per_level[i*4 + 2] / 16.0) << " "
-		    << (GLfloat)(surfels_per_level[i*4 + 1] / 64.0) << endl;
+		out << surfels_per_level[i*4 + 0] << " "
+		    << surfels_per_level[i*4 + 1] << " "
+		    << surfels_per_level[i*4 + 2] << " "
+		    << surfels_per_level[i*4 + 3] << endl;
 
 	}
 
@@ -1295,134 +1306,31 @@ void Primitives::writeFileLOD ( const char* fn ) {
 
 void Primitives::readFileLOD ( const char* fn ) {
 
-	ifstream in(fn);
+  ifstream in(fn);
 
-	//*** setType & setRendererType ***
+  in >> numVertsArray;
 
-	type = 1.0;
+  surfels_lod.clear();
 
-	renderer_type = PYRAMID_POINTS; 
+  GLfloat x, y, z, nx, ny, nz, r;
+  for (uint i = 0; i < numVertsArray; i++) {
+    in >> x >> y >> z >> r >> nx >> ny >> nz;
+    surfels_lod.push_back(Surfel(Point(x, y, z), Vector(nx, ny, nz), r, i));
+  }
 
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
+  in >> numPatches;
 
-	glDeleteBuffers(1, &vertex_buffer);
-	glDeleteBuffers(1, &normal_buffer);
-
-	//*** Begin *** setPyramidPointsArrays ***
-
-	in >> numVertsArray;
-
-	GLfloat *vertex_array, *normal_array;
-
-	vertex_array = new GLfloat[numVertsArray * 4];
-	normal_array = new GLfloat[numVertsArray * 4];
-
-	uint pos = 0;
-	for (uint i = 0; i < numVertsArray; i++) {
-
-		in >> vertex_array[pos*4 + 0] >> vertex_array[pos*4 + 1]
-		   >> vertex_array[pos*4 + 2] >> vertex_array[pos*4 + 3];
-
-		in >> normal_array[pos*4 + 0] >> normal_array[pos*4 + 1]
-		   >> normal_array[pos*4 + 2];
-
-		normal_array[pos*4 + 3] = 1.0;
-
-		++pos;
-
-	}
-
-	glGenBuffers(1, &vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, numVertsArray * 4 * sizeof(GLfloat), (const void*)vertex_array, GL_STATIC_DRAW);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glVertexPointer(4, GL_FLOAT, 0, NULL); 
-
-	glActiveTexture( GL_TEXTURE6 );
-	glGenTextures(1, &vertTextBufferObject);
-	glBindTexture(GL_TEXTURE_BUFFER_EXT, vertTextBufferObject);
-	glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, vertex_buffer);
-
-	glGenBuffers(1, &normal_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-	glBufferData(GL_ARRAY_BUFFER, numVertsArray * 4 * sizeof(GLfloat), (const void*)normal_array, GL_STATIC_DRAW);
-  
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-	glVertexPointer(4, GL_FLOAT, 0, NULL);
-
-	glActiveTexture( GL_TEXTURE7 );
-	glGenTextures(1, &normalTextBufferObject);
-	glBindTexture(GL_TEXTURE_BUFFER_EXT, normalTextBufferObject);
-	glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, normal_buffer);
-
-	delete [] vertex_array;
-	delete [] normal_array;
-
-	//*** End *** setPyramidPointsArrays ***
-
-	vertex_array = NULL;
-
-	normal_array = NULL;
-
-	//*** Begin *** setPatchesArray ***
-
-	in >> numPatches;
+  surfels[LOD_LEVELS-1].clear();
+  surfels_per_level.clear();
 	
-	GLfloat *surfels_per_level_array;
-	vertex_array = new GLfloat[numPatches * 4];
-	normal_array = new GLfloat[numPatches * 3];
-	surfels_per_level_array = new GLfloat[numPatches * 4];
-  
-	for (uint i = 0; i < numPatches; ++i) {
+  GLuint spl[4];
+  for (uint i = 0; i < numPatches; ++i) {
+    in >> x >> y >> z >> r >> nx >> ny >> nz;
+    in >> spl[0] >> spl[1] >> spl[2] >> spl[3];
+    surfels[LOD_LEVELS-1].push_back(Surfel(Point(x, y, z), Vector(nx, ny, nz), r, i));
+    for (uint j = 0; j < 4; ++j)
+      surfels_per_level.push_back(spl[j]);
+  }
 
-		in >> vertex_array[i*4 + 0] >> vertex_array[i*4 + 1]
-		   >> vertex_array[i*4 + 2] >> vertex_array[i*4 + 3];
-
-		in >> normal_array[i*3 + 0] >> normal_array[i*3 + 1]
-		   >> normal_array[i*3 + 2];
-
-		in >> surfels_per_level_array[i*4 + 0]
-		   >> surfels_per_level_array[i*4 + 1]
-		   >> surfels_per_level_array[i*4 + 2]
-		   >> surfels_per_level_array[i*4 + 3];
-
-	}
-
-	glGenBuffers(1, &vertex_patches_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
-	glBufferData(GL_ARRAY_BUFFER, numPatches * 4 * sizeof(GLfloat), (const void*)vertex_array, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &normal_patches_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
-	glBufferData(GL_ARRAY_BUFFER, numPatches * 3 * sizeof(GLfloat), (const void*)normal_array, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &surfels_per_level_patches_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
-	glBufferData(GL_ARRAY_BUFFER, numPatches * 4 * sizeof(GLfloat), (const void*)surfels_per_level_array, GL_STATIC_DRAW);
-
-	delete [] vertex_array;
-	delete [] normal_array;
-	delete [] surfels_per_level_array;
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
-	glVertexPointer(4, GL_FLOAT, 0, NULL);
-
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
-	glNormalPointer(GL_FLOAT, 0, NULL);
-
-	glEnableClientState(GL_COLOR_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
-	glColorPointer(4, GL_FLOAT, 0, NULL);
-
-	//*** End *** setPatchesArray ***
-
-	in.close();
-
+  in.close();
 }
