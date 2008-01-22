@@ -108,11 +108,14 @@ class Application
   void createKeyFrame( void ) {
     if (camera) camera->createKeyFrame();
   }
-  void writeKeyFrames( void ) {
-    if (camera) camera->writeKeyFrames("frames.camera");
+  void clearFrames( void ) {
+    if (camera) camera->clearFrames();
   }
-  void loadKeyFrames( void ) {
-    if (camera) camera->loadKeyFrames("frames.camera");
+  void writeKeyFrames( void ) {
+    if (camera) camera->writeKeyFrames("camera.frames");
+  }
+  void loadKeyFrames( const char* filename ) {
+    if (camera) camera->loadKeyFrames(filename);
   }
   void runFrames( void ) {
     if (camera) camera->runFrames();

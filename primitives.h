@@ -81,6 +81,7 @@ class Primitives
 
   inline uint numPrimitivesIn(void) { return numPatches; }
   inline uint numPrimitivesLOD(void) { return numVertsArray; }
+  inline uint numPrimitivesInLevel( int l ) { return surfels[l].size(); }
 
  private:
 

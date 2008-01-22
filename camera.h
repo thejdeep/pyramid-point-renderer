@@ -203,6 +203,11 @@ public:
 
   void runFrames( void ) { frameVideo = 0.0; }
 
+  void clearFrames( void ) { 
+    frameVideo = -1.0; 
+    keyFrames.clear();
+  }
+
   bool runningFrames( void ) {
     return ( (frameVideo >= 0.0) && (keyFrames.size() > 0) );
   }

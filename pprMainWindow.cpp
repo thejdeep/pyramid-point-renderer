@@ -37,7 +37,6 @@ void pprMainWindow::writeLod( void ) {
  **/
 void pprMainWindow::fileOpen( void )
 {
-  QImage textura,buf;
   QString sfile;
 		
   sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol *.lod)"));
@@ -90,6 +89,11 @@ void pprMainWindow::selectCurrObject ( void ) {
     return;
 
   int id = (curr->text(0)).toInt();
+
+  if (id == -1) {
+    application->clearSelectedObjects ( );
+    return;
+  }
 
   int rtype = application->getRendererType( id );
 
@@ -179,14 +183,42 @@ void pprMainWindow::on_actionRunKeyFrames_triggered( bool ckecked ) {
 }
 
 void pprMainWindow::on_actionLoadKeyFrames_triggered( bool ckecked ) {
-  application->loadKeyFrames();
+  QString sfile;
+		
+  sfile = QFileDialog::getOpenFileName(this, tr("Open Key Frames"), "./", tr("Files (*.frames)"));
+
+  const char* filename = sfile.toLatin1();
+
+  vector<int> objs_ids;
+
+  QStringList name_split = sfile.split("/");
+  QStringList name_split2 = name_split.back().split("."); 
+
+  QString filetype = name_split2.back();
+  if ( !sfile.isEmpty() ) {  
+    if (filetype.compare("frames") == 0)
+      application->loadKeyFrames( filename );
+    else
+      cout << "File extension not supported" << endl;
+  }
+  else {
+    // statusBar()->message( "Loading cancelled.Could not read image file.", 2000 );
+  }
 }
 
 void pprMainWindow::on_actionWriteKeyFrames_triggered( bool ckecked ) {
   application->writeKeyFrames();
 }
 
+void pprMainWindow::on_actionClearKeyFrames_triggered( bool ckecked ) {
+  application->clearFrames();
+}
+
 void pprMainWindow::keyPressEvent( QKeyEvent* event) {
   if (event->key() == Qt::Key_Q)
     close();
+  else if (event->key() == Qt::Key_K)
+    application->createKeyFrame();
+  else if (event->key() == Qt::Key_R)
+    application->runFrames();
 }

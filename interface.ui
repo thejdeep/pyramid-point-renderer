@@ -173,6 +173,14 @@
       <string>Models</string>
      </property>
     </column>
+    <item>
+     <property name="text" >
+      <string>-1</string>
+     </property>
+     <property name="text" >
+      <string>Camera</string>
+     </property>
+    </item>
    </widget>
    <widget class="QTextBrowser" name="textObjectInfo" >
     <property name="geometry" >
@@ -495,6 +503,7 @@
     <addaction name="actionRunKeyFrames" />
     <addaction name="separator" />
     <addaction name="actionCreateKeyFrame" />
+    <addaction name="actionClearKeyFrames" />
     <addaction name="separator" />
     <addaction name="actionLoadKeyFrames" />
     <addaction name="actionWriteKeyFrames" />
@@ -569,6 +578,11 @@
   <action name="actionRunKeyFrames" >
    <property name="text" >
     <string>Run</string>
+   </property>
+  </action>
+  <action name="actionClearKeyFrames" >
+   <property name="text" >
+    <string>Clear</string>
    </property>
   </action>
  </widget>

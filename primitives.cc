@@ -1127,16 +1127,18 @@ void Primitives::reorderSurfels ( void ) {
     num_surfels += surfels[i].size();
 
   surfels_per_level.reserve( surfels[LOD_LEVELS-1].size()*4 );
+  //***** including level 3 ?!?!?!?!?!?!
   surfels_lod.reserve( num_surfels );
 
   int num_surfels_per_level[LOD_LEVELS];
   num_surfels_per_level[LOD_LEVELS-1] = 1;
 
   vector<Surfel>::iterator curr_surfel = surfels_lod.begin();
-  surfels_per_level.push_back( 0 );
 
   int patch_id = 0;
   for (vector<Surfel>::iterator it = surfels[LOD_LEVELS-1].begin(); it != surfels[LOD_LEVELS-1].end(); ++it) {
+
+    surfels_per_level.push_back( surfels_lod.size() );
 
     patch_id = it->id();
     
@@ -1154,20 +1156,18 @@ void Primitives::reorderSurfels ( void ) {
 	  }
 	}
       
-	if ( it == surfels[LOD_LEVELS-1].begin() )
+	if ( it == surfels[LOD_LEVELS-1].begin() && (i == LOD_LEVELS-2))
 	  curr_surfel = surfels_lod.begin();
-	else {
+	else
 	  curr_surfel++;
-	  patch_id = curr_surfel->id();
-	}
+	patch_id = curr_surfel->id();
+	
       }
     }
 
     for (int i = 0; i < LOD_LEVELS-1; ++i) {    
       surfels_per_level.push_back( (GLuint)num_surfels_per_level[i] );
-    }
-    
-    surfels_per_level.push_back( surfels_lod.size() );
+    }   
 
     curr_surfel = surfels_lod.end();
     curr_surfel--;
@@ -1177,14 +1177,23 @@ void Primitives::reorderSurfels ( void ) {
   cout << "surfels " << LOD_LEVELS-1 << " : " << surfels[LOD_LEVELS-1].size() << endl;
 
   int cnt = 0;
+  int cnt_lods[3] = {0, 0, 0};
+
+  for (unsigned int i = 0; i < surfels[3].size(); ++i) {
+    cnt_lods[0] += surfels_per_level[i*4 + 1];
+    cnt_lods[1] += surfels_per_level[i*4 + 2];
+    cnt_lods[2] += surfels_per_level[i*4 + 3];
+  }
+
   for (int i = 0; i < LOD_LEVELS-1; ++i) {
     cnt += surfels[i].size();
-    cout << "surfels " << i << " : " << surfels[i].size() << endl;
+    cout << "surfels " << i << " : " << surfels[i].size() << " = " << cnt_lods[i] << endl;
     surfels[i].clear();
     if (i > 0)
       delete [] merged_ids[i];
   }
 
+  cout << "size of s per level " << surfels_per_level.size() << endl;
   cout << "surfels " <<  surfels_lod.size() << " = " << cnt << endl;
 
   numPatches = surfels[LOD_LEVELS-1].size();

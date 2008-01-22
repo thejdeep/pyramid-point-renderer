@@ -47,8 +47,8 @@ Application::Application( void ) {
   material_id = 9;
   selected_objs.clear();
 
-  reconstruction_filter_size = 1.0;
-  prefilter_size = 0.75;
+  reconstruction_filter_size = 0.01;
+  prefilter_size = 0.0;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
@@ -364,17 +364,11 @@ int Application::readLodFile ( const char * filename ) {
   objects.back().setFilename( filename );
 
   primitives.push_back( Primitives( primitives.size() ) );
-
-  cout << "file " << filename << "  founded, reading it... " << endl;
   
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
-  cout << "lodfile " << lodFilename << "  founded, reading it... " << endl;
-  
   primitives.back().readFileLOD(lodFilename);
   
-  cout << "readed! " << endl;
-
 //   } else {
 
 //     cout << "reading " << filename << " ..." << flush;
@@ -402,8 +396,8 @@ int Application::readLodFile ( const char * filename ) {
        << "### Number of PATCHES in ###" << endl
        << "Lowest Resolution : " << primitives.back().numPrimitivesIn()  << endl
        << "All Resolutions   : " << primitives.back().numPrimitivesLOD() << endl
+       << "Level 0   : " << primitives.back().numPrimitivesInLevel(0) << endl
        << endl;
-
 
   objects.back().addPrimitives( primitives.back().getId() );
 

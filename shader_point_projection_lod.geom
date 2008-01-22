@@ -32,9 +32,9 @@ varying in vec3 radius_depth_w_vertex[1];
 varying in float radius_ratio[1];
 
 vec4 lodColors [4] = vec4[4] ( vec4(1.0, 0.0, 0.0, 1.0),
-				  vec4(0.0, 1.0, 0.0, 1.0),
-				  vec4(0.0, 0.0, 1.0, 1.0),
-				  vec4(0.3, 0.3, 0.0, 1.0));
+			       vec4(0.0, 1.0, 0.0, 1.0),
+			       vec4(0.0, 0.0, 1.0, 1.0),
+			       vec4(0.3, 0.3, 0.0, 1.0));
 
 void main() {
 
@@ -71,24 +71,22 @@ void main() {
       surfels_per_level *= vec4(1.0, 4.0, 16.0, 64.0);
 
       int lod_id = int(surfels_per_level.x * total_surfels);
-      int num_surfels = 0;
+      int num_surfels = int(surfels_per_level.y);
+      color = lodColors[2];
 
-      if (radius_ratio[0] < 6*pixel_size) {
-
-	num_surfels = int(surfels_per_level.y);
-	color = lodColors[2];
-
-      } else if (radius_ratio[0] < 9*pixel_size) {
+      if (radius_ratio[0] < 9*pixel_size) {
 
         lod_id += int(surfels_per_level.y);
 	num_surfels = int(surfels_per_level.z);
 	color = lodColors[1];
+
       }
       else {
 
 	lod_id += int(surfels_per_level.y + surfels_per_level.z);
 	num_surfels = int(surfels_per_level.w);
 	color = lodColors[0];
+
       }
            
       for (int i = 0; i < num_surfels; ++i) {
