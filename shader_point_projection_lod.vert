@@ -19,15 +19,17 @@ uniform vec3 eye;
 varying out vec3 normal_vec_vertex;
 varying out vec3 radius_depth_w_vertex;
 
-varying out float radius_ratio;
+varying out float ep;
 
 void main() {
 
-  gl_FrontColor = gl_Color;
-
   gl_TexCoord[0] = gl_MultiTexCoord0;
 
-  if ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < 0.00 ) {
+  normal_vec_vertex = gl_Color.xyz;
+
+  // angle between view vector and normal
+  float cos_alpha = dot(normalize(eye - gl_Vertex.xyz), normal_vec_vertex);
+  if ( cos_alpha < 0.00 ) {
 
     radius_depth_w_vertex.x = 0.0;
     gl_Position = vec4(1.0);
@@ -38,9 +40,13 @@ void main() {
     vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
     radius_depth_w_vertex = vec3(gl_Vertex.w, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
-    normal_vec_vertex = normalize(gl_NormalMatrix * gl_Normal);
+    normal_vec_vertex = normalize(gl_NormalMatrix * normal_vec_vertex);
 
-    radius_ratio = gl_Vertex.w / v.w;
+    // project perpendicular error
+    ep = gl_Color.w;
+    float sin_alpha = sqrt (1.0 - cos_alpha*cos_alpha);
+    float d = length (eye - gl_Vertex.xyz);
+    ep *= sin_alpha / d;
 
     gl_Position = v;
 

@@ -140,8 +140,13 @@ struct Point
   }
 
 
-  const Vector operator -(const Point p) {
-    return Vector (this->_x - p.x(), this->_y - p.y(), this->_z - p.z());
+/*   const Vector operator -(const Point p) const { */
+/*     return Vector (this->_x - p.x(), this->_y - p.y(), this->_z - p.z()); */
+/*   } */
+
+  // subtract two points, return a vector
+  inline friend const Vector operator -(const Point p0, const Point p1) {
+    return Vector (p0.x() - p1.x(), p0.y() - p1.y(), p0.z() - p1.z());
   }
 
   // add vector
@@ -223,7 +228,12 @@ class Surfel
 {
  public:
 
-  Surfel(Point _p, Vector _n, Point _c, double _r, unsigned int _id) {
+  Surfel(Point _p, Vector _n, double _r, unsigned int _id, double _ep) : 
+    p(_p), n(_n), r(_r), ep(_ep), id_num(_id) {
+    c = default_color;
+  }
+
+  Surfel(Point _p, Vector _n, Point _c, double _r, unsigned int _id) : ep(0.0){
     p = Point(_p);
     id_num = _id;
     n = _n;
@@ -231,7 +241,7 @@ class Surfel
     r = _r;
   }
 
-  Surfel(Point _p, Vector _n, double _r, unsigned int _id) {
+  Surfel(Point _p, Vector _n, double _r, unsigned int _id) : ep(0.0){
     p = Point(_p);
     id_num = _id;
     n = _n;
@@ -239,7 +249,7 @@ class Surfel
     r = _r;
   }
 
-  Surfel(Point _p, unsigned int _id) {
+  Surfel(Point _p, unsigned int _id) : ep(0.0){
     p = Point(_p);
     id_num = _id;
     n = Vector(0.0, 0.0, 0.0);
@@ -247,7 +257,7 @@ class Surfel
     r = 0;
   }
 
-  Surfel(Point _p) {
+  Surfel(Point _p) : ep(0.0){
     p = Point(_p);
     n = Vector(0.0, 0.0, 0.0);
     c = default_color;
@@ -261,23 +271,25 @@ class Surfel
   ~Surfel() {};
 
   const Point position(void) const { return p; }
-  const double position(const int axis) { return p[axis]; }
+  double position(const int axis)  { return p[axis]; }
   void setPosition(const Point _p) { p = Point(_p); }
 
   const Vector normal(void) const { return n; }
-  const double normal(int axis) { return n[axis]; }
+  double normal(int axis) { return n[axis]; }
   void setNormal(Vector _n) { n = Vector(_n); }
 
   const Point color(void) const { return c; }
-  const double color(int spectrum) { return c[spectrum]; }
+  double color(int spectrum) { return c[spectrum]; }
   void setColor(Point _c) { c = Point(_c); }
 
-  const unsigned int id (void) const { return id_num; }
+  unsigned int id (void) const { return id_num; }
   void setId (unsigned int _id) {id_num = _id; }
 
-  const double radius (void) const { return r; }
+  double radius (void) const { return r; }
   void setRadius (double _r) { r = _r; }
   
+  double perpendicularError (void) const { return ep; }
+
   /// I/O operator - output
   inline friend ostream& operator << (ostream& out, const Surfel &s) {
     out << s.id_num << " " << s.p.x() << " " << s.p.y() << " " << s.p.z() << " " << s.r << " "
@@ -296,6 +308,9 @@ class Surfel
 
   /// Splat radius
   double r;
+
+  /// Perpendicular error
+  double ep;
 
  private:
 

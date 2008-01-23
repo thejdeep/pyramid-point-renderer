@@ -68,13 +68,9 @@ void Primitives::render ( void ) {
     glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
     glTexCoordPointer(4, GL_INT, 0, NULL);
 
-//     glEnableVertexAttribArray(ATTRIB_INDEX);
-//        glBindBuffer(GL_ARRAY_BUFFER, 0);
-//     glVertexAttribPointer(ATTRIB_INDEX, 4, GL_INT, GL_FALSE, 0, (const void*)surfels_per_level_array);
-
-    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
-    glNormalPointer(GL_FLOAT, 0, NULL);
+    glColorPointer(4, GL_FLOAT, 0, NULL);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
@@ -84,7 +80,7 @@ void Primitives::render ( void ) {
 
     //glDisableVertexAttribArray(ATTRIB_INDEX);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
   }
   else if (renderer_type == PYRAMID_LINES) {
@@ -408,27 +404,21 @@ void Primitives::setPatchesArray ( void ) {
   GLfloat *vertex_array, *normal_array;
   GLint *surfels_per_level_array;
   vertex_array = new GLfloat[numPatches*4];
-  normal_array = new GLfloat[numPatches*3];
+  normal_array = new GLfloat[numPatches*4];
   surfels_per_level_array = new GLint[numPatches*4];
-  
-  //int total_surfels = surfels_lod.size();
 
   for (uint i = 0; i < numPatches; ++i) {
     Point p = surfels[LOD_LEVELS-1][i].position();
-    vertex_array[i*4 + 0] = p.x();
-    vertex_array[i*4 + 1] = p.y();
-    vertex_array[i*4 + 2] = p.z();
-    vertex_array[i*4 + 3] = surfels[LOD_LEVELS-1][i].radius();
+    vertex_array[i*4 + 0] = (GLfloat)p.x();
+    vertex_array[i*4 + 1] = (GLfloat)p.y();
+    vertex_array[i*4 + 2] = (GLfloat)p.z();
+    vertex_array[i*4 + 3] = (GLfloat)surfels[LOD_LEVELS-1][i].radius();
 
     Vector n = surfels[LOD_LEVELS-1][i].normal();
-    normal_array[i*3 + 0] = n.x();
-    normal_array[i*3 + 1] = n.y();
-    normal_array[i*3 + 2] = n.z();
-
-//     surfels_per_level_array[i*4 + 0] = (GLfloat)(surfels_per_level[i*4 + 0] / (GLfloat)total_surfels);
-//     surfels_per_level_array[i*4 + 1] = (GLfloat)surfels_per_level[i*4 + 1] / 4.0;
-//     surfels_per_level_array[i*4 + 2] = (GLfloat)surfels_per_level[i*4 + 2] / 16.0;
-//     surfels_per_level_array[i*4 + 3] = (GLfloat)surfels_per_level[i*4 + 3] / 64.0;
+    normal_array[i*4 + 0] = (GLfloat)n.x();
+    normal_array[i*4 + 1] = (GLfloat)n.y();
+    normal_array[i*4 + 2] = (GLfloat)n.z();
+    normal_array[i*4 + 3] = (GLfloat)surfels[LOD_LEVELS-1][i].perpendicularError();
 
     surfels_per_level_array[i*4 + 0] = (GLint)surfels_per_level[i*4 + 0];
     surfels_per_level_array[i*4 + 1] = (GLint)surfels_per_level[i*4 + 1];
@@ -442,20 +432,21 @@ void Primitives::setPatchesArray ( void ) {
 
   glGenBuffers(1, &normal_patches_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
-  glBufferData(GL_ARRAY_BUFFER, numPatches * 3 * sizeof(GLfloat), (const void*)normal_array, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, numPatches * 4 * sizeof(GLfloat), (const void*)normal_array, GL_STATIC_DRAW);
 
   glGenBuffers(1, &surfels_per_level_patches_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
   glBufferData(GL_ARRAY_BUFFER, numPatches * 4 * sizeof(GLint), (const void*)surfels_per_level_array, GL_STATIC_DRAW);
 
-
   delete [] vertex_array;
   delete [] normal_array;
   delete [] surfels_per_level_array;
 
-  glEnableClientState(GL_NORMAL_ARRAY);
+  // Using color arrays instead of normal to pass perpendicular error as fourth component
+  // Normal array has fixed sized of 3 elements
+  glEnableClientState(GL_COLOR_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
-  glNormalPointer(GL_FLOAT, 0, NULL);
+  glColorPointer(4, GL_FLOAT, 0, NULL);
 
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
@@ -1110,11 +1101,36 @@ void Primitives::createLOD ( int lod ) {
     if ( node->isLeaf() )
       {
       if (node->itemPtrCount() > 0) {
+
+	Surfel *son;
+	Surfel *s = node->element(0);
+	double max = DBL_MIN, min = DBL_MAX;
+	double max_son_error = DBL_MIN;
 	vector<int> *ids = node->mergedElements();
+
+	// Iterate over all merged sons
 	for (vector<int>::iterator it = ids->begin(); it != ids->end(); ++it) {
 	  merged_ids[lod][id] = *it;
 	  ++id;
+
+	  // Compute perpendicular error between merged node and this son
+	  son = &surfels[lod-1][*it];
+	  double di = son->radius() * sqrt(1.0 - pow( son->normal() * s->normal(), 2.0));
+	  Vector v = son->position() - s->position();
+	  double ei = v * s->normal();
+	  if (ei + di > max)
+	    max = ei + di;
+	  if (ei - di < min)
+	    min = ei - di;
+
+	  double son_error = son->perpendicularError();
+	  if (son_error > max_son_error)
+	    max_son_error = son_error;
 	}
+	// The perpendicular error of this node is the difference between
+	// the max and min error between all sons -- PBG pg 335
+	s->ep = (max - min) + max_son_error;
+
 	for (unsigned int i = 0; i < 4 - ids->size(); ++i) {
 	  merged_ids[lod][id] = -1;
 	  ++id;
@@ -1266,14 +1282,15 @@ void Primitives::writeFileLOD ( const char* fn ) {
 
 	Point p;
 	Vector n;
-	GLfloat radius;
+	GLfloat radius, ep, perp_error;
 	for (uint i = 0; i < numPatches; ++i) {
 
-		px=0; py=0; pz=0; r=0; nx=0; ny=0; nz=0;
+	  px=0; py=0; pz=0; r=0; nx=0; ny=0; nz=0; ep=0;
 
 		p = surfels[LOD_LEVELS-1][i].position();
 		n = surfels[LOD_LEVELS-1][i].normal();
 		radius = (GLfloat)(surfels[LOD_LEVELS-1][i].radius());
+		perp_error = (GLfloat)(surfels[LOD_LEVELS-1][i].perpendicularError());
 
 		if ( !isnan( p.x() ) )
 			px = p.x();
@@ -1289,9 +1306,12 @@ void Primitives::writeFileLOD ( const char* fn ) {
 			ny = n.y();
 		if ( !isnan( n.z() ) )
 			nz = n.z();
+		if ( !isnan( perp_error ) )
+			ep = perp_error;
+
 
 		out << px << " " << py << " " << pz << " " << r << " "
-		    << nx << " " << ny << " " << nz << endl;
+		    << nx << " " << ny << " " << nz << " " << ep << endl;
 	
 		out << surfels_per_level[i*4 + 0] << " "
 		    << surfels_per_level[i*4 + 1] << " "
@@ -1324,10 +1344,11 @@ void Primitives::readFileLOD ( const char* fn ) {
   surfels_per_level.clear();
 	
   GLuint spl[4];
+  GLfloat ep;
   for (uint i = 0; i < numPatches; ++i) {
-    in >> x >> y >> z >> r >> nx >> ny >> nz;
+    in >> x >> y >> z >> r >> nx >> ny >> nz >> ep;
     in >> spl[0] >> spl[1] >> spl[2] >> spl[3];
-    surfels[LOD_LEVELS-1].push_back(Surfel(Point(x, y, z), Vector(nx, ny, nz), r, i));
+    surfels[LOD_LEVELS-1].push_back(Surfel(Point(x, y, z), Vector(nx, ny, nz), r, i, ep));
     for (uint j = 0; j < 4; ++j)
       surfels_per_level.push_back(spl[j]);
   }
