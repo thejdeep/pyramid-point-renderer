@@ -35,11 +35,9 @@ struct Vector
   }
 
   /// Computes length of vector
-  void normalize ( void ) {
+  Vector normalize ( void ) const {   
     double n = 1.0/length();
-    _x *= n;
-    _y *= n;
-    _z *= n;
+    return Vector(_x*n, _y*n, _z*n);
   }
 
   /// Operator to grant write/read access to the color values
@@ -97,6 +95,12 @@ struct Vector
   // add by scalar, vector (s,s,s)
   const Vector operator +(const double s) {
     return Vector (this->_x + s, this->_y + s, this->_z + s);
+  }
+
+  /// I/O operator - output
+  inline friend ostream& operator << (ostream& out, const Vector &v) {
+    out << v._x << " " << v._y << " " << v._z << " " << v._w;
+    return out;
   }
 
   const double x ( void) const { return _x; }
@@ -168,6 +172,11 @@ struct Point
     return !(*this == p);
   }
 
+  /// I/O operator - output
+  inline friend ostream& operator << (ostream& out, const Point &p) {
+    out << p._x << " " << p._y << " " << p._z << " " << p._w;
+    return out;
+  }
 
   inline friend double squared_distance (const Point p, const Point q) {
     return p.squared_distance(q);

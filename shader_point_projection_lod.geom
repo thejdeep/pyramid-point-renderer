@@ -14,7 +14,7 @@
 
 #extension GL_EXT_gpu_shader4 : enable
 
-const float epsilon = 0.01;
+const float epsilon = 0.0005;
 
 //--- Uniforms ---
 uniform samplerBuffer vertex_buffer;

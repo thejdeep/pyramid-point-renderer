@@ -45,7 +45,8 @@ void main() {
     // project perpendicular error
     ep = gl_Color.w;
     float sin_alpha = sqrt (1.0 - cos_alpha*cos_alpha);
-    float d = length (eye - gl_Vertex.xyz);
+    //float sin_alpha = sin(acos(cos_alpha));
+    float d = v.w;//length (eye - gl_Vertex.xyz);
     ep *= sin_alpha / d;
 
     gl_Position = v;

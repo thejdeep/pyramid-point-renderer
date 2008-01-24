@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <assert.h>
 
 #define PI 3.14159265
 
@@ -1095,27 +1096,31 @@ void Primitives::createLOD ( int lod ) {
   merged_ids[lod] = new GLint[surfels[lod].size()*4];
 
   node = kdTree->begin();
+  int id_merge = 0;
   id = 0;
   while (node != NULL) {
 
     if ( node->isLeaf() )
       {
       if (node->itemPtrCount() > 0) {
-
+	
 	Surfel *son;
-	Surfel *s = node->element(0);
+	Surfel *s = &surfels[lod][id];
 	double max = DBL_MIN, min = DBL_MAX;
 	double max_son_error = DBL_MIN;
 	vector<int> *ids = node->mergedElements();
 
 	// Iterate over all merged sons
 	for (vector<int>::iterator it = ids->begin(); it != ids->end(); ++it) {
-	  merged_ids[lod][id] = *it;
-	  ++id;
+	  merged_ids[lod][id_merge] = *it;
+	  ++id_merge;
 
 	  // Compute perpendicular error between merged node and this son
 	  son = &surfels[lod-1][*it];
-	  double di = son->radius() * sqrt(1.0 - pow( son->normal() * s->normal(), 2.0));
+	  double normal_dot = son->normal().normalize() * s->normal().normalize();
+	  if (normal_dot*normal_dot > 1.0) 
+	    normal_dot = 1.0;
+	  double di = son->radius() * sqrt(1.0 - normal_dot*normal_dot);
 	  Vector v = son->position() - s->position();
 	  double ei = v * s->normal();
 	  if (ei + di > max)
@@ -1130,15 +1135,18 @@ void Primitives::createLOD ( int lod ) {
 	// The perpendicular error of this node is the difference between
 	// the max and min error between all sons -- PBG pg 335
 	s->ep = (max - min) + max_son_error;
+	assert (max >= min);
 
 	for (unsigned int i = 0; i < 4 - ids->size(); ++i) {
-	  merged_ids[lod][id] = -1;
-	  ++id;
+	  merged_ids[lod][id_merge] = -1;
+	  ++id_merge;
 	}
+	++id;
       }
     }
 
     node = (KdTree3DNode*)node->next();
+
   }
 
   cout << "created ids " << lod << endl;
@@ -1276,10 +1284,6 @@ void Primitives::writeFileLOD ( const char* fn ) {
 
 	out << numPatches << endl;
 	
-	uint total_surfels = surfels_lod.size();
-
-	//	assert( surfels_lod.size() > 0 );
-
 	Point p;
 	Vector n;
 	GLfloat radius, ep, perp_error;
@@ -1312,7 +1316,7 @@ void Primitives::writeFileLOD ( const char* fn ) {
 
 		out << px << " " << py << " " << pz << " " << r << " "
 		    << nx << " " << ny << " " << nz << " " << ep << endl;
-	
+
 		out << surfels_per_level[i*4 + 0] << " "
 		    << surfels_per_level[i*4 + 1] << " "
 		    << surfels_per_level[i*4 + 2] << " "
