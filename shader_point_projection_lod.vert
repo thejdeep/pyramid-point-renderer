@@ -46,7 +46,8 @@ void main() {
     ep = gl_Color.w;
     float sin_alpha = sqrt (1.0 - cos_alpha*cos_alpha);
     //float sin_alpha = sin(acos(cos_alpha));
-    float d = v.w;//length (eye - gl_Vertex.xyz);
+    vec3 orig_eye = vec3(0.0, 0.0, -3.0);
+    float d = v.w; //length(orig_eye - v.xyz);
     ep *= sin_alpha / d;
 
     gl_Position = v;

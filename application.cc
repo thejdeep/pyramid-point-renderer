@@ -280,6 +280,8 @@ void Application::createPointRender( int type ) {
 
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
+  point_based_render->setDepthTest(depth_culling);
+
 }
 
 int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
@@ -593,6 +595,12 @@ void Application::setPerVertexColor ( bool b, int object_id ) {
 
 void Application::setAutoRotate ( bool r ) {
   rotating = r;
+}
+
+void Application::setDepthTest ( bool d ) {
+  depth_culling = d;
+  if (point_based_render)
+    point_based_render->setDepthTest(depth_culling);
 }
 
 void Application::useLOD ( bool lod, int object_id ) {

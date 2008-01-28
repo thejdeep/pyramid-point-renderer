@@ -5,6 +5,7 @@
 // Projects points to screen space and rotates normal
 // stores output on texture
 #extension GL_ARB_draw_buffers : enable
+#extension GL_EXT_gpu_shader4 : enable
 
 // height of near viewing plane
 //uniform float h_near;
@@ -57,8 +58,8 @@ void main(void)
   float depth_interval;
 
   if (gl_Color.a > 0.50)
-    //depth_interval = radius_depth_w.x;
-    depth_interval = perspective_radius(radius_depth_w.x / radius_depth_w.z, normal_vec);
+    depth_interval = radius_depth_w.x;
+    //depth_interval = perspective_radius(radius_depth_w.x / radius_depth_w.z, normal_vec);
   else
     depth_interval = 0.0;
 

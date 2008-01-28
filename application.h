@@ -92,6 +92,7 @@ class Application
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
+  void setDepthTest ( bool b );
 
   void clearSelectedObjects ( void );
   void setSelectedObject ( int id );

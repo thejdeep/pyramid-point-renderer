@@ -42,7 +42,7 @@ class openGLWidget: public QGLWidget {
       elapsed_millisecs += timer.elapsed();
 
       fps_loop ++;
-      if (fps_loop == 100) {
+      if (fps_loop == 10) {
 	fps = (elapsed_millisecs) / (double)fps_loop;
 	fps =  1000.0 / fps;
 	fpsDisplay->display(fps);

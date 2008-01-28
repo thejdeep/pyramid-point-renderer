@@ -307,13 +307,12 @@ void main (void) {
     if  (bufferA.w != 0.0) {
       vec4 up_pixelA = texture2D (textureA, gl_TexCoord[3].st).xyzw;
       vec4 up_pixelB = texture2D (textureB, gl_TexCoord[3].st).xyzw;
-      vec4 up_pixelC = texture2D (textureC, gl_TexCoord[3].st).xyzw;
-      
+      vec4 up_pixelC = texture2D (textureC, gl_TexCoord[3].st).xyzw;  
       if ( (up_pixelA.w != 0.0) && (bufferB.x  - bufferB.y > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
 
     }
-  }
+  }  
 
   // unspecified pixel (weight == 0.0) or occluded pixel
   // synthesize pixel
@@ -435,8 +434,8 @@ void main (void) {
 
 	// if specified scatter pixel test distance to center of ellipse
 	if (pixelA[i].w > 0.0) {
-	  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+	  //dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	  dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
 	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
 	}
 	else
@@ -490,7 +489,8 @@ void main (void) {
 	      {
 		// Depth test between ellipses in range
 		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {
-		  float w = abs(4.0 * 3.1416 * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+		  //float w = abs(4.0 * 3.1416 * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+		  float w = 1.0;
 		  total_weight += weights[i] * w;
 		  bufferA += weights[i] * pixelA[i] * w;
 		  bufferB += weights[i] * pixelB[i] * w;

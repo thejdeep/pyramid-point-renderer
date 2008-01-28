@@ -307,8 +307,8 @@ void main (void) {
 	  // Depth test between valid in reach ellipses
 	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax)) 
 	    {
-	      float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
-		
+	      //	      float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+	      float w = 1.0;
 	      bufferA += pixelA[i] * w;
 		
 	      // Increment ellipse total path with distance from gather pixel to center
