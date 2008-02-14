@@ -14,7 +14,8 @@
 
 #extension GL_EXT_gpu_shader4 : enable
 
-const float epsilon = 0.02;
+//const float epsilon = 0.02;
+const float epsilon = 0.006;
 
 //--- Uniforms ---
 uniform samplerBuffer vertex_buffer;
@@ -30,9 +31,9 @@ varying in vec3 radius_depth_w_vertex[1];
 
 varying in float ep[1];
 
-vec4 lodColors [4] = vec4[4] ( vec4(1.0, 0.0, 0.0, 1.0),
-			       vec4(0.0, 1.0, 0.0, 1.0),
-			       vec4(0.0, 0.0, 1.0, 1.0),
+vec4 lodColors [4] = vec4[4] ( vec4(1.0, 0.0, 0.0, 0.25),
+			       vec4(0.0, 1.0, 0.0, 0.50),
+			       vec4(0.0, 0.0, 1.0, 0.75),
 			       vec4(0.3, 0.3, 0.0, 1.0));
 
 vec4 black = vec4(0.0, 0.0, 0.0, 1.0);

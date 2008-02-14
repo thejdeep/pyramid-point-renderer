@@ -123,7 +123,7 @@ void Application::draw(void) {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   point_based_render->clearBuffers();
-  
+
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i){
 //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
@@ -133,6 +133,10 @@ void Application::draw(void) {
 
     // Compute rotated eye position for this object for back face culling
     double eye[3];
+    eye[0] = objects[i].getCenter()[0];
+    eye[1] = objects[i].getCenter()[1];
+    eye[2] = objects[i].getCenter()[2];
+
     camera->computeEyePosition(*(objects[i].getRotationQuat()), eye);
     point_based_render->setEye(eye);
 

@@ -14,7 +14,7 @@ void main(void)
 
   // back face culling (rotated eye, fixed point)  
   if ( ((gl_Color.a > 0.9) ) &&
-    ( dot(normalize(eye - gl_Vertex.xyz), gl_Normal) < -0.10 )) {
+    ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -0.10 )) {
     radius_depth_w.x = 0.0;
 
     // for some reason seting the vector to vec4(0.0) drops

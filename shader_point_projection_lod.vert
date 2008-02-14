@@ -28,8 +28,8 @@ void main() {
   normal_vec_vertex = gl_Color.xyz;
 
   // angle between view vector and normal
-  float cos_alpha = dot(normalize(eye - gl_Vertex.xyz), normal_vec_vertex);
-  if ( cos_alpha < 0.00 ) {
+  float cos_alpha = dot(normalize(gl_Vertex.xyz - eye), normal_vec_vertex);
+  if ( cos_alpha < -0.10 ) {
 
     radius_depth_w_vertex.x = 0.0;
     gl_Position = vec4(1.0);
@@ -46,8 +46,9 @@ void main() {
     ep = gl_Color.w;
     float sin_alpha = sqrt (1.0 - cos_alpha*cos_alpha);
     //float sin_alpha = sin(acos(cos_alpha));
-    vec3 orig_eye = vec3(0.0, 0.0, -3.0);
-    float d = v.w; //length(orig_eye - v.xyz);
+    //vec3 orig_eye = vec3(0.0, 0.0, -3.0);
+    //float d = v.w;
+    float d = length(eye - gl_Vertex.xyz);
     ep *= sin_alpha / d;
 
     gl_Position = v;

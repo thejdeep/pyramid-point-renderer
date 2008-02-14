@@ -20,7 +20,7 @@ void Camera::initLight (void) {
   glEnable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
 
-  GLfloat ambientLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+  GLfloat ambientLight[] = { 0.0f, 0.0f, 0.0f, 1.0f };
   GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
   GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -89,7 +89,7 @@ void Camera::setView (void) {
   }
 
   glTranslatef(position[0], position[1], position[2]);
-  glTranslatef(-eye[0], -eye[1], -eye[2]);
+  //glTranslatef(-eye[0], -eye[1], -eye[2]);
 
 //   Quat q = q_rot;
 //   q.x *= -1;
@@ -321,9 +321,12 @@ void Camera::computeEyePosition(Quat q, double *new_eye) {
   Quat q_new_rot = q_rot;
   q_new_rot = q_new_rot.composeWith(q);
   q_new_rot.invert();
-  new_eye[0] = eye[0];
-  new_eye[1] = eye[1];
-  new_eye[2] = eye[2];
+//   new_eye[0] = eye[0];
+//   new_eye[1] = eye[1];
+//   new_eye[2] = eye[2];
+  new_eye[0] += position[0];
+  new_eye[1] += position[1];
+  new_eye[2] += position[2];
   q_new_rot.rotate(new_eye);
 }
 

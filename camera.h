@@ -82,7 +82,7 @@ public:
     eye[0] = 0.0; eye[1] = 0.0; eye[2] = 3.0;
     eye_rot[0] = 0.0; eye_rot[1] = 0.0; eye_rot[2] = 3.0;
 
-    position[0] = 0.0; position[1] = 0.0; position[2] = 0.0;
+    position[0] = 0.0; position[1] = 0.0; position[2] = -3.0;
     
     light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
 

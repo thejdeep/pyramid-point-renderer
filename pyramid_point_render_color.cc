@@ -542,6 +542,11 @@ int PyramidPointRenderColor::phongShadingCallbackFunc(pixels_struct dest, pixels
   shader_phong->set_uniform("textureA", 0);
   shader_phong->set_uniform("textureC", 1);
 
+  if (use_lod)
+    shader_phong->set_uniform("color_per_lod", (GLint)color_per_lod);
+  else
+    shader_phong->set_uniform("color_per_lod", (GLint)0);
+
   return FALSE; /* not done, rasterize quad */
 }
 

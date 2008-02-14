@@ -434,8 +434,8 @@ void main (void) {
 
 	// if specified scatter pixel test distance to center of ellipse
 	if (pixelA[i].w > 0.0) {
-	  //dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+	  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
 	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
 	}
 	else
