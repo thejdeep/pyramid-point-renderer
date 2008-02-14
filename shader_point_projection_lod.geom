@@ -14,11 +14,12 @@
 
 #extension GL_EXT_gpu_shader4 : enable
 
-const float epsilon = 0.025;
+const float epsilon = 0.02;
 
 //--- Uniforms ---
 uniform samplerBuffer vertex_buffer;
 uniform samplerBuffer normal_buffer;
+uniform int color_per_lod;
 
 //--- Varyings ---
 varying out vec3 normal_vec;
@@ -34,6 +35,8 @@ vec4 lodColors [4] = vec4[4] ( vec4(1.0, 0.0, 0.0, 1.0),
 			       vec4(0.0, 0.0, 1.0, 1.0),
 			       vec4(0.3, 0.3, 0.0, 1.0));
 
+vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
+
 void main() {
 
   vec4 v = gl_PositionIn[0];
@@ -47,7 +50,10 @@ void main() {
 	radius_depth_w = radius_depth_w_vertex[0];
 	normal_vec = normal_vec_vertex[0];
 
-	gl_FrontColor = lodColors[3];	
+	if (color_per_lod > 0)
+	  gl_FrontColor = lodColors[3];	
+	else
+	  gl_FrontColor = black;
 	gl_Position = gl_PositionIn[0];
 	EmitVertex();
 	EndPrimitive();
@@ -89,7 +95,10 @@ void main() {
 	      radius_depth_w = vec3(orig_v.w, -(gl_ModelViewMatrix * vec4(orig_v.xyz, 1.0)).z, v.w);
 	      normal_vec = normalize(gl_NormalMatrix * normal_vec);
 
-	      gl_FrontColor = color;
+	      if (color_per_lod > 0)
+		gl_FrontColor = color;
+	      else
+		gl_FrontColor = black;
 	      gl_Position = v;
 	      EmitVertex();
 	      EndPrimitive();	    

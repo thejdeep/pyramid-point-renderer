@@ -428,7 +428,6 @@ void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
-
 void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 		       vector<Triangle> *triangles) {
 

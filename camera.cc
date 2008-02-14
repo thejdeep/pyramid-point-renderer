@@ -20,7 +20,7 @@ void Camera::initLight (void) {
   glEnable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
 
-  GLfloat ambientLight[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+  GLfloat ambientLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
   GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
   GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 

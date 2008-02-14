@@ -56,6 +56,9 @@ void main(void)
     discard;
 
   float depth_interval;
+
+  if (normal_vec.z > 0.1)
+    discard;
   
   // Leaves
   if (gl_Color.a > 0.9)

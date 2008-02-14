@@ -126,8 +126,8 @@ void Application::draw(void) {
   
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i){
-  //for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    //int i = *it;
+//   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+//     int i = *it;
     // Reset camera position and direction
     camera->setView();
 
@@ -245,10 +245,11 @@ void Application::changeMaterial( int mat ) {
 }
 
 void Application::changeRendererType( point_render_type_enum type, int object_id ) {
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-    primitives[*prim_it].setRendererType(type);
-
+  for (unsigned int i = 0; i < objects.size(); ++i){
+    vector< int >* prims = objects[i].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+      primitives[*prim_it].setRendererType(type);
+  }
   // Resets the color material
   changeMaterial();
 }
@@ -281,7 +282,6 @@ void Application::createPointRender( int type ) {
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
   point_based_render->setDepthTest(depth_culling);
-
 }
 
 int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
@@ -331,9 +331,6 @@ int Application::readFile ( const char * filename ) {
   objects.back().setFilename( filename );
 
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
-
-
-  //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
 
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
@@ -585,12 +582,11 @@ void Application::setPrefilter ( double s ) {
 
 void Application::setPerVertexColor ( bool b, int object_id ) {
   vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-    {
-      primitives[*prim_it].setPerVertexColor(b);
-      // Reset renderer type to load per vertex color or default color in vertex array
-      primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
-    }
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+    primitives[*prim_it].setPerVertexColor(b);
+    // Reset renderer type to load per vertex color or default color in vertex array
+    primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
+  }
 }
 
 void Application::setAutoRotate ( bool r ) {
@@ -608,9 +604,14 @@ void Application::useLOD ( bool lod, int object_id ) {
   if ( lod )
     type = PYRAMID_POINTS_LOD;
 
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-    primitives[*prim_it].setRendererType( type );
-
+  for (unsigned int i = 0; i < objects.size(); ++i){
+    vector< int >* prims = objects[i].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
+      primitives[*prim_it].setRendererType( type );
+  }
   point_based_render->useLOD( lod );
+}
+
+void Application::setLodColors ( bool c ) {
+  point_based_render->useColorPerLOD( c );
 }

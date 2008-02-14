@@ -158,9 +158,9 @@
     <property name="geometry" >
      <rect>
       <x>0</x>
-      <y>460</y>
+      <y>480</y>
       <width>191</width>
-      <height>321</height>
+      <height>301</height>
      </rect>
     </property>
     <column>
@@ -394,6 +394,11 @@
     </item>
     <item>
      <property name="text" >
+      <string>Sand</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
       <string>Light</string>
      </property>
     </item>
@@ -468,7 +473,7 @@
     <property name="geometry" >
      <rect>
       <x>0</x>
-      <y>420</y>
+      <y>450</y>
       <width>51</width>
       <height>23</height>
      </rect>
@@ -480,7 +485,7 @@
    <widget class="QCheckBox" name="checkBoxDepthTest" >
     <property name="geometry" >
      <rect>
-      <x>80</x>
+      <x>0</x>
       <y>420</y>
       <width>91</width>
       <height>23</height>
@@ -488,6 +493,19 @@
     </property>
     <property name="text" >
      <string>DepthTest</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxLODColors" >
+    <property name="geometry" >
+     <rect>
+      <x>70</x>
+      <y>450</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>LOD Colors</string>
     </property>
    </widget>
   </widget>

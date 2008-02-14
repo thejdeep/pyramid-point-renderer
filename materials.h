@@ -22,13 +22,13 @@
 #ifndef __MATERIALS_H__
 #define __MATERIALS_H__
 
-#define NUM_MATERIALS 21
+#define NUM_MATERIALS 22
 
 enum mat_name {
   brass, bronze, polished_bronze, chrome, copper, polished_copper,
   gold, polished_gold, pewter, silver, polished_silver, emerald,
   jade, obsidian, pearl, ruby, turquoise, black_plastic,
-  black_rubber, light, none
+  black_rubber, sand, light, none
 }; // following materials.h matrix order
 
 // ambient
@@ -63,7 +63,7 @@ const GLfloat Mats[NUM_MATERIALS][14] = {
 	0.780392, 0.568627, 0.113725, 1.000000,
 	0.992157, 0.941176, 0.807843, 1.000000,
 	27.897400
-},
+  },
   {//bronze
 	0.212500, 0.127500, 0.054000, 1.000000,
 	0.714000, 0.428400, 0.181440, 1.000000,
@@ -172,7 +172,12 @@ const GLfloat Mats[NUM_MATERIALS][14] = {
 	0.400000, 0.400000, 0.400000, 1.000000,
 	10.000000
   },
-
+  { // sand
+    0.2,  0.2,  0.2,  1.0,
+    0.92, 0.72, 0.21, 1.0,
+    0.05, 0.05, 0.05, 1.0,
+    1.0
+  },
   {//light
 	0.10000, 0.10000, 0.10000, 1.00000,
 	0.10000, 0.10000, 0.10000, 1.00000,

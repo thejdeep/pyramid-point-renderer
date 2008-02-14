@@ -89,6 +89,7 @@ class Application
   void setPerVertexColor ( bool b, int object_id );
   void setAutoRotate ( bool r );
   void useLOD( bool l, int object_id );
+  void setLodColors( bool l );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );

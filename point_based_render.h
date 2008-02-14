@@ -23,13 +23,13 @@ class PointBasedRender
   PointBasedRender() : window_width(1024), window_height(1024),
     canvas_width(1024), canvas_height(1024),
     zoom_factor(1.0), material_id(0), depth_test(1), elliptical_weight(1),
-    reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0)
+    reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0), color_per_lod(0)
     {}
 
   PointBasedRender(int w, int h) : window_width(w), window_height(h),
     canvas_width(h), canvas_height(h),
     zoom_factor(1.0), material_id(0), depth_test(1), elliptical_weight(1),
-    reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0)
+    reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0), color_per_lod(0)
     {}
 
    virtual ~PointBasedRender() {};
@@ -83,6 +83,10 @@ class PointBasedRender
      use_lod = l;
    }
 
+   virtual void useColorPerLOD( const bool c ) {
+     color_per_lod = c;
+   }
+
  protected:
    /// Window width.
    GLuint window_width;
@@ -112,6 +116,9 @@ class PointBasedRender
 
   /// Flag for enabling/disabling LOD rendering
   bool use_lod;
+
+  /// Flag for enabling/disabling color per LOD level
+  bool color_per_lod;
 
    /// Size of reconstruction filter.
    double reconstruction_filter_size;

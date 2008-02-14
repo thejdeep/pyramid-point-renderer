@@ -47,17 +47,17 @@ GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 void Primitives::render ( void ) {
 
   if (renderer_type == PYRAMID_POINTS) {
-//     glEnableClientState(GL_VERTEX_ARRAY);
-//     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-//     glVertexPointer(4, GL_FLOAT, 0, NULL); 
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glVertexPointer(4, GL_FLOAT, 0, NULL); 
     
-//     glEnableClientState(GL_COLOR_ARRAY);
-//     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-//     glColorPointer(4, GL_FLOAT, 0, NULL);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+    glColorPointer(4, GL_FLOAT, 0, NULL);
 
-//     glEnableClientState(GL_NORMAL_ARRAY);
-//     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-//     glNormalPointer(GL_FLOAT, 0, NULL); 
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+    glNormalPointer(GL_FLOAT, 0, NULL); 
     
     glDrawArrays(GL_POINTS, 0, number_points);
 
@@ -65,24 +65,33 @@ void Primitives::render ( void ) {
   }
   else if (renderer_type == PYRAMID_POINTS_LOD) {
 
-//     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-//     glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
-//     glTexCoordPointer(4, GL_INT, 0, NULL);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, surfels_per_level_patches_buffer);
+    glTexCoordPointer(4, GL_INT, 0, NULL);
 
-//     glEnableClientState(GL_COLOR_ARRAY);
-//     glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
-//     glColorPointer(4, GL_FLOAT, 0, NULL);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, normal_patches_buffer);
+    glColorPointer(4, GL_FLOAT, 0, NULL);
 
-//     glEnableClientState(GL_VERTEX_ARRAY);
-//     glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
-//     glVertexPointer(4, GL_FLOAT, 0, NULL);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
+    glVertexPointer(4, GL_FLOAT, 0, NULL);
+
+    glActiveTexture( GL_TEXTURE6 );
+    glGenTextures(1, &vertTextBufferObject);
+    glBindTexture(GL_TEXTURE_BUFFER_EXT, vertTextBufferObject);
+    glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, vertex_buffer);
+
+    glActiveTexture( GL_TEXTURE7 );
+    glGenTextures(1, &normalTextBufferObject);
+    glBindTexture(GL_TEXTURE_BUFFER_EXT, normalTextBufferObject);
+    glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, normal_buffer);
 
     glDrawArrays(GL_POINTS, 0, numPatches);
 
-    //glDisableVertexAttribArray(ATTRIB_INDEX);
-//     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//     glDisableClientState(GL_COLOR_ARRAY);
-//     glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
   else if (renderer_type == PYRAMID_LINES) {
 
@@ -378,7 +387,7 @@ void Primitives::setPyramidPointsArraysLOD ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL); 
 
-  glActiveTexture( GL_TEXTURE6);
+  glActiveTexture( GL_TEXTURE6 );
   glGenTextures(1, &vertTextBufferObject);
   glBindTexture(GL_TEXTURE_BUFFER_EXT, vertTextBufferObject);
   glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, vertex_buffer);
@@ -391,7 +400,7 @@ void Primitives::setPyramidPointsArraysLOD ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL);
 
-  glActiveTexture( GL_TEXTURE7);
+  glActiveTexture( GL_TEXTURE7 );
   glGenTextures(1, &normalTextBufferObject);
   glBindTexture(GL_TEXTURE_BUFFER_EXT, normalTextBufferObject);
   glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, GL_RGBA32F_ARB, normal_buffer);
@@ -457,7 +466,6 @@ void Primitives::setPatchesArray ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_patches_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL);
 }
-
 
 void Primitives::setPyramidPointsDisplayList ( void ) {
 

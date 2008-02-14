@@ -164,6 +164,14 @@ void pprMainWindow::on_checkBoxLOD_stateChanged( int state ) {
   widget->updateGL();
 }
 
+void pprMainWindow::on_checkBoxLODColors_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->setLodColors(true);
+  else
+    application->setLodColors(false);
+  widget->updateGL();
+}
+
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
   application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
