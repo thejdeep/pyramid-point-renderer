@@ -521,7 +521,68 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 
 }
 
-int readObjsFile (const char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids) {
+int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids, Camera *camera) {
+  ifstream in (filename);
+
+  if (in.fail()) return false;
+
+  char comments[255];
+  int num_primitives, num_objects;
+
+  in.getline (comments, 255);
+
+  in >> comments >> num_primitives;
+  in >> comments >> num_objects;
+
+  int id;
+  char ply_file[num_primitives][100];
+  double type;
+  int renderer_type;
+  Point rgb;
+  int material;
+  vector< char* > filenames;
+
+  for (int i = 0; i < num_primitives; ++i) {   
+    in >> id >> ply_file[i] >> type >> renderer_type >> material;
+    prims->push_back ( Primitives(id, type) );
+    prims->back().setType( type );
+    prims->back().setPerVertexColor( 1 );
+    prims->back().setMaterial(material);
+    filenames.push_back( ply_file[i] );
+    
+    readPlyTriangles (ply_file[i], (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
+
+    // Must call after reading file because this next function creates
+    // the vertex array or display lists, and needs the surfels structure loaded
+    prims->back().setRendererType( renderer_type );
+  }
+
+  Quat q;
+  double x, y, z;
+  int n, prim_id;
+  for (int i = 0; i < num_objects; ++i) {    
+    in >> id >> x >> y >> z >> q.x >> q.y >> q.z >> q.a >> n;
+    objs_ids->push_back (id);
+    objs->push_back( Object(id, x, y, z, q) );
+    objs->at(id).setFilename( filenames[i] );    
+
+    for (int j = 0; j < n; ++j) {
+      in >> prim_id;
+      (objs->at(id)).addPrimitives( prim_id );
+    }
+  }
+
+  // read camera attributes
+  double camera_pos[3];
+  in >> camera_pos[0] >> camera_pos[1] >> camera_pos[2] >> q.x >> q.y >> q.z >> q.a;
+  camera->setPositionVector( camera_pos );
+  camera->setRotationQuat( q );
+
+  in.close();
+  return num_objects;
+}
+
+int readTreeFiles (const char* filename, vector<Primitives> *prims, vector<Object> *objs, vector<int> *objs_ids) {
   ifstream in (filename);
 
   if (in.fail()) return false;
@@ -539,12 +600,15 @@ int readObjsFile (const char* filename, vector<Primitives> *prims, vector<Object
   double type;
   int renderer_type;
   Point rgb;
+  int material = 0;
 
   for (int i = 0; i < num_primitives; ++i) {   
     in >> id >> ply_file >> type >> renderer_type >> rgb[0] >> rgb[1] >> rgb[2];
+
     prims->push_back ( Primitives(id, type) );
     prims->back().setType( type );
     prims->back().setPerVertexColor( 1 );
+    prims->back().setMaterial(material);
 
     readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
 
@@ -597,19 +661,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object>
   return true;
 }
 
-int readFile2 (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
-  vector<int> ids;
-  if (strstr(argv[1], ".pol") != NULL) {
-    if (readObjsFile(argv[1], prims, objs, &ids))
-      return 2;
-  }
-  else {
-    if (readModels(argc, argv, prims, objs))
-      return 1;
-  }
-  return 0;
 
-}
 
 int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,
 			   vector<Triangle> *triangles){

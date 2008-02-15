@@ -157,12 +157,16 @@ public:
 
   /// Return rotation quat
   const Quat rotationQuat ( void ) { return q_rot; }
+  void setRotationQuat ( Quat q ) { q_rot = q; }
 
   /// Return zoom factor
   const double zoom ( void ) const { return zoom_factor; }
 
-  /// Return zoom factor
+  /// Return position
   const double* positionVector ( void ) const { return &position[0]; }
+  void setPositionVector ( double p[3] ) { 
+    position[0] = p[0]; position[1] = p[1]; position[2] = p[2]; }
+  
 
   /// Return far and near planes
   const double zNear ( void ) const { return z_near; }

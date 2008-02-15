@@ -542,10 +542,10 @@ int PyramidPointRenderColor::phongShadingCallbackFunc(pixels_struct dest, pixels
   shader_phong->set_uniform("textureA", 0);
   shader_phong->set_uniform("textureC", 1);
 
-  if (use_lod)
-    shader_phong->set_uniform("color_per_lod", (GLint)color_per_lod);
-  else
-    shader_phong->set_uniform("color_per_lod", (GLint)0);
+//   if (use_lod)
+//     shader_phong->set_uniform("color_per_lod", (GLint)color_per_lod);
+//   else
+//     shader_phong->set_uniform("color_per_lod", (GLint)0);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -792,7 +792,7 @@ void PyramidPointRenderColor::createFBO() {
  **/
 void PyramidPointRenderColor::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_projection_no_lod = new glslKernel();
   shader_projection_no_lod->vertex_source("shader_point_projection_color.vert");

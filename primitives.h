@@ -48,11 +48,11 @@ class Primitives
 {
  public:
   
-  Primitives() : color_model(0) { }
+  Primitives() : color_model(0), material(0) { }
 
-  Primitives(int id_num, GLfloat t) : id(id_num), type(t), color_model(0) {}
+  Primitives(int id_num, GLfloat t) : id(id_num), type(t), color_model(0), material(0) {}
       
-  Primitives(int id_num) : id(id_num), color_model(0) {}
+  Primitives(int id_num) : id(id_num), color_model(0), material(0) {}
       
   ~Primitives() {}
 
@@ -66,6 +66,9 @@ class Primitives
 
   void setType ( GLfloat t ) {type = t;}
   GLfloat getType ( void ) {return type;}
+
+  void setMaterial ( int m ) {material = m;}
+  int getMaterial ( void ) const {return material;}
 
   void setId ( int id_num ) { id = id_num; }
   int getId ( void ) { return id; }
@@ -114,6 +117,9 @@ class Primitives
   
   // Flag to indicate per vertex color component
   bool color_model;
+
+  // Material id
+  int material;
 
   // Rendering type.
   int renderer_type;

@@ -9,6 +9,7 @@ pprMainWindow::pprMainWindow (QMainWindow *parent): QMainWindow(parent)
 
   connect( actionOpen, SIGNAL( triggered() ), this, SLOT( fileOpen() ) );
   connect( actionWrite_LOD, SIGNAL( triggered() ), this, SLOT( writeLod() ) );
+  connect( actionWrite_Scene, SIGNAL( triggered() ), this, SLOT( writeScene() ) );
 
   modelsTreeWidget->setSelectionMode( QAbstractItemView::ExtendedSelection );
   widget->setFpsDisplay ( lcdNumberFps ); 
@@ -34,6 +35,10 @@ void pprMainWindow::writeLod( void ) {
   application->writeLodFile();
 }
 
+void pprMainWindow::writeScene( void ) {
+  application->writeSceneFile();
+}
+
 /**
  * Opens a file with the dialog box.
  **/
@@ -41,13 +46,14 @@ void pprMainWindow::fileOpen( void )
 {
   QString sfile;
 		
-  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol *.lod)"));
+  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol *.lod *.scn)"));
   
   vector<int> objs_ids;
 
   QStringList name_split = sfile.split("/");
   QStringList name_split2 = name_split.back().split("."); 
   QString filetype = name_split2.back();
+  QString objectName = name_split2.front();
 
   const char* filename = sfile.toLatin1().data();
 
@@ -58,17 +64,23 @@ void pprMainWindow::fileOpen( void )
       application->readPolFile( filename, &objs_ids );
     else if (filetype.compare("lod") == 0)
       objs_ids.push_back( application->readLodFile( filename ) );
+    else if (filetype.compare("scn") == 0)
+      application->readSceneFile( filename, &objs_ids );
     else
       cout << "File extension not supported" << endl;
   }
   else {
-    // statusBar()->message( "Loading cancelled.Could not read image file.", 2000 );
+    // statusBar()->message( "Loading cancelled. Could not read image file.", 2000 );
   }
 
   modelsTreeWidget->clearSelection();
 
+  // Inlcude -LOD at the end of the name on the list for better identification
+  if (filetype.compare("lod") == 0)
+    objectName.append ( "-LOD" );
+
   for (unsigned int i = 0; i < objs_ids.size(); ++i) {
-    modelsTreeWidget->insert( name_split2.front(), objs_ids[i] );
+    modelsTreeWidget->insert( objectName, objs_ids[i] );
     application->setSelectedObject( objs_ids[i] );
   }
 
@@ -91,10 +103,13 @@ void pprMainWindow::selectCurrObject ( void ) {
 
   int id = (curr->text(0)).toInt();
 
-  if (id == -1) {
-    application->clearSelectedObjects ( );
+  application->clearSelectedObjects ( );
+  cout << "id : " << id << endl;
+
+  if (id == -1)
     return;
-  }
+
+  application->setSelectedObject( id );
 
   int rtype = application->getRendererType( id );
 
@@ -155,11 +170,13 @@ void pprMainWindow::on_checkBoxAutoRotate_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_checkBoxLOD_stateChanged( int state ) {
+  selectCurrObject();
+
   if (state == Qt::Checked)
     application->useLOD(true, (modelsTreeWidget->currentItem()->text(0)).toInt());
   else
     application->useLOD(false, (modelsTreeWidget->currentItem()->text(0)).toInt());
-  selectCurrObject();
+
   widget->updateGL();
 }
 
@@ -177,7 +194,8 @@ void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
 }
 
 void pprMainWindow::on_comboColors_currentIndexChanged( int index ) {
-  application->changeMaterial ( index  );
+  //  application->changeMaterial ( index  );
+  application->changeMaterial ( index, (modelsTreeWidget->currentItem()->text(0)).toInt() );
   widget->updateGL();
 }
 

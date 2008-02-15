@@ -69,15 +69,18 @@ class Application
 
 
   int writeLodFile ( void );
+  int writeSceneFile ( void );
   int readFile ( const char * filename );
   int readLodFile ( const char * filename );
   int readPolFile (const char * filename, vector<int> * ids);
+  int readSceneFile (const char * filename, vector<int> *objs_ids);
   void drawPoints ( void );
   void draw ( void );
   void reshape ( int w, int h );
 
   void changeRendererType ( int type, int object_id );
   void changeMaterial( int mat );
+  void changeMaterial( int mat, int object_id );
 
   int getRendererType ( int object_id );
   int getNumberPoints ( int object_id );

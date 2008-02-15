@@ -44,7 +44,7 @@ Application::Application( void ) {
   show_splats = 1;
 
   timing_profile = 0;
-  material_id = 9;
+  material_id = 0;
   selected_objs.clear();
 
   reconstruction_filter_size = 1.0;
@@ -125,18 +125,19 @@ void Application::draw(void) {
   point_based_render->clearBuffers();
 
   // Render objects primitives with pyramid algorithm
-  for (unsigned int i = 0; i < objects.size(); ++i){
+  for (unsigned int i = 0; i < objects.size(); ++i) {
 //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
 //     int i = *it;
     // Reset camera position and direction
     camera->setView();
 
-    // Compute rotated eye position for this object for back face culling
+    // Compute rotated eye position for this object for back face culling   
     double eye[3];
     eye[0] = objects[i].getCenter()[0];
     eye[1] = objects[i].getCenter()[1];
     eye[2] = objects[i].getCenter()[2];
 
+    // Compute the rotated eye (opposite direction) of the camera + object center position
     camera->computeEyePosition(*(objects[i].getRotationQuat()), eye);
     point_based_render->setEye(eye);
 
@@ -149,7 +150,12 @@ void Application::draw(void) {
       Primitives * prim = &(primitives[*prim_it]);
       int type = prim->getRendererType();
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	point_based_render->projectSamples( prim );
+	if (type == PYRAMID_POINTS_LOD)
+	  point_based_render->useLOD( true );
+	else
+	  point_based_render->useLOD( false );
+	
+	point_based_render->projectSamples( prim );	
       }
     }
   }
@@ -249,8 +255,9 @@ void Application::changeMaterial( int mat ) {
 }
 
 void Application::changeRendererType( point_render_type_enum type, int object_id ) {
-  for (unsigned int i = 0; i < objects.size(); ++i){
-    vector< int >* prims = objects[i].getPrimitivesList();
+  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    //  for (unsigned int i = 0; i < objects.size(); ++i){
+    vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
       primitives[*prim_it].setRendererType(type);
   }
@@ -276,10 +283,10 @@ void Application::createPointRender( int type ) {
   else if (type == 1){
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
-  else if (type == 2) {
-    point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
-    point_based_render->useLOD(true);
-  }
+//   else if (type == 2) {
+//     point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+//     point_based_render->useLOD(true);
+//   }
 
   assert (point_based_render);
 
@@ -288,10 +295,36 @@ void Application::createPointRender( int type ) {
   point_based_render->setDepthTest(depth_culling);
 }
 
+int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
+  // Create a new primitive from given file
+
+  int num_objs = readObjsFiles (filename, &primitives, &objects, objs_ids, camera);
+
+  if ( num_objs > 0  ) {
+
+    num_objects = objects.size();
+
+    // Count total number of points being rendered
+    for (vector<int>::iterator it = objs_ids->begin(); it < objs_ids->end(); ++it) {
+      vector< int >* prims = objects[*it].getPrimitivesList();
+      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+	number_surfels += primitives[*prim_it].getSurfels()->size();
+      }
+    }
+
+    //  if (!point_based_render)
+    createPointRender( 0 );
+
+    return num_objs;
+  }
+
+  return -1;
+}
+
 int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
   // Create a new primitive from given file
 
-  int num_objs = readObjsFile (filename, &primitives, &objects, objs_ids);
+  int num_objs = readTreeFiles (filename, &primitives, &objects, objs_ids);
 
   if ( num_objs > 0  ) {
 
@@ -414,11 +447,37 @@ int Application::readLodFile ( const char * filename ) {
   cout << "number of surfels : " << number_surfels << endl;
   
   //  if (!point_based_render)
-  createPointRender( 2 );
+  createPointRender( 0 );
 
   cout << "created point renderer" << endl;
 
   return id;
+}
+
+int Application::writeSceneFile ( void ) {
+  char * fn = "../plys/scene.scn";
+  ofstream out(fn, ios::trunc);
+
+  out << "#Scene file : type;renderType;material id -- id;x;y;z;q.x;q.y;q.z;q.a;n" << endl;
+  out << "PRIMITIVES " << primitives.size() << endl;
+  out << "OBJECTS " << objects.size() << endl;
+
+  for (int i = 0; i < primitives.size(); ++i) {
+    out << i << " " << objects[i].filename() << " " << 1.0 << " " << primitives[i].getRendererType() << " " <<
+      primitives[i].getMaterial() << endl;
+  }
+
+  for (int i = 0; i < objects.size(); ++i) {
+    out << i << " " << objects[i].getCenter()[0] << " " << objects[i].getCenter()[1] << " " << objects[i].getCenter()[2] << " " <<
+      objects[i].getRotationQuat()->x << " " << objects[i].getRotationQuat()->y << " " << objects[i].getRotationQuat()->z << " " <<
+      objects[i].getRotationQuat()->a  << " 1 " << i << endl;
+  }
+
+  out << camera->positionVector()[0] << " " << camera->positionVector()[1] << " " << camera->positionVector()[2] << " " <<
+    camera->rotationQuat().x << " " << camera->rotationQuat().y << " " << camera->rotationQuat().z << " " << camera->rotationQuat().a << endl;
+
+  cout << "Wrote scene : scene.scn" << endl;
+
 }
 
 int Application::writeLodFile ( void ) {
@@ -532,9 +591,8 @@ void Application::clearSelectedObjects ( void ) {
   selected_objs.clear();
 }
 
-void Application::setSelectedObject ( int id ) {
+void Application::setSelectedObject ( int id ) {    
   selected_objs.push_back( id );
-  //selected_objs.clear();
 }
 
 int Application::getRendererType ( int object_id ) {
@@ -569,7 +627,6 @@ int Application::getNumberTriangles ( int object_id ) {
   }
 
   return num;
-
 }
 
 void Application::setReconstructionFilter ( double s ) { 
@@ -608,12 +665,22 @@ void Application::useLOD ( bool lod, int object_id ) {
   if ( lod )
     type = PYRAMID_POINTS_LOD;
 
-  for (unsigned int i = 0; i < objects.size(); ++i){
-    vector< int >* prims = objects[i].getPrimitivesList();
+  //  for (unsigned int i = 0; i < objects.size(); ++i){
+  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
       primitives[*prim_it].setRendererType( type );
   }
-  point_based_render->useLOD( lod );
+}
+
+void Application::changeMaterial( int mat, int object_id ) {
+  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    vector< int >* prims = objects[*it].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+      primitives[*prim_it].setMaterial( mat );
+      primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
+    }
+  }  
 }
 
 void Application::setLodColors ( bool c ) {

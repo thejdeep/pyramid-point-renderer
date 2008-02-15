@@ -20,6 +20,7 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   
   virtual void fileOpen( void );
   virtual void writeLod( void );
+  virtual void writeScene( void );
 
   void on_modelsTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
   void on_comboRendererType_currentIndexChanged( int index );

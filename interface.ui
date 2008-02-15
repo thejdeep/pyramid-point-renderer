@@ -299,6 +299,31 @@
     </property>
     <item>
      <property name="text" >
+      <string>Silver</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Gold</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Turquoise</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Ruby</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Sand</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
       <string>Brass</string>
      </property>
     </item>
@@ -329,22 +354,12 @@
     </item>
     <item>
      <property name="text" >
-      <string>Gold</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
       <string>Polished Gold</string>
      </property>
     </item>
     <item>
      <property name="text" >
       <string>Pewter</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>Silver</string>
      </property>
     </item>
     <item>
@@ -374,27 +389,12 @@
     </item>
     <item>
      <property name="text" >
-      <string>Ruby</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>Turquoise</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
       <string>Black Plastic</string>
      </property>
     </item>
     <item>
      <property name="text" >
       <string>Black Rubber</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>Sand</string>
      </property>
     </item>
     <item>
@@ -524,6 +524,7 @@
     </property>
     <addaction name="actionOpen" />
     <addaction name="actionWrite_LOD" />
+    <addaction name="actionWrite_Scene" />
     <addaction name="separator" />
     <addaction name="actionQuit" />
    </widget>
@@ -614,6 +615,11 @@
   <action name="actionClearKeyFrames" >
    <property name="text" >
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionWrite_Scene" >
+   <property name="text" >
+    <string>Write Scene</string>
    </property>
   </action>
  </widget>

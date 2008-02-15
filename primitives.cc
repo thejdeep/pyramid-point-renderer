@@ -11,7 +11,7 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-#define ATTRIB_INDEX 6
+#define NUM_MATERIALS 5
 
 GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
@@ -315,7 +315,8 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
       color_array[pos*4 + 1] = obj_colors[id][1];
       color_array[pos*4 + 2] = obj_colors[id][2];
     }
-    color_array[pos*4 + 3] = type;
+    //    color_array[pos*4 + 3] = type;
+    color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
     normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
@@ -526,7 +527,8 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
       color_array[pos*4 + 1] = obj_colors[id][1];
       color_array[pos*4 + 2] = obj_colors[id][2];
     }
-    color_array[pos*4 + 3] = type;
+    //    color_array[pos*4 + 3] = type;
+    color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
     normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());

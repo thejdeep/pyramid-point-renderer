@@ -13,7 +13,7 @@ void main(void)
 {
 
   // back face culling (rotated eye, fixed point)  
-  if ( ((gl_Color.a > 0.9) ) &&
+  if ( ((gl_Color.a > 0.0) ) &&
     ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -0.10 )) {
     radius_depth_w.x = 0.0;
 
@@ -32,7 +32,6 @@ void main(void)
     radius_depth_w = vec3(gl_Vertex.w, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
     
     // radius_depth_w.z = radius_depth_w.y;
-    // radius_depth_w.z = (1.0 / radius_depth_w.y) * (10.0 / 9.0) + (10.0 / 9.0);
 
     gl_Position = v;
   }
