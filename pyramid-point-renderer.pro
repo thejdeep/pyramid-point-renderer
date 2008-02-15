@@ -9,7 +9,6 @@ INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel
 
 QT += opengl
-QT += qt3support
 
 # Input
 HEADERS += application.h \
