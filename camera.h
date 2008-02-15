@@ -180,6 +180,7 @@ public:
   void createKeyFrame( void ) {
 	  keyframe k( position, q_rot );
 	  keyFrames.push_back( k );
+	  cout << "Key frame recorded." << endl;
   }
 
   void writeKeyFrames( const char* fn ) {

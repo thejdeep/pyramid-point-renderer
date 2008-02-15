@@ -550,7 +550,17 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
     prims->back().setMaterial(material);
     filenames.push_back( ply_file[i] );
     
-    readPlyTriangles (ply_file[i], (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
+    if (strstr(ply_file[i], ".lod") != NULL ) {
+
+      char fn[200];
+      strcpy(fn, ply_file[i]);
+      char* ptr = strstr(fn, ".lod");
+      strncpy (ptr, "", 4);
+      readPlyTriangles (fn, (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
+      prims->back().readFileLOD(ply_file[i]);
+    }
+    else
+      readPlyTriangles (ply_file[i], (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
 
     // Must call after reading file because this next function creates
     // the vertex array or display lists, and needs the surfels structure loaded
@@ -600,7 +610,6 @@ int readTreeFiles (const char* filename, vector<Primitives> *prims, vector<Objec
   double type;
   int renderer_type;
   Point rgb;
-  int material = 0;
 
   for (int i = 0; i < num_primitives; ++i) {   
     in >> id >> ply_file >> type >> renderer_type >> rgb[0] >> rgb[1] >> rgb[2];
@@ -608,7 +617,6 @@ int readTreeFiles (const char* filename, vector<Primitives> *prims, vector<Objec
     prims->push_back ( Primitives(id, type) );
     prims->back().setType( type );
     prims->back().setPerVertexColor( 1 );
-    prims->back().setMaterial(material);
 
     readPlyTriangles (ply_file, (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
 

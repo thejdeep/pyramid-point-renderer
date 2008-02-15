@@ -312,7 +312,6 @@ int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
       }
     }
 
-    //  if (!point_based_render)
     createPointRender( 0 );
 
     return num_objs;
@@ -397,7 +396,7 @@ int Application::readLodFile ( const char * filename ) {
 
   // Create a new object and connect to new primitive
   objects.push_back( Object( id ) );
-  objects.back().setFilename( filename );
+  objects.back().setFilename( lodFilename );
 
   primitives.push_back( Primitives( primitives.size() ) );
   

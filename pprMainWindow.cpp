@@ -104,7 +104,6 @@ void pprMainWindow::selectCurrObject ( void ) {
   int id = (curr->text(0)).toInt();
 
   application->clearSelectedObjects ( );
-  cout << "id : " << id << endl;
 
   if (id == -1)
     return;
