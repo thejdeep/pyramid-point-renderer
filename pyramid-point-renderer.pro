@@ -9,6 +9,7 @@ INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel
 
 QT += opengl
+QT += qt3support
 
 # Input
 HEADERS += application.h \
@@ -32,8 +33,7 @@ HEADERS += application.h \
            pyramid_triangle_renderer.h \
            pyramid_types.h \
            quat.h \
-           surfels.h \
-           surfels_old.h \
+           surfels.h \      
            timer.h \
            triangle_renderer.h \
            matrix.cc
