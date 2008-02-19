@@ -304,7 +304,7 @@ void main (void) {
 	//if (abs(pixelC[i].w - obj_id) < 0.1 )
 	{
 	  // Depth test between valid in reach ellipses
-	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax)) 
+	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
 	    {
 	      //	      float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 	      float w = 1.0;

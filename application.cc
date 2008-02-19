@@ -474,6 +474,8 @@ int Application::writeSceneFile ( void ) {
 
   out << camera->positionVector()[0] << " " << camera->positionVector()[1] << " " << camera->positionVector()[2] << " " <<
     camera->rotationQuat().x << " " << camera->rotationQuat().y << " " << camera->rotationQuat().z << " " << camera->rotationQuat().a << endl;
+  
+  out << camera->lightVector()[0] << " " << camera->lightVector()[1] << " " << camera->lightVector()[2] << endl;
 
   cout << "Wrote scene : scene.scn" << endl;
 

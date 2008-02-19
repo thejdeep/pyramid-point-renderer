@@ -167,6 +167,11 @@ public:
   void setPositionVector ( double p[3] ) { 
     position[0] = p[0]; position[1] = p[1]; position[2] = p[2]; }
   
+  /// Return light position
+  const GLfloat* lightVector ( void ) const { return &light_position[0]; }
+  void setLightVector ( GLfloat p[3] ) { 
+    light_position[0] = p[0]; light_position[1] = p[1]; light_position[2] = p[2]; }
+  
 
   /// Return far and near planes
   const double zNear ( void ) const { return z_near; }

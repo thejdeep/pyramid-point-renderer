@@ -584,9 +584,12 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
 
   // read camera attributes
   double camera_pos[3];
+  GLfloat light_pos[3];
   in >> camera_pos[0] >> camera_pos[1] >> camera_pos[2] >> q.x >> q.y >> q.z >> q.a;
   camera->setPositionVector( camera_pos );
   camera->setRotationQuat( q );
+  in >> light_pos[0] >> light_pos[1] >> light_pos[2];
+  camera->setLightVector( light_pos );
 
   in.close();
   return num_objects;

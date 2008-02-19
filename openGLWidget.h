@@ -29,7 +29,7 @@ class openGLWidget: public QGLWidget {
   openGLWidget(QWidget* parent=0,
 	       const QGLWidget* shareWidget = 0, Qt::WFlags f=0)
     : QGLWidget (parent, shareWidget, f) {
-    startTimer(1);
+    startTimer(0);
   }
 
     // A simple opengl drawing callback
