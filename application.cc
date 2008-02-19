@@ -519,7 +519,7 @@ void Application::mouseLeftButton(int x, int y) {
     camera->startRotation(x, y);
   else {
     for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->startQuatRotation(x, y, objects[*it].getRotationQuat());     
+      camera->startQuatRotation(x, y, objects[*it].getRotationQuat(), objects[*it].getCenter());
   }
 }
 
@@ -551,7 +551,7 @@ void Application::mouseLeftMotion(int x, int y) {
     camera->rotate(x, y);
   else {
     for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->rotateQuat(x, y, objects[*it].getRotationQuat());
+      camera->rotateQuat(x, y, objects[*it].getRotationQuat(), objects[*it].getCenter());
   }
 }
 

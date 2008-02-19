@@ -120,7 +120,7 @@ public:
   void updateMouse ( void );
 
   /// Starts a quat rotation procedure
-  void startQuatRotation(int x, int y, Quat*);
+  void startQuatRotation(int x, int y, Quat*, double[3]);
   /// Starts a rotation procedure
   void startRotation(int x, int y);
   /// Ends a rotation procedure
@@ -150,7 +150,7 @@ public:
   /// Translate a given vector in the z axis
   void zoomingVec (int x, int y, double* vec);
   /// Rotate a given quaternion
-  void rotateQuat(int x, int y, Quat *q);
+  void rotateQuat(int x, int y, Quat *q, double[3]);
 
   /// Return rotation matrix
   const double* rotationMatrix ( void );// { return rotation_matrix; }
@@ -282,6 +282,7 @@ private:
 
   void mapToSphere(const double p_screen[3], double p[], const double r) const;
 
+  void projectToScreen(double p[3], double* screen_pos);
 };
 
 #endif

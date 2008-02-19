@@ -133,8 +133,8 @@ void Camera::resetViewMode ( void ) {
   double y = 1.0 * zoom_factor;
 
   if (view_mode == PERSPECTIVE)
-    glFrustum(left, right, bottom, top, z_near, z_far);
-  //gluPerspective( 45, (w/h), z_near, z_far );
+    //glFrustum(left, right, bottom, top, z_near, z_far);
+    gluPerspective( 45, (w/h), z_near, z_far );
   else
     glOrtho( -x, x, -y, y, z_near, z_far );
 }
@@ -200,13 +200,16 @@ void Camera::startRotation(int x, int y) {
 /// Starts a rotation procedure
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
-void Camera::startQuatRotation(int x, int y, Quat* q) {
+void Camera::startQuatRotation(int x, int y, Quat* q, double obj_center[3]) {
 
   q_last = *q;
 
+  double screen_obj_center[3];
+  projectToScreen(obj_center, screen_obj_center);
+
   // Save initial click
-  mouse_start[0] = x;
-  mouse_start[1] = screen_height - y;
+  mouse_start[0] = x - screen_obj_center[0];
+  mouse_start[1] = screen_height - (y - screen_obj_center[1]);
   mouse_start[2] = 0.0;
 
 }
@@ -238,6 +241,34 @@ void Camera::mapToSphere(const double p_screen[3], double p[], const double r) c
   }
   else
     p[2] = sqrt (1.0 - sq_len);
+
+}
+
+void Camera::projectToScreen(double p[3], double* screen_pos) {
+
+  GLdouble pos_x, pos_y, pos_z;
+
+  setView();
+
+  GLdouble model_view[16];
+  glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
+
+  GLdouble projection[16];
+  glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+	
+  // get 2D coordinates based on 3D coordinates
+
+  gluProject(p[0], p[1], p[2],
+	     model_view, projection, viewport,
+	     &pos_x, &pos_y, &pos_z);
+
+  screen_pos[0] = pos_x - screen_width*0.5;
+  screen_pos[1] = screen_height - pos_y - screen_height*0.5;
+  screen_pos[2] = pos_z;
+
 
 }
 
@@ -288,10 +319,13 @@ void Camera::rotate(int x, int y) {
 /// Rotate given quaternion
 /// @param x Mouse screen x coordinate
 /// @param y Mouse screen y coordinate
-void Camera::rotateQuat(int x, int y, Quat *q) {
+void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
 
-  mouse_curr[0] = x;
-  mouse_curr[1] = screen_height - y;
+  double screen_obj_center[3];
+  projectToScreen(obj_center, screen_obj_center);
+
+  mouse_curr[0] = x - screen_obj_center[0];
+  mouse_curr[1] = screen_height - (y - screen_obj_center[1]);
   mouse_curr[2] = 0.0;
 
   double v0[3], v1[3];
