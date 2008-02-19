@@ -26,6 +26,7 @@ HEADERS += application.h \
            pprMainWindow.h \
            primitives.h \
            pyramid_point_render.h \
+           pyramid_point_render_nearest.h \
            pyramid_point_render_color.h \
            pyramid_point_render_lod.h \
            pyramid_point_render_trees.h \
@@ -50,6 +51,7 @@ SOURCES += application.cc \
            pprMainWindow.cpp \
            primitives.cc \
            pyramid_point_render.cc \
+           pyramid_point_render_nearest.cc \
            pyramid_point_render_color.cc \
            pyramid_point_render_lod.cc \
            pyramid_point_render_trees.cc \

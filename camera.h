@@ -73,16 +73,14 @@ public:
 				     zoom_factor(1.0), fov(1.0),
 				     z_near(0.01), z_far(100.0) {
     view_mode = PERSPECTIVE;
+
     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     std::copy (identity, identity+16, rotation_matrix);
 
     q_last.a = 1.0; q_last.x = 0.0; q_last.y = 0.0; q_last.z = 0.0;
     q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
 
-    eye[0] = 0.0; eye[1] = 0.0; eye[2] = 3.0;
-    eye_rot[0] = 0.0; eye_rot[1] = 0.0; eye_rot[2] = 3.0;
-
-    position[0] = 0.0; position[1] = 0.0; position[2] = -3.0;
+    position[0] = 0.0; position[1] = 0.0; position[2] = -1.0;
     
     light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
 
@@ -179,7 +177,6 @@ public:
   const double fieldOfVision ( void ) const { return fov; }
 
   void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
-  void eyeVec ( double e[] ) const { e[0] = eye[0]; e[1] = eye[1]; e[2] = eye[2]; };  
   void positionVec ( double e[] ) const { e[0] = position[0]; e[1] = position[1]; e[2] = -position[2]; };
 
   void createKeyFrame( void ) {
@@ -252,14 +249,9 @@ private:
   // Front and back z planes
   double z_near, z_far;
 
-  // Fixed eye position
-  double eye[3];
-
-  // Rotated eye
-  double eye_rot[3];
-
   // Quarternion rotation
   Quat q_last;
+
   // Quaternion accumulation during rotation
   Quat q_rot;
 

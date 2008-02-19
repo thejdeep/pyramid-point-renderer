@@ -29,7 +29,7 @@ void main() {
 
   // angle between view vector and normal
   float cos_alpha = dot(normalize(gl_Vertex.xyz - eye), normal_vec_vertex);
-  if ( cos_alpha < -0.10 ) {
+  if ( cos_alpha < -0.20 ) {
 
     radius_depth_w_vertex.x = 0.0;
     gl_Position = vec4(1.0);

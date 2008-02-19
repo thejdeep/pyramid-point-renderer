@@ -31,6 +31,7 @@
 //#include "triangle_renderer.h"
 
 #include "pyramid_point_render.h"
+#include "pyramid_point_render_nearest.h"
 #include "pyramid_point_render_color.h"
 #include "pyramid_point_render_lod.h"
 #include "pyramid_point_render_trees.h"

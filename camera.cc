@@ -89,7 +89,7 @@ void Camera::setView (void) {
   }
 
   glTranslatef(position[0], position[1], position[2]);
-  //glTranslatef(-eye[0], -eye[1], -eye[2]);
+
 
 //   Quat q = q_rot;
 //   q.x *= -1;
@@ -109,7 +109,6 @@ void Camera::setView (void) {
   }
 
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
-  //glTranslatef(-eye_rot[0], -eye_rot[1], -eye_rot[2]);
 }
 
 /// Resets the view mode properties
@@ -118,16 +117,16 @@ void Camera::resetViewMode ( void ) {
   double w = (double)screen_width;
   double h = (double)screen_height;
 
-  double diag = sqrt (w*w + h*h);
-  double top = h / diag * 0.5 * fov * z_near;
-  double bottom = - top;
-  double right = w / diag * 0.5 * fov * z_near;
-  double left = -right;
+//   double diag = sqrt (w*w + h*h);
+//   double top = h / diag * 0.5 * fov * z_near;
+//   double bottom = - top;
+//   double right = w / diag * 0.5 * fov * z_near;
+//   double left = -right;
 
-  left *= zoom_factor;
-  right *= zoom_factor;
-  top *= zoom_factor;
-  bottom *= zoom_factor;
+//   left *= zoom_factor;
+//   right *= zoom_factor;
+//   top *= zoom_factor;
+//   bottom *= zoom_factor;
 
   double x = 1.0 * zoom_factor;
   double y = 1.0 * zoom_factor;
@@ -354,13 +353,16 @@ void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
 void Camera::computeEyePosition(Quat q, double *new_eye) {
   Quat q_new_rot = q_rot;
   q_new_rot = q_new_rot.composeWith(q);
+
+//   Quat q_new_rot = q;
+//   q_new_rot = q_new_rot.composeWith(q_rot);
+
   q_new_rot.invert();
-//   new_eye[0] = eye[0];
-//   new_eye[1] = eye[1];
-//   new_eye[2] = eye[2];
-  new_eye[0] += position[0];
-  new_eye[1] += position[1];
-  new_eye[2] += position[2];
+
+  new_eye[0] = position[0];
+  new_eye[1] = position[1];
+  new_eye[2] = position[2];
+
   q_new_rot.rotate(new_eye);
 }
 
@@ -578,10 +580,10 @@ const double* Camera::rotationMatrix ( void ) {
   rotation_matrix[10] = 1 - 2 * ( xx + yy );
   rotation_matrix[11] = 0;
  
-  // Translation vector = -eye
-  rotation_matrix[12] = -eye[0];
-  rotation_matrix[13] = -eye[1];
-  rotation_matrix[14] = -eye[2];
+  // Translation vector = position
+  rotation_matrix[12] = position[0];
+  rotation_matrix[13] = position[1];
+  rotation_matrix[14] = position[2];
 
   rotation_matrix[15] = 1;
 
