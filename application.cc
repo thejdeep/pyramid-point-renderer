@@ -133,18 +133,18 @@ void Application::draw(void) {
     camera->setView();
 
     // Compute rotated eye position for this object for back face culling   
-//     double eye[3];
-//     eye[0] = objects[i].getCenter()[0];
-//     eye[1] = objects[i].getCenter()[1];
-//     eye[2] = objects[i].getCenter()[2];
-
-//     // Compute the rotated eye (opposite direction) of the camera + object center position
-//     camera->computeEyePosition(*(objects[i].getRotationQuat()), eye);
-
     double eye[3];
-    eye[0] = camera->positionVector()[0];
-    eye[1] = camera->positionVector()[1];
-    eye[2] = camera->positionVector()[2];
+    eye[0] = objects[i].getCenter()[0];
+    eye[1] = objects[i].getCenter()[1];
+    eye[2] = objects[i].getCenter()[2];
+
+    // Compute the rotated eye (opposite direction) of the camera + object center position
+    camera->computeEyePosition(*(objects[i].getRotationQuat()), eye);
+
+//     double eye[3];
+//     eye[0] = camera->positionVector()[0];
+//     eye[1] = camera->positionVector()[1];
+//     eye[2] = camera->positionVector()[2];
 
     point_based_render->setEye(eye);
 

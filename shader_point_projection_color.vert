@@ -12,10 +12,10 @@ varying vec3 radius_depth_w;
 void main(void)
 {
 
-  vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
-  normal_vec = normalize(gl_NormalMatrix * gl_Normal);
+/*   vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0); */
+/*   normal_vec = normalize(gl_NormalMatrix * gl_Normal); */
 
-  if ( dot(normalize(v - eye), normal_vec) < -1.0 ) {
+  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -1.2 ) {
 
   // back face culling (rotated eye, fixed point)  
   //  if ( ((gl_Color.a > 0.0) ) &&
@@ -29,9 +29,9 @@ void main(void)
   else
   {
     // only rotate point and normal if not culled
-    //vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+    vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
    
-    //normal_vec = normalize(gl_NormalMatrix * gl_Normal);
+    normal_vec = normalize(gl_NormalMatrix * gl_Normal);
 
     // compute depth value without projection matrix, only modelview
     radius_depth_w = vec3(gl_Vertex.w, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
