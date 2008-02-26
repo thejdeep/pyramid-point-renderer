@@ -10,6 +10,7 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include "file_io.h"
+#include <GL/glut.h>
 
 // #define CANVAS_WIDTH  1024
 // #define CANVAS_HEIGHT 1024
@@ -33,6 +34,8 @@ Application::Application( void ) {
   fps_loop = 0;
   active_shift = 0;
   analysis_filter_size = 0;
+
+  lods_perc = true;
 
   color_model = true;
   elliptical_weight = true;
@@ -119,6 +122,9 @@ void Application::draw(void) {
   if (primitives.size() == 0)
     return;
 
+  for (int i = 0; i < 4; ++i)
+    surfs_per_level[i] = 0;
+
   // Clear all buffers including pyramid algorithm buffers
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -145,7 +151,7 @@ void Application::draw(void) {
 //     eye[0] = camera->positionVector()[0];
 //     eye[1] = camera->positionVector()[1];
 //     eye[2] = camera->positionVector()[2];
-
+    
     point_based_render->setEye(eye);
 
     // Translate and rotate object
@@ -161,11 +167,16 @@ void Application::draw(void) {
 	  point_based_render->useLOD( true );
 	else
 	  point_based_render->useLOD( false );
-	
+
+	prim->eye = Point(eye[0], eye[1], eye[2]);
+	prim->countNumVertsLOD(&surfs_per_level[0]);
 	point_based_render->projectSamples( prim );	
       }
     }
   }
+
+  //  cout << surfs_per_level[0] << " " << surfs_per_level[1] << " " << surfs_per_level[2] << " " << surfs_per_level[3] << endl;
+
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
@@ -173,7 +184,7 @@ void Application::draw(void) {
   point_based_render->draw();
 
   // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-  for (unsigned int i = 0; i < objects.size(); ++i){
+  for (unsigned int i = 0; i < objects.size(); ++i) {
 //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
 //     int i = *it;
     // Reset camera position and direction
@@ -199,10 +210,131 @@ void Application::draw(void) {
   if (show_points)
     drawPoints();
 
+  screenText();
+
   if (rotating)
     camera->rotate();
 
-  glFinish();
+
+}
+
+/// Screen text with commands info
+void Application::screenText( void ) {
+
+  int w = 200;
+  int h = 100;
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  //  glViewport(CANVAS_WIDTH - w, 0, CANVAS_WIDTH, h);
+  glViewport(0, 0, w, h);
+
+  gluOrtho2D(0.0, 1.5, 0.0, 1.0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  /****/
+
+  int total;
+  if (lods_perc)
+    total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
+  else
+    total = surfs_per_level[4];
+  double x_max = 0.0;
+
+  // BACKGROUND
+  glColor4f(0.0, 0.0, 0.0, 1.000000);
+  glBegin (GL_POLYGON);
+  glVertex2f (0.0, 0.0);
+  glVertex2f (1.5, 0.0);
+  glVertex2f (1.5, 1.0);
+  glVertex2f (0.0, 1.0);
+  glEnd();
+
+  // SILVER
+  x_max = (double)surfs_per_level[3] / (double)total;
+  glColor4f(0.507540+0.192250, 0.507540+0.192250, 0.507540+0.192250, 1.000000);
+  glBegin (GL_POLYGON);
+  glVertex2f (0.0, 0.1);
+  glVertex2f (x_max, 0.1);
+  glVertex2f (x_max, 0.2);
+  glVertex2f (0.0, 0.2);
+  glEnd();
+
+  // GOLD
+  x_max = (double)surfs_per_level[2] / (double)total;
+  glColor4f(0.751640+0.247250, 0.606480+0.199500, 0.226480+0.074500, 1.000000);
+  glBegin (GL_POLYGON);
+  glVertex2f (0.0, 0.3);
+  glVertex2f (x_max, 0.3);
+  glVertex2f (x_max, 0.4);
+  glVertex2f (0.0, 0.4);
+  glEnd();
+
+  // TURQUOISE
+  x_max = (double)surfs_per_level[1] / (double)total;
+  glColor4f(0.396000+0.100000, 0.741510+0.187250, 0.691020+0.174500, 1.000000);
+  glBegin (GL_POLYGON);
+  glVertex2f (0.0, 0.5);
+  glVertex2f (x_max, 0.5);
+  glVertex2f (x_max, 0.6);
+  glVertex2f (0.0, 0.6);
+  glEnd();
+
+  // RUBY
+  x_max = (double)surfs_per_level[0] / (double)total;
+  glColor4f(0.614240+0.174500, 0.041360+0.011750, 0.041360+0.011750, 1.000000);
+  glBegin (GL_POLYGON);
+  glVertex2f (0.0, 0.7);
+  glVertex2f (x_max, 0.7);
+  glVertex2f (x_max, 0.8);
+  glVertex2f (0.0, 0.8);
+  glEnd();
+  /****/
+  glColor3f(1.0, 1.0, 1.0);
+
+  char text[4][20];
+  if (lods_perc) {
+    sprintf(text[0], "%.1f", (surfs_per_level[0] / (double)total) * 100.0);
+    strcat(text[0], "%");
+    sprintf(text[1], "%.1f", (surfs_per_level[1] / (double)total) * 100.0);
+    strcat(text[1], "%");
+    sprintf(text[2], "%.1f", (surfs_per_level[2] / (double)total) * 100.0);
+    strcat(text[2], "%");
+    sprintf(text[3], "%.1f", (surfs_per_level[3] / (double)total) * 100.0);
+    strcat(text[3], "%");
+  }
+  else {
+    sprintf(text[0], "%d", surfs_per_level[0]);
+    sprintf(text[1], "%d", surfs_per_level[1]);
+    sprintf(text[2], "%d", surfs_per_level[2]);
+    sprintf(text[3], "%d", surfs_per_level[3]);
+  }
+
+  glRasterPos2d(0.1, 0.1);
+  for (char *s = &text[3][0]; *s; ++s)
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+
+  glRasterPos2d(0.1, 0.3);
+  for (char *s = &text[2][0]; *s; ++s)
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+
+  glRasterPos2d(0.1, 0.5);
+  for (char *s = &text[1][0]; *s; ++s)
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+
+  glRasterPos2d(0.1, 0.7);
+  for (char *s = &text[0][0]; *s; ++s)
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  camera->setView ();
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 }
 
 /// Reshape func
@@ -693,4 +825,8 @@ void Application::changeMaterial( int mat, int object_id ) {
 
 void Application::setLodColors ( bool c ) {
   point_based_render->useColorPerLOD( c );
+}
+
+void Application::switchLodsPerc ( void ) {
+  lods_perc = !lods_perc;
 }

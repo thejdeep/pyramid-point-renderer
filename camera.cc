@@ -84,7 +84,7 @@ void Camera::setView (void) {
 		  q_rot.z = ( coef_a * keyFrames[frame].rot.z ) + ( coef_b * keyFrames[frame+1].rot.z );
 		  q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );		  
 		  
-		  frameVideo += 0.001;
+		  frameVideo += 0.01;
 	  }
   }
 
@@ -127,7 +127,6 @@ void Camera::resetViewMode ( void ) {
 //   right *= zoom_factor;
 //   top *= zoom_factor;
 //   bottom *= zoom_factor;
-
   double x = 1.0 * zoom_factor;
   double y = 1.0 * zoom_factor;
 

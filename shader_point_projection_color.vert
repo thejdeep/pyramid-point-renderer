@@ -15,7 +15,7 @@ void main(void)
 /*   vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0); */
 /*   normal_vec = normalize(gl_NormalMatrix * gl_Normal); */
 
-  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -1.2 ) {
+  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -10.6 ) {
 
   // back face culling (rotated eye, fixed point)  
   //  if ( ((gl_Color.a > 0.0) ) &&

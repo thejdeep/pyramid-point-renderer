@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ .
-LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel
+LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
 

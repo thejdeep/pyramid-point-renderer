@@ -188,7 +188,7 @@ void pprMainWindow::on_checkBoxLODColors_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  //application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
   widget->updateGL();
 }
 
@@ -255,4 +255,6 @@ void pprMainWindow::keyPressEvent( QKeyEvent* event) {
     application->createKeyFrame();
   else if (event->key() == Qt::Key_R)
     application->runFrames();
+  else if (event->key() == Qt::Key_P)
+    application->switchLodsPerc();
 }

@@ -68,6 +68,7 @@ class Application
   Application();
   ~Application() {};
 
+  void screenText( void );
 
   int writeLodFile ( void );
   int writeSceneFile ( void );
@@ -94,6 +95,7 @@ class Application
   void setAutoRotate ( bool r );
   void useLOD( bool l, int object_id );
   void setLodColors( bool l );
+  void switchLodsPerc ( void );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
@@ -162,6 +164,7 @@ class Application
   bool show_points;
   int show_splats;
   bool show_screen_info;
+  bool lods_perc;
 
   bool elliptical_weight;
   bool depth_culling;
@@ -179,6 +182,8 @@ class Application
   int fps_loop;
   double start_time, end_time;
   int timing_profile;
+
+  int surfs_per_level[5];
 
   /*************************************/
 

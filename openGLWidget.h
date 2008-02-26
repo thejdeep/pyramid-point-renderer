@@ -8,6 +8,8 @@
 
 #include "application.h"
 
+#include <GL/glut.h>
+
 // A wrapper over QGLWidget
 class openGLWidget: public QGLWidget {
     
@@ -30,6 +32,14 @@ class openGLWidget: public QGLWidget {
 	       const QGLWidget* shareWidget = 0, Qt::WFlags f=0)
     : QGLWidget (parent, shareWidget, f) {
     startTimer(0);
+
+    int argc = 0; 
+    char * argv[1];
+    argv[0] = "";
+
+    //GLUT initialization, just for writing text to screen
+    glutInit(&argc, argv);
+
   }
 
     // A simple opengl drawing callback
@@ -50,6 +60,9 @@ class openGLWidget: public QGLWidget {
 	elapsed_millisecs = 0;
 	fps_loop = 0;	
       }
+
+
+
     }
     
     void setFpsDisplay ( QLCDNumber * d ) { fpsDisplay = d; }

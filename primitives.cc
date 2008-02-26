@@ -166,7 +166,8 @@ void Primitives::render ( void ) {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
@@ -352,6 +353,39 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   glEnableClientState(GL_NORMAL_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glNormalPointer(GL_FLOAT, 0, NULL); 
+}
+
+void Primitives::countNumVertsLOD ( int *spl ) {
+
+  double error;
+  double sin_alpha, cos_alpha;
+  Point p;
+  Vector n;
+  double d;
+  double epsilon = 0.006;
+
+  for (uint i = 0; i < numPatches; ++i) {
+    error = surfels[LOD_LEVELS-1][i].perpendicularError();
+    p = surfels[LOD_LEVELS-1][i].position();
+    n = surfels[LOD_LEVELS-1][i].normal();
+
+    cos_alpha = (p - eye).normalize() * n;
+    d = (p - eye).length();
+    sin_alpha = sqrt( 1.0 - cos_alpha*cos_alpha);
+    error *= sin_alpha / d;
+
+    if (error < epsilon)
+      spl[0] += 1;
+    else if (error < 2.0 * epsilon)
+      spl[1] += surfels_per_level[i*4 + 1];
+    else if (error < 3.0 * epsilon)
+      spl[2] += surfels_per_level[i*4 + 2];
+    else
+      spl[3] += surfels_per_level[i*4 + 3];
+  }
+
+  spl[4] = numPatches + numVertsArray;
+
 }
 
 /**
@@ -998,6 +1032,8 @@ void Primitives::setTrianglesDisplayList( void ) {
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels[0].at( it->verts[0] ).position();

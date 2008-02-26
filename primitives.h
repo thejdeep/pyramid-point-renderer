@@ -88,6 +88,13 @@ class Primitives
   inline uint numPrimitivesLOD(void) { return numVertsArray; }
   inline uint numPrimitivesInLevel( int l ) { return surfels[l].size(); }
 
+  /*********** FOR COUNTING NUMBER OF PRIMITIVES PER LOD **********/
+
+  void countNumVertsLOD ( int * );
+  Point eye;
+
+  /****************************************************************/
+
  private:
 
   void reorderSurfels ( void );
