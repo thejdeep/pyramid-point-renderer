@@ -363,28 +363,37 @@ void Primitives::countNumVertsLOD ( int *spl ) {
   Vector n;
   double d;
   double epsilon = 0.006;
+  //double epsilon = 0.02;
 
-  for (uint i = 0; i < numPatches; ++i) {
-    error = surfels[LOD_LEVELS-1][i].perpendicularError();
-    p = surfels[LOD_LEVELS-1][i].position();
-    n = surfels[LOD_LEVELS-1][i].normal();
+  if (renderer_type != PYRAMID_POINTS_LOD) {
+    spl[3] += surfels[0].size();
+    spl[4] += spl[3];
+  }
+  else {
 
-    cos_alpha = (p - eye).normalize() * n;
-    d = (p - eye).length();
-    sin_alpha = sqrt( 1.0 - cos_alpha*cos_alpha);
-    error *= sin_alpha / d;
-
-    if (error < epsilon)
-      spl[0] += 1;
-    else if (error < 2.0 * epsilon)
-      spl[1] += surfels_per_level[i*4 + 1];
-    else if (error < 3.0 * epsilon)
-      spl[2] += surfels_per_level[i*4 + 2];
-    else
-      spl[3] += surfels_per_level[i*4 + 3];
+    for (uint i = 0; i < numPatches; ++i) {
+      error = surfels[LOD_LEVELS-1][i].perpendicularError();
+      p = surfels[LOD_LEVELS-1][i].position();
+      n = surfels[LOD_LEVELS-1][i].normal();
+      
+      cos_alpha = (p - eye).normalize() * n;
+      d = (p - eye).length();
+      sin_alpha = sqrt( 1.0 - cos_alpha*cos_alpha);
+      error *= sin_alpha / d;
+      
+      if (error < epsilon)
+	spl[0] += 1;
+      else if (error < 4.0 * epsilon)
+	spl[1] += surfels_per_level[i*4 + 1];
+      else if (error < 8.0 * epsilon)
+	spl[2] += surfels_per_level[i*4 + 2];
+      else
+	spl[3] += surfels_per_level[i*4 + 3];
+    }
+    spl[4] += numPatches + numVertsArray;
   }
 
-  spl[4] = numPatches + numVertsArray;
+  
 
 }
 

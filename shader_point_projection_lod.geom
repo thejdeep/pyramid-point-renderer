@@ -66,11 +66,11 @@ void main() {
 	int lod_id = surfels_per_level.x;
 	int num_surfels = 0;
 
-	if ( ep[0] < 2.0*epsilon ) {
+	if ( ep[0] < 4.0*epsilon ) {
 	  num_surfels = surfels_per_level.y;
 	  color = lodColors[2];
 	}
-	else if ( ep[0] < 3.0*epsilon ) {
+	else if ( ep[0] < 8.0*epsilon ) {
 	  lod_id += surfels_per_level.y;
 	  num_surfels = surfels_per_level.z;
 	  color = lodColors[1];

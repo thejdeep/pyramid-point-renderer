@@ -122,7 +122,7 @@ void Application::draw(void) {
   if (primitives.size() == 0)
     return;
 
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < 5; ++i)
     surfs_per_level[i] = 0;
 
   // Clear all buffers including pyramid algorithm buffers
@@ -167,6 +167,7 @@ void Application::draw(void) {
 	  point_based_render->useLOD( true );
 	else
 	  point_based_render->useLOD( false );
+
 
 	prim->eye = Point(eye[0], eye[1], eye[2]);
 	prim->countNumVertsLOD(&surfs_per_level[0]);
@@ -215,20 +216,18 @@ void Application::draw(void) {
   if (rotating)
     camera->rotate();
 
-
 }
 
 /// Screen text with commands info
 void Application::screenText( void ) {
 
-  int w = 200;
-  int h = 100;
+  int w = 400;
+  int h = 200;
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
-  //  glViewport(CANVAS_WIDTH - w, 0, CANVAS_WIDTH, h);
-  glViewport(0, 0, w, h);
+  glViewport(24, 24, w+24, h+24);
 
   gluOrtho2D(0.0, 1.5, 0.0, 1.0);
   glMatrixMode(GL_MODELVIEW);
@@ -240,31 +239,41 @@ void Application::screenText( void ) {
   if (lods_perc)
     total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
   else
-    total = surfs_per_level[4];
+    total = surfs_per_level[4] / 10.0;
   double x_max = 0.0;
 
   // BACKGROUND
-  glColor4f(0.0, 0.0, 0.0, 1.000000);
-  glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.0);
-  glVertex2f (1.5, 0.0);
-  glVertex2f (1.5, 1.0);
-  glVertex2f (0.0, 1.0);
-  glEnd();
+//   glColor4f(0.0, 0.0, 0.0, 1.0);
+//   glBegin (GL_POLYGON);
+//   glVertex2f (0.0, 0.0);
+//   glVertex2f (1.5, 0.0);
+//   glVertex2f (1.5, 1.0);
+//   glVertex2f (0.0, 1.0);
+//   glEnd();
 
   // SILVER
   x_max = (double)surfs_per_level[3] / (double)total;
   glColor4f(0.507540+0.192250, 0.507540+0.192250, 0.507540+0.192250, 1.000000);
   glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.1);
+  glVertex2f (0.0, 0.0);
+  glVertex2f (x_max, 0.0);
   glVertex2f (x_max, 0.1);
-  glVertex2f (x_max, 0.2);
-  glVertex2f (0.0, 0.2);
+  glVertex2f (0.0, 0.1);
   glEnd();
 
   // GOLD
   x_max = (double)surfs_per_level[2] / (double)total;
   glColor4f(0.751640+0.247250, 0.606480+0.199500, 0.226480+0.074500, 1.000000);
+  glBegin (GL_POLYGON);
+  glVertex2f (0.0, 0.15);
+  glVertex2f (x_max, 0.15);
+  glVertex2f (x_max, 0.25);
+  glVertex2f (0.0, 0.25);
+  glEnd();
+
+  // TURQUOISE
+  x_max = (double)surfs_per_level[1] / (double)total;
+  glColor4f(0.396000+0.100000, 0.741510+0.187250, 0.691020+0.174500, 1.000000);
   glBegin (GL_POLYGON);
   glVertex2f (0.0, 0.3);
   glVertex2f (x_max, 0.3);
@@ -272,31 +281,23 @@ void Application::screenText( void ) {
   glVertex2f (0.0, 0.4);
   glEnd();
 
-  // TURQUOISE
-  x_max = (double)surfs_per_level[1] / (double)total;
-  glColor4f(0.396000+0.100000, 0.741510+0.187250, 0.691020+0.174500, 1.000000);
-  glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.5);
-  glVertex2f (x_max, 0.5);
-  glVertex2f (x_max, 0.6);
-  glVertex2f (0.0, 0.6);
-  glEnd();
-
   // RUBY
   x_max = (double)surfs_per_level[0] / (double)total;
   glColor4f(0.614240+0.174500, 0.041360+0.011750, 0.041360+0.011750, 1.000000);
   glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.7);
-  glVertex2f (x_max, 0.7);
-  glVertex2f (x_max, 0.8);
-  glVertex2f (0.0, 0.8);
+  glVertex2f (0.0, 0.45);
+  glVertex2f (x_max, 0.45);
+  glVertex2f (x_max, 0.55);
+  glVertex2f (0.0, 0.55);
   glEnd();
   /****/
-  glColor3f(1.0, 1.0, 1.0);
+  //  glColor3f(1.0, 1.0, 1.0);
+  glColor3f(0.0, 0.0, 0.0);
 
-  char text[4][20];
+
+  char text[5][20];
   if (lods_perc) {
-    sprintf(text[0], "%.1f", (surfs_per_level[0] / (double)total) * 100.0);
+    sprintf(text[0], "%.1f\%", (surfs_per_level[0] / (double)total) * 100.0);
     strcat(text[0], "%");
     sprintf(text[1], "%.1f", (surfs_per_level[1] / (double)total) * 100.0);
     strcat(text[1], "%");
@@ -304,29 +305,39 @@ void Application::screenText( void ) {
     strcat(text[2], "%");
     sprintf(text[3], "%.1f", (surfs_per_level[3] / (double)total) * 100.0);
     strcat(text[3], "%");
+    sprintf(text[4], "Total points rendered : %d", total);
   }
   else {
     sprintf(text[0], "%d", surfs_per_level[0]);
     sprintf(text[1], "%d", surfs_per_level[1]);
     sprintf(text[2], "%d", surfs_per_level[2]);
     sprintf(text[3], "%d", surfs_per_level[3]);
+    sprintf(text[4], "Total points in all levels : %d", surfs_per_level[4]);
   }
+  
+  void* font = GLUT_BITMAP_HELVETICA_18;
 
-  glRasterPos2d(0.1, 0.1);
+
+  glRasterPos2d(((double)surfs_per_level[3] / (double)total) + 0.01, 0.0);
   for (char *s = &text[3][0]; *s; ++s)
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+    glutBitmapCharacter(font, *s);
 
-  glRasterPos2d(0.1, 0.3);
+  glRasterPos2d(((double)surfs_per_level[2] / (double)total) + 0.01, 0.15);
   for (char *s = &text[2][0]; *s; ++s)
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+    glutBitmapCharacter(font, *s);
 
-  glRasterPos2d(0.1, 0.5);
+  glRasterPos2d(((double)surfs_per_level[1] / (double)total) + 0.01, 0.30);
   for (char *s = &text[1][0]; *s; ++s)
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+    glutBitmapCharacter(font, *s);
 
-  glRasterPos2d(0.1, 0.7);
+  glRasterPos2d(((double)surfs_per_level[0] / (double)total) + 0.01, 0.45);
   for (char *s = &text[0][0]; *s; ++s)
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *s);
+    glutBitmapCharacter(font, *s);
+
+  glRasterPos2d(0.0, 0.6);
+  for (char *s = &text[4][0]; *s; ++s)
+    glutBitmapCharacter(font, *s);
+
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
