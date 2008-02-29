@@ -4,26 +4,14 @@
 
 #extension GL_ARB_draw_buffers : enable
 
-
 // flag for depth test on/off
 uniform bool depth_test;
-
-// one over 2 * fbo size
-uniform vec2 oo_2fbo_size;
-
-// size of half a pixel
-uniform float half_pixel_size;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
 uniform sampler2D textureA;
 uniform sampler2D textureB;
-
-vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size), 
-				      vec2(half_pixel_size, -half_pixel_size), 
-				      vec2(-half_pixel_size, half_pixel_size), 
-				      vec2(half_pixel_size, half_pixel_size));
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -207,24 +195,10 @@ void main (void) {
 
   float valid_pixels = 0.0;
 
-  vec4 pixelA[4], pixelB[4];
+  vec4 pixelA, pixelB;
 
-  //up-right
-  tex_coord[0].st = gl_TexCoord[0].st + oo_2fbo_size.st;
-  //up-left
-  tex_coord[1].s = gl_TexCoord[0].s - oo_2fbo_size.s;
-  tex_coord[1].t = gl_TexCoord[0].t + oo_2fbo_size.t;
-  //down-right
-  tex_coord[2].s = gl_TexCoord[0].s + oo_2fbo_size.s;
-  tex_coord[2].t = gl_TexCoord[0].t - oo_2fbo_size.t;
-  //down-left
-  tex_coord[3].st = gl_TexCoord[0].st - oo_2fbo_size.st;
-
-  // Gather pixels values
-  for (int i = 0; i < 4; ++i) {
-    pixelA[i] = texture2D (textureA, tex_coord[i].st).xyzw;
-    pixelB[i] = texture2D (textureB, tex_coord[i].st).xyzw;
-  }
+  pixelA = texture2D (textureA, gl_TexCoord[0].st).xyzw;
+  pixelB = texture2D (textureB, gl_TexCoord[0].st).xyzw;
 
   // Compute the front most pixel from lower level (minimum z
   // coordinate)
@@ -232,7 +206,7 @@ void main (void) {
   float zmin = 10000.0;
   float zmax = -10000.0;
   for (int i = 0; i < 4; ++i) {
-    if (pixelA[i].w > 0.0) {
+    if (pixelA.w > 0.0) {
       // test if this ellipse reaches the center of the pixel being constructed
       dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);

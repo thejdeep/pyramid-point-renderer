@@ -35,6 +35,7 @@
 #include "pyramid_point_render_color.h"
 #include "pyramid_point_render_lod.h"
 #include "pyramid_point_render_trees.h"
+#include "ellipse_rasterization.h"
 
 #include "object.h"
 #include "camera.h"

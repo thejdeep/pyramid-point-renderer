@@ -238,6 +238,11 @@
     </item>
     <item>
      <property name="text" >
+      <string>Ellipse Rasterization</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
       <string>None</string>
      </property>
     </item>

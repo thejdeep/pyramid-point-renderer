@@ -177,9 +177,6 @@ void Application::draw(void) {
     }
   }
 
-  //  cout << surfs_per_level[0] << " " << surfs_per_level[1] << " " << surfs_per_level[2] << " " << surfs_per_level[3] << endl;
-
-
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
   // Computes per pixel color with deferred shading
@@ -419,6 +416,9 @@ void Application::changeRendererType( point_render_type_enum type, int object_id
 
 void Application::changeRendererType( int type, int object_id ) {
   changeRendererType ( (point_render_type_enum)type, object_id );
+  if (type == RASTERIZE_ELLIPSES)
+    createPointRender( 2 );
+
 }
 
 void Application::createPointRender( int type ) {
@@ -432,13 +432,12 @@ void Application::createPointRender( int type ) {
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
-  else if (type == 1){
+  else if (type == 1) {
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
-//   else if (type == 2) {
-//     point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
-//     point_based_render->useLOD(true);
-//   }
+  else if (type == 2) {
+    point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
+  }
 
   assert (point_based_render);
 

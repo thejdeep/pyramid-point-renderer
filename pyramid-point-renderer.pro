@@ -13,6 +13,7 @@ QT += opengl
 # Input
 HEADERS += application.h \
            camera.h \
+           ellipse_rasterization.h \
            ewa_surface_splatting.h \
            file_io.h \
            kd-tree.h \
@@ -39,6 +40,7 @@ HEADERS += application.h \
 FORMS += interface.ui
 SOURCES += application.cc \
            camera.cc \
+           ellipse_rasterization.cc \
            ewa_surface_splatting.cc \
            main.cpp \
            matrix.cc \
