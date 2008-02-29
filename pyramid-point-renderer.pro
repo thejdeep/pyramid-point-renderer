@@ -15,7 +15,6 @@ HEADERS += application.h \
            camera.h \
            ewa_surface_splatting.h \
            file_io.h \
-           GLee.h \
            kd-tree.h \
            materials.h \
            modelsTreeWidget.h \
@@ -41,7 +40,6 @@ FORMS += interface.ui
 SOURCES += application.cc \
            camera.cc \
            ewa_surface_splatting.cc \
-           GLee.cpp \
            main.cpp \
            matrix.cc \
            modelsTreeWidget.cpp \

@@ -68,7 +68,8 @@ class Application
   Application();
   ~Application() {};
 
-  void screenText( void );
+  void setColorBars ( bool c );
+  void renderColorBars( void );
 
   int writeLodFile ( void );
   int writeSceneFile ( void );
@@ -162,6 +163,7 @@ class Application
   GLint render_mode;
   bool show_kd_tree;
   bool show_points;
+  bool show_color_bars;
   int show_splats;
   bool show_screen_info;
   bool lods_perc;

@@ -44,6 +44,7 @@ Application::Application( void ) {
 
   show_screen_info = true;
   show_points = false;
+  show_color_bars = false;
   show_splats = 1;
 
   timing_profile = 0;
@@ -211,7 +212,8 @@ void Application::draw(void) {
   if (show_points)
     drawPoints();
 
-  screenText();
+  if (show_color_bars)
+    renderColorBars();
 
   if (rotating)
     camera->rotate();
@@ -219,7 +221,7 @@ void Application::draw(void) {
 }
 
 /// Screen text with commands info
-void Application::screenText( void ) {
+void Application::renderColorBars( void ) {
 
   int w = 400;
   int h = 200;
@@ -840,4 +842,8 @@ void Application::setLodColors ( bool c ) {
 
 void Application::switchLodsPerc ( void ) {
   lods_perc = !lods_perc;
+}
+
+void Application::setColorBars ( bool c ) {
+  show_color_bars = c;
 }

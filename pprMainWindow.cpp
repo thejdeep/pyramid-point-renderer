@@ -152,6 +152,14 @@ void pprMainWindow::on_checkBoxDepthTest_stateChanged( int state ) {
   widget->updateGL();
 }
 
+void pprMainWindow::on_checkBoxColorBars_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->setColorBars(true);
+  else
+    application->setColorBars(false);
+  widget->updateGL();
+}
+
 void pprMainWindow::on_checkBoxPerVertexColor_stateChanged( int state ) {
   if (state == Qt::Checked)
     application->setPerVertexColor(true, (modelsTreeWidget->currentItem()->text(0)).toInt());
