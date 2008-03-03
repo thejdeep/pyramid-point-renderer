@@ -8,6 +8,7 @@
  **/
 
 #include "camera.h"
+#include <math.h>
 
 #define PI 3.14159265
 
@@ -63,6 +64,17 @@ void Camera::setView (void) {
 		  position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
 		  position[1] = keyFrames[frame].pos[1] + (keyFrames[frame+1].pos[1]-keyFrames[frame].pos[1])*(step);
 		  position[2] = keyFrames[frame].pos[2] + (keyFrames[frame+1].pos[2]-keyFrames[frame].pos[2])*(step);
+		  light_position[0] = keyFrames[frame].light_pos[0] + 
+		    (keyFrames[frame+1].light_pos[0]-keyFrames[frame].light_pos[0])*(step);
+		  light_position[1] = keyFrames[frame].light_pos[1] + 
+		    (keyFrames[frame+1].light_pos[1]-keyFrames[frame].light_pos[1])*(step);
+		  light_position[2] = keyFrames[frame].light_pos[2] + 
+		    (keyFrames[frame+1].light_pos[2]-keyFrames[frame].light_pos[2])*(step);
+
+		  frame_reconstruction_filter = keyFrames[frame].reconstruction_filter + 
+		    (keyFrames[frame+1].reconstruction_filter-keyFrames[frame].reconstruction_filter)*(step);
+		  frame_prefilter = keyFrames[frame].prefilter + 
+		    (keyFrames[frame+1].prefilter-keyFrames[frame].prefilter)*(step);
 
 		  theta = acos( (keyFrames[frame].rot.x * keyFrames[frame+1].rot.x) +
 				(keyFrames[frame].rot.y * keyFrames[frame+1].rot.y) +
@@ -70,7 +82,7 @@ void Camera::setView (void) {
 				(keyFrames[frame].rot.a * keyFrames[frame+1].rot.a) );
 
 		  sin_theta = sin( theta );
-		  if ((theta == 0.0) || (sin_theta == 0.0)) {
+		  if ((theta == 0.0) || (sin_theta == 0.0) || (isnan(theta)) ) {
 		    coef_a = 1.0;
 		    coef_b = 0.0;
 		  }

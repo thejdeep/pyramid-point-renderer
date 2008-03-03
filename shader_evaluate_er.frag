@@ -4,8 +4,7 @@
 //#version 120
 
 // flag for depth test on/off
-uniform bool depth_test;
-uniform bool elliptical_weight;
+//uniform bool depth_test;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
@@ -79,13 +78,13 @@ void main (void) {
   float weight = 0.0, dist_test;
 
   // retrieve pixel from displacement position
-  pixelA = texture2D (textureA, gl_TexCoord[0].st + displacement.xy).xyzw;
+  pixelA = texture2D (textureA, gl_TexCoord[0].st + vec2(displacement.xy)).xyzw;
 
   // retrieve actual pixel with current values
   buffer = texture2D (textureC, gl_TexCoord[0].st).xyzw;
 
   if (pixelA.w > 0.0) {
-    pixelB = texture2D (textureB, gl_TexCoord[0].st + displacement.xy).xyzw;
+    pixelB = texture2D (textureB, gl_TexCoord[0].st + vec2(displacement.xy)).xyzw;
   
     dist_test = pointInEllipse(pixelB.zw, pixelA.w, pixelA.xyz);
     //dist_test = pointInCircle(pixelB.zw, pixelA.w);

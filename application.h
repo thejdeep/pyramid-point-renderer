@@ -116,7 +116,7 @@ class Application
   void mouseRightMotion( int x, int y );
 
   void createKeyFrame( void ) {
-    if (camera) camera->createKeyFrame();
+    if (camera) camera->createKeyFrame(reconstruction_filter_size, prefilter_size);
   }
   void clearFrames( void ) {
     if (camera) camera->clearFrames();

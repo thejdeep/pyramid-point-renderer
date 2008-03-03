@@ -1,13 +1,10 @@
 uniform sampler2D textureA;
-uniform sampler2D textureC;
-
-//uniform int color_per_lod;
 
 //silver
 //gold
 //turquoise
 //ruby
-//
+//alvaro blue
 
 const int num_materials = 6;
 
@@ -42,42 +39,37 @@ float shininess[num_materials] = float[num_materials] (51.200001,
 void main (void) {
 
   vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;
-  vec4 color = texture2D (textureC, gl_TexCoord[0].st).xyzw;
+  vec4 color = vec4(0.0, 1.0, 0.0, 1.0);
 
   if (normal.a != 0.0) {
-    int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
+    color = vec4(1.0, 0.0, 0.0, 1.0);
+    //    int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
+/*     int material = 1; */
 
-    if (material == 5) {
-      color = diffuse[material];
-    }
-    else {
-      vec3 lightDir = normalize(vec3(gl_LightSource[0].position));  
+/*     if (material == 5) { */
+/*       color = diffuse[material]; */
+/*     } */
+/*     else { */
+/*       vec3 lightDir = normalize(vec3(gl_LightSource[0].position));   */
 
-      normal = normalize(normal);
+/*       normal = normalize(normal); */
 
-      //    if (bool(color_per_lod))
-      color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient;
-      /*     else */
-      /*       color += gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient; */
+/*       color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient; */
 
-      float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
+/*       float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0); */
 
-      //    if (bool(color_per_lod))
-      color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
-      /*     else */
-      /*       color += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * NdotL; */
+/*       color += diffuse[material] * gl_LightSource[0].diffuse * NdotL; */
 
-      if (NdotL > 0.0) {
-	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
-	//     if (bool(color_per_lod))
-	color += specular[0] * gl_LightSource[0].specular * pow(NdotHV, shininess[0]);
-	/*        else */
-	/*        color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess); */
-      }
-    }
+/*       if (NdotL > 0.0) { */
+/* 	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0); */
+
+/* 	color += specular[0] * gl_LightSource[0].specular * pow(NdotHV, shininess[0]); */
+
+/*       } */
+/*     } */
   }
-  else
-    color = vec4(1.0);
+/*   else */
+/*     color = vec4(1.0); */
   
   gl_FragColor = vec4(color.rgb, 1.0);
 }

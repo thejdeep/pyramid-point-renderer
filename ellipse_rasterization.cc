@@ -17,7 +17,6 @@ EllipseRasterization::EllipseRasterization() : PointBasedRender(),
 					     render_state(RS_BUFFER0) {
   createFBO();
   createShaders();
-
 }
 
 EllipseRasterization::EllipseRasterization(int w, int h) : PointBasedRender(w, h),
@@ -52,15 +51,18 @@ void EllipseRasterization::drawQuad( void ) {
   /* send quad */
   glBegin(GL_QUADS);
   glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    
-  glTexCoord2d(0.0, 0.0);
-  glVertex2f(0.0, 0.0);
-  glTexCoord2d(0.0, 1.0);
-  glVertex2f(0.0, canvas_height+canvas_border_height);
-  glTexCoord2d(1.0, 1.0);
+
+  glTexCoord2d(canvas_border_width / 1024.0, canvas_border_height / 1024.0);
+  glVertex2f(canvas_border_width, canvas_border_height);
+
+  glTexCoord2d(canvas_border_width / 1024.0, (canvas_border_height+canvas_height) / 1024.0);
+  glVertex2f(canvas_border_width, canvas_height+canvas_border_height);
+
+  glTexCoord2d((canvas_border_width+canvas_width) / 1024.0, (canvas_border_height+canvas_height) / 1024.0);
   glVertex2f(canvas_width+canvas_border_width, canvas_height+canvas_border_height);
-  glTexCoord2d(1.0, 0.0);
-  glVertex2f(canvas_width+canvas_border_width, 0.0);
+
+  glTexCoord2d((canvas_border_width+canvas_width) / 1024.0, canvas_border_height / 1024.0);
+  glVertex2f(canvas_width+canvas_border_width, canvas_border_height);
 
   glEnd();
 }
@@ -95,21 +97,13 @@ void EllipseRasterization::switchBuffers( void ) {
 /// Project point sized samples to screen space
 void EllipseRasterization::projectSurfels ( Primitives* prim )
 {
+  GLenum outputBuffers[3] = {fbo_buffers[0], fbo_buffers[1], fbo_buffers[2]};
+
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  glDrawBuffer(fbo_buffers[2]);
+  glDrawBuffers(3, outputBuffers);
 
-  glViewport(0, 0, canvas_width, canvas_height);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluOrtho2D(0.0, canvas_width, 0.0, canvas_height);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(FBO_TYPE, (GLuint)0);
-
-  //drawQuad();
+  shader_projection->use();
+  shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
 
   // Render vertices using the vertex buffer object.
   prim->render();
@@ -123,38 +117,64 @@ void EllipseRasterization::evaluatePixels( void )
 
   shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
-  shader_evaluate->set_uniform("depth_test", depth_test);
+  //shader_evaluate->set_uniform("depth_test", depth_test);
 
-  shader_evaluate->set_uniform("ellipsesTexture", 0);
+  shader_evaluate->set_uniform("textureA", 3);
+  shader_evaluate->set_uniform("textureB", 4);
 
   for (int j = 0; j < MAX_DISPLACEMENT; ++j)
     for (int i = 0; i < MAX_DISPLACEMENT; ++i) {
-      shader_evaluate->set_uniform("displacement", i, j);
-      drawQuad();
       switchBuffers();
+      shader_evaluate->set_uniform("displacement", i, j);
+      shader_evaluate->set_uniform("textureC", (GLint)read_buffer);
+      drawQuad();
     }
-  shader_evaluate->use(0);      
+  shader_evaluate->use(0);
 }
 
 void EllipseRasterization::rasterizePhongShading( void )
 {
-  shader_phong->use();
-  shader_phong->set_uniform("textureA", 0);
-
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
+  CHECK_FOR_OGL_ERROR();
 
-  glViewport(0, 0, canvas_width, canvas_height);
+//   glViewport(0, 0, canvas_width,
+// 	     canvas_height);
+//   glMatrixMode(GL_PROJECTION);
+//   glLoadIdentity();
+//   gluOrtho2D(0.0, canvas_width,
+// 	     0.0, canvas_height);
+
+  glViewport(0, 0, canvas_width+canvas_border_width,
+	     canvas_height+canvas_border_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluOrtho2D(0.0, canvas_width, 0.0, canvas_height);
+  gluOrtho2D(0.0, canvas_width+canvas_border_width,
+	     0.0, canvas_height+canvas_border_height);
+
+//   glViewport(canvas_border_width, canvas_border_height, 
+// 	     canvas_width+canvas_border_width,
+// 	     canvas_height+canvas_border_height);
+//   CHECK_FOR_OGL_ERROR();
+
+//   glMatrixMode(GL_PROJECTION);
+//   glLoadIdentity();
+//   gluOrtho2D(canvas_border_width, canvas_width+canvas_border_width,
+// 	     canvas_border_height, canvas_height+canvas_border_height);
+
+
+  CHECK_FOR_OGL_ERROR();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(FBO_TYPE, fbo_textures[read_buffer]);
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+  glBindTexture(FBO_TYPE, fbo_textures[0]);
+
+//   shader_phong->use();
+//   shader_phong->set_uniform("textureA", 0);
+
+  drawQuad();
 
   shader_phong->use(0);
 }
@@ -206,7 +226,7 @@ void EllipseRasterization::interpolate() {
   glDepthMask(GL_FALSE);
 
   // Interpolate scattered data using pyramid algorithm
-  evaluatePixels();
+  //  evaluatePixels();
 }
 
 /**
@@ -216,8 +236,8 @@ void EllipseRasterization::draw( void ) {
   // Deffered shading of the final image containing normal map
   rasterizePhongShading();
 
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-  glDrawBuffer(GL_BACK);
+//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+//   glDrawBuffer(GL_BACK);
   glDisable(FBO_TYPE);
 
   CHECK_FOR_OGL_ERROR();
@@ -252,12 +272,16 @@ void EllipseRasterization::createFBO() {
   assert(FBO_BUFFERS_COUNT <= 16);
 
   glGenTextures(FBO_BUFFERS_COUNT, fbo_textures);
+  GLsizei size = 1024;
+
   for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
     fbo_buffers[i] = attachments[i];
     glBindTexture(FBO_TYPE, fbo_textures[i]);
-    glTexImage2D(FBO_TYPE, 0, FBO_FORMAT,
-		 canvas_width+canvas_border_width, canvas_height+canvas_border_height,
-		 0, GL_RGBA, GL_FLOAT, NULL);
+    
+    glTexImage2D((GLenum)FBO_TYPE, (GLint)0, (GLint)FBO_FORMAT, size, size,
+		 (GLint)0, (GLenum)GL_RGBA, (GLenum)GL_FLOAT, NULL);
+    CHECK_FOR_OGL_ERROR();
+
     glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -267,8 +291,8 @@ void EllipseRasterization::createFBO() {
   //for creating and binding a depth buffer:
   glGenTextures(1, &fbo_depth);
   glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo_depth);
-  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, canvas_width+canvas_border_width,
-			   canvas_height+canvas_border_height);
+  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, size, size);
+
   glGenFramebuffersEXT(1, &fbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
@@ -325,7 +349,7 @@ void EllipseRasterization::createFBO() {
  **/
 void EllipseRasterization::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_point_projection_er.vert");
@@ -338,16 +362,9 @@ void EllipseRasterization::createShaders ( void ) {
   shader_evaluate->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong.vert");
-  shader_phong->fragment_source("shader_phong.frag");
+  shader_phong->vertex_source("shader_phong_er.vert");
+  shader_phong->fragment_source("shader_phong_er.frag");
   shader_phong->install( shader_inst_debug );
-}
-
-/**
- * Sets the vertex array.
- **/
-void EllipseRasterization::setVertices( vector<Surfel> *s ) {
- 
 
 }
 

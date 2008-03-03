@@ -138,6 +138,10 @@ void Application::draw(void) {
     
     // Reset camera position and direction
     camera->setView();
+    if (camera->runningFrames()) {
+      point_based_render->setReconstructionFilterSize(camera->getKeyFrameReconstructionFilter());
+      point_based_render->setPrefilterSize(camera->getKeyFramePrefilter());
+    }
 
     // Compute rotated eye position for this object for back face culling   
     double eye[3];
@@ -522,7 +526,8 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( PYRAMID_POINTS );
+  //  primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
 
   num_objects = objects.size();
 

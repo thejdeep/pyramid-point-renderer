@@ -44,7 +44,8 @@ void main(void)
   // First buffer  : normal.x, normal.y, normal.z, radius
   // Second buffer : minimum depth, depth interval, center.x, center.y
   // Third buffer  : color
-  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z ); 
+  //  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z );
+  gl_FragData[0] = vec4 (normal_vec, 1.0 );
   gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval, 0.0, 0.0);
   gl_FragData[2] = gl_Color;
 }

@@ -17,12 +17,7 @@
 
 #include "point_based_render.h"
 
-#define FBO_BUFFERS_COUNT 2
-#define FBO_TYPE GL_TEXTURE_2D
-#define FBO_FORMAT GL_RGBA16F_ARB
-
 #define MAX_DISPLACEMENT 4
-
 
 class EllipseRasterization : public PointBasedRender
 {
@@ -50,7 +45,6 @@ class EllipseRasterization : public PointBasedRender
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
-  void setVertices( vector<Surfel> *surfels );
   void setPrefilterSize(double s);
   void setReconstructionFilterSize(double s);
   void setZoomFactor (double z);
