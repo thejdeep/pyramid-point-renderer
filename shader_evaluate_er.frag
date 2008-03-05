@@ -3,6 +3,10 @@
 #extension GL_ARB_draw_buffers : enable
 //#version 120
 
+const float pi = 3.1416;
+
+const float reduc_factor = 1.0;
+
 // flag for depth test on/off
 //uniform bool depth_test;
 
@@ -72,31 +76,54 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
 void main (void) {
 
-    // retrieve candidadte ellipse from displacement position
-    vec4 pixelA = texture2D (textureA, gl_TexCoord[0].st + displacement.xy).xyzw;
+  // retrieve candidadte ellipse from displacement position
+  vec4 pixelA = texture2D (textureA, gl_TexCoord[0].st + displacement.xy).xyzw;
 
-    // retrieve actual pixel with current values
-    vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;
+  // retrieve actual pixel with current values
+  vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;
 
-    // if pixel from displacement position is a projected surfel, check if current
-    // pixel is inside its radius
-    if (pixelA.w > 0.0) {
-      //pixelB = texture2D (textureB, gl_TexCoord[0].st + displacement.xy).xyzw;
-    
-      if (displacement.xy == vec2(0.0, 0.0)){
-	buffer = vec4(texture2D (textureA, gl_TexCoord[0].st).xyz*0.1, 0.1);
-      }
-      else {
+  // if pixel from displacement position is a projected surfel, check if current
+  // pixel is inside its radius
+  if (pixelA.w > 0.0) {
 
-	float dist_test = pointInEllipse(displacement.xy, pixelA.w, pixelA.xyz);
-	//float dist_test = pointInCircle(displacement.xy, pixelA.w);
+    // if no displacement just use projected point values
+    if (displacement.xy == vec2(0.0, 0.0)){       
+      buffer = vec4(texture2D (textureA, gl_TexCoord[0].st).xyz, reduc_factor);
+      buffer.z *= reduc_factor;
+    }
+    else {
+      // convert from spherical coordinates
+      pixelA.xy *= vec2(2.0*pi, pi);
+      vec3 normal = vec3 (cos(pixelA.x)*sin(pixelA.y), sin(pixelA.x)*sin(pixelA.y), cos(pixelA.y));
+
+      float dist_test = pointInEllipse(displacement.xy, pixelA.w, normal);
+      //float dist_test = pointInCircle(displacement.xy, pixelA.w);
 	
-	// Ellipse in range
-	if (dist_test > 0.0) {
-	  float weight = exp(-0.5*dist_test)*0.1;
-	  buffer += vec4(pixelA.xyz*weight, weight);
+      // Ellipse in range
+      if (dist_test > 0.0) {
+
+	// empty pixel
+/* 	if (buffer.w == 0.0) { */
+/* 	  buffer = vec4(pixelA.xy, pixelA.z*reduc_factor, reduc_factor); */
+/* 	} */
+/* 	// sum contribution to current values */
+/* 	else  */
+	{
+	  float weight = exp(-0.5*dist_test)*reduc_factor;
+	  buffer.xy *= vec2(2.0*pi, pi);
+	  vec3 curr_normal = vec3 (cos(buffer.x)*sin(buffer.y), sin(buffer.x)*sin(buffer.y), cos(buffer.y));
+
+	  curr_normal *= buffer.w;
+	  curr_normal += normal * weight;
+
+	  curr_normal = normalize( curr_normal );
+	  float theta = atan( curr_normal.y / curr_normal.x );
+	  float phi = acos( curr_normal.z );
+
+	  buffer = vec4(theta/(2.0*pi), phi/pi, buffer.z+pixelA.z*weight, buffer.w+weight);
 	}
       }
     }
-    gl_FragColor = buffer;
+  }
+  gl_FragColor = buffer;
 }

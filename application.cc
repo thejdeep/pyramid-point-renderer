@@ -77,6 +77,7 @@ Application::Application( void ) {
 
   glEnable(GL_NORMALIZE);
   CHECK_FOR_OGL_ERROR()	;
+
 }
 
 /// Renders a surfel as a opengl point primitive
@@ -128,6 +129,7 @@ void Application::draw(void) {
   // Clear all buffers including pyramid algorithm buffers
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   point_based_render->clearBuffers();
 
   // Render objects primitives with pyramid algorithm
@@ -419,8 +421,8 @@ void Application::changeRendererType( point_render_type_enum type ) {
   changeMaterial();
 }
 
-void Application::changeRendererType( int type, int object_id ) {
-  changeRendererType ( (point_render_type_enum)type, object_id );
+void Application::changeRendererType( int type ) {
+  changeRendererType ( (point_render_type_enum)type );
   if (type == RASTERIZE_ELLIPSES)
     createPointRender( 2 );
   else
@@ -455,8 +457,9 @@ void Application::createPointRender( int type ) {
 
 int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
   // Create a new primitive from given file
-
+  
   int num_objs = readObjsFiles (filename, &primitives, &objects, objs_ids, camera);
+  cout << "pass" << endl;
 
   if ( num_objs > 0  ) {
 

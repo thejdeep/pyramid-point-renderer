@@ -66,7 +66,6 @@ class Application
   void changeMaterial ( void );
   void changeRendererType ( point_render_type_enum type );
 
-
  public :
 
   Application();
@@ -85,7 +84,7 @@ class Application
   void draw ( void );
   void reshape ( int w, int h );
 
-  void changeRendererType ( int type, int object_id );
+  void changeRendererType ( int type );
   void changeMaterial( int mat );
   void changeSelectedObjsMaterial( int mat );
 

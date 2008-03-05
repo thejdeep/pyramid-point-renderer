@@ -196,7 +196,7 @@ void pprMainWindow::on_checkBoxLODColors_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
-  application->changeRendererType ( index, (modelsTreeWidget->currentItem()->text(0)).toInt()  );
+  application->changeRendererType ( index );
   widget->updateGL();
 }
 

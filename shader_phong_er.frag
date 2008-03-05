@@ -7,6 +7,7 @@ uniform sampler2D textureA;
 //ruby
 //alvaro blue
 
+const float pi = 3.1416;
 const int num_materials = 6;
 
 vec4 ambient[num_materials] = vec4[num_materials](vec4(0.192250, 0.192250, 0.192250, 1.000000),
@@ -39,7 +40,7 @@ float shininess[num_materials] = float[num_materials] (51.200001,
 
 void main (void) {
 
-  vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;
+  vec4 pixel = texture2D (textureA, gl_TexCoord[0].st).xyzw;
 /*   if (normal.a != 0.0) */
 /*     gl_FragColor = vec4(normal.rgb/normal.a, 1.0); */
 /*   else */
@@ -47,16 +48,20 @@ void main (void) {
   //  vec4 color = texture2D (textureB, gl_TexCoord[0].st).xyzw;
   vec4 color = vec4(1.0);
 
-  if (normal.a != 0.0) {
+  // convert from spherical coordinates
+  pixel.xy *= vec2(2.0*pi, pi);
+  vec3 normal = vec3 (cos(pixel.x)*sin(pixel.y), sin(pixel.x)*sin(pixel.y), cos(pixel.y));
 
-    normal /= normal.w;
+  if (pixel.a != 0.0) {
+
+    // divide normal by sum of weights
+    //    normal /= pixel.w;
+    //normal = normalize(normal);
 
     //int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
     int material = 0;
 
     vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
-
-    //normal = normalize(normal);
 
     color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient;
 

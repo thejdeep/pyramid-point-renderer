@@ -17,7 +17,8 @@
 
 #include "point_based_render.h"
 
-#define MAX_DISPLACEMENT 6
+#define MAX_DISPLACEMENT 5
+#define NUM_CIRCLE_SUBDIVISIONS 1
 
 class EllipseRasterization : public PointBasedRender
 {
@@ -32,7 +33,6 @@ class EllipseRasterization : public PointBasedRender
 
   void drawQuad( void );
   void switchBuffers( void );
-
 
  public:
   EllipseRasterization();

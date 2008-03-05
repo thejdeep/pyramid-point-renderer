@@ -55,24 +55,15 @@ void main (void) {
 
       normal = normalize(normal);
 
-      //    if (bool(color_per_lod))
       color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient;
-      /*     else */
-      /*       color += gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient; */
 
       float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
 
-      //    if (bool(color_per_lod))
       color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
-      /*     else */
-      /*       color += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * NdotL; */
 
       if (NdotL > 0.0) {
 	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
-	//     if (bool(color_per_lod))
 	color += specular[0] * gl_LightSource[0].specular * pow(NdotHV, shininess[0]);
-	/*        else */
-	/*        color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess); */
       }
     }
   }

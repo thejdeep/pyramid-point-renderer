@@ -7,27 +7,10 @@
 #extension GL_ARB_draw_buffers : enable
 #extension GL_EXT_gpu_shader4 : enable
 
-// height of near viewing plane
-//uniform float h_near;
+const float pi = 3.1416;
 
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
-
-float perspective_radius(in float r, in vec3 n) {
-
-  float len = length(n.xy);
-
-  if (len == 0.0)
-    n.y = 0.0;
-  else
-    n.y /= len;
-
-  // angle between normal and z direction
-  float angle = acos(n.y);
-  float sin_angle = sin(angle);
-
-  return r * sin_angle;
-}
 
 void main(void)
 { 
@@ -37,20 +20,11 @@ void main(void)
   if (normal_vec.z < 0.0)
     discard;
 
-/*   float depth_interval; */
-
-/*   depth_interval = radius_depth_w.x;   */
-
-
-  // First buffer  : normal.x, normal.y, normal.z, radius
-  // Second buffer : minimum depth, depth interval, center.x, center.y
-  // Third buffer  : color
-
   float r = radius_depth_w.x / radius_depth_w.z;
-  //  float z = 1000.0 * radius_depth_w.y;
 
-  gl_FragColor = vec4 (normal_vec, r*0.1 );
-  //  gl_FragData[1] = vec4 (radius_depth_w.y, gl_Color., 0.0, 0.0);
-  //  gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval, 0.0, 0.0);
-  //  gl_FragData[2] = gl_Color;
+  float theta = atan( normal_vec.y / normal_vec.x );
+  float phi = acos( normal_vec.z );
+
+  // [theta, phi, depth, radius]
+  gl_FragColor = vec4 (theta/(2.0*pi), phi/pi, radius_depth_w.y, r );
 }

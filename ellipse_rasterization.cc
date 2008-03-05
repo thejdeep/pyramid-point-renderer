@@ -109,6 +109,7 @@ void EllipseRasterization::projectSurfels ( Primitives* prim )
  
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+  shader_projection->set_uniform("num_subdivisions", NUM_CIRCLE_SUBDIVISIONS);
 
   // Render vertices using the vertex buffer object.
   prim->render();
@@ -338,8 +339,9 @@ void EllipseRasterization::createFBO( void ) {
 
     glTexImage2D(FBO_TYPE, 0, FBO_FORMAT, fbo_width, fbo_height,
 		 0, GL_RGBA, GL_FLOAT, NULL);
-    CHECK_FOR_OGL_ERROR();
 
+    CHECK_FOR_OGL_ERROR();
+    
     glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -411,6 +413,10 @@ void EllipseRasterization::createShaders ( void ) {
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_point_projection_er.vert");
+  shader_projection->geometry_source("shader_point_projection_er.geom");
+  shader_projection->set_geom_max_output_vertices( NUM_CIRCLE_SUBDIVISIONS );
+  shader_projection->set_geom_input_type(GL_POINTS);
+  shader_projection->set_geom_output_type(GL_POINTS);
   shader_projection->fragment_source("shader_point_projection_er.frag");
   shader_projection->install( shader_inst_debug );
 

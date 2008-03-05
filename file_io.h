@@ -567,13 +567,20 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
     prims->back().setRendererType( renderer_type );
   }
 
+  for (int i = num_primitives; i < num_objects; ++i)
+    filenames.push_back( ply_file[0] );
+
   Quat q;
   double x, y, z;
   int n, prim_id;
-  for (int i = 0; i < num_objects; ++i) {    
+  for (int i = 0; i < num_objects; ++i) {
+    cout << "pass " << i << endl;
     in >> id >> x >> y >> z >> q.x >> q.y >> q.z >> q.a >> n;
+
     objs_ids->push_back (id);
     objs->push_back( Object(id, x, y, z, q) );
+    cout << "name :   ";
+    cout << filenames[i] << endl;
     objs->at(id).setFilename( filenames[i] );    
 
     for (int j = 0; j < n; ++j) {
@@ -581,6 +588,7 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
       (objs->at(id)).addPrimitives( prim_id );
     }
   }
+
 
   // read camera attributes
   double camera_pos[3];
