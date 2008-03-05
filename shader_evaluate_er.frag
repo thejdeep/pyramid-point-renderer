@@ -9,11 +9,10 @@
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
-uniform ivec2 displacement;
+uniform vec2 displacement;
 
 uniform sampler2D textureA;
 uniform sampler2D textureB;
-uniform sampler2D textureC;
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -73,28 +72,31 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
 void main (void) {
 
-  vec4 buffer;
-  vec4 pixelA, pixelB;
-  float weight = 0.0, dist_test;
+    // retrieve candidadte ellipse from displacement position
+    vec4 pixelA = texture2D (textureA, gl_TexCoord[0].st + displacement.xy).xyzw;
 
-  // retrieve pixel from displacement position
-  pixelA = texture2D (textureA, gl_TexCoord[0].st + vec2(displacement.xy)).xyzw;
+    // retrieve actual pixel with current values
+    vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;
 
-  // retrieve actual pixel with current values
-  buffer = texture2D (textureC, gl_TexCoord[0].st).xyzw;
-
-  if (pixelA.w > 0.0) {
-    pixelB = texture2D (textureB, gl_TexCoord[0].st + vec2(displacement.xy)).xyzw;
-  
-    dist_test = pointInEllipse(pixelB.zw, pixelA.w, pixelA.xyz);
-    //dist_test = pointInCircle(pixelB.zw, pixelA.w);
+    // if pixel from displacement position is a projected surfel, check if current
+    // pixel is inside its radius
+    if (pixelA.w > 0.0) {
+      //pixelB = texture2D (textureB, gl_TexCoord[0].st + displacement.xy).xyzw;
     
-    // Ellipse in range
-    if (dist_test > 0.0) {
-      weight = exp(-0.5*dist_test);      
-      buffer += vec4(pixelA.xyz, weight);
-    }
-  }
+      if (displacement.xy == vec2(0.0, 0.0)){
+	buffer = vec4(texture2D (textureA, gl_TexCoord[0].st).xyz*0.1, 0.1);
+      }
+      else {
 
-  gl_FragColor = buffer;
+	float dist_test = pointInEllipse(displacement.xy, pixelA.w, pixelA.xyz);
+	//float dist_test = pointInCircle(displacement.xy, pixelA.w);
+	
+	// Ellipse in range
+	if (dist_test > 0.0) {
+	  float weight = exp(-0.5*dist_test)*0.1;
+	  buffer += vec4(pixelA.xyz*weight, weight);
+	}
+      }
+    }
+    gl_FragColor = buffer;
 }

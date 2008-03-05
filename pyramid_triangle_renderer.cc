@@ -867,29 +867,3 @@ void PyramidTriangleRenderer::setTriangles( vector<Triangle> *t ) {
 void PyramidTriangleRenderer::setVertices( vector<Surfel> *s ) {
   surfels = s;
 }
-
-void PyramidTriangleRenderer::setPrefilterSize(double s) {
-  // Prefilter is always zero since splats have pixel size for
-  // rasterized triangles.
-  prefilter_size = 0.0;
-}
-
-void PyramidTriangleRenderer::setReconstructionFilterSize(double s) {
-  reconstruction_filter_size = s;
-}
-
-void PyramidTriangleRenderer::setZoomFactor (double z) {
-  zoom_factor = z;
-}
-
-void PyramidTriangleRenderer::setEye (double e[3]) {
-  eye[0] = e[0];
-  eye[1] = e[1];
-  eye[2] = e[2];
-}
-
-void PyramidTriangleRenderer::setLight (double l[3]) {
-  light_dir[0] = l[0];
-  light_dir[1] = l[1];
-  light_dir[2] = l[2];
-}

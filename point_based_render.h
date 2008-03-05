@@ -22,33 +22,38 @@ class PointBasedRender
  public:
   PointBasedRender() : window_width(1024), window_height(1024),
     canvas_width(1024), canvas_height(1024),
-    zoom_factor(1.0), material_id(0), depth_test(1), elliptical_weight(1),
+    material_id(0), depth_test(1), elliptical_weight(1),
     reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0), color_per_lod(0)
     {}
 
   PointBasedRender(int w, int h) : window_width(w), window_height(h),
     canvas_width(h), canvas_height(h),
-    zoom_factor(1.0), material_id(0), depth_test(1), elliptical_weight(1),
+    material_id(0), depth_test(1), elliptical_weight(1),
     reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0), color_per_lod(0)
     {}
 
    virtual ~PointBasedRender() {};
 
-   
    virtual void draw( ) {}
    virtual void draw(int) {}
    virtual void interpolate( ) {}
    virtual void projectSamples(Primitives*) {}
    virtual void clearBuffers( ) {}
 
-   virtual void setVertices( std::vector<Surfel> *surfels ) {}
-   virtual void setTriangles( std::vector<Triangle> *triangles ) {}
+   virtual void setPrefilterSize(double s) { prefilter_size = s; }
+   virtual void setReconstructionFilterSize(double s) { reconstruction_filter_size = s; }
 
-   virtual void setPrefilterSize(double s) {}
-   virtual void setReconstructionFilterSize(double s) {}
-   virtual void setZoomFactor (double z) {}
-   virtual void setEye (double e[3]) {}
-   virtual void setLight (double l[3]) {}
+   void setEye (double e[3]) {
+     eye[0] = e[0];
+     eye[1] = e[1];
+     eye[2] = e[2];
+   }
+   
+   void setLight (double l[3]) {
+     light_dir[0] = l[0];
+     light_dir[1] = l[1];
+     light_dir[2] = l[2];
+   }
 
    void setMaterial (const int m) {
      if (m < NUM_MATERIALS)
@@ -102,8 +107,6 @@ class PointBasedRender
    double light_dir[3];
    /// Eye position.
    double eye[3];
-   /// Zoom factor.
-   double zoom_factor;
 
    /// Identification of the material from materials.h table.
    int material_id;
@@ -114,16 +117,16 @@ class PointBasedRender
    /// Flag to turn on/off elliptical weight
    bool elliptical_weight;
 
-  /// Flag for enabling/disabling LOD rendering
-  bool use_lod;
-
-  /// Flag for enabling/disabling color per LOD level
-  bool color_per_lod;
-
    /// Size of reconstruction filter.
    double reconstruction_filter_size;
    /// Size of antialising filter.
    double prefilter_size;
+
+   /// Flag for enabling/disabling LOD rendering
+   bool use_lod;
+
+   /// Flag for enabling/disabling color per LOD level
+   bool color_per_lod;
 };
 
 #endif

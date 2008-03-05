@@ -786,35 +786,3 @@ void PyramidPointRender::createShaders ( void ) {
   shader_show->fragment_source("shader_show.frag");
   shader_show->install( shader_inst_debug );
 }
-
-/**
- * Sets the vertex array.
- **/
-void PyramidPointRender::setVertices( vector<Surfel> *s ) {
- 
-
-}
-
-void PyramidPointRender::setPrefilterSize(double s) {
-  prefilter_size = s;
-}
-
-void PyramidPointRender::setReconstructionFilterSize(double s) {
-  reconstruction_filter_size = s;
-}
-
-void PyramidPointRender::setZoomFactor (double z) {
-   zoom_factor = z;
-}
-
-void PyramidPointRender::setEye (double e[3]) {
-  eye[0] = e[0];
-  eye[1] = e[1];
-  eye[2] = e[2];
-}
-
-void PyramidPointRender::setLight (double l[3]) {
-  light_dir[0] = l[0];
-  light_dir[1] = l[1];
-  light_dir[2] = l[2];
-}

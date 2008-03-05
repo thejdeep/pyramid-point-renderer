@@ -37,6 +37,54 @@ void Camera::initLight (void) {
   glShadeModel(GL_SMOOTH);
 }
 
+void Camera::computeKeyFrame( void ) {
+  unsigned int frame = (unsigned int)frameVideo;
+  double step = frameVideo - frame;
+  double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
+
+  if ( keyFrames.size() - 1 == frame ) {
+    frameVideo = -1.0;
+  }
+  else {
+    position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
+    position[1] = keyFrames[frame].pos[1] + (keyFrames[frame+1].pos[1]-keyFrames[frame].pos[1])*(step);
+    position[2] = keyFrames[frame].pos[2] + (keyFrames[frame+1].pos[2]-keyFrames[frame].pos[2])*(step);
+    light_position[0] = keyFrames[frame].light_pos[0] + 
+      (keyFrames[frame+1].light_pos[0]-keyFrames[frame].light_pos[0])*(step);
+    light_position[1] = keyFrames[frame].light_pos[1] + 
+      (keyFrames[frame+1].light_pos[1]-keyFrames[frame].light_pos[1])*(step);
+    light_position[2] = keyFrames[frame].light_pos[2] + 
+      (keyFrames[frame+1].light_pos[2]-keyFrames[frame].light_pos[2])*(step);
+
+    frame_reconstruction_filter = keyFrames[frame].reconstruction_filter + 
+      (keyFrames[frame+1].reconstruction_filter-keyFrames[frame].reconstruction_filter)*(step);
+    frame_prefilter = keyFrames[frame].prefilter + 
+      (keyFrames[frame+1].prefilter-keyFrames[frame].prefilter)*(step);
+
+    theta = acos( (keyFrames[frame].rot.x * keyFrames[frame+1].rot.x) +
+		  (keyFrames[frame].rot.y * keyFrames[frame+1].rot.y) +
+		  (keyFrames[frame].rot.z * keyFrames[frame+1].rot.z) +
+		  (keyFrames[frame].rot.a * keyFrames[frame+1].rot.a) );
+
+    sin_theta = sin( theta );
+    if ((theta == 0.0) || (sin_theta == 0.0) || (isnan(theta)) ) {
+      coef_a = 1.0;
+      coef_b = 0.0;
+    }
+    else {
+      coef_a = ( sin( ( 1.0 - step ) * theta ) / sin_theta );
+      coef_b = ( sin( step * theta ) / sin_theta );
+    }
+
+    q_rot.x = ( coef_a * keyFrames[frame].rot.x ) + ( coef_b * keyFrames[frame+1].rot.x );
+    q_rot.y = ( coef_a * keyFrames[frame].rot.y ) + ( coef_b * keyFrames[frame+1].rot.y );
+    q_rot.z = ( coef_a * keyFrames[frame].rot.z ) + ( coef_b * keyFrames[frame+1].rot.z );
+    q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );		  
+		  
+    frameVideo += 0.01;
+  }
+}
+
 /// Sets OpenGL camera
 void Camera::setView (void) {
 
@@ -51,57 +99,10 @@ void Camera::setView (void) {
 
   initLight();
 
-  if ( runningFrames() ) {
-
-	  unsigned int frame = (unsigned int)frameVideo;
-	  double step = frameVideo - frame;
-	  double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
-
-	  if ( keyFrames.size() - 1 == frame ) {
-	    frameVideo = -1.0;
-	  }
-	  else {
-		  position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
-		  position[1] = keyFrames[frame].pos[1] + (keyFrames[frame+1].pos[1]-keyFrames[frame].pos[1])*(step);
-		  position[2] = keyFrames[frame].pos[2] + (keyFrames[frame+1].pos[2]-keyFrames[frame].pos[2])*(step);
-		  light_position[0] = keyFrames[frame].light_pos[0] + 
-		    (keyFrames[frame+1].light_pos[0]-keyFrames[frame].light_pos[0])*(step);
-		  light_position[1] = keyFrames[frame].light_pos[1] + 
-		    (keyFrames[frame+1].light_pos[1]-keyFrames[frame].light_pos[1])*(step);
-		  light_position[2] = keyFrames[frame].light_pos[2] + 
-		    (keyFrames[frame+1].light_pos[2]-keyFrames[frame].light_pos[2])*(step);
-
-		  frame_reconstruction_filter = keyFrames[frame].reconstruction_filter + 
-		    (keyFrames[frame+1].reconstruction_filter-keyFrames[frame].reconstruction_filter)*(step);
-		  frame_prefilter = keyFrames[frame].prefilter + 
-		    (keyFrames[frame+1].prefilter-keyFrames[frame].prefilter)*(step);
-
-		  theta = acos( (keyFrames[frame].rot.x * keyFrames[frame+1].rot.x) +
-				(keyFrames[frame].rot.y * keyFrames[frame+1].rot.y) +
-				(keyFrames[frame].rot.z * keyFrames[frame+1].rot.z) +
-				(keyFrames[frame].rot.a * keyFrames[frame+1].rot.a) );
-
-		  sin_theta = sin( theta );
-		  if ((theta == 0.0) || (sin_theta == 0.0) || (isnan(theta)) ) {
-		    coef_a = 1.0;
-		    coef_b = 0.0;
-		  }
-		  else {
-		    coef_a = ( sin( ( 1.0 - step ) * theta ) / sin_theta );
-		    coef_b = ( sin( step * theta ) / sin_theta );
-		  }
-
-		  q_rot.x = ( coef_a * keyFrames[frame].rot.x ) + ( coef_b * keyFrames[frame+1].rot.x );
-		  q_rot.y = ( coef_a * keyFrames[frame].rot.y ) + ( coef_b * keyFrames[frame+1].rot.y );
-		  q_rot.z = ( coef_a * keyFrames[frame].rot.z ) + ( coef_b * keyFrames[frame+1].rot.z );
-		  q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );		  
-		  
-		  frameVideo += 0.001;
-	  }
-  }
+  if ( runningFrames() )
+    computeKeyFrame();
 
   glTranslatef(position[0], position[1], position[2]);
-
 
 //   Quat q = q_rot;
 //   q.x *= -1;

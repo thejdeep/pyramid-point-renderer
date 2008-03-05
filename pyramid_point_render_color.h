@@ -23,17 +23,17 @@ class PyramidPointRenderColor : public PointBasedRender
 
   void createFBO( void );
   void createShaders ( void );
-  int showCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int showCallbackFunc( void );
   void showPixels(int bufferIndex);
   void rasterizePhongShading(int bufferIndex);
-  int phongShadingCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int phongShadingCallbackFunc( void );
   void rasterizeSynthesisPyramid();
-  int synthesisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int synthesisCallbackFunc( void );
   void copyAnalysisPyramid();
-  int copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int copyCallbackFunc( void );
   void rasterizeAnalysisPyramid( void );
-  int analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  int projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int analysisCallbackFunc( void );
+  int projectionCallbackFunc( void );
   void projectSurfels( Primitives* prim );
 
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2);
@@ -52,13 +52,6 @@ class PyramidPointRenderColor : public PointBasedRender
   void clearBuffers (void);
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
-
-  void setVertices( vector<Surfel> *surfels );
-  void setPrefilterSize(double s);
-  void setReconstructionFilterSize(double s);
-  void setZoomFactor (double z);
-  void setEye (double e[3]);
-  void setLight (double l[3]);
 
   void useLOD( bool l ) {
     use_lod = l;

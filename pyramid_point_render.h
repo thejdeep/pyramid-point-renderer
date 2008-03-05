@@ -58,13 +58,6 @@ class PyramidPointRender : public PointBasedRender
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
-  void setVertices( vector<Surfel> *surfels );
-  void setPrefilterSize(double s);
-  void setReconstructionFilterSize(double s);
-  void setZoomFactor (double z);
-  void setEye (double e[3]);
-  void setLight (double l[3]);
-
  private:
   /// Frame buffer object width.
   int fbo_width;

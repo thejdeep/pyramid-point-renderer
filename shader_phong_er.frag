@@ -1,4 +1,5 @@
 uniform sampler2D textureA;
+//uniform sampler2D textureB;
 
 //silver
 //gold
@@ -39,37 +40,37 @@ float shininess[num_materials] = float[num_materials] (51.200001,
 void main (void) {
 
   vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;
-  vec4 color = vec4(0.0, 1.0, 0.0, 1.0);
+/*   if (normal.a != 0.0) */
+/*     gl_FragColor = vec4(normal.rgb/normal.a, 1.0); */
+/*   else */
+/*     gl_FragColor = vec4(1.0); */
+  //  vec4 color = texture2D (textureB, gl_TexCoord[0].st).xyzw;
+  vec4 color = vec4(1.0);
 
   if (normal.a != 0.0) {
-    color = vec4(1.0, 0.0, 0.0, 1.0);
-    //    int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
-/*     int material = 1; */
 
-/*     if (material == 5) { */
-/*       color = diffuse[material]; */
-/*     } */
-/*     else { */
-/*       vec3 lightDir = normalize(vec3(gl_LightSource[0].position));   */
+    normal /= normal.w;
 
-/*       normal = normalize(normal); */
+    //int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
+    int material = 0;
 
-/*       color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient; */
+    vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
 
-/*       float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0); */
+    //normal = normalize(normal);
 
-/*       color += diffuse[material] * gl_LightSource[0].diffuse * NdotL; */
+    color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient;
 
-/*       if (NdotL > 0.0) { */
-/* 	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0); */
+    float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
 
-/* 	color += specular[0] * gl_LightSource[0].specular * pow(NdotHV, shininess[0]); */
+    color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
 
-/*       } */
-/*     } */
+    if (NdotL > 0.0) {
+      float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
+      color += specular[0] * gl_LightSource[0].specular * pow(NdotHV, shininess[0]);
+    }
   }
-/*   else */
-/*     color = vec4(1.0); */
+  else
+    color = vec4(1.0);
   
   gl_FragColor = vec4(color.rgb, 1.0);
 }

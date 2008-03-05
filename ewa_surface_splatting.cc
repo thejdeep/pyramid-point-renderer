@@ -665,28 +665,3 @@ void EWASurfaceSplatting::draw ( void ) {
 
 
 }
-
-
-void EWASurfaceSplatting::setPrefilterSize(double s) {
-  prefilter_size = s;
-}
-
-void EWASurfaceSplatting::setReconstructionFilterSize(double s) {
-  reconstruction_filter_size = s;
-}
-
-void EWASurfaceSplatting::setZoomFactor (double z) {
-  zoom_factor = z;
-}
-
-void EWASurfaceSplatting::setEye (double e[3]) {
-  eye[0] = e[0];
-  eye[1] = e[1];
-  eye[2] = e[2];
-}
-
-void EWASurfaceSplatting::setLight (double l[3]) {
-  light_dir[0] = l[0];
-  light_dir[1] = l[1];
-  light_dir[2] = l[2];
-}

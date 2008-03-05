@@ -31,13 +31,13 @@ class openGLWidget: public QGLWidget {
   openGLWidget(QWidget* parent=0,
 	       const QGLWidget* shareWidget = 0, Qt::WFlags f=0)
     : QGLWidget (parent, shareWidget, f) {
-    startTimer(0);
+    startTimer(1);
 
-    int argc = 0; 
+    int argc = 0;
     char * argv[1];
     argv[0] = "";
 
-    //GLUT initialization, just for writing text to screen
+    // GLUT initialization, just for writing text to screen
     glutInit(&argc, argv);
 
   }

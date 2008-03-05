@@ -250,6 +250,8 @@ public:
 
 private:
 
+  void computeKeyFrame ( void );
+
   // Screen size
   int screen_width, screen_height;
 

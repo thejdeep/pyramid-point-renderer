@@ -48,6 +48,9 @@
 
 #define CANVAS_WIDTH  768
 #define CANVAS_HEIGHT 768
+#define CANVAS_BORDER_WIDTH  24
+#define CANVAS_BORDER_HEIGHT 24
+
 
 class Application
 {
@@ -61,7 +64,7 @@ class Application
   void glVertex ( Point p );
 
   void changeMaterial ( void );
-  void changeRendererType ( point_render_type_enum type, int object_id );
+  void changeRendererType ( point_render_type_enum type );
 
 
  public :
@@ -84,7 +87,7 @@ class Application
 
   void changeRendererType ( int type, int object_id );
   void changeMaterial( int mat );
-  void changeMaterial( int mat, int object_id );
+  void changeSelectedObjsMaterial( int mat );
 
   int getRendererType ( int object_id );
   int getNumberPoints ( int object_id );
@@ -95,7 +98,7 @@ class Application
 
   void setPerVertexColor ( bool b, int object_id );
   void setAutoRotate ( bool r );
-  void useLOD( bool l, int object_id );
+  void useLOD( bool l );
   void setLodColors( bool l );
   void switchLodsPerc ( void );
 

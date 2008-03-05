@@ -180,9 +180,9 @@ void pprMainWindow::on_checkBoxLOD_stateChanged( int state ) {
   selectCurrObject();
 
   if (state == Qt::Checked)
-    application->useLOD(true, (modelsTreeWidget->currentItem()->text(0)).toInt());
+    application->useLOD( true );
   else
-    application->useLOD(false, (modelsTreeWidget->currentItem()->text(0)).toInt());
+    application->useLOD( false );
 
   widget->updateGL();
 }
@@ -202,7 +202,7 @@ void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
 
 void pprMainWindow::on_comboColors_currentIndexChanged( int index ) {
   //  application->changeMaterial ( index  );
-  application->changeMaterial ( index, (modelsTreeWidget->currentItem()->text(0)).toInt() );
+  application->changeSelectedObjsMaterial ( index );
   widget->updateGL();
 }
 

@@ -50,21 +50,54 @@ void EllipseRasterization::drawQuad( void ) {
 
   /* send quad */
   glBegin(GL_QUADS);
-  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+  glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 
-  glTexCoord2d(canvas_border_width / 1024.0, canvas_border_height / 1024.0);
-  glVertex2f(canvas_border_width, canvas_border_height);
+  GLfloat vertices[4][2];
+  GLfloat texcoords[4][2];
 
-  glTexCoord2d(canvas_border_width / 1024.0, (canvas_border_height+canvas_height) / 1024.0);
-  glVertex2f(canvas_border_width, canvas_height+canvas_border_height);
+  vertices[0][0] = (GLfloat)canvas_border_width;
+  vertices[0][1] = (GLfloat)canvas_border_height;
+  vertices[1][0] = (GLfloat)canvas_border_width;
+  vertices[1][1] = (GLfloat)(canvas_height+canvas_border_height);
+  vertices[2][0] = (GLfloat)(canvas_width+canvas_border_width);
+  vertices[2][1] = (GLfloat)(canvas_height+canvas_border_height);
+  vertices[3][0] = (GLfloat)(canvas_width+canvas_border_width);
+  vertices[3][1] = (GLfloat)canvas_border_height;
 
-  glTexCoord2d((canvas_border_width+canvas_width) / 1024.0, (canvas_border_height+canvas_height) / 1024.0);
-  glVertex2f(canvas_width+canvas_border_width, canvas_height+canvas_border_height);
+  texcoords[0][0] = (GLfloat)canvas_border_width / (GLfloat)fbo_width;
+  texcoords[0][1] = (GLfloat)canvas_border_height / (GLfloat)fbo_height;
+  texcoords[1][0] = (GLfloat)canvas_border_width / (GLfloat)fbo_width;
+  texcoords[1][1] = (GLfloat)(canvas_height+canvas_border_height) / (GLfloat)fbo_height;
+  texcoords[2][0] = (GLfloat)(canvas_width+canvas_border_width) / (GLfloat)fbo_width;
+  texcoords[2][1] = (GLfloat)(canvas_height+canvas_border_height) / (GLfloat)fbo_height;
+  texcoords[3][0] = (GLfloat)(canvas_width+canvas_border_width) / (GLfloat)fbo_width;
+  texcoords[3][1] = (GLfloat)canvas_border_height / (GLfloat)fbo_height;
 
-  glTexCoord2d((canvas_border_width+canvas_width) / 1024.0, canvas_border_height / 1024.0);
-  glVertex2f(canvas_width+canvas_border_width, canvas_border_height);
+  for (int i = 0; i < 4; ++i) {
+    glTexCoord2f(texcoords[i][0], texcoords[i][1]);
+    glVertex2f(vertices[i][0], vertices[i][1]);
+  }
 
   glEnd();
+}
+
+/// Project point sized samples to screen space
+void EllipseRasterization::projectSurfels ( Primitives* prim )
+{
+//   GLenum outputBuffers[3] = {fbo_buffers[2], fbo_buffers[3], fbo_buffers[4]};
+//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+//   glDrawBuffers(3, outputBuffers);
+
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+  glDrawBuffer(fbo_buffers[2]);
+ 
+  shader_projection->use();
+  shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+
+  // Render vertices using the vertex buffer object.
+  prim->render();
+
+  shader_projection->use(0);
 }
 
 void EllipseRasterization::switchBuffers( void ) {
@@ -80,55 +113,53 @@ void EllipseRasterization::switchBuffers( void ) {
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
   glDrawBuffer(fbo_buffers[dest_buffer]);
 
-  glViewport(0, 0, canvas_width+canvas_border_width,
-	     canvas_height+canvas_border_height);
+  glViewport(0, 0, canvas_width+2*canvas_border_width,
+	     canvas_height+2*canvas_border_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluOrtho2D(0.0, canvas_width+canvas_border_width, 
-	     0.0, canvas_height+canvas_border_height);
+  gluOrtho2D(0.0, canvas_width+2*canvas_border_width,
+	     0.0, canvas_height+2*canvas_border_height);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  glActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE0 + read_buffer);
   glBindTexture(FBO_TYPE, fbo_textures[read_buffer]);
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-}
-
-/// Project point sized samples to screen space
-void EllipseRasterization::projectSurfels ( Primitives* prim )
-{
-  GLenum outputBuffers[3] = {fbo_buffers[0], fbo_buffers[1], fbo_buffers[2]};
-
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  glDrawBuffers(3, outputBuffers);
-
-  shader_projection->use();
-  shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
-
-  // Render vertices using the vertex buffer object.
-  prim->render();
-
-  shader_projection->use(0);
+  //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
 void EllipseRasterization::evaluatePixels( void )
 {  
+
+  //shader_evaluate->set_uniform("depth_test", depth_test);
+
+  // Activate projected surfels texture
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(FBO_TYPE, fbo_textures[2]);
+//   glActiveTexture(GL_TEXTURE3);
+//   glBindTexture(FBO_TYPE, fbo_textures[3]);
+
   shader_evaluate->use();
 
   shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
-  //shader_evaluate->set_uniform("depth_test", depth_test);
 
-  shader_evaluate->set_uniform("textureA", 3);
-  shader_evaluate->set_uniform("textureB", 4);
+  // pass texture with original normals and radius from projected pixel
+  // textureA [n.x, n.y, n.z, radius]
+  shader_evaluate->set_uniform("textureA", 2);
+// textureA [z, deltaZ, material_id, 0.0]
+//   shader_evaluate->set_uniform("textureB", 3);
 
-  for (int j = 0; j < MAX_DISPLACEMENT; ++j)
-    for (int i = 0; i < MAX_DISPLACEMENT; ++i) {
+  GLfloat size[2] = {(GLfloat)(fbo_width),
+		     (GLfloat)(fbo_height)};
+
+  for (int j = -MAX_DISPLACEMENT; j < MAX_DISPLACEMENT; ++j)
+    for (int i = -MAX_DISPLACEMENT; i < MAX_DISPLACEMENT; ++i) {
       switchBuffers();
-      shader_evaluate->set_uniform("displacement", i, j);
-      shader_evaluate->set_uniform("textureC", (GLint)read_buffer);
+      shader_evaluate->set_uniform("displacement", i/size[0], j/size[1]);
+      shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
       drawQuad();
     }
+
   shader_evaluate->use(0);
 }
 
@@ -138,41 +169,33 @@ void EllipseRasterization::rasterizePhongShading( void )
   glDrawBuffer(GL_BACK);
   CHECK_FOR_OGL_ERROR();
 
-//   glViewport(0, 0, canvas_width,
-// 	     canvas_height);
-//   glMatrixMode(GL_PROJECTION);
-//   glLoadIdentity();
-//   gluOrtho2D(0.0, canvas_width,
-// 	     0.0, canvas_height);
-
-  glViewport(0, 0, canvas_width+canvas_border_width,
-	     canvas_height+canvas_border_height);
+  glViewport(0, 0, canvas_width+2*canvas_border_width,
+	     canvas_height+2*canvas_border_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluOrtho2D(0.0, canvas_width+canvas_border_width,
-	     0.0, canvas_height+canvas_border_height);
+  gluOrtho2D(0.0, canvas_width+2*canvas_border_width,
+	     0.0, canvas_height+2*canvas_border_height);
 
 //   glViewport(canvas_border_width, canvas_border_height, 
 // 	     canvas_width+canvas_border_width,
 // 	     canvas_height+canvas_border_height);
 //   CHECK_FOR_OGL_ERROR();
-
 //   glMatrixMode(GL_PROJECTION);
 //   glLoadIdentity();
 //   gluOrtho2D(canvas_border_width, canvas_width+canvas_border_width,
 // 	     canvas_border_height, canvas_height+canvas_border_height);
 
-
-  CHECK_FOR_OGL_ERROR();
-
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(FBO_TYPE, fbo_textures[0]);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(FBO_TYPE, fbo_textures[1]);
+//   glActiveTexture(GL_TEXTURE4);
+//   glBindTexture(FBO_TYPE, fbo_textures[4]);
 
-//   shader_phong->use();
-//   shader_phong->set_uniform("textureA", 0);
+  shader_phong->use();
+  shader_phong->set_uniform("textureA", 1);
+//   shader_phong->set_uniform("textureB", 4);
 
   drawQuad();
 
@@ -226,7 +249,7 @@ void EllipseRasterization::interpolate() {
   glDepthMask(GL_FALSE);
 
   // Interpolate scattered data using pyramid algorithm
-  //  evaluatePixels();
+  evaluatePixels();
 }
 
 /**
@@ -236,8 +259,8 @@ void EllipseRasterization::draw( void ) {
   // Deffered shading of the final image containing normal map
   rasterizePhongShading();
 
-//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-//   glDrawBuffer(GL_BACK);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  glDrawBuffer(GL_BACK);
   glDisable(FBO_TYPE);
 
   CHECK_FOR_OGL_ERROR();
@@ -272,14 +295,14 @@ void EllipseRasterization::createFBO() {
   assert(FBO_BUFFERS_COUNT <= 16);
 
   glGenTextures(FBO_BUFFERS_COUNT, fbo_textures);
-  GLsizei size = 1024;
+  fbo_width = fbo_height = 1024;
 
   for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
     fbo_buffers[i] = attachments[i];
     glBindTexture(FBO_TYPE, fbo_textures[i]);
-    
-    glTexImage2D((GLenum)FBO_TYPE, (GLint)0, (GLint)FBO_FORMAT, size, size,
-		 (GLint)0, (GLenum)GL_RGBA, (GLenum)GL_FLOAT, NULL);
+
+    glTexImage2D(FBO_TYPE, 0, FBO_FORMAT, fbo_width, fbo_height,
+		 0, GL_RGBA, GL_FLOAT, NULL);
     CHECK_FOR_OGL_ERROR();
 
     glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -291,14 +314,14 @@ void EllipseRasterization::createFBO() {
   //for creating and binding a depth buffer:
   glGenTextures(1, &fbo_depth);
   glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, fbo_depth);
-  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, size, size);
+  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, fbo_width, fbo_height);
 
   glGenFramebuffersEXT(1, &fbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
   CHECK_FOR_OGL_ERROR();
 
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) 
+  for (i = 0; i < FBO_BUFFERS_COUNT; i++)
     {
       //fprintf(stderr, "bind fbo buffer %i\n", i);
       glBindTexture(FBO_TYPE, fbo_textures[i]);
@@ -366,28 +389,4 @@ void EllipseRasterization::createShaders ( void ) {
   shader_phong->fragment_source("shader_phong_er.frag");
   shader_phong->install( shader_inst_debug );
 
-}
-
-void EllipseRasterization::setPrefilterSize(double s) {
-  prefilter_size = s;
-}
-
-void EllipseRasterization::setReconstructionFilterSize(double s) {
-  reconstruction_filter_size = s;
-}
-
-void EllipseRasterization::setZoomFactor (double z) {
-   zoom_factor = z;
-}
-
-void EllipseRasterization::setEye (double e[3]) {
-  eye[0] = e[0];
-  eye[1] = e[1];
-  eye[2] = e[2];
-}
-
-void EllipseRasterization::setLight (double l[3]) {
-  light_dir[0] = l[0];
-  light_dir[1] = l[1];
-  light_dir[2] = l[2];
 }

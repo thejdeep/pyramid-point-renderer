@@ -15,8 +15,6 @@
 // #define CANVAS_WIDTH  1024
 // #define CANVAS_HEIGHT 1024
  
-
-
 // #define CANVAS_WIDTH  512
 // #define CANVAS_HEIGHT 512
 
@@ -24,7 +22,8 @@
 Application::Application( void ) {
 
   // Initialize camera with window canvas size
-  camera = new Camera(CANVAS_WIDTH, CANVAS_HEIGHT);
+  camera = new Camera(CANVAS_WIDTH + 2*CANVAS_BORDER_WIDTH, 
+		      CANVAS_HEIGHT + 2*CANVAS_BORDER_HEIGHT);
 
   render_mode = GL_RENDER;
 
@@ -127,7 +126,7 @@ void Application::draw(void) {
     surfs_per_level[i] = 0;
 
   // Clear all buffers including pyramid algorithm buffers
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   point_based_render->clearBuffers();
 
@@ -176,7 +175,7 @@ void Application::draw(void) {
 
 	prim->eye = Point(eye[0], eye[1], eye[2]);
 	prim->countNumVertsLOD(&surfs_per_level[0]);
-	point_based_render->projectSamples( prim );	
+	point_based_render->projectSamples( prim );
       }
     }
   }
@@ -219,6 +218,9 @@ void Application::draw(void) {
   if (rotating)
     camera->rotate();
 
+  // necessary to compute correct fps
+  glFinish();
+
 }
 
 /// Screen text with commands info
@@ -242,7 +244,7 @@ void Application::renderColorBars( void ) {
   if (lods_perc)
     total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
   else
-    total = surfs_per_level[4] / 10.0;
+    total = surfs_per_level[4] / 10;
   double x_max = 0.0;
 
   // BACKGROUND
@@ -300,7 +302,7 @@ void Application::renderColorBars( void ) {
 
   char text[5][20];
   if (lods_perc) {
-    sprintf(text[0], "%.1f\%", (surfs_per_level[0] / (double)total) * 100.0);
+    sprintf(text[0], "%.1f", (surfs_per_level[0] / (double)total) * 100.0);
     strcat(text[0], "%");
     sprintf(text[1], "%.1f", (surfs_per_level[1] / (double)total) * 100.0);
     strcat(text[1], "%");
@@ -407,9 +409,8 @@ void Application::changeMaterial( int mat ) {
   changeMaterial();
 }
 
-void Application::changeRendererType( point_render_type_enum type, int object_id ) {
+void Application::changeRendererType( point_render_type_enum type ) {
   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    //  for (unsigned int i = 0; i < objects.size(); ++i){
     vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
       primitives[*prim_it].setRendererType(type);
@@ -422,6 +423,8 @@ void Application::changeRendererType( int type, int object_id ) {
   changeRendererType ( (point_render_type_enum)type, object_id );
   if (type == RASTERIZE_ELLIPSES)
     createPointRender( 2 );
+  else
+    createPointRender( 0 );
 
 }
 
@@ -526,7 +529,7 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //  primitives.back().setRendererType( PYRAMID_POINTS );
+  //primitives.back().setRendererType( PYRAMID_POINTS );
   primitives.back().setRendererType( RASTERIZE_ELLIPSES );
 
   num_objects = objects.size();
@@ -617,12 +620,12 @@ int Application::writeSceneFile ( void ) {
   out << "PRIMITIVES " << primitives.size() << endl;
   out << "OBJECTS " << objects.size() << endl;
 
-  for (int i = 0; i < primitives.size(); ++i) {
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
     out << i << " " << objects[i].filename() << " " << 1.0 << " " << primitives[i].getRendererType() << " " <<
       primitives[i].getMaterial() << endl;
   }
 
-  for (int i = 0; i < objects.size(); ++i) {
+  for (unsigned int i = 0; i < objects.size(); ++i) {
     out << i << " " << objects[i].getCenter()[0] << " " << objects[i].getCenter()[1] << " " << objects[i].getCenter()[2] << " " <<
       objects[i].getRotationQuat()->x << " " << objects[i].getRotationQuat()->y << " " << objects[i].getRotationQuat()->z << " " <<
       objects[i].getRotationQuat()->a  << " 1 " << i << endl;
@@ -634,7 +637,8 @@ int Application::writeSceneFile ( void ) {
   out << camera->lightVector()[0] << " " << camera->lightVector()[1] << " " << camera->lightVector()[2] << endl;
 
   cout << "Wrote scene : scene.scn" << endl;
-
+  
+  return 1;
 }
 
 int Application::writeLodFile ( void ) {
@@ -817,12 +821,11 @@ void Application::setDepthTest ( bool d ) {
     point_based_render->setDepthTest(depth_culling);
 }
 
-void Application::useLOD ( bool lod, int object_id ) {
+void Application::useLOD ( bool lod ) {
   int type = PYRAMID_POINTS;
   if ( lod )
     type = PYRAMID_POINTS_LOD;
 
-  //  for (unsigned int i = 0; i < objects.size(); ++i){
   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
     vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
@@ -830,7 +833,7 @@ void Application::useLOD ( bool lod, int object_id ) {
   }
 }
 
-void Application::changeMaterial( int mat, int object_id ) {
+void Application::changeSelectedObjsMaterial( int mat ) {
   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
     vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {

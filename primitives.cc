@@ -46,7 +46,8 @@ GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
  **/
 void Primitives::render ( void ) {
 
-  if (renderer_type == PYRAMID_POINTS) {
+  if ((renderer_type == PYRAMID_POINTS) ||
+      (renderer_type == RASTERIZE_ELLIPSES)) {
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glVertexPointer(4, GL_FLOAT, 0, NULL); 
@@ -218,10 +219,12 @@ void Primitives::setRendererType ( int rtype ) {
 
   if (renderer_type == PYRAMID_POINTS)
     setPyramidPointsArraysColor();
-  if (renderer_type == PYRAMID_POINTS_LOD) {
+  else if (renderer_type == PYRAMID_POINTS_LOD) {
     setPyramidPointsArraysLOD();
     setPatchesArray();
   }
+  else if (renderer_type == RASTERIZE_ELLIPSES)
+    setPyramidPointsArraysColor();
   else if (renderer_type == PYRAMID_POINTS_COLOR)
     setPyramidPointsDisplayList();
   else if (renderer_type == PYRAMID_TRIANGLES)

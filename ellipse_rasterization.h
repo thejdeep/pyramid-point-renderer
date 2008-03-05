@@ -17,7 +17,7 @@
 
 #include "point_based_render.h"
 
-#define MAX_DISPLACEMENT 4
+#define MAX_DISPLACEMENT 6
 
 class EllipseRasterization : public PointBasedRender
 {
@@ -45,18 +45,9 @@ class EllipseRasterization : public PointBasedRender
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
-  void setPrefilterSize(double s);
-  void setReconstructionFilterSize(double s);
-  void setZoomFactor (double z);
-  void setEye (double e[3]);
-  void setLight (double l[3]);
-
  private:
 
-  /// Canvas width.
-  int canvas_width;
-  /// Canvas height.
-  int canvas_height;
+  int fbo_width, fbo_height;
 
   /// Canvas border width.
   int canvas_border_width;

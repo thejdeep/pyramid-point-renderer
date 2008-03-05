@@ -201,22 +201,22 @@ void PyramidPointRenderColor::rasterizePixels(pixels_struct dest, pixels_struct 
       bool ret = TRUE;
       switch(phase) {
       case PROJECTION:
-	ret = projectionCallbackFunc(dest, src0, src1);	
+	ret = projectionCallbackFunc();	
 	break;
       case ANALYSIS:
-	ret = analysisCallbackFunc(dest, src0, src1);
+	ret = analysisCallbackFunc();
 	break;
       case COPY:
-	ret = copyCallbackFunc(dest, src0, src1);
+	ret = copyCallbackFunc();
 	break;
       case SYNTHESIS:
-	ret = synthesisCallbackFunc(dest, src0, src1);
+	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	ret = phongShadingCallbackFunc(dest, src0, src1);
+	ret = phongShadingCallbackFunc();
 	break;
       case SHOW:
-	ret = showCallbackFunc(dest, src0, src1);
+	ret = showCallbackFunc();
 	break;
       }
       if (FALSE != ret)
@@ -357,7 +357,7 @@ pixels_struct PyramidPointRenderColor::generatePixels(int level,
 }
 
 
-int PyramidPointRenderColor::projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderColor::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
@@ -403,7 +403,7 @@ double PyramidPointRenderColor::computeHalfPixelSize(int level) {
   return d;
 }
 
-int PyramidPointRenderColor::analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderColor::analysisCallbackFunc( void )
 {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
@@ -448,7 +448,7 @@ void PyramidPointRenderColor::rasterizeAnalysisPyramid( void )
     }
 }
 
-int PyramidPointRenderColor::copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderColor::copyCallbackFunc( void )
 {
   shader_copy->use();
   shader_copy->set_uniform("textureA", 0);
@@ -485,7 +485,7 @@ void PyramidPointRenderColor::copyAnalysisPyramid()
     }
 }
 
-int PyramidPointRenderColor::synthesisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderColor::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
   shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
@@ -536,7 +536,7 @@ void PyramidPointRenderColor::rasterizeSynthesisPyramid()
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidPointRenderColor::phongShadingCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderColor::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
@@ -575,7 +575,7 @@ void PyramidPointRenderColor::rasterizePhongShading(int bufferIndex)
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidPointRenderColor::showCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderColor::showCallbackFunc( void )
 {
   shader_show->use();
   shader_show->set_uniform("tex", 0);
@@ -836,32 +836,5 @@ void PyramidPointRenderColor::createShaders ( void ) {
   shader_show->install( shader_inst_debug );
 }
 
-/**
- * Sets the vertex array.
- **/
-void PyramidPointRenderColor::setVertices( vector<Surfel> *s ) {
-}
 
-void PyramidPointRenderColor::setPrefilterSize(double s) {
-  prefilter_size = s;
-}
 
-void PyramidPointRenderColor::setReconstructionFilterSize(double s) {
-  reconstruction_filter_size = s;
-}
-
-void PyramidPointRenderColor::setZoomFactor (double z) {
-   zoom_factor = z;
-}
-
-void PyramidPointRenderColor::setEye (double e[3]) {
-  eye[0] = e[0];
-  eye[1] = e[1];
-  eye[2] = e[2];
-}
-
-void PyramidPointRenderColor::setLight (double l[3]) {
-  light_dir[0] = l[0];
-  light_dir[1] = l[1];
-  light_dir[2] = l[2];
-}
