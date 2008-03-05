@@ -19,6 +19,9 @@ EllipseRasterization::EllipseRasterization() : PointBasedRender(),
   createShaders();
 }
 
+/**
+ * Constructor with screen size.
+ **/
 EllipseRasterization::EllipseRasterization(int w, int h) : PointBasedRender(w, h),
 					   canvas_border_width(w/32),
 					   canvas_border_height(h/32),
@@ -46,6 +49,13 @@ EllipseRasterization::~EllipseRasterization() {
   glDrawBuffer(GL_BACK);
 }
 
+/** 
+ * Draws a quad for texture rendering.
+ * The texture coordinates are relative to the full texture size,
+ * since some frameBuffers except only power of two sizes and the
+ * screen size is arbitrary.
+ * The vertices coordinates do not include the bordes.
+ **/
 void EllipseRasterization::drawQuad( void ) {
 
   /* send quad */
@@ -81,7 +91,13 @@ void EllipseRasterization::drawQuad( void ) {
   glEnd();
 }
 
-/// Project point sized samples to screen space
+/**
+ * Project surfels os a single primitive to screen space.
+ * Projection is written on third color attachment (number 2).
+ * Each sample is projected to one single pixel with information
+ * of its normal, radius, and depth.
+ * @param prim Given primitive to be projected.
+ **/
 void EllipseRasterization::projectSurfels ( Primitives* prim )
 {
 //   GLenum outputBuffers[3] = {fbo_buffers[2], fbo_buffers[3], fbo_buffers[4]};
@@ -100,6 +116,12 @@ void EllipseRasterization::projectSurfels ( Primitives* prim )
   shader_projection->use(0);
 }
 
+/**
+ * Switchs the render source and target.
+ * Ping-pong scheme, reads from one texture and writes to 
+ * another of identical size. During the next interation the
+ * source and destination are switched around.
+ **/
 void EllipseRasterization::switchBuffers( void ) {
   if (read_buffer == 0) {
     read_buffer = 1;
@@ -127,6 +149,14 @@ void EllipseRasterization::switchBuffers( void ) {
   //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
+/**
+ * Reconstructs surface by rasterizing ellipses.
+ * A fixed sized mask is set on top of each pixel.
+ * Each iteration sums the contribution of a fixed
+ * displacement on the mask for every pixel.
+ * Thus n iterations is necessary where n is the size of
+ * the mask in pixels.
+ **/
 void EllipseRasterization::evaluatePixels( void )
 {  
 
@@ -163,6 +193,10 @@ void EllipseRasterization::evaluatePixels( void )
   shader_evaluate->use(0);
 }
 
+/**
+ * Computes phong illumination for reconstructed surface.
+ * Each pixel contains normal information.
+ **/
 void EllipseRasterization::rasterizePhongShading( void )
 {
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -203,9 +237,9 @@ void EllipseRasterization::rasterizePhongShading( void )
 }
 
 /**
- * Clear all framebuffers and screen buffer.
+ * Clear all framebuffers, depthbuffer and screen buffer.
  **/
-void EllipseRasterization::clearBuffers() {
+void EllipseRasterization::clearBuffers( void ) {
   int i;
 
   glEnable(FBO_TYPE);
@@ -234,7 +268,8 @@ void EllipseRasterization::clearBuffers() {
 }
 
 /**
- * Project points to framebuffer with depth test on.
+ * Project points of a primitive to framebuffer with depth test on.
+ * @param prim Given primitive.
  **/
 void EllipseRasterization::projectSamples(Primitives* prim) {
   projectSurfels( prim );
@@ -242,9 +277,9 @@ void EllipseRasterization::projectSamples(Primitives* prim) {
 }
 
 /**
- * Interpolate projected samples by fetching nearest pixels
+ * Reconstructs surface.
  **/
-void EllipseRasterization::interpolate() {
+void EllipseRasterization::interpolate( void ) {
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
 
@@ -267,9 +302,9 @@ void EllipseRasterization::draw( void ) {
 }
 
 /**
- * Initialize OpenGL state variables.
+ * Initialize frameBuffer object and textures.
  **/
-void EllipseRasterization::createFBO() {
+void EllipseRasterization::createFBO( void ) {
   int i;
   GLenum framebuffer_status;
   GLenum attachments[16] = {

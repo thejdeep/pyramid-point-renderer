@@ -177,22 +177,22 @@ void PyramidPointRenderLod::rasterizePixels(pixels_struct dest, pixels_struct sr
       bool ret = TRUE;
       switch(phase) {
       case PROJECTION:
-	ret = projectionCallbackFunc(dest, src0, src1);	
+	ret = projectionCallbackFunc();	
 	break;
       case ANALYSIS:
-	ret = analysisCallbackFunc(dest, src0, src1);
+	ret = analysisCallbackFunc();
 	break;
       case COPY:
-	ret = copyCallbackFunc(dest, src0, src1);
+	ret = copyCallbackFunc();
 	break;
       case SYNTHESIS:
-	ret = synthesisCallbackFunc(dest, src0, src1);
+	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	ret = phongShadingCallbackFunc(dest, src0, src1);
+	ret = phongShadingCallbackFunc();
 	break;
       case SHOW:
-	ret = showCallbackFunc(dest, src0, src1);
+	ret = showCallbackFunc();
 	break;
       }
       if (FALSE != ret)
@@ -336,7 +336,7 @@ pixels_struct PyramidPointRenderLod::generatePixels(int level,
 }
 
 
-int PyramidPointRenderLod::projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderLod::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
@@ -380,7 +380,7 @@ double PyramidPointRenderLod::computeHalfPixelSize(int level) {
   return d;
 }
 
-int PyramidPointRenderLod::analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderLod::analysisCallbackFunc( void )
 {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
@@ -425,7 +425,7 @@ void PyramidPointRenderLod::rasterizeAnalysisPyramid( void )
     }
 }
 
-int PyramidPointRenderLod::copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderLod::copyCallbackFunc( void )
 {
   shader_copy->use();
   shader_copy->set_uniform("textureA", 0);
@@ -459,7 +459,7 @@ void PyramidPointRenderLod::copyAnalysisPyramid()
     }
 }
 
-int PyramidPointRenderLod::synthesisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderLod::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
   shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
@@ -506,7 +506,7 @@ void PyramidPointRenderLod::rasterizeSynthesisPyramid()
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidPointRenderLod::phongShadingCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderLod::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
@@ -543,7 +543,7 @@ void PyramidPointRenderLod::rasterizePhongShading(int bufferIndex)
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidPointRenderLod::showCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidPointRenderLod::showCallbackFunc( void )
 {
   shader_show->use();
   shader_show->set_uniform("tex", 0);

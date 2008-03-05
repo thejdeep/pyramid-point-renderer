@@ -176,22 +176,22 @@ void PyramidTriangleRenderer::rasterizePixels(pixels_struct dest, pixels_struct 
       bool ret = TRUE;
       switch(phase) {
       case PROJECTION:
-	ret = projectionCallbackFunc(dest, src0, src1);	
+	ret = projectionCallbackFunc();	
 	break;
       case ANALYSIS:
-	ret = analysisCallbackFunc(dest, src0, src1);
+	ret = analysisCallbackFunc();
 	break;
       case COPY:
-	ret = copyCallbackFunc(dest, src0, src1);
+	ret = copyCallbackFunc();
 	break;
       case SYNTHESIS:
-	ret = synthesisCallbackFunc(dest, src0, src1);
+	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	ret = phongShadingCallbackFunc(dest, src0, src1);
+	ret = phongShadingCallbackFunc();
 	break;
       case SHOW:
-	ret = showCallbackFunc(dest, src0, src1);
+	ret = showCallbackFunc();
 	break;
       }
       if (FALSE != ret)
@@ -333,7 +333,7 @@ pixels_struct PyramidTriangleRenderer::generatePixels(int level,
 }
 
 
-int PyramidTriangleRenderer::projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidTriangleRenderer::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
@@ -386,7 +386,7 @@ double PyramidTriangleRenderer::computeHalfPixelSize(int level) {
   return d;
 }
 
-int PyramidTriangleRenderer::analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidTriangleRenderer::analysisCallbackFunc( void )
 {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
@@ -428,7 +428,7 @@ void PyramidTriangleRenderer::rasterizeAnalysisPyramid( void )
     }
 }
 
-int PyramidTriangleRenderer::copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidTriangleRenderer::copyCallbackFunc( void )
 {
   shader_copy->use();
   shader_copy->set_uniform("textureA", 0);
@@ -460,7 +460,7 @@ void PyramidTriangleRenderer::copyAnalysisPyramid()
     }
 }
 
-int PyramidTriangleRenderer::synthesisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidTriangleRenderer::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
   shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
@@ -503,7 +503,7 @@ void PyramidTriangleRenderer::rasterizeSynthesisPyramid()
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidTriangleRenderer::phongShadingCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidTriangleRenderer::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("tex", 0);
@@ -547,7 +547,7 @@ void PyramidTriangleRenderer::rasterizePhongShading(int bufferIndex)
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidTriangleRenderer::showCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1)
+int PyramidTriangleRenderer::showCallbackFunc( void )
 {
   shader_show->use();
   shader_show->set_uniform("tex", 0);

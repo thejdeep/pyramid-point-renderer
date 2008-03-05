@@ -29,24 +29,24 @@ class PyramidPointRenderTrees : public PointBasedRender
 
   void createFBO( void );
   void createShaders ( void );
-  int showCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int showCallbackFunc( void );
   void showPixels(int bufferIndex);
   void rasterizePhongShading(int bufferIndex);
-  int phongShadingCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int phongShadingCallbackFunc( void );
   void rasterizeSynthesisPyramid();
-  int synthesisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int synthesisCallbackFunc( void );
   void copyAnalysisPyramid();
-  int copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int copyCallbackFunc( void );
   void rasterizeAnalysisPyramid( void );
-  int analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  int projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int analysisCallbackFunc( void );
+  int projectionCallbackFunc( void );
   void projectSurfels( Primitives* prim );
 
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);
 
-  double computeHalfPixelSize(int level);
+  double computeHalfPixelSize( void );
 
  public:
   PyramidPointRenderTrees();
@@ -115,35 +115,5 @@ class PyramidPointRenderTrees : public PointBasedRender
   render_state_enum render_state;
 
 };
-
-#define CHECK_FOR_OGL_ERROR()	  									 \
-	do {															 \
-		GLenum err;													 \
-		err = glGetError();											 \
-		if (err != GL_NO_ERROR)										 \
-		{															 \
-			fprintf(stderr, "%s(%d) glError: %s\n",					 \
-					__FILE__, __LINE__, gluErrorString(err));		 \
-		}															 \
-	} while(0)
-
-#if !defined NULL
-#	define NULL 0
-#endif
-
-#if !defined TRUE
-#	define TRUE 1
-#endif
-
-#if !defined FALSE
-#	define FALSE 0
-#endif
-
-
- /* macros */
-
-#if !defined MAX
-#	define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
 
 #endif

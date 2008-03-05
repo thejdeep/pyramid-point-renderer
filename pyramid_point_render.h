@@ -28,24 +28,24 @@ class PyramidPointRender : public PointBasedRender
 
   void createFBO( void );
   void createShaders ( void );
-  int showCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int showCallbackFunc( void );
   void showPixels(int bufferIndex);
   void rasterizePhongShading(int bufferIndex);
-  int phongShadingCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int phongShadingCallbackFunc( void );
   void rasterizeSynthesisPyramid();
-  int synthesisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int synthesisCallbackFunc( void );
   void copyAnalysisPyramid();
-  int copyCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int copyCallbackFunc( void );
   void rasterizeAnalysisPyramid( void );
-  int analysisCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
-  int projectionCallbackFunc(pixels_struct dest, pixels_struct src0, pixels_struct src1);
+  int analysisCallbackFunc( void );
+  int projectionCallbackFunc( void );
   void projectSurfels( Primitives * );
 
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);
 
-  double computeHalfPixelSize(int level);
+  double computeHalfPixelSize( void );
 
  public:
   PyramidPointRender();

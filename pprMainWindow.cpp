@@ -216,7 +216,7 @@ void pprMainWindow::on_doubleSpinBoxPrefilter_valueChanged( double d ) {
   widget->updateGL();
 }
 
-void pprMainWindow::on_actionCreateKeyFrame_triggered( bool ckecked ) {
+void pprMainWindow::on_actionCreateKeyFrame_triggered( bool ckecked  ) {
   application->createKeyFrame();
 }
 
