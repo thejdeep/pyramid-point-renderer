@@ -1,14 +1,14 @@
 /* Synthesis step */
 
 #extension GL_ARB_draw_buffers : enable
-//#version 120
+#version 120
 
 const float pi = 3.1416;
 
 const float reduc_factor = 1.0;
 
 // flag for depth test on/off
-//uniform bool depth_test;
+uniform bool depth_test;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
@@ -77,52 +77,48 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 void main (void) {
 
   // retrieve candidadte ellipse from displacement position
-  vec4 pixelA = texture2D (textureA, gl_TexCoord[0].st + displacement.xy).xyzw;
+  vec4 ellipse = texture2D (textureA, gl_TexCoord[0].st + displacement.xy).xyzw;
 
   // retrieve actual pixel with current values
   vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;
 
   // if pixel from displacement position is a projected surfel, check if current
   // pixel is inside its radius
-  if (pixelA.w > 0.0) {
+  if (ellipse.w > 0.0) {
 
-    // if no displacement just use projected point values
-    if (displacement.xy == vec2(0.0, 0.0)){       
-      buffer = vec4(texture2D (textureA, gl_TexCoord[0].st).xyz, reduc_factor);
-      buffer.z *= reduc_factor;
-    }
-    else {
-      // convert from spherical coordinates
-      pixelA.xy *= pi;
-      vec3 normal = vec3 (cos(pixelA.x)*sin(pixelA.y), sin(pixelA.x)*sin(pixelA.y), cos(pixelA.y));
+    // convert from spherical coordinates
+    float ellipse_theta = ellipse.x * pi;
+    float ellipse_phi = ellipse.y * pi;
+    vec3 normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
 
-      float dist_test = pointInEllipse(displacement.xy, pixelA.w, normal);
-      //float dist_test = pointInCircle(displacement.xy, pixelA.w);
+    float dist_test = pointInEllipse(displacement.xy, ellipse.w, normal);
+    //float dist_test = pointInCircle(displacement.xy, ellipse.w);
 	
-      // Ellipse in range
-      if (dist_test > 0.0) {
+    // Ellipse in range
+    if (dist_test >= 0.0) {
 
-	// empty pixel
-/* 	if (buffer.w == 0.0) { */
-/* 	  buffer = vec4(pixelA.xy, pixelA.z*reduc_factor, reduc_factor); */
-/* 	} */
-/* 	// sum contribution to current values */
-/* 	else  */
-	{
-	  float weight = exp(-0.5*dist_test)*reduc_factor;
-	  buffer.xy *= pi;
-	  vec3 curr_normal = vec3 (cos(buffer.x)*sin(buffer.y), sin(buffer.x)*sin(buffer.y), cos(buffer.y));
+      // weight is the gaussian exponential of the distance to the ellipse's center
+      float weight = exp(-0.5*dist_test)*reduc_factor;
+      float pixelZ = buffer.z / buffer.w;
 
-	  curr_normal *= buffer.w;
-	  curr_normal += normal * weight;
+      // sum contribution to current values if pixel near current surface (elipse)
+      if ((!depth_test) || (buffer.w == 0.0) || (abs(ellipse.z - pixelZ) <= ellipse.w)) {
+	buffer.xy *= pi;
+	vec3 curr_normal = vec3 (cos(buffer.x)*sin(buffer.y), sin(buffer.x)*sin(buffer.y), cos(buffer.y));
 
-	  curr_normal = normalize( curr_normal );
-	  float theta = atan( curr_normal.y, curr_normal.x );
-	  float phi = acos( curr_normal.z );
+	curr_normal *= buffer.w;
+	curr_normal += normal * weight;
 
-	  buffer = vec4(theta/pi, phi/pi, buffer.z+pixelA.z*weight, buffer.w+weight);
-	}
+	curr_normal = normalize( curr_normal );
+	float theta = atan( curr_normal.y, curr_normal.x );
+	float phi = acos( curr_normal.z );
+
+	buffer = vec4(theta/pi, phi/pi, buffer.z+ellipse.z*weight, buffer.w+weight);
       }
+      // overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
+      else if (ellipse.z < (buffer.z/buffer.w)) {
+	buffer = vec4(ellipse.xy, ellipse.z*weight, weight);
+      }      
     }
   }
   gl_FragColor = buffer;

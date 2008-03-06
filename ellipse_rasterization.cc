@@ -161,7 +161,7 @@ void EllipseRasterization::switchBuffers( void ) {
 void EllipseRasterization::evaluatePixels( void )
 {  
 
-  //shader_evaluate->set_uniform("depth_test", depth_test);
+
 
   // Activate projected surfels texture
   glActiveTexture(GL_TEXTURE2);
@@ -170,7 +170,7 @@ void EllipseRasterization::evaluatePixels( void )
 //   glBindTexture(FBO_TYPE, fbo_textures[3]);
 
   shader_evaluate->use();
-
+  shader_evaluate->set_uniform("depth_test", depth_test);
   shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
