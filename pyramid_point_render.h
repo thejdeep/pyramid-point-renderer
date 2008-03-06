@@ -15,10 +15,8 @@
 /* #include "timer.h" */
 /* } */
 
-#include <math.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cassert>
 
 #include "point_based_render.h"
 

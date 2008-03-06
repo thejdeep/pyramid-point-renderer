@@ -78,7 +78,7 @@ void EWASurfaceSplatting::phongShader ( double n[3], double c[]) {
 
   double light_dot_n = n[0]*light[0] + n[1]*light[1] + n[2]*light[2];
   if (light_dot_n > 0.0) {
-    double s = pow(light_dot_n, Mats[material_id][12]);
+    double s = pow(light_dot_n, (double)Mats[material_id][12]);
     double diffuse[4] = {Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]};
     double specular[4] = {Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]};
     for (int i = 0; i < 4; ++i) {
@@ -121,7 +121,7 @@ void EWASurfaceSplatting::splatShader ( surfelVectorIter s, double mv[][4], doub
 
   double light_dot_n = n_mv[0]*light[0] + n_mv[1]*light[1] + n_mv[2]*light[2];
   if (light_dot_n > 0.0) {
-    double s = pow(light_dot_n, Mats[material_id][12]);
+    double s = pow(light_dot_n, (double)Mats[material_id][12]);
     double diffuse[4] = {Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]};
     double specular[4] = {Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]};
     for (int i = 0; i < 4; ++i) {

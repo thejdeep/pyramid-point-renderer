@@ -9,24 +9,7 @@
 #ifndef __OBJECT_H__
 #define __OBJECT_H__
 
-#define GL_GLEXT_PROTOTYPES
-
 #include "primitives.h"
-
-
-/* typedef enum  */
-/*   { */
-/*     TRIANGLES, */
-/*     LINES, */
-/*     PYRAMID_POINTS, */
-/*     PYRAMID_POINTS_COLOR, */
-/*     PYRAMID_TRIANGLES, */
-/*     PYRAMID_HYBRID, */
-/*     PYRAMID_LINES, */
-/*     EWA_SPLATTING, */
-/*     EWA_SPLATTING_INTERPOLATE_NORMALS, */
-/*     NONE */
-/*   } point_render_type_enum; */
 
 using namespace std;
 

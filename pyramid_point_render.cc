@@ -365,7 +365,7 @@ void PyramidPointRender::projectSurfels ( Primitives* prim )
 
 double PyramidPointRender::computeHalfPixelSize( void ) {
 
-  double d = pow(2.0, cur_level) / (double)(canvas_width);
+  double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
   d *= 0.5;
 
   return d;

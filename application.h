@@ -13,7 +13,7 @@
 #define __APPLICATION__
 
 //OpenGL and GLUT includes
-#include <assert.h>
+#include <cassert>
 
 //IO includes
 #include <sstream>
@@ -21,7 +21,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <math.h>
+#include <cmath>
 
 #include <list>
 #include <vector>

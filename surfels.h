@@ -10,11 +10,12 @@
 #ifndef __SURFELS__
 #define __SURFELS__
 
-#include <list.h>
-#include <vector.h>
-#include <math.h>
+#include <list>
+#include <vector>
+#include <iostream>
+#include <cmath>
 
-
+using namespace std;
 
 struct Vector
 {

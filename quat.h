@@ -9,7 +9,7 @@
 #ifndef __QUAT_H__
 #define __QUAT_H__
 
-#include "math.h"
+#include "cmath"
 
 class Quat {
 public:

@@ -8,17 +8,9 @@
 #ifndef __EWA_SURFACE_SPLATTING_H__
 #define __EWA_SURFACE_SPLATTING_H__
 
-#define GL_GLEXT_PROTOTYPES
 
-/* extern "C" { */
-/* #include <GL/glut.h> */
-/* #include <GL/glext.h> */
-/* } */
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector.h>
+#include <cmath>
+#include <vector>
 
 #include "point_based_render.h"
 

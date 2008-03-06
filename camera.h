@@ -13,7 +13,7 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 
-#include "math.h"
+#include <cmath>
 #include <algorithm>
 #include <iostream>
 #include <vector>

@@ -9,10 +9,8 @@
 #ifndef __PYRAMID_POINT_RENDER_NEAREST_H__
 #define __PYRAMID_POINT_RENDER_NEAREST_H__
 
-#include <math.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cassert>
 
 #include "point_based_render.h"
 
@@ -39,7 +37,7 @@ class PyramidPointRenderNearest : public PointBasedRender
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);
 
-  double computeHalfPixelSize(int level);
+  double computeHalfPixelSize( void );
 
  public:
   PyramidPointRenderNearest();

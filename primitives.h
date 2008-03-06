@@ -17,7 +17,7 @@
 
 #include "GL/glu.h"
 
-#include <float.h>
+#include <cfloat>
 
 #define LOD_LEVELS 4
 #define MAX_LEAF_SURFELS 4 // the code expects this to be 4

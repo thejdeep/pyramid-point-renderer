@@ -19,7 +19,6 @@
 #include <vector>
 #include <map>
 #include "surfels.h"
-//#include <assert.h>
 
 using namespace std;
 
@@ -77,7 +76,7 @@ struct OverflowRefine : public KdTreeRefine <ItemPtr> {
   }
 
   /// Split a leaf node iff the list contains more than Max items
-  static bool split (const Box& world, vector<ItemPtr>& items, vector<int> *mergedItems) {
+  static bool split (vector<ItemPtr>& items, vector<int> *mergedItems) {
     if (items.size() == 1) {
       mergedItems->push_back(items[0]->id());
       return false;
@@ -374,7 +373,7 @@ public:
       PtrList.push_back(p);
 
       // Check if overflow criteria is met
-      if (Refine::split (world, PtrList, &mergedItems)) {
+      if (Refine::split (PtrList, &mergedItems)) {
 
 	/// Check largest box dimension for subdivision
 	split_dim = (world.max().x() - world.min().x() > world.max().y() - world.min().y()) ? 0 : 1;

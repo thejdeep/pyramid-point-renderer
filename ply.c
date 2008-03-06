@@ -567,10 +567,10 @@ void put_element_ply(PlyFile *plyfile, void *elem_ptr)
 
 	/* write the length */
 	len = strlen(*str) + 1;
-	fwrite (&len, sizeof(int), 1, fp);
+	int ret = fwrite (&len, sizeof(int), 1, fp);
 
 	/* write the string, including the null character */
-	fwrite (*str, len, 1, fp);
+	ret = fwrite (*str, len, 1, fp);
       }
       else {                   /* scalar */
         item = elem_data + prop->offset;
@@ -971,6 +971,9 @@ void setup_other_props(PlyFile *plyfile, PlyElement *elem)
   int size = 0;
   int type_size;
 
+  if (!plyfile)
+    return;
+
   /* Examine each property in decreasing order of size. */
   /* We do this so that all data types will be aligned by */
   /* word, half-word, or whatever within the structure. */
@@ -1251,7 +1254,8 @@ Entry:
 
 void free_other_elements_ply (PlyOtherElems *other_elems)
 {
-
+  if (!other_elems)
+    return;
 }
 
 
@@ -1636,9 +1640,9 @@ void binary_get_element(PlyFile *plyfile, char *elem_ptr)
     else if (prop->is_list == PLY_STRING) {     /* string */
       int len;
       char *str;
-      fread (&len, sizeof(int), 1, fp);
+      int ret = fread (&len, sizeof(int), 1, fp);
       str = (char *) myalloc (len);
-      fread (str, len, 1, fp);
+      ret = fread (str, len, 1, fp);
       if (store_it) {
 	char **str_ptr;
         item = elem_data + prop->offset;
@@ -1887,36 +1891,37 @@ void write_binary_item(
   unsigned short ushort_val;
   short short_val;
   float float_val;
+  int ret = 0;
 
   switch (type) {
     case Int8:
       char_val = int_val;
-      fwrite (&char_val, 1, 1, fp);
+      ret = fwrite (&char_val, 1, 1, fp);
       break;
     case Int16:
       short_val = int_val;
-      fwrite (&short_val, 2, 1, fp);
+      ret = fwrite (&short_val, 2, 1, fp);
       break;
     case Int32:
-      fwrite (&int_val, 4, 1, fp);
+      ret = fwrite (&int_val, 4, 1, fp);
       break;
     case Uint8:
       uchar_val = uint_val;
-      fwrite (&uchar_val, 1, 1, fp);
+      ret = fwrite (&uchar_val, 1, 1, fp);
       break;
     case Uint16:
       ushort_val = uint_val;
-      fwrite (&ushort_val, 2, 1, fp);
+      ret = fwrite (&ushort_val, 2, 1, fp);
       break;
     case Uint32:
-      fwrite (&uint_val, 4, 1, fp);
+      ret = fwrite (&uint_val, 4, 1, fp);
       break;
     case Float32:
       float_val = double_val;
-      fwrite (&float_val, 4, 1, fp);
+      ret = fwrite (&float_val, 4, 1, fp);
       break;
     case Float64:
-      fwrite (&double_val, 8, 1, fp);
+      ret = fwrite (&double_val, 8, 1, fp);
       break;
     default:
       fprintf (stderr, "write_binary_item: bad type = %d\n", type);
@@ -2062,52 +2067,53 @@ void get_binary_item(
   void *ptr;
 
   ptr = (void *) c;
+  int ret = 0;
 
   switch (type) {
     case Int8:
-      fread (ptr, 1, 1, fp);
+      ret = fread (ptr, 1, 1, fp);
       *int_val = *((char *) ptr);
       *uint_val = *int_val;
       *double_val = *int_val;
       break;
     case Uint8:
-      fread (ptr, 1, 1, fp);
+      ret = fread (ptr, 1, 1, fp);
       *uint_val = *((unsigned char *) ptr);
       *int_val = *uint_val;
       *double_val = *uint_val;
       break;
     case Int16:
-      fread (ptr, 2, 1, fp);
+      ret = fread (ptr, 2, 1, fp);
       *int_val = *((short int *) ptr);
       *uint_val = *int_val;
       *double_val = *int_val;
       break;
     case Uint16:
-      fread (ptr, 2, 1, fp);
+      ret = fread (ptr, 2, 1, fp);
       *uint_val = *((unsigned short int *) ptr);
       *int_val = *uint_val;
       *double_val = *uint_val;
       break;
     case Int32:
-      fread (ptr, 4, 1, fp);
+      ret = fread (ptr, 4, 1, fp);
       *int_val = *((int *) ptr);
       *uint_val = *int_val;
       *double_val = *int_val;
       break;
     case Uint32:
-      fread (ptr, 4, 1, fp);
+      ret = fread (ptr, 4, 1, fp);
       *uint_val = *((unsigned int *) ptr);
       *int_val = *uint_val;
       *double_val = *uint_val;
       break;
     case Float32:
-      fread (ptr, 4, 1, fp);
+      ret = fread (ptr, 4, 1, fp);
       *double_val = *((float *) ptr);
       *int_val = *double_val;
       *uint_val = *double_val;
       break;
     case Float64:
-      fread (ptr, 8, 1, fp);
+      ret = fread (ptr, 8, 1, fp);
       *double_val = *((double *) ptr);
       *int_val = *double_val;
       *uint_val = *double_val;
@@ -2254,6 +2260,9 @@ void add_element (PlyFile *plyfile, char **words, int nwords)
 {
   PlyElement *elem;
 
+  if (!plyfile)
+    return;
+
   /* create the new element */
   elem = (PlyElement *) myalloc (sizeof (PlyElement));
   elem->name = strdup (words[1]);
@@ -2270,6 +2279,9 @@ void add_element (PlyFile *plyfile, char **words, int nwords)
   /* add the new element to the object's list */
   plyfile->elems[plyfile->num_elem_types] = elem;
   plyfile->num_elem_types++;
+
+  if (nwords == 0)
+    return;
 }
 
 
@@ -2352,6 +2364,9 @@ void add_property (PlyFile *plyfile, char **words, int nwords)
 
   elem->props[elem->nprops] = prop;
   elem->nprops++;
+
+  if ((!plyfile) || (!nwords))
+    return;
 }
 
 
@@ -2923,13 +2938,13 @@ typedef struct RuleName {
 } RuleName;
 
 RuleName rule_name_list[] = {
-  AVERAGE_RULE, "avg",
-  RANDOM_RULE, "rnd",
-  MINIMUM_RULE, "max",
-  MAXIMUM_RULE, "min",
-  MAJORITY_RULE, "major",
-  SAME_RULE, "same",
-  -1, "end_marker"
+  {AVERAGE_RULE, "avg"},
+  {RANDOM_RULE, "rnd"},
+  {MINIMUM_RULE, "max"},
+  {MAXIMUM_RULE, "min"},
+  {MAJORITY_RULE, "major"},
+  {SAME_RULE, "same"},
+  {-1, "end_marker"}
 };
 
 
