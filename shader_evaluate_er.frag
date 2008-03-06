@@ -93,7 +93,7 @@ void main (void) {
     }
     else {
       // convert from spherical coordinates
-      pixelA.xy *= vec2(2.0*pi, pi);
+      pixelA.xy *= pi;
       vec3 normal = vec3 (cos(pixelA.x)*sin(pixelA.y), sin(pixelA.x)*sin(pixelA.y), cos(pixelA.y));
 
       float dist_test = pointInEllipse(displacement.xy, pixelA.w, normal);
@@ -110,17 +110,17 @@ void main (void) {
 /* 	else  */
 	{
 	  float weight = exp(-0.5*dist_test)*reduc_factor;
-	  buffer.xy *= vec2(2.0*pi, pi);
+	  buffer.xy *= pi;
 	  vec3 curr_normal = vec3 (cos(buffer.x)*sin(buffer.y), sin(buffer.x)*sin(buffer.y), cos(buffer.y));
 
 	  curr_normal *= buffer.w;
 	  curr_normal += normal * weight;
 
 	  curr_normal = normalize( curr_normal );
-	  float theta = atan( curr_normal.y / curr_normal.x );
+	  float theta = atan( curr_normal.y, curr_normal.x );
 	  float phi = acos( curr_normal.z );
 
-	  buffer = vec4(theta/(2.0*pi), phi/pi, buffer.z+pixelA.z*weight, buffer.w+weight);
+	  buffer = vec4(theta/pi, phi/pi, buffer.z+pixelA.z*weight, buffer.w+weight);
 	}
       }
     }

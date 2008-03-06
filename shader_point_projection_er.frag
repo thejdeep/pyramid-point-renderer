@@ -22,9 +22,9 @@ void main(void)
 
   float r = radius_depth_w.x / radius_depth_w.z;
 
-  float theta = atan( normal_vec.y / normal_vec.x );
+  float theta = atan( normal_vec.y, normal_vec.x );
   float phi = acos( normal_vec.z );
 
   // [theta, phi, depth, radius]
-  gl_FragColor = vec4 (theta/(2.0*pi), phi/pi, radius_depth_w.y, r );
+  gl_FragColor = vec4 (theta/pi, phi/pi, radius_depth_w.y, r*0.1 );
 }

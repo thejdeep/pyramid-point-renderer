@@ -49,7 +49,7 @@ void main (void) {
   vec4 color = vec4(1.0);
 
   // convert from spherical coordinates
-  pixel.xy *= vec2(2.0*pi, pi);
+  pixel.xy *= pi;
   vec3 normal = vec3 (cos(pixel.x)*sin(pixel.y), sin(pixel.x)*sin(pixel.y), cos(pixel.y));
 
   if (pixel.a != 0.0) {
