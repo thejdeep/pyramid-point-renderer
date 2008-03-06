@@ -161,8 +161,6 @@ void EllipseRasterization::switchBuffers( void ) {
 void EllipseRasterization::evaluatePixels( void )
 {  
 
-
-
   // Activate projected surfels texture
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(FBO_TYPE, fbo_textures[2]);
@@ -183,10 +181,11 @@ void EllipseRasterization::evaluatePixels( void )
   GLfloat size[2] = {(GLfloat)(fbo_width),
 		     (GLfloat)(fbo_height)};
 
-  for (int j = -MAX_DISPLACEMENT; j < MAX_DISPLACEMENT; ++j)
-    for (int i = -MAX_DISPLACEMENT; i < MAX_DISPLACEMENT; ++i) {
+  read_buffer = 1;
+  for (int j = -MAX_DISPLACEMENT; j <= MAX_DISPLACEMENT; ++j)
+    for (int i = -MAX_DISPLACEMENT; i <= MAX_DISPLACEMENT; ++i) {
       switchBuffers();
-      shader_evaluate->set_uniform("displacement", i/size[0], j/size[1]);
+      shader_evaluate->set_uniform("displacement", (GLfloat)i/size[0], (GLfloat)j/size[1]);
       shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
       drawQuad();
     }

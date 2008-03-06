@@ -28,5 +28,5 @@ void main(void)
   float phi = acos( normal_vec.z );
 
   // [theta, phi, depth, radius]
-  gl_FragColor = vec4 (theta/pi, phi/pi, z, r*1.0 );
+  gl_FragColor = vec4 (theta/pi, phi/pi, z, r );
 }

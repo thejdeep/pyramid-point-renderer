@@ -64,7 +64,7 @@ class Application
   void glVertex ( Point p );
 
   void changeMaterial ( void );
-  void changeRendererType ( point_render_type_enum type );
+  void changePrimitivesRendererType ( point_render_type_enum type );
 
  public :
 

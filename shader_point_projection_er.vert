@@ -12,7 +12,7 @@ varying vec3 radius_depth_w_vertex;
 void main(void)
 {
 
-  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -0.2 ) {
+  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -0.0 ) {
 
   // back face culling (rotated eye, fixed point)  
     radius_depth_w_vertex.x = 0.0;

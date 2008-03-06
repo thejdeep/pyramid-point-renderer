@@ -48,15 +48,11 @@ void main (void) {
   //  vec4 color = texture2D (textureB, gl_TexCoord[0].st).xyzw;
   vec4 color = vec4(1.0);
 
-  // convert from spherical coordinates
+  // convert from spherical coordinates, note normal has already length = 1
   pixel.xy *= pi;
   vec3 normal = vec3 (cos(pixel.x)*sin(pixel.y), sin(pixel.x)*sin(pixel.y), cos(pixel.y));
 
   if (pixel.a != 0.0) {
-
-    // divide normal by sum of weights
-    //    normal /= pixel.w;
-    //normal = normalize(normal);
 
     //int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
     int material = 0;

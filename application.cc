@@ -411,7 +411,7 @@ void Application::changeMaterial( int mat ) {
   changeMaterial();
 }
 
-void Application::changeRendererType( point_render_type_enum type ) {
+void Application::changePrimitivesRendererType( point_render_type_enum type ) {
   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
     vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
@@ -422,12 +422,11 @@ void Application::changeRendererType( point_render_type_enum type ) {
 }
 
 void Application::changeRendererType( int type ) {
-  changeRendererType ( (point_render_type_enum)type );
+  changePrimitivesRendererType ( (point_render_type_enum)type );
   if (type == RASTERIZE_ELLIPSES)
     createPointRender( 2 );
   else
     createPointRender( 0 );
-
 }
 
 void Application::createPointRender( int type ) {
@@ -532,8 +531,8 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //primitives.back().setRendererType( PYRAMID_POINTS );
-  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  primitives.back().setRendererType( PYRAMID_POINTS );
+  //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
 
   num_objects = objects.size();
 
