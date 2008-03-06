@@ -129,6 +129,10 @@ void pprMainWindow::selectCurrObject ( void ) {
  * Changes item selection.
  **/
 void pprMainWindow::on_modelsTreeWidget_itemClicked ( QTreeWidgetItem * item, int column )  {
+
+  if (column > 3)
+    return;
+
   application->clearSelectedObjects ();
 
   if (item == 0)
@@ -216,15 +220,15 @@ void pprMainWindow::on_doubleSpinBoxPrefilter_valueChanged( double d ) {
   widget->updateGL();
 }
 
-void pprMainWindow::on_actionCreateKeyFrame_triggered( bool ckecked  ) {
+void pprMainWindow::on_actionCreateKeyFrame_triggered( bool ) {
   application->createKeyFrame();
 }
 
-void pprMainWindow::on_actionRunKeyFrames_triggered( bool ckecked ) {
+void pprMainWindow::on_actionRunKeyFrames_triggered( bool ) {
   application->runFrames();
 }
 
-void pprMainWindow::on_actionLoadKeyFrames_triggered( bool ckecked ) {
+void pprMainWindow::on_actionLoadKeyFrames_triggered( bool ) {
   QString sfile;
 		
   sfile = QFileDialog::getOpenFileName(this, tr("Open Key Frames"), "./", tr("Files (*.frames)"));
@@ -248,11 +252,11 @@ void pprMainWindow::on_actionLoadKeyFrames_triggered( bool ckecked ) {
   }
 }
 
-void pprMainWindow::on_actionWriteKeyFrames_triggered( bool ckecked ) {
+void pprMainWindow::on_actionWriteKeyFrames_triggered( bool ) {
   application->writeKeyFrames();
 }
 
-void pprMainWindow::on_actionClearKeyFrames_triggered( bool ckecked ) {
+void pprMainWindow::on_actionClearKeyFrames_triggered( bool ) {
   application->clearFrames();
 }
 

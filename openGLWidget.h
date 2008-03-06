@@ -21,7 +21,7 @@ class openGLWidget: public QGLWidget {
 
  protected:
   // idle function called every 1 millisecond
-  void timerEvent(QTimerEvent *event) {
+  void timerEvent(QTimerEvent *) {
     updateGL();
   }
 
@@ -73,7 +73,8 @@ class openGLWidget: public QGLWidget {
       glViewport((width - side) / 2, (height - side) / 2, side, side);
     }
 
-    void mouseReleaseEvent ( QMouseEvent * event ) {    
+    void mouseReleaseEvent ( QMouseEvent * ) {
+
       application->mouseReleaseButton();
     }
 
