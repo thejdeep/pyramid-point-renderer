@@ -9,8 +9,8 @@
 
 const float pi = 3.1416;
 
-//const float max_radius = (1.0/(408.0))*4.5;
-const float max_radius = (0.05/(408.0))*4.5;
+const float max_radius = (1.0/(816.0))*7.5;
+//const float max_radius = (1.0/(1024.0))*4.5;
 
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
@@ -26,6 +26,8 @@ void main(void)
   float r = abs(radius_depth_w.x / radius_depth_w.z);
   float z = radius_depth_w.y;
 
+  //r *= 0.001;
+
   if (r > max_radius)
     r *= -1.0;
 /*     discard; */
@@ -36,5 +38,5 @@ void main(void)
   float phi = acos( normal_vec.z );
 
   // [theta, phi, depth, radius]
-  gl_FragColor = vec4 (theta/pi, phi/pi, z, r );
+  gl_FragColor = vec4 (theta/pi, phi/pi, z, r);
 }

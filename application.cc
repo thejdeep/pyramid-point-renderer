@@ -805,7 +805,6 @@ int Application::getNumberTriangles ( int object_id ) {
     Primitives * prim = &(primitives[*prim_it]);
     num += prim->numberTriangles();
   }
-
   return num;
 }
 
@@ -822,12 +821,15 @@ void Application::setPrefilter ( double s ) {
 }
 
 void Application::setPerVertexColor ( bool b, int object_id ) {
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-    primitives[*prim_it].setPerVertexColor(b);
-    // Reset renderer type to load per vertex color or default color in vertex array
-    primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
-  }
+    camera->switchKeyFrameInterpolationMode();
+
+
+//   vector< int >* prims = objects[object_id].getPrimitivesList();
+//   for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+//     primitives[*prim_it].setPerVertexColor(b);
+//     // Reset renderer type to load per vertex color or default color in vertex array
+//     primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
+//   }
 }
 
 void Application::setAutoRotate ( bool r ) {

@@ -146,7 +146,9 @@ public:
     double len = sqrt(q.x*q.x + q.y*q.y + q.z*q.z);
     if (len <= 0)
       return Quat(q);
-    double c = acos(q.a) / len;
+    double angle = acos(q.a);
+    double c = angle / sin(angle);
+    
     return Quat(q.x*c, q.y*c, q.z*c, 0);
   }
 
@@ -155,8 +157,9 @@ public:
     double len = sqrt(this->x*this->x + this->y*this->y + this->z*this->z);
     if (len <= 0)
       return Quat(*this);
-    double exs = sin(len*t)/len;
-    return Quat (this->x*exs, this->y*exs, this->z*exs, cos(len*t));
+    double phi = len;//acos(this->a);
+    double exs = sin(phi*t)/len;
+    return Quat (this->x*exs, this->y*exs, this->z*exs, cos(phi*t));
   }
 
   // exponential function
@@ -191,14 +194,14 @@ public:
   }
 
   // Computes a new quaternion between q and r
-  inline friend Quat interpolationQuat ( Quat p, Quat q, Quat r ) {
+  inline friend Quat intermediate ( Quat p, Quat q, Quat r ) {
     return q * exp ( -0.25 * (log( q.inverse() * p) + log( q.inverse() * r)));
   }
 
   // Cubic interpolation between quaternions 
   inline friend Quat cubicInterpolation ( Quat p, Quat q, Quat r, Quat s, double t ) {
-    Quat a = interpolationQuat( p, q, r );
-    Quat b = interpolationQuat( q, r, s );
+    Quat a = intermediate( p, q, r );
+    Quat b = intermediate( q, r, s );
 
     return squad (q, r, a, b, t);
   }

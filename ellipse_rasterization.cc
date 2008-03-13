@@ -93,6 +93,28 @@ void EllipseRasterization::drawQuad( void ) {
 
 
 /**
+ * Extracts debugging information from the reconstructed buffer.
+ **/
+void EllipseRasterization::getDataReconstructedPixels ( int buffer ) {
+  
+  GLfloat *outputBuffer = new GLfloat[fbo_width * fbo_height * 4];
+  glReadBuffer(fbo_buffers[buffer]);
+  glReadPixels(0, 0, fbo_width, fbo_height, GL_RGBA, GL_FLOAT, &outputBuffer[0]);
+
+  int pixels = 0;
+
+  for (int i = 0; i < fbo_width * fbo_height * 4; i+=4) {
+    if (outputBuffer[i + 3] > 0)
+    ++pixels;
+  }
+  
+  cout << pixels << endl;
+//   cout << sqrt((double)pixels) / 2.0 << endl;
+
+  delete outputBuffer;
+}
+
+/**
  * Extracts debugging information from the projected samples.
  **/
 void EllipseRasterization::getDataProjectedPixels ( int* data ) {
@@ -108,8 +130,10 @@ void EllipseRasterization::getDataProjectedPixels ( int* data ) {
     radius = outputBuffer[i + 3];
     if (radius < 0.0)
       ++splats;
-    if (radius > 0.0)
+    if (radius > 0.0)      
       ++kernels;
+//     if (radius != 0.0)
+//       cout << "r : " << radius << " " << radius*816.0 << endl;
   }
   
   data[0] += splats;
@@ -213,6 +237,7 @@ void EllipseRasterization::evaluatePixels( void )
   GLfloat size[2] = {(GLfloat)(fbo_width),
 		     (GLfloat)(fbo_height)};
 
+  int passes = 0;
   read_buffer = 1;
   for (int j = -MAX_DISPLACEMENT; j <= MAX_DISPLACEMENT; ++j)
     for (int i = -MAX_DISPLACEMENT; i <= MAX_DISPLACEMENT; ++i) {
@@ -220,9 +245,12 @@ void EllipseRasterization::evaluatePixels( void )
       shader_evaluate->set_uniform("displacement", (GLfloat)i/size[0], (GLfloat)j/size[1]);
       shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
       drawQuad();
+      ++passes;
     }
 
   shader_evaluate->use(0);
+
+  //getDataReconstructedPixels ( dest_buffer );
 }
 
 /**
@@ -254,8 +282,8 @@ void EllipseRasterization::rasterizePhongShading( void )
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(FBO_TYPE, fbo_textures[1]);
+  glActiveTexture(GL_TEXTURE0+dest_buffer);
+  glBindTexture(FBO_TYPE, fbo_textures[dest_buffer]);
 //   glActiveTexture(GL_TEXTURE4);
 //   glBindTexture(FBO_TYPE, fbo_textures[4]);
 

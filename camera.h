@@ -108,6 +108,8 @@ public:
     radius = 1.0;
 
     frame_video = -1.0;
+
+    keyFrameInterpolation = 0;
   }
 
   /// Destructor
@@ -250,6 +252,10 @@ public:
     //return keyFrames[(unsigned int)frame_video].prefilter;
   }
 
+  void switchKeyFrameInterpolationMode ( void ) {
+    keyFrameInterpolation = !keyFrameInterpolation;      
+  }
+
 private:
 
   void computeKeyFrame ( void );
@@ -303,6 +309,8 @@ private:
 
   double frame_reconstruction_filter;
   double frame_prefilter;
+
+  bool keyFrameInterpolation;
 
   double squaredDistance(const double [3], const double [3]) const;
 

@@ -5,9 +5,9 @@
 
 const float pi = 3.1416;
 
-const float reduc_factor = 1.0;
+const float reduc_factor = 0.1;
 
-const int mask_size = 1;
+const int mask_size = 2;
 
 // flag for depth test on/off
 uniform bool depth_test;
@@ -26,7 +26,7 @@ uniform sampler2D textureB;
 float pointInCircle(in vec2 d, in float radius){
   float sqrt_len = d.x*d.x + d.y*d.y;
 
-  radius *= 2.0;
+  radius *= 1.0;
   radius += prefilter_size;
 
   float dif = sqrt_len / (radius*radius);
@@ -44,10 +44,12 @@ float pointInCircle(in vec2 d, in float radius){
 // @param radius Ellipse major axis length * 0.5.
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
+  
   float len = length(normal.xy);
 
   if (len == 0.0)
-    normal.y = 0.0;
+    return pointInCircle(d, radius);
+    //normal.y = 0.0;
   else
     normal.y /= len;
 
@@ -78,13 +80,16 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
 void main (void) {
 
+  vec2 texSizeB = vec2(textureSize2D(textureB, 0));
+
   // retrieve actual pixel with current values
-  vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;  
+  //  vec4 buffer = texelFetch2D (textureB, ivec2(gl_TexCoord[0].st)*texSizeB, 0).xyzw;  
+  vec4 buffer = texture2D (textureB, gl_TexCoord[0].st, 0).xyzw;
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
     
-      vec2 local_displacement = (displacement.xy * float(mask_size)) + (vec2(i, j) / float(1024.0));
+      vec2 local_displacement = (displacement.xy * float(mask_size*2+1)) + (vec2(i, j) / texSizeB);
 
       // retrieve candidadte ellipse from displacement position
       vec4 ellipse = texture2D (textureA, gl_TexCoord[0].st + local_displacement.xy).xyzw;
@@ -99,8 +104,8 @@ void main (void) {
 	float ellipse_phi = ellipse.y * pi;
 	vec3 normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
 
-	float dist_test = pointInEllipse(local_displacement.xy, ellipse.w, normal);
-	//float dist_test = pointInCircle(local_displacement.xy, ellipse.w);
+	//float dist_test = pointInEllipse(local_displacement.xy, ellipse.w, normal);
+	float dist_test = pointInCircle(local_displacement.xy, ellipse.w);
 	
 	// Ellipse in range
 	if (dist_test >= 0.0) {

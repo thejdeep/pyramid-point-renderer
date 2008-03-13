@@ -44,6 +44,7 @@ class EllipseRasterization : public PointBasedRender
   void interpolate ( void );
 
   void getDataProjectedPixels ( int * );
+  void getDataReconstructedPixels ( int buffer );
 
  private:
 

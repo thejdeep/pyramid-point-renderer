@@ -40,9 +40,6 @@ void Camera::initLight (void) {
 void Camera::computeKeyFrame( void ) {
   unsigned int frame = (unsigned int)frame_video;
   double step = frame_video - frame;
-  //double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
-
-  // cout << step << endl;
 
   if ( keyFrames.size() - 2 == frame ) {
     frame_video = -1.0;
@@ -63,21 +60,19 @@ void Camera::computeKeyFrame( void ) {
     frame_prefilter = keyFrames[frame].prefilter + 
       (keyFrames[frame+1].prefilter-keyFrames[frame].prefilter)*(step);
 
-    //    q_rot = slerp(keyFrames[frame].rot, keyFrames[frame+1].rot, step);
+    if (!keyFrameInterpolation)
+      q_rot = slerp(keyFrames[frame].rot, keyFrames[frame+1].rot, step);
+    else {
+      if (frame > 1)
+	q_rot = cubicInterpolation(keyFrames[frame-1].rot, keyFrames[frame].rot, 
+				   keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
+      else
+	q_rot = cubicInterpolation(keyFrames[frame].rot, keyFrames[frame].rot, 
+				   keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
+    }
 
-    if (frame > 1)
-      q_rot = cubicInterpolation(keyFrames[frame-1].rot, keyFrames[frame].rot, 
-				 keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
-    else
-      q_rot = cubicInterpolation(keyFrames[frame].rot, keyFrames[frame].rot, 
-				 keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
-
-
-    frame_video += 0.01;
+    frame_video += 0.005;
   }
-
-    
-
 }
 
 /// Sets OpenGL camera
@@ -394,7 +389,7 @@ void Camera::zooming(int x, int y) {
 //   double diff = mouse_curr[1] - mouse_start[1];
 //   zoom_factor += diff / screen_height;
 
-  position[2] -= 15.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
+  position[2] -= 10.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];
