@@ -27,6 +27,9 @@ Application::Application( void ) {
 
   render_mode = GL_RENDER;
 
+  max_surfs_per_level[0] = max_surfs_per_level[1] = 
+    max_surfs_per_level[2] = max_surfs_per_level[3] = 0;
+
   point_based_render = NULL;
 
   number_surfels = 0;
@@ -174,10 +177,23 @@ void Application::draw(void) {
 	else
 	  point_based_render->useLOD( false );
 
-
 	prim->eye = Point(eye[0], eye[1], eye[2]);
-	prim->countNumVertsLOD(&surfs_per_level[0]);
+	//	prim->countNumVertsLOD(&surfs_per_level[0]);
 	point_based_render->projectSamples( prim );
+
+	if (show_color_bars)
+	{
+	  point_based_render->getDataProjectedPixels( &surfs_per_level[0] );
+	  if (surfs_per_level[0] > max_surfs_per_level[0])
+	    max_surfs_per_level[0] = surfs_per_level[0];
+
+	  if (surfs_per_level[1] > max_surfs_per_level[1])
+	    max_surfs_per_level[1] = surfs_per_level[1];
+
+	  surfs_per_level[2] = max_surfs_per_level[0];
+	  surfs_per_level[3] = max_surfs_per_level[1];
+	}
+	
       }
     }
   }
@@ -215,7 +231,7 @@ void Application::draw(void) {
     drawPoints();
 
   if (show_color_bars)
-    renderColorBars();
+    renderLODColorBars();
 
   if (rotating)
     camera->rotate();
@@ -225,8 +241,9 @@ void Application::draw(void) {
 
 }
 
+
 /// Screen text with commands info
-void Application::renderColorBars( void ) {
+void Application::renderLODColorBars( void ) {
 
   int w = 400;
   int h = 200;
@@ -244,9 +261,9 @@ void Application::renderColorBars( void ) {
 
   int total;
   if (lods_perc)
-    total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
+    total = surfs_per_level[0] + surfs_per_level[1];// + surfs_per_level[2] + surfs_per_level[3];
   else
-    total = surfs_per_level[4] / 10;
+    total = surfs_per_level[4]/2;
   double x_max = 0.0;
 
   // BACKGROUND
@@ -531,8 +548,8 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( PYRAMID_POINTS );
-  //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  //primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
 
   num_objects = objects.size();
 
@@ -541,7 +558,7 @@ int Application::readFile ( const char * filename ) {
   
   //  if (!point_based_render)
   createPointRender( 0 );
-
+ 
   return id;
 }
 

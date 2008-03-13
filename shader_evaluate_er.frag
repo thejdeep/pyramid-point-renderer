@@ -79,7 +79,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 void main (void) {
 
   // retrieve actual pixel with current values
-  vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;
+  vec4 buffer = texture2D (textureB, gl_TexCoord[0].st).xyzw;  
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
@@ -88,6 +88,7 @@ void main (void) {
 
       // retrieve candidadte ellipse from displacement position
       vec4 ellipse = texture2D (textureA, gl_TexCoord[0].st + local_displacement.xy).xyzw;
+      ellipse.w = abs(ellipse.w);
   
       // if pixel from displacement position is a projected surfel, check if current
       // pixel is inside its radius
@@ -109,7 +110,7 @@ void main (void) {
 	  float pixelZ = buffer.z / buffer.w;
 
 	  // sum contribution to current values if pixel near current surface (elipse)
-	  if ((!depth_test) || (buffer.w == 0.0) || (abs(ellipse.z - pixelZ) <= ellipse.w)) {
+	  if ((!depth_test) || (buffer.w == 0.0) || (abs(ellipse.z - pixelZ) <= 2.0*ellipse.w)) {
 	    buffer.xy *= pi;
 	    vec3 curr_normal = vec3 (cos(buffer.x)*sin(buffer.y), sin(buffer.x)*sin(buffer.y), cos(buffer.y));
 

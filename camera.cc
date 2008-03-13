@@ -38,12 +38,14 @@ void Camera::initLight (void) {
 }
 
 void Camera::computeKeyFrame( void ) {
-  unsigned int frame = (unsigned int)frameVideo;
-  double step = frameVideo - frame;
-  double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
+  unsigned int frame = (unsigned int)frame_video;
+  double step = frame_video - frame;
+  //double theta = 0.0, sin_theta = 0.0, coef_a = 0.0, coef_b = 0.0;
 
-  if ( keyFrames.size() - 1 == frame ) {
-    frameVideo = -1.0;
+  // cout << step << endl;
+
+  if ( keyFrames.size() - 2 == frame ) {
+    frame_video = -1.0;
   }
   else {
     position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
@@ -61,28 +63,21 @@ void Camera::computeKeyFrame( void ) {
     frame_prefilter = keyFrames[frame].prefilter + 
       (keyFrames[frame+1].prefilter-keyFrames[frame].prefilter)*(step);
 
-    theta = acos( (keyFrames[frame].rot.x * keyFrames[frame+1].rot.x) +
-		  (keyFrames[frame].rot.y * keyFrames[frame+1].rot.y) +
-		  (keyFrames[frame].rot.z * keyFrames[frame+1].rot.z) +
-		  (keyFrames[frame].rot.a * keyFrames[frame+1].rot.a) );
+    //    q_rot = slerp(keyFrames[frame].rot, keyFrames[frame+1].rot, step);
 
-    sin_theta = sin( theta );
-    if ((theta == 0.0) || (sin_theta == 0.0) || (isnan(theta)) ) {
-      coef_a = 1.0;
-      coef_b = 0.0;
-    }
-    else {
-      coef_a = ( sin( ( 1.0 - step ) * theta ) / sin_theta );
-      coef_b = ( sin( step * theta ) / sin_theta );
-    }
+    if (frame > 1)
+      q_rot = cubicInterpolation(keyFrames[frame-1].rot, keyFrames[frame].rot, 
+				 keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
+    else
+      q_rot = cubicInterpolation(keyFrames[frame].rot, keyFrames[frame].rot, 
+				 keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
 
-    q_rot.x = ( coef_a * keyFrames[frame].rot.x ) + ( coef_b * keyFrames[frame+1].rot.x );
-    q_rot.y = ( coef_a * keyFrames[frame].rot.y ) + ( coef_b * keyFrames[frame+1].rot.y );
-    q_rot.z = ( coef_a * keyFrames[frame].rot.z ) + ( coef_b * keyFrames[frame+1].rot.z );
-    q_rot.a = ( coef_a * keyFrames[frame].rot.a ) + ( coef_b * keyFrames[frame+1].rot.a );		  
-		  
-    frameVideo += 0.01;
+
+    frame_video += 0.01;
   }
+
+    
+
 }
 
 /// Sets OpenGL camera
@@ -144,8 +139,8 @@ void Camera::resetViewMode ( void ) {
   double y = 1.0 * zoom_factor;
 
   if (view_mode == PERSPECTIVE)
-    //glFrustum(left, right, bottom, top, z_near, z_far);
-    gluPerspective( 45, (w/h), z_near, z_far );
+    //  glFrustum(left, right, bottom, top, z_near, z_far);
+    gluPerspective( 90, (w/h), z_near, z_far );
   else
     glOrtho( -x, x, -y, y, z_near, z_far );
 }
@@ -292,7 +287,7 @@ void Camera::rotate() {
 
   q_last = q_rot;
   //  Quat new_rot (0.9999, 0.005, 0.001, 0.003);
-  Quat new_rot (0.999, 0.00, 0.001, 0.00003);
+  Quat new_rot (0.00, 0.001, 0.00003, 0.999);
   
   // Multiply local rotation by total rotation (order matters!)
   q_rot = new_rot.composeWith(q_last);
@@ -319,7 +314,7 @@ void Camera::rotate(int x, int y) {
 		    v0[0]*v1[1] - v0[1]*v1[0]};
   double angle = v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2];
 
-  Quat new_rot (angle, axis[0], axis[1], axis[2]);
+  Quat new_rot (axis[0], axis[1], axis[2], angle);
 
   // Multiply local rotation by total rotation (order matters!)
   q_rot = new_rot.composeWith(q_last);
@@ -349,7 +344,7 @@ void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
 		    v0[0]*v1[1] - v0[1]*v1[0]};
   double angle = v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2];
 
-  Quat new_rot (angle, axis[0], axis[1], axis[2]);
+  Quat new_rot (axis[0], axis[1], axis[2], angle);
 
   // Multiply local rotation by total rotation (order matters!)
   *q = new_rot.composeWith(q_last);
@@ -369,7 +364,7 @@ void Camera::computeEyePosition(Quat q, double *new_eye) {
 //   Quat q_new_rot = q;
 //   q_new_rot = q_new_rot.composeWith(q_rot);
 
-  q_new_rot.invert();
+  q_new_rot = q_new_rot.inverse();
 
   new_eye[0] = position[0];
   new_eye[1] = position[1];

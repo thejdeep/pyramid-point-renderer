@@ -43,6 +43,8 @@ class EllipseRasterization : public PointBasedRender
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
+  void getDataProjectedPixels ( int * );
+
  private:
 
   // Size of framebuffer, usually a power of 2

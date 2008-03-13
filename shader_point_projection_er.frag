@@ -9,6 +9,9 @@
 
 const float pi = 3.1416;
 
+//const float max_radius = (1.0/(408.0))*4.5;
+const float max_radius = (0.05/(408.0))*4.5;
+
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
 
@@ -20,8 +23,13 @@ void main(void)
   if (normal_vec.z < 0.0)
     discard;
 
-  float r = radius_depth_w.x / radius_depth_w.z;
+  float r = abs(radius_depth_w.x / radius_depth_w.z);
   float z = radius_depth_w.y;
+
+  if (r > max_radius)
+    r *= -1.0;
+/*     discard; */
+//    r = max_radius;
 
   // atan(y,x) returns a value in the range [-pi, pi]
   float theta = atan( normal_vec.y, normal_vec.x );

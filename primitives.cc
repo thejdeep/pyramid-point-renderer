@@ -1031,21 +1031,24 @@ void Primitives::setTrianglesDisplayList( void ) {
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
 
-  GLfloat black[] = {0.0, 0.0, 0.0, 1.0};
+  GLfloat black[] = {0.6, 0.6, 0.6, 1.0};
 
   surfelVectorIter it_s = surfels[0].begin();
 
-  GLfloat color[] = {(GLfloat)(it_s->color().x()),
-		     (GLfloat)(it_s->color().y()), 
-		     (GLfloat)(it_s->color().z())};
+//   GLfloat color[] = {(GLfloat)(it_s->color().x()),
+// 		     (GLfloat)(it_s->color().y()), 
+// 		     (GLfloat)(it_s->color().z())};
 
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
 
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
-  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 50);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels[0].at( it->verts[0] ).position();

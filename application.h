@@ -72,7 +72,7 @@ class Application
   ~Application() {};
 
   void setColorBars ( bool c );
-  void renderColorBars( void );
+  void renderLODColorBars( void );
 
   int writeLodFile ( void );
   int writeSceneFile ( void );
@@ -189,6 +189,7 @@ class Application
   int timing_profile;
 
   int surfs_per_level[5];
+  int max_surfs_per_level[4];
 
   /*************************************/
 

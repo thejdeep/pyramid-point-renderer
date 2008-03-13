@@ -92,6 +92,8 @@ public:
 				     zoom_factor(1.0), fov(1.0),
 				     z_near(0.01), z_far(100.0) {
     view_mode = PERSPECTIVE;
+    //    view_mode = ORTHOGRAPHIC;
+
 
     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     std::copy (identity, identity+16, rotation_matrix);
@@ -105,7 +107,7 @@ public:
 
     radius = 1.0;
 
-    frameVideo = -1.0;
+    frame_video = -1.0;
   }
 
   /// Destructor
@@ -224,28 +226,28 @@ public:
       in >> k;
       keyFrames.push_back( k );
     }
-    frameVideo = -1.0;
+    frame_video = -1.0;
   }
 
-  void runFrames( void ) { frameVideo = 0.0; }
+  void runFrames( void ) { frame_video = 0.0; }
 
   void clearFrames( void ) { 
-    frameVideo = -1.0; 
+    frame_video = -1.0; 
     keyFrames.clear();
   }
 
   bool runningFrames( void ) {
-    return ( (frameVideo >= 0.0) && (keyFrames.size() > 0) );
+    return ( (frame_video >= 0.0) && (keyFrames.size() > 0) );
   }
 
   double getKeyFrameReconstructionFilter ( void ) {
     return frame_reconstruction_filter;
-    //return keyFrames[(unsigned int)frameVideo].reconstruction_filter;
+    //return keyFrames[(unsigned int)frame_video].reconstruction_filter;
   }
 
   double getKeyFramePrefilter ( void ) {
     return frame_prefilter;
-    //return keyFrames[(unsigned int)frameVideo].prefilter;
+    //return keyFrames[(unsigned int)frame_video].prefilter;
   }
 
 private:
@@ -297,7 +299,7 @@ private:
 
   vector< keyframe > keyFrames;
 
-  double frameVideo;
+  double frame_video;
 
   double frame_reconstruction_filter;
   double frame_prefilter;

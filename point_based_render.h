@@ -43,6 +43,8 @@ class PointBasedRender
    virtual void setPrefilterSize(double s) { prefilter_size = s; }
    virtual void setReconstructionFilterSize(double s) { reconstruction_filter_size = s; }
 
+   virtual void getDataProjectedPixels ( int* ) {}
+
    void setEye (double e[3]) {
      eye[0] = e[0];
      eye[1] = e[1];

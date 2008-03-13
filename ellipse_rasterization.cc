@@ -91,6 +91,38 @@ void EllipseRasterization::drawQuad( void ) {
   glEnd();
 }
 
+
+/**
+ * Extracts debugging information from the projected samples.
+ **/
+void EllipseRasterization::getDataProjectedPixels ( int* data ) {
+  
+  GLfloat *outputBuffer = new GLfloat[fbo_width * fbo_height * 4];
+  glReadBuffer(fbo_buffers[2]);
+  glReadPixels(0, 0, fbo_width, fbo_height, GL_RGBA, GL_FLOAT, &outputBuffer[0]);
+
+  GLfloat radius = 0.0;
+  int splats = 0, kernels = 0;
+
+  for (int i = 0; i < fbo_width * fbo_height * 4; i+=4) {
+    radius = outputBuffer[i + 3];
+    if (radius < 0.0)
+      ++splats;
+    if (radius > 0.0)
+      ++kernels;
+  }
+  
+  data[0] += splats;
+  data[1] += kernels;
+  data[2] += 0;
+  data[3] += 0;
+  data[4] = fbo_width*fbo_height;
+
+  delete outputBuffer;
+
+}
+
+
 /**
  * Project surfels os a single primitive to screen space.
  * Projection is written on third color attachment (number 2).
