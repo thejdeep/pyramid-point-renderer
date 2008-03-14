@@ -1,0 +1,14 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Instructions on how to compile the code.
+
+
+= Details =
+
+  * Download the LcgTk library from [http://code.google.com/p/lcgtk/]
+
+  * Have Qt4 installed.
+
+  * Change the path to the LcgTk in the _pyramid-point-renderer.pro_ file.
