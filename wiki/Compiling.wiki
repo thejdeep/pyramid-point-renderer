@@ -10,7 +10,7 @@ I hope to soon add also support to Glut.
 
 Before you compile:
 
-  * Download the LcgTk library from [http://code.google.com/p/lcgtk/]
+  * Download the LcgTk library from [http://code.google.com/p/lcgtk/ LcgTk]
 
   * Have Qt4 installed.
 
