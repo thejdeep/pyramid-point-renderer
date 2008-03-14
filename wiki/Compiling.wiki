@@ -10,11 +10,11 @@ I hope to soon add also support to Glut.
 
 Before you compile:
 
-  * Download the LcgTk library from [http://code.google.com/p/lcgtk/ LcgTk]
+  * Download the [http://code.google.com/p/lcgtk/ LcgTk] library.
 
   * Have Qt4 installed.
 
-  * Change the path to the LcgTk in the _pyramid-point-renderer.pro_ file.
+  * Change the path to the *LcgTk* in the _pyramid-point-renderer.pro_ file.
 
 In the pyramid-point-renderer type the following:
 
