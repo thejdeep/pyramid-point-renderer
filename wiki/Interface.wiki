@@ -1,0 +1,11 @@
+#summary Understanding the interface.
+
+= Introduction =
+
+The Qt interface provides the main interface with the application. It still contain some debug purposes only widgets, but it is fairly simple to understand.
+
+= Details =
+
+Since this is a _Beta_ version, not all boxes are clickable safe, that is, they are not always enabled and disabled appropiately with each kind of model.
+
+The Lod check box for example should only be used when a _.lod_ model has been loaded.
