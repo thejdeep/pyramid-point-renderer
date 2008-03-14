@@ -1,5 +1,4 @@
-#summary Understanding the interface.
-
+#summary Understanding the basic commands.
 = Introduction =
 
 The Qt interface provides the main interface with the application. It still contain some debug purposes only widgets, but it is fairly simple to understand.
