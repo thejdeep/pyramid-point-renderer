@@ -8,4 +8,20 @@ The Qt interface provides the main interface with the application. It still cont
 
 Since this is a _Beta_ version, not all boxes are clickable safe, that is, they are not always enabled and disabled appropiately with each kind of model.
 
+==Pyramid Point Rendering===
+
+
+==Models with Level-of-Detail Structure==
+
 The Lod check box for example should only be used when a _.lod_ model has been loaded.
+The point-based LOD rendering is still a work in progress, thus the reason for its significant bad performance compared to the plain point rendering.
+
+More details about this project can be found at:
+[http://www.lcg.ufrj.br/Projetos/object-textures]
+
+The color bars depicts the number/percentage of points being rendered at each of the four possible LOD levels, where the colors are respectively from coarsest to finest:
+Ruby - Turquoise - Gold - Silver
+
+==Ellipse Rasterization==
+
+This mode is still at an early construction stage. More info about this will be available soon.
