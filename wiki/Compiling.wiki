@@ -2,8 +2,9 @@
 
 = Introduction =
 
-Instructions on how to compile the code.
-
+The code is almost self-contained except mainly for the Qt4 dependecy,
+however, the application classes are independent of the interface, thus
+I hope to soon add also support to Glut.
 
 = Details =
 
