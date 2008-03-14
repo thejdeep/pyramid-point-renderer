@@ -18,7 +18,7 @@ The accepted _ply_ files must have two more attributes besides the vertex coordi
   * Normals
   * Radius
 
-These three attributes composes a _surfel_.
+These three attributes compose a _surfel_.
 
 ===Surfel Coordinates===
 
