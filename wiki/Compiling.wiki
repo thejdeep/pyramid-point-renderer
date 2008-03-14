@@ -7,8 +7,18 @@ Instructions on how to compile the code.
 
 = Details =
 
+Before you compile:
+
   * Download the LcgTk library from [http://code.google.com/p/lcgtk/]
 
   * Have Qt4 installed.
 
   * Change the path to the LcgTk in the _pyramid-point-renderer.pro_ file.
+
+In the pyramid-point-renderer type the following:
+
+  * qmake-qt4 (Generates the Makefile)
+
+  * make
+
+Now execute _*pyramid-point-renderer*_
