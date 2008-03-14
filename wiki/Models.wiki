@@ -8,3 +8,5 @@ Stanford PLY format.
 = Details =
 
 The repository already includeds the _ply.c_ and _ply.h_ files. These have been a little modified to compile without warnings. Unfornately the ply library was built specifically for 32-bits architectures, so if you are running on a 64-bits machine you'll not be able to use binary plys, only ascii plys.
+
+The accepted plys files must have two more attributes 
