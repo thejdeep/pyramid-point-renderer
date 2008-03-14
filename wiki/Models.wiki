@@ -30,4 +30,8 @@ Vertex normals may be computed using the ply library or by any other convenient 
 
 ===Surfel Radius===
 
-The radius of a surfel is its sampling  
+The radius of a surfel corresponds to its sampling distance. This can be computed using the k-nearest neighbors of a sample.
+
+===Precomputed Models===
+
+Some models with precomputed normals and radius can be found at [http://www.lcg.ufrj.br/Projetos/pbr].
