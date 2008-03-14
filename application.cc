@@ -7,16 +7,8 @@
  *
  **/
 
-#define GL_GLEXT_PROTOTYPES
-
 #include "file_io.h"
 #include <GL/glut.h>
-
-// #define CANVAS_WIDTH  1024
-// #define CANVAS_HEIGHT 1024
- 
-// #define CANVAS_WIDTH  512
-// #define CANVAS_HEIGHT 512
 
 /// Initialize global variables and opengl states
 Application::Application( void ) {
@@ -71,8 +63,6 @@ Application::Application( void ) {
   glDisable(GL_CULL_FACE);
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
-
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   camera->initLight();
 
@@ -548,8 +538,8 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //primitives.back().setRendererType( PYRAMID_POINTS );
-  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  primitives.back().setRendererType( PYRAMID_POINTS );
+  //  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
 
   num_objects = objects.size();
 
@@ -821,15 +811,12 @@ void Application::setPrefilter ( double s ) {
 }
 
 void Application::setPerVertexColor ( bool b, int object_id ) {
-    camera->switchKeyFrameInterpolationMode();
-
-
-//   vector< int >* prims = objects[object_id].getPrimitivesList();
-//   for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-//     primitives[*prim_it].setPerVertexColor(b);
-//     // Reset renderer type to load per vertex color or default color in vertex array
-//     primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
-//   }
+  vector< int >* prims = objects[object_id].getPrimitivesList();
+  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+    primitives[*prim_it].setPerVertexColor(b);
+    // Reset renderer type to load per vertex color or default color in vertex array
+    primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
+  }
 }
 
 void Application::setAutoRotate ( bool r ) {

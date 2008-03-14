@@ -78,21 +78,12 @@ typedef struct _keyframe {
 /// Keeps mouse information.
 class Camera {
 public:
-  
-//   /// Default constructor
-//   Camera() : screen_width (500), screen_height (500),
-// 	     zoom_factor(1.0), fov(50), z_near(1.0) z_far(100.0){
-//     view_mode = ORTHOGRAPHIC;
-//     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
-//     std::copy (identity, identity+16, rotation_matrix);
-//   }
-
+ 
   /// Constructor with screen dimensions
   Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				     zoom_factor(1.0), fov(1.0),
 				     z_near(0.01), z_far(100.0) {
     view_mode = PERSPECTIVE;
-    //    view_mode = ORTHOGRAPHIC;
 
 
     static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -303,14 +294,18 @@ private:
   // Mouse button
   int button_pressed;
 
+  // Array with key frames
   vector< keyframe > keyFrames;
 
   double frame_video;
 
+  bool keyFrameInterpolation;
+
+  /*********************************************************/
+  // Specific application variables to record on a key frame
   double frame_reconstruction_filter;
   double frame_prefilter;
-
-  bool keyFrameInterpolation;
+  /*********************************************************/
 
   double squaredDistance(const double [3], const double [3]) const;
 

@@ -1,6 +1,6 @@
 /**
  * Camera class controls all manipulation in 3D, including light sources.
- * Keeps mouse information.
+ * Also keeps mouse information.
  *
  * Author : Ricardo Marroquim
  * Date created : 27-01-07
@@ -15,7 +15,9 @@
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
-/// Initialize light properties
+/**
+ * Initialize light properties.
+ **/
 void Camera::initLight (void) {
   glEnable (GL_LIGHTING);
   glEnable (GL_LIGHT0);
@@ -37,6 +39,9 @@ void Camera::initLight (void) {
   glShadeModel(GL_SMOOTH);
 }
 
+/** 
+ * Computes camera properties while interpolating key frame.
+ **/
 void Camera::computeKeyFrame( void ) {
   unsigned int frame = (unsigned int)frame_video;
   double step = frame_video - frame;
@@ -75,7 +80,11 @@ void Camera::computeKeyFrame( void ) {
   }
 }
 
-/// Sets OpenGL camera
+/**
+ * Sets OpenGL camera.
+ * Initialize viewport and resets projection and modelview matrices.
+ * Translates and rotates camera direction and position.
+ **/
 void Camera::setView (void) {
 
   glViewport(0, 0, screen_width, screen_height);
@@ -114,7 +123,10 @@ void Camera::setView (void) {
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 }
 
-/// Resets the view mode properties
+/**
+ * Resets the view mode properties.
+ * Sets camera projection to perspective or orthographic.
+ **/
 void Camera::resetViewMode ( void ) {
 
   double w = (double)screen_width;
@@ -140,27 +152,31 @@ void Camera::resetViewMode ( void ) {
     glOrtho( -x, x, -y, y, z_near, z_far );
 }
 
-/// Switch between orthograpic and perspective modes
+/**
+ * Switch between orthographic and perspective modes
+ **/
 void Camera::switchViewMode ( void ) {
-
   if (view_mode == PERSPECTIVE)
     view_mode = ORTHOGRAPHIC;
   else
     view_mode = PERSPECTIVE;
   setView();
-  //  reshape(screen_width, screen_height);
 }
 
-/// Switch to given mode
-/// @param vm Given view mode
+/** 
+ * Switch to given view mode.
+ * @param vm Given view mode
+ **/
 void Camera::switchViewMode ( int vm ) {
   view_mode = vm;
   reshape(screen_width, screen_height);
 }
 
-/// Reshape func
-/// @param w New window width
-/// @param h New window height
+/**
+ * Reshape func
+ * @param w New window width
+ * @param h New window height
+ **/
 void Camera::reshape(int w, int h) {
 
   screen_width = w;
@@ -187,20 +203,26 @@ void Camera::reshape(int w, int h) {
   glLoadIdentity();
 }
 
-/// Starts a rotation procedure
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Starts camera rotation procedure.
+ * Stores initial mouse position.
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ **/
 void Camera::startRotation(int x, int y) { 
-
-  // Save initial click
   mouse_start[0] = x;
   mouse_start[1] = screen_height - y;
   mouse_start[2] = 0.0;
 }
 
-/// Starts a rotation procedure
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Starts a rotation procedure for a given object
+ * other than the camera itself.
+ * @param x Mouse screen x coordinate.
+ * @param y Mouse screen y coordinate.
+ * @param q Object's rotation quaternion.
+ * @param obj_center Position of object being rotated.
+ **/
 void Camera::startQuatRotation(int x, int y, Quat* q, double obj_center[3]) {
 
   q_last = *q;
@@ -208,22 +230,24 @@ void Camera::startQuatRotation(int x, int y, Quat* q, double obj_center[3]) {
   double screen_obj_center[3];
   projectToScreen(obj_center, screen_obj_center);
 
-  // Save initial click
   mouse_start[0] = x - screen_obj_center[0];
   mouse_start[1] = screen_height - (y - screen_obj_center[1]);
   mouse_start[2] = 0.0;
-
 }
 
-/// Ends a rotation procedure
-void Camera::endRotation() {
+/**
+ * Finalizes rotation procedure.
+ **/
+void Camera::endRotation( void ) {
   q_last = q_rot;
 }
 
-/// Maps a clicked point on the screen to the arcball sphere
-/// @param p Given point
-/// @param Mapped point on sphere
-/// @param Sphere radius
+/**
+ * Maps a clicked point on the screen to the arcball sphere
+ * @param p Given point
+ * @param Mapped point on sphere
+ * @param Sphere radius
+ **/
 void Camera::mapToSphere(const double p_screen[3], double p[], const double r) const {
 
   p[0] = 2.0 *(p_screen[0]/((double)screen_width)) - 1.0;
@@ -245,6 +269,11 @@ void Camera::mapToSphere(const double p_screen[3], double p[], const double r) c
 
 }
 
+/**
+ * Projects a given point in world coordinates to screen coordinates.
+ * @param p Given point in world coordinates.
+ * @param screen_pos Screen position of given point.
+ **/
 void Camera::projectToScreen(double p[3], double* screen_pos) {
 
   GLdouble pos_x, pos_y, pos_z;
@@ -273,15 +302,12 @@ void Camera::projectToScreen(double p[3], double* screen_pos) {
 
 }
 
-void Camera::rotate() {
-//   Quat new_rot (0.001, 0.0, 0.0, 1.0);
-  
-//   // Multiply local rotation by total rotation (order matters!)
-//   q_rot = new_rot.composeWith(q_rot);
-  // Save initial click
+/**
+ * Auto-rotate camera.
+ **/
+void Camera::rotate( void ) {
 
   q_last = q_rot;
-  //  Quat new_rot (0.9999, 0.005, 0.001, 0.003);
   Quat new_rot (0.00, 0.001, 0.00003, 0.999);
   
   // Multiply local rotation by total rotation (order matters!)
@@ -290,9 +316,11 @@ void Camera::rotate() {
   q_last = q_rot;
 }
 
-/// Rotate world
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Rotate world
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ **/
 void Camera::rotate(int x, int y) {
 
   mouse_curr[0] = x;
@@ -317,9 +345,13 @@ void Camera::rotate(int x, int y) {
 
 }
 
-/// Rotate given quaternion
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Rotate quaternion of an object other than the camera.
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ * @param q Object's rotation quaternion.
+ * @param obj_center Position of object being rotated.
+ **/
 void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
 
   double screen_obj_center[3];
@@ -347,11 +379,13 @@ void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
   q->normalize();
 }
 
-/// Computes inverse rotation for eye position,
-/// composes given rotation with current camera rotation.
-/// Used for back face culling
-/// @param q Given rotation.
-/// @param new_eye New computed eye position.
+/**
+ * Computes inverse rotation for eye position,
+ * composes given rotation with current camera rotation.
+ * Used to enable back face culling before projecting the vertices.
+ * @param q Given rotation.
+ * @param new_eye New computed eye position.
+ **/
 void Camera::computeEyePosition(Quat q, double *new_eye) {
   Quat q_new_rot = q_rot;
   q_new_rot = q_new_rot.composeWith(q);
@@ -368,26 +402,27 @@ void Camera::computeEyePosition(Quat q, double *new_eye) {
   q_new_rot.rotate(new_eye);
 }
 
-/// Sets mouse button click position
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Sets mouse button click position
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ **/
 void Camera::mouseSetClick(int x, int y) {
   mouse_start[0] = x;
   mouse_start[1] = screen_height - y;
   mouse_start[2] = 0.0;
 }
 
-/// Translate on z axe.
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/*
+ * Translate on z axe.
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ **/
 void Camera::zooming(int x, int y) {
 
   mouse_curr[0] = x;
   mouse_curr[1] = screen_height - y;
   mouse_curr[2] = 0.0;
-
-//   double diff = mouse_curr[1] - mouse_start[1];
-//   zoom_factor += diff / screen_height;
 
   position[2] -= 10.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
@@ -396,10 +431,11 @@ void Camera::zooming(int x, int y) {
   mouse_start[2] = mouse_curr[2];
 }
 
-
-/// Translate camera position
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Translate camera position
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+**/
 void Camera::translate (int x, int y) {
 
   mouse_curr[0] = x;
@@ -414,9 +450,13 @@ void Camera::translate (int x, int y) {
   mouse_start[2] = mouse_curr[2];
 }
 
-/// Translate a given vector
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Translate a given vector representing an object position other
+ * than the camera.
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ * @param vec Object's position vector.
+ **/
 void Camera::translateVec (int x, int y, double* vec) {
 
   mouse_curr[0] = x;
@@ -444,17 +484,23 @@ void Camera::translateVec (int x, int y, double* vec) {
   vec[2] += rotVec[2];
 }
 
+/**
+ * Updates the mouse coordinates.
+ **/
 void Camera::updateMouse ( void ) {
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];
   mouse_start[2] = mouse_curr[2];
-  
 }
 
-/// Translate a given vector
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Translate a given vector on the z axis (zoom),
+ * for objects other than the camera.
+ * @param x Mouse screen x coordinate.
+ * @param y Mouse screen y coordinate.
+ * @param vec Object's position vector.
+**/
 void Camera::zoomingVec (int x, int y, double* vec) {
 
   mouse_curr[0] = x;
@@ -482,9 +528,11 @@ void Camera::zoomingVec (int x, int y, double* vec) {
 }
 
 
-/// Translate ligth position
-/// @param x Mouse screen x coordinate
-/// @param y Mouse screen y coordinate
+/**
+ * Translate ligth position
+ * @param x Mouse screen x coordinate
+ * @param y Mouse screen y coordinate
+ **/
 void Camera::lightTranslate (int x, int y) {
 
   mouse_curr[0] = x;
@@ -514,8 +562,10 @@ double Camera::squaredDistance(const double p[3], const double q[3]) const {
   return vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2];
 }
 
-/// Returns the rotation matrix
-/// @return rotation matrix
+/**
+ * Returns the rotation matrix
+ * @return rotation matrix
+**/
 const double* Camera::rotationMatrix ( void ) {
 
   double n, s;
