@@ -8,8 +8,12 @@ The Qt interface provides the main interface with the application. It still cont
 
 Since this is a _Beta_ version, not all boxes are clickable safe, that is, they are not always enabled and disabled appropiately with each kind of model.
 
-==Pyramid Point Rendering===
+==Pyramid Points===
 
+This is the basic Pyramid Point Rendering as described in:
+[http://www.lcg.ufrj.br/Projetos/pbr]
+
+==Tree Rendering==
 
 ==Models with Level-of-Detail Structure==
 
