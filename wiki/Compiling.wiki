@@ -14,7 +14,7 @@ Before you compile:
 
   * Have Qt4 installed.
 
-  * Change the path to the *LcgTk* in the _pyramid-point-renderer.pro_ file.
+  * Change the *LcgTk* path in the _pyramid-point-renderer.pro_ file.
 
 In the pyramid-point-renderer type the following:
 
