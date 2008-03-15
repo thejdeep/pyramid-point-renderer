@@ -104,8 +104,8 @@ void main (void) {
 	float ellipse_phi = ellipse.y * pi;
 	vec3 normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
 
-	//float dist_test = pointInEllipse(local_displacement.xy, ellipse.w, normal);
-	float dist_test = pointInCircle(local_displacement.xy, ellipse.w);
+	float dist_test = pointInEllipse(local_displacement.xy, ellipse.w, normal);
+	//float dist_test = pointInCircle(local_displacement.xy, ellipse.w);
 	
 	// Ellipse in range
 	if (dist_test >= 0.0) {

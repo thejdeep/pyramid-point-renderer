@@ -140,7 +140,7 @@ class Application
 
   PointBasedRender *point_based_render;
 
-  Camera * camera;
+  Camera *camera;
 
   int material_id;
   vector< int > selected_objs;
