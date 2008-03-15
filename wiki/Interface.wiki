@@ -27,7 +27,9 @@ More details about this project can be found at:
 The color bars depicts the number/percentage of points being rendered at each of the four possible LOD levels, where the colors are respectively from coarsest to finest:
 Ruby - Turquoise - Gold - Silver
 
-When the *Write LOD* option under the *File* menu is selected, a file with the same name as the read model with an extra *.lod* at the end is created with the Level-of-Detail structure. Right now a _Kd-Tree_ is used to merge the splats and create the resolution levels, but a better and more robust version with a _Point Octree_ is under development and will soon be incorporated to the system. 
+When the *Write LOD* option under the *File* menu is selected, a file with the same name as the read model with an extra _.lod_ at the end is created with the Level-of-Detail structure. A _.lod_ is ready to be loaded as any other files without the need to recreate the multi-resolution structure.
+
+At the present moment a _Kd-Tree_ is used to merge the splats and create the resolution levels, but a better and more robust version with a _Point Octree_ is under development and will soon be incorporated to the system. 
 
 *Note* that the code with the _Kd-Tree_ is a very weak implementation of the multi-resolution structure and doesn't work for all models. It was quickly implemented just to test the LOD code using the geometry shader. This issues will be corrected with the new version.
 
