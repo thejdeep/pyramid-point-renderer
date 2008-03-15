@@ -68,7 +68,7 @@ void Camera::initLight (void) {
   glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
 
   glShadeModel(GL_SMOOTH);
 }

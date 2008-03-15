@@ -54,7 +54,7 @@ void main (void) {
 
       normal = normalize(normal);
 
-      color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient;
+      color = ambient[material] * gl_LightSource[0].ambient * gl_LightModel.ambient;
 
       float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
 

@@ -49,11 +49,11 @@ class Primitives
 {
  public:
   
-  Primitives() : color_model(0), material(0) { }
+  Primitives() : color_model(0), material(0), has_lod(0) { }
 
-  Primitives(int id_num, GLfloat t) : id(id_num), type(t), color_model(0), material(0) {}
-      
-  Primitives(int id_num) : id(id_num), color_model(0), material(0) {}
+  Primitives(int id_num, GLfloat t) : id(id_num), type(t), color_model(0), material(0), has_lod(0) {}
+    
+  Primitives(int id_num) : id(id_num), color_model(0), material(0), has_lod(0) {}
       
   ~Primitives() {}
 
@@ -84,6 +84,9 @@ class Primitives
 
   void writeFileLOD ( const char* fn );
   void readFileLOD ( const char* fn );
+
+  void setLodStructure( bool l ) { has_lod = l; }
+  bool hasLod( void ) { return has_lod; }
 
   inline uint numPrimitivesIn(void) { return numPatches; }
   inline uint numPrimitivesLOD(void) { return numVertsArray; }
@@ -153,9 +156,6 @@ class Primitives
   /// Indices vector for vertex arrays for lines
   GLuint *indices;
 
-  // Vector of surfels belonging to this object.
-  //  vector<Surfel> surfels;
-
   // Vector of triangles belonging to this object.
   vector<Triangle> triangles;
 
@@ -177,6 +177,9 @@ class Primitives
   vector<GLuint> surfels_per_level;
 
   KdTree3D * kdTree;
+
+  // Flag indicating if primitive has LOD structure or not
+  bool has_lod;
 
 };
 

@@ -342,6 +342,7 @@ int PyramidPointRenderLod::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+
   shader_projection->set_uniform("vertex_buffer", 4);
   shader_projection->set_uniform("normal_buffer", 5);
   shader_projection->set_uniform("total_surfels", (GLint)num_primitives);

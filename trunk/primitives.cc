@@ -22,24 +22,6 @@ GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0}};
 
-// For apple tree
-// GLfloat obj_colors[8][4] = {{0.2, 1.0, 0.2, 1.0},
-// 			    {0.7, 0.2, 0.2, 0.1},
-// 			    {0.7, 0.2, 0.2, 0.1},
-// 			    {0.2, 1.0, 0.2, 1.0},
-// 			    {0.7, 0.2, 0.2, 1.0},
-// 			    {0.7, 0.2, 0.2, 1.0},
-// 			    {0.1, 0.5, 0.1, 1.0},
-// 			    {0.35, 0.1, 0.1, 0.7}};
-
-// GLfloat obj_colors[8][4] = {{0.3, 0.1, 0.1, 1.0},
-// 			    {0.1, 0.1, 0.3, 1.0},
-// 			    {0.3, 0.1, 0.1, 1.0},
-// 			    {0.8, 0.7, 0.2, 0.3},
-// 			    {0.35, 0.1, 0.1, 0.5},
-// 			    {0.1, 0.5, 0.1, 0.6},
-// 			    {0.35, 0.1, 0.1, 0.7},
-// 			    {0.1, 0.5, 0.1, 0.8}};
 
 /**
  * Render object using designed rendering system.
@@ -177,7 +159,10 @@ void Primitives::render ( void ) {
     glColor4f(1.0, 1.0, 1.0, 1.0);
    
     glCallList(triangleDisplayList);
-   
+
+    glDisable(GL_CULL_FACE);
+    glShadeModel(GL_FLAT);
+    
   }
   else if (renderer_type == LINES) {
     glDisable(GL_BLEND);
@@ -191,6 +176,9 @@ void Primitives::render ( void ) {
     glLineWidth(1.0);
 
     glCallList(triangleDisplayList);
+
+    glDisable(GL_CULL_FACE);
+    glShadeModel(GL_FLAT);
   }
 }
 
@@ -211,10 +199,15 @@ void Primitives::setRendererType ( int rtype ) {
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
   glDeleteBuffers(1, &vertex_buffer);
   glDeleteBuffers(1, &color_buffer);
   glDeleteBuffers(1, &normal_buffer);
+  glDeleteBuffers(1, &vertex_patches_buffer);
+  glDeleteBuffers(1, &normal_patches_buffer);
+  glDeleteBuffers(1, &surfels_per_level_patches_buffer);
+
   glDeleteLists(triangleDisplayList, 1);
 
   if (renderer_type == PYRAMID_POINTS)
@@ -635,10 +628,8 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
   obj_colors[id][3] = type;
-  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
+  //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
 
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels[0].at( it->verts[0] ).position();
@@ -1031,25 +1022,24 @@ void Primitives::setTrianglesDisplayList( void ) {
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
 
-  GLfloat black[] = {0.6, 0.6, 0.6, 1.0};
+  //GLfloat black[] = {0.6, 0.6, 0.6, 1.0};
 
-  surfelVectorIter it_s = surfels[0].begin();
-
+  //surfelVectorIter it_s = surfels[0].begin();
 //   GLfloat color[] = {(GLfloat)(it_s->color().x()),
 // 		     (GLfloat)(it_s->color().y()), 
 // 		     (GLfloat)(it_s->color().z())};
 
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
 
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
-  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 50);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
+//   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 50);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+ 
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels[0].at( it->verts[0] ).position();
     p[1] = surfels[0].at( it->verts[1] ).position();
@@ -1061,13 +1051,13 @@ void Primitives::setTrianglesDisplayList( void ) {
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
       //      glColor4fv(obj_colors[id]);
-      glNormal3f(-n[i].x(), -n[i].y(), -n[i].z());
+      glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
     }
     glEnd();
   }
  
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, black);
+  //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, black);
 
   glEndList();
 }
@@ -1083,7 +1073,12 @@ void Primitives::setLinesDisplayList( void ) {
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
 
-  glPointSize(5.0);
+  glPointSize(2.0);
+
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
     p[0] = surfels[0].at( it->verts[0] ).position();

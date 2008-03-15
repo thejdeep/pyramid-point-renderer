@@ -203,11 +203,17 @@ void pprMainWindow::on_checkBoxLODColors_stateChanged( int state ) {
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
   application->changeRendererType ( index );
+
+  // Get the renderer type of the object to make sure it was possible to change the renderer type
+  int id = (modelsTreeWidget->currentItem()->text(0)).toInt();
+  int rtype = application->getRendererType( id );
+  if (rtype > 0)
+    comboRendererType->setCurrentIndex( rtype );
+
   widget->updateGL();
 }
 
 void pprMainWindow::on_comboColors_currentIndexChanged( int index ) {
-  //  application->changeMaterial ( index  );
   application->changeSelectedObjsMaterial ( index );
   widget->updateGL();
 }

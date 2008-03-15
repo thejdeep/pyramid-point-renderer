@@ -14,10 +14,12 @@
 // properly. This is necessary for the color bars numbers.
 #include <GL/glut.h>
 
-/// Initialize global variables and opengl states
+/**
+ * Initialize opengl and application state variables.
+ **/
 Application::Application( void ) {
 
-  // Initialize camera with window canvas size
+  // Initialize camera
   camera = new Camera(CANVAS_WIDTH + CANVAS_WIDTH/16,
 		      CANVAS_HEIGHT + CANVAS_HEIGHT/16);
 
@@ -217,7 +219,7 @@ void Application::draw(void) {
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
       Primitives * prim = &(primitives[*prim_it]);
       int type = prim->getRendererType();
-      if ((type == TRIANGLES) || (type == LINES))
+      if ((type != NONE) && ((type == TRIANGLES) || (type == LINES)))
 	prim->render();
     }
   }
@@ -256,11 +258,13 @@ void Application::renderLODColorBars( void ) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  /****/
-
-  int total;
-  if (lods_perc)
-    total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
+  int total = surfs_per_level[4];;
+  if (lods_perc) {
+    if (render_mode == PYRAMID_POINTS_LOD)
+      total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
+    else if (render_mode == RASTERIZE_ELLIPSES)
+      total = surfs_per_level[0] + surfs_per_level[1];
+    }
   else
     total = surfs_per_level[4]/2;
   double x_max = 0.0;
@@ -314,9 +318,9 @@ void Application::renderLODColorBars( void ) {
   glVertex2f (0.0, 0.55);
   glEnd();
   /****/
+
   //  glColor3f(1.0, 1.0, 1.0);
   glColor3f(0.0, 0.0, 0.0);
-
 
   char text[5][20];
   if (lods_perc) {
@@ -403,20 +407,29 @@ void Application::changePrimitivesRendererType( point_render_type_enum type ) {
   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
     vector< int >* prims = objects[*it].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-      primitives[*prim_it].setRendererType(type);
+      if ((type != PYRAMID_POINTS_LOD) || (primitives[*prim_it].hasLod()))
+	primitives[*prim_it].setRendererType(type);
   }
   // Resets the color material
   changeMaterial();
 }
 
 void Application::changeRendererType( int type ) {
-  if (type != PYRAMID_LINES)
+
+  if (selected_objs.size() == 0)
+    return;
+
+  if ((render_mode != PYRAMID_LINES) && (type != PYRAMID_LINES)) {
     changePrimitivesRendererType ( (point_render_type_enum)type );
-  render_mode = type;
-  createPointRender( );
+    render_mode = type;
+    createPointRender( );
+  }
 }
 
 void Application::createPointRender( void ) {
+
+  if (render_mode == NONE)
+    return;
 
   delete point_based_render;
 
@@ -431,9 +444,7 @@ void Application::createPointRender( void ) {
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == RASTERIZE_ELLIPSES)
     point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
-//   else if (render_mode == PYRAMID_TRIANGLES)
-//     point_based_render = new PyramidTriangleRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);
-  else if (render_mode == TRIANGLES)
+  else if ((render_mode == TRIANGLES) || (render_mode == LINES))
     point_based_render = new TriangleRenderer();
 
   assert (point_based_render);
@@ -453,7 +464,6 @@ int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
   // Create a new primitive from given file
   
   int num_objs = readObjsFiles (filename, &primitives, &objects, objs_ids, camera);
-  cout << "pass" << endl;
 
   if ( num_objs > 0  ) {
 
@@ -562,6 +572,7 @@ int Application::readLodFile ( const char * filename ) {
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
   primitives.back().readFileLOD(lodFilename);
+  primitives.back().setLodStructure(1);
   
 //   } else {
 
@@ -750,6 +761,9 @@ void Application::setSelectedObject ( int id ) {
 
 int Application::getRendererType ( int object_id ) {
 
+  if ((object_id < 0) || (object_id >= (int)objects.size()))
+    return -1;
+
     // Projects to image plane surfels of all primitives for this object
   vector< int >* prims = objects[object_id].getPrimitivesList();
   Primitives * prim = &(primitives[prims->front()]);
@@ -831,7 +845,8 @@ void Application::changeSelectedObjsMaterial( int mat ) {
       primitives[*prim_it].setMaterial( mat );
       primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
     }
-  }  
+  }
+  changeMaterial(mat);
 }
 
 void Application::setLodColors ( bool c ) {

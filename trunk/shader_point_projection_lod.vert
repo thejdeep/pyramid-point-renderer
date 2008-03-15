@@ -14,6 +14,7 @@
 
 //--- Uniforms ---
 uniform vec3 eye;
+uniform int back_face_culling;
 
 //--- Varyings ---
 varying out vec3 normal_vec_vertex;
@@ -29,7 +30,7 @@ void main() {
 
   // angle between view vector and normal
   float cos_alpha = dot(normalize(gl_Vertex.xyz - eye), normal_vec_vertex);
-  if ( cos_alpha < -1.20 ) {
+  if ( (back_face_culling == 1) && (cos_alpha < 0.0) ) {
 
     radius_depth_w_vertex.x = 0.0;
     gl_Position = vec4(1.0);
@@ -52,7 +53,6 @@ void main() {
     ep *= sin_alpha / d;
 
     gl_Position = v;
-
   }
 
 }
