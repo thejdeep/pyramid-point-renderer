@@ -40,6 +40,8 @@ Some models with precomputed normals and radius can be found at [http://www.lcg.
 
 ==LOD Models==
 
-Models containing the Level-of-Detail structure can be generated from the *Write LOD* option in the *File* menu, or loaded directed. Lod model files must contain the extension _.lod_. For more info
+Models containing the Level-of-Detail structure can be generated from the *Write LOD* option in the *File* menu, or loaded directed. Lod model files must contain the extension _.lod_. For more info see [Interface].
 
 ==Tree Models==
+
+Tree models are line-based representations converted from the original triangulated models. They must contain the extension _.pol_. For more info see [Interface].
