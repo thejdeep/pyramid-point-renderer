@@ -17,7 +17,7 @@ This is the basic Pyramid Point Rendering as described in:
 This mode is specific for rendering tree models. The interpolation algorithm was adapted to handle lines as well as points. For more details refer to the article to be published on *Computer & Graphics*:
 [http://dx.doi.org/10.1016/j.cag.2008.01.011]
 
-The tree rendering mode still has a few minor bugs that should be treated in a near future.
+The tree rendering mode still has a few minor bugs that will be treated in a near future.
 
 ==Models with Level-of-Detail Structure==
 
