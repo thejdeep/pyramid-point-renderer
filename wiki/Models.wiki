@@ -45,3 +45,10 @@ Models containing the Level-of-Detail structure can be generated from the *Write
 ==Tree Models==
 
 Tree models are line-based representations converted from the original triangulated models. They must contain the extension _.pol_. For more info see [Interface].
+
+==Scenes==
+
+Files with extensions _.scn_ contains one or more models with position, rotation, material and renderer type information. It also stores the camera's position and direction as well as light position. A scene file can be loaded as any other kind of file from the *Open* file menu option.
+
+After setting up the models a scene file can be created by selecting the option *Write Scene* from the *File* menu. For the moment it always creates a file named *scene.scn* that should be renamed to avoid overwriting.
+
