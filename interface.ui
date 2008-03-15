@@ -74,7 +74,7 @@
    </palette>
   </property>
   <property name="windowTitle" >
-   <string>MainWindow</string>
+   <string>Point Based Rendering</string>
   </property>
   <widget class="QWidget" name="centralwidget" >
    <widget class="openGLWidget" native="1" name="widget" >

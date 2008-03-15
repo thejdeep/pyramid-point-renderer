@@ -82,6 +82,10 @@ class PointBasedRender
      depth_test = d;
    }
 
+   void setBackFaceCulling( const bool b ) {
+     back_face_culling = b;
+   }
+
    void setEllipticalWeight( const bool w ) {
      elliptical_weight = w;
    }
@@ -115,6 +119,9 @@ class PointBasedRender
 
    /// Flag to turn on/off depth test
    bool depth_test;
+
+   /// Flag to turn on/off back_face_culling
+   bool back_face_culling;
 
    /// Flag to turn on/off elliptical weight
    bool elliptical_weight;

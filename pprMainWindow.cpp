@@ -88,6 +88,8 @@ void pprMainWindow::fileOpen( void )
 
   if (filetype.compare("lod") == 0)
     checkBoxLOD->setCheckState( (Qt::CheckState) 2 );
+
+
 }
 
 /**

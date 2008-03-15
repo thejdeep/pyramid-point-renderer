@@ -6,6 +6,7 @@
 // stores output on texture
 
 uniform vec3 eye;
+uniform int back_face_culling;
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
 
@@ -14,8 +15,7 @@ void main(void)
 
 /*   vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0); */
 /*   normal_vec = normalize(gl_NormalMatrix * gl_Normal); */
-
-  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < 0.0 ) {
+  if ( (back_face_culling) && (dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < 0.0 )) {
 
   // back face culling (rotated eye, fixed point)  
   //  if ( ((gl_Color.a > 0.0) ) &&

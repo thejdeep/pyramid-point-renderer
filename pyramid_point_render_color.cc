@@ -94,10 +94,12 @@ void PyramidPointRenderColor::rasterizePixels(pixels_struct dest, pixels_struct 
 
       if (framebuffer_state != FBS_SYSTEM_PROVIDED)
 	{
-	  glViewport(0, 0, canvas_width, canvas_height);
+	  glViewport(0, 0, canvas_width + 2*canvas_border_width, 
+		     canvas_height + 2*canvas_border_height);
 	  glMatrixMode(GL_PROJECTION);
 	  glLoadIdentity();
-	  gluOrtho2D(0.0, canvas_width, 0.0, canvas_height);
+	  gluOrtho2D(0.0, canvas_width + 2*canvas_border_width, 
+		     0.0, canvas_height + 2*canvas_border_height);
 
 	  glMatrixMode(GL_MODELVIEW);
 	  glLoadIdentity();
@@ -224,8 +226,6 @@ void PyramidPointRenderColor::rasterizePixels(pixels_struct dest, pixels_struct 
 	  return; /* callback function has done the rendering */
 	}
     }
-
-
 
   /* set vertex and texture coordinates and rasterize */
   {
@@ -361,6 +361,7 @@ int PyramidPointRenderColor::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+  shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
 
   if (use_lod) {
     shader_projection->set_uniform("vertex_buffer", 6);

@@ -8,16 +8,20 @@
  **/
 
 #include "file_io.h"
+
+// Glut was included only because the Qt function to
+// write on the screen contains bugs and is not working
+// properly. This is necessary for the color bars numbers.
 #include <GL/glut.h>
 
 /// Initialize global variables and opengl states
 Application::Application( void ) {
 
   // Initialize camera with window canvas size
-  camera = new Camera(CANVAS_WIDTH + 2*CANVAS_BORDER_WIDTH, 
-		      CANVAS_HEIGHT + 2*CANVAS_BORDER_HEIGHT);
+  camera = new Camera(CANVAS_WIDTH + CANVAS_WIDTH/16,
+		      CANVAS_HEIGHT + CANVAS_HEIGHT/16);
 
-  render_mode = GL_RENDER;
+  render_mode = 0;
 
   max_surfs_per_level[0] = max_surfs_per_level[1] = 
     max_surfs_per_level[2] = max_surfs_per_level[3] = 0;
@@ -26,8 +30,6 @@ Application::Application( void ) {
 
   number_surfels = 0;
   fps_loop = 0;
-  active_shift = 0;
-  analysis_filter_size = 0;
 
   lods_perc = true;
 
@@ -36,7 +38,6 @@ Application::Application( void ) {
   depth_culling = true;
   rotating = 0;
 
-  show_screen_info = true;
   show_points = false;
   show_color_bars = false;
   show_splats = 1;
@@ -71,6 +72,13 @@ Application::Application( void ) {
   glEnable(GL_NORMALIZE);
   CHECK_FOR_OGL_ERROR()	;
 
+}
+
+Application::~Application( void ) {
+  objects.clear();
+  primitives.clear();
+  delete point_based_render;
+  delete camera;
 }
 
 /// Renders a surfel as a opengl point primitive
@@ -168,11 +176,12 @@ void Application::draw(void) {
 	  point_based_render->useLOD( false );
 
 	prim->eye = Point(eye[0], eye[1], eye[2]);
-	//	prim->countNumVertsLOD(&surfs_per_level[0]);
+	if (type == PYRAMID_POINTS_LOD)
+	  prim->countNumVertsLOD(&surfs_per_level[0]);
 	point_based_render->projectSamples( prim );
 
-	if (show_color_bars)
-	{
+	if ((show_color_bars) && (type == RASTERIZE_ELLIPSES))
+	{	   
 	  point_based_render->getDataProjectedPixels( &surfs_per_level[0] );
 	  if (surfs_per_level[0] > max_surfs_per_level[0])
 	    max_surfs_per_level[0] = surfs_per_level[0];
@@ -251,7 +260,7 @@ void Application::renderLODColorBars( void ) {
 
   int total;
   if (lods_perc)
-    total = surfs_per_level[0] + surfs_per_level[1];// + surfs_per_level[2] + surfs_per_level[3];
+    total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
   else
     total = surfs_per_level[4]/2;
   double x_max = 0.0;
@@ -366,35 +375,7 @@ void Application::renderLODColorBars( void ) {
 /// @param w New window width
 /// @param h New window height
 void Application::reshape(int w, int h) {
-
-  //  glutReshapeWindow (w, h);
-
   camera->reshape(w, h);
-
-  //  glutPostRedisplay();
-}
-
-/// Unproject a point from screen coordinates to world coordinates
-/// @param p Point to be unprojected
-/// @return Point in world coordinates
-Point Application::unproject (const Point& p) {
-
-  GLint viewport[4];
-  GLdouble modelview[16];
-  GLdouble projection[16];
-  GLfloat winX, winY, winZ;
-  GLdouble posX, posY, posZ;
-      
-  glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-  glGetDoublev( GL_PROJECTION_MATRIX, projection );
-  glGetIntegerv( GL_VIEWPORT, viewport );
-
-  winX = (float)p.x();
-  winY = (float)viewport[3] - (float)p.y();      
-  winZ = (float)p.z();
-  gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-    
-  return Point (posX, posY, posZ);
 }
 
 /**
@@ -429,32 +410,39 @@ void Application::changePrimitivesRendererType( point_render_type_enum type ) {
 }
 
 void Application::changeRendererType( int type ) {
-  changePrimitivesRendererType ( (point_render_type_enum)type );
-  if (type == RASTERIZE_ELLIPSES)
-    createPointRender( 2 );
-  else
-    createPointRender( 0 );
+  if (type != PYRAMID_LINES)
+    changePrimitivesRendererType ( (point_render_type_enum)type );
+  render_mode = type;
+  createPointRender( );
 }
 
-void Application::createPointRender( int type ) {
+void Application::createPointRender( void ) {
 
-  if (point_based_render)
-    delete point_based_render;
+  delete point_based_render;
 
-  if (type == 0) {
+  if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
+      (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)){
     if (color_model)
       point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
-  else if (type == 1) {
+  else if (render_mode == PYRAMID_LINES)
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
-  else if (type == 2) {
+  else if (render_mode == RASTERIZE_ELLIPSES)
     point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
+//   else if (render_mode == PYRAMID_TRIANGLES)
+//     point_based_render = new PyramidTriangleRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);
+  else if (render_mode == TRIANGLES)
+    point_based_render = new TriangleRenderer();
 
   assert (point_based_render);
+
+  if ((render_mode == PYRAMID_TRIANGLES) || (render_mode == PYRAMID_HYBRID))
+    point_based_render->setBackFaceCulling(0);
+  else
+    point_based_render->setBackFaceCulling(1);
+
 
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
@@ -479,7 +467,9 @@ int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
       }
     }
 
-    createPointRender( 0 );
+    render_mode = PYRAMID_POINTS;
+
+    createPointRender( );
 
     return num_objs;
   }
@@ -504,8 +494,9 @@ int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
       }
     }
 
-    //  if (!point_based_render)
-    createPointRender( 1 );
+    render_mode = PYRAMID_LINES;
+
+    createPointRender( );
 
     return num_objs;
   }
@@ -520,8 +511,6 @@ int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
  * @return Id number of created object.
  **/
 int Application::readFile ( const char * filename ) {
-  // read the models passed as command line arguments
-  //  int read = readFile(argc, argv, &primitives, &objects);
 
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
@@ -546,8 +535,10 @@ int Application::readFile ( const char * filename ) {
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
   
+  render_mode = PYRAMID_POINTS;
+
   //  if (!point_based_render)
-  createPointRender( 0 );
+  createPointRender( );
  
   return id;
 }
@@ -613,10 +604,9 @@ int Application::readLodFile ( const char * filename ) {
   cout << "primitives : " << primitives.size() << endl;
   cout << "number of surfels : " << number_surfels << endl;
   
-  //  if (!point_based_render)
-  createPointRender( 0 );
+  render_mode = PYRAMID_POINTS_LOD;
 
-  cout << "created point renderer" << endl;
+  createPointRender( );
 
   return id;
 }
@@ -677,13 +667,6 @@ int Application::writeLodFile ( void ) {
 /// @param y Y coordinate of mouse click
 void Application::mouseLeftButton(int x, int y) {
   
-//   if (glutGetModifiers() == GLUT_ACTIVE_SHIFT)
-//     active_shift = 1;
-//   else
-//     active_shift = 0;
-
-  //Point click = unproject(Point (x, y, 0.0));
-
   if (selected_objs.empty())
     camera->startRotation(x, y);
   else {

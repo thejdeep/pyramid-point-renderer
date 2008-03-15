@@ -35,7 +35,10 @@
 #include "pyramid_point_render_color.h"
 #include "pyramid_point_render_lod.h"
 #include "pyramid_point_render_trees.h"
+#include "pyramid_triangle_renderer.h"
 #include "ellipse_rasterization.h"
+#include "triangle_renderer.h"
+
 
 #include "object.h"
 #include "camera.h"
@@ -48,17 +51,12 @@
 
 #define CANVAS_WIDTH  768
 #define CANVAS_HEIGHT 768
-#define CANVAS_BORDER_WIDTH  24
-#define CANVAS_BORDER_HEIGHT 24
-
 
 class Application
 {
  private :
 
-  void createPointRender( int type );
-  //void screenText( int w, int h );
-  Point unproject ( const Point& p );
+  void createPointRender( void );
   void glVertex ( const Surfel * s );
   void glVertex ( surfelVectorIter it );
   void glVertex ( Point p );
@@ -69,7 +67,7 @@ class Application
  public :
 
   Application();
-  ~Application() {};
+  ~Application();
 
   void setColorBars ( bool c );
   void renderLODColorBars( void );
@@ -152,9 +150,13 @@ class Application
   vector<Primitives> primitives;
 
   // Vector of point samples
-  std::vector<Surfel> surfels;
+  //std::vector<Surfel> surfels;
   // Vector of triangles with indices to surfels
-  std::vector<Triangle> triangles;
+  //std::vector<Triangle> triangles;
+
+  // Determines which rendering class to use (Pyramid points, pyramid lines for tree rendering, ellipse rasterization ...)
+  // see primitives.h for the complete list (point_render_type_enum).
+  GLint render_mode;
 
   /*****Visual interface global vars*****/
   surfelVectorIter selected_surfel;
@@ -163,24 +165,15 @@ class Application
   double reconstruction_filter_size;
   double prefilter_size;
 
-  GLint render_mode;
-  bool show_kd_tree;
   bool show_points;
   bool show_color_bars;
   int show_splats;
-  bool show_screen_info;
   bool lods_perc;
 
   bool elliptical_weight;
   bool depth_culling;
   bool rotating;
   bool color_model;
-
-  bool active_shift;
-
-  int analysis_filter_size;
-
-  double max_radius;
 
   // Frames per sencond and Surfels per second
   double sps, fps;
