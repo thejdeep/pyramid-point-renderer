@@ -34,4 +34,4 @@ The radius of a surfel corresponds to its sampling distance. This can be compute
 
 ===Precomputed Models===
 
-Some models with precomputed normals and radius can be found at [http://www.lcg.ufrj.br/Projetos/pbr]. A few smaller models can also be found here under the download tab.
+Some models with precomputed normals and radius can be found at [http://www.lcg.ufrj.br/Projetos/pbr]. A few smaller models can also be found here under the *Downloads* tab.
