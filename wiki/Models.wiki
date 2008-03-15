@@ -20,6 +20,8 @@ The accepted _ply_ files must have two more attributes besides the vertex coordi
 
 These three attributes compose a _surfel_.
 
+==Attributes==
+
 ===Surfel Coordinates===
 
 The 3D coordinates are expected to be normalized between [-1, +1].
@@ -35,3 +37,9 @@ The radius of a surfel corresponds to its sampling distance. This can be compute
 ===Precomputed Models===
 
 Some models with precomputed normals and radius can be found at [http://www.lcg.ufrj.br/Projetos/pbr]. A few smaller models can also be found here under the *Downloads* tab.
+
+==LOD Models==
+
+Models containing the Level-of-Detail structure can be generated from the *Write LOD* option in the *File* menu, or loaded directed. Lod model files must contain the extension _.lod_. For more info
+
+==Tree Models==
