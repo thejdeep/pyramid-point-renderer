@@ -667,6 +667,8 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
   number_triangles = triangles.size();
   indices = new GLuint[number_triangles*2];
 
+  cout << "type : " << type << endl;
+
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
 

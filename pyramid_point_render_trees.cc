@@ -781,7 +781,7 @@ void PyramidPointRenderTrees::createFBO() {
  **/
 void PyramidPointRenderTrees::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_projection_trees.vert");
