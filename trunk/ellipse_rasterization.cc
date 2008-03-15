@@ -91,7 +91,6 @@ void EllipseRasterization::drawQuad( void ) {
   glEnd();
 }
 
-
 /**
  * Extracts debugging information from the reconstructed buffer.
  **/

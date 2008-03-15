@@ -80,28 +80,7 @@ class Camera {
 public:
  
   /// Constructor with screen dimensions
-  Camera(const int w, const int h) : screen_width (w), screen_height (h), 
-				     zoom_factor(1.0), fov(1.0),
-				     z_near(0.01), z_far(100.0) {
-    view_mode = PERSPECTIVE;
-
-
-    static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
-    std::copy (identity, identity+16, rotation_matrix);
-
-    q_last.a = 1.0; q_last.x = 0.0; q_last.y = 0.0; q_last.z = 0.0;
-    q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
-
-    position[0] = 0.0; position[1] = 0.0; position[2] = -1.0;
-    
-    light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
-
-    radius = 1.0;
-
-    frame_video = -1.0;
-
-    keyFrameInterpolation = 0;
-  }
+  Camera(const int w, const int h);
 
   /// Destructor
   ~Camera();

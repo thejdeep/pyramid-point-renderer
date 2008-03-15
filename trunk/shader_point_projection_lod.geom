@@ -32,9 +32,9 @@ varying in vec3 radius_depth_w_vertex[1];
 varying in float ep[1];
 
 vec4 lodColors [4] = vec4[4] ( vec4(1.0, 0.0, 0.0, 0.0),
-			       vec4(0.0, 1.0, 0.0, 0.2),
-			       vec4(0.0, 0.0, 1.0, 0.4),
-			       vec4(0.3, 0.3, 0.0, 0.6));
+			       vec4(0.0, 1.0, 0.0, 1.0/6.0),
+			       vec4(0.0, 0.0, 1.0, 2.0/6.0),
+			       vec4(0.3, 0.3, 0.0, 3.0/6.0));
 
 vec4 black = vec4(0.0, 0.0, 0.0, 0.0);
 

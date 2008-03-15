@@ -7,7 +7,6 @@ uniform sampler2D textureC;
 //gold
 //turquoise
 //ruby
-//
 
 const int num_materials = 6;
 

@@ -97,10 +97,12 @@ void PyramidPointRenderLod::rasterizePixels(pixels_struct dest, pixels_struct sr
 
       if (framebuffer_state != FBS_SYSTEM_PROVIDED)
 	{
-	  glViewport(0, 0, canvas_width, canvas_height);
+	  glViewport(0, 0, canvas_width + 2*canvas_border_width, 
+		     canvas_height + 2*canvas_border_height);
 	  glMatrixMode(GL_PROJECTION);
 	  glLoadIdentity();
-	  gluOrtho2D(0.0, canvas_width, 0.0, canvas_height);
+	  gluOrtho2D(0.0, canvas_width + 2*canvas_border_width, 
+		     0.0, canvas_height + 2*canvas_border_height);
 
 	  glMatrixMode(GL_MODELVIEW);
 	  glLoadIdentity();

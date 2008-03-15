@@ -319,7 +319,7 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
       color_array[pos*4 + 1] = obj_colors[id][1];
       color_array[pos*4 + 2] = obj_colors[id][2];
     }
-    //    color_array[pos*4 + 3] = type;
+    //color_array[pos*4 + 3] = type;
     color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
