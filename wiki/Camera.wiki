@@ -1,0 +1,12 @@
+#summary Manipulating the camera and creating a path.
+
+= Introduction =
+The camera class basically controls most of the OpenGL states and methods. This implementation will soon be modified, but for the meanwhile every object reports to the camera class when a local rotation or translation occurs.
+
+= Details =
+
+==Key Frames==
+
+The camera class also contains method to record and interpolate key frames. After a sequence of key frames is recorded there is an option to write it to file to be loaded in the future. For the meanwhile it always writes to a file _camera.frames_, overwriting if it already exists.
+
+The key frame interpolation is done with Spherical Linear Interpolation (_slerp_). The light position is also recorded together with the camera position and orientation.
