@@ -59,7 +59,7 @@ void main (void) {
 
     vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
 
-    color = ambient[material] * gl_LightSource[0].ambient + gl_LightModel.ambient;
+    color = ambient[material] * gl_LightSource[0].ambient * gl_LightModel.ambient;
 
     float NdotL = max(dot(normal.xyz, lightDir.xyz),0.0);
 
