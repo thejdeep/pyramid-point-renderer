@@ -4,7 +4,7 @@
 
 The code is almost self-contained except mainly for the Qt4 dependecy,
 however, the application classes are independent of the interface, thus
-I hope to soon add also support to Glut.
+I hope to soon add also support to Glut for a lightweight and more compatible version.
 
 = Details =
 
