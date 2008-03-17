@@ -9,4 +9,24 @@ The Qt interface provides the main interface with the application. It still cont
 
 Two different filters were inherited from the _Surface Splatting_ method: the reconstruction  filter and the prefilter.
 
-The reconstruction filter is a global size modifier for all ellipses, thus increasing it will enlarge all ellipses proportionally. The prefilter is added to reconstruction filter and is used for anti-aliasing purposes.
+The reconstruction filter is a global size modifier for all ellipses, thus increasing it will enlarge all ellipses proportionally. 
+
+The prefilter is added to reconstruction filter and is used for anti-aliasing purposes. Increasing the prefilter size tends to leave the splats more "round".
+
+==Per Vertex Color==
+
+If a models has _RGB_ attributes per vertex, the colors can be interpolated using the algorithm when this check box is enabled.
+
+==Depth Test==
+
+A flag for turning depth test _on/off_.
+
+==LOD==
+
+The *LOD* check box will only work for models with _.lod_ extension. It alternates between constant splat size rendering and using the lod structure.
+
+The *LOD Colors* renders each resolution level splat with a different color.
+
+When rendering in *LOD* mode the *Colors Bar* The check box renders on screen a colored graph depicting the usage of each level of resolution.
+
+== 
