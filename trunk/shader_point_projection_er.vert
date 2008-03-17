@@ -29,9 +29,7 @@ void main(void)
     normal_vec_vertex = normalize(gl_NormalMatrix * gl_Normal);
 
     // compute depth value without projection matrix, only modelview
-    radius_depth_w_vertex = vec3(gl_Vertex.w, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
-    
-    // radius_depth_w.z = radius_depth_w.y;
+    radius_depth_w_vertex = vec3(gl_Vertex.w, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);   
 
     gl_Position = v;
   }

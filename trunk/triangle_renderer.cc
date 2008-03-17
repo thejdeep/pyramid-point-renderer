@@ -9,12 +9,6 @@
 
 TriangleRenderer::TriangleRenderer() {}
 
-TriangleRenderer::~TriangleRenderer() { 
-}
+TriangleRenderer::~TriangleRenderer() {}
 
-/**
- * Render the triangle soup.
- **/
-void TriangleRenderer::draw() {
-
-}
+void TriangleRenderer::draw() {}

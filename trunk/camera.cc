@@ -333,7 +333,6 @@ void Camera::projectToScreen(double p[3], double* screen_pos) {
   screen_pos[1] = screen_height - pos_y - screen_height*0.5;
   screen_pos[2] = pos_z;
 
-
 }
 
 /**

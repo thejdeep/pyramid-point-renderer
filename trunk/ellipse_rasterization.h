@@ -15,8 +15,8 @@
 
 #include "point_based_render.h"
 
-#define MAX_DISPLACEMENT 0
-#define MAX_SUB_DISPLACEMENT 2
+#define MAX_DISPLACEMENT 1
+#define MAX_SUB_DISPLACEMENT 1
 #define NUM_CIRCLE_SUBDIVISIONS 1
 
 class EllipseRasterization : public PointBasedRender
