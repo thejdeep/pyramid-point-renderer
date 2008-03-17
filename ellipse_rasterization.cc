@@ -162,9 +162,12 @@ void EllipseRasterization::projectSurfels ( Primitives* prim )
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
   glDrawBuffer(fbo_buffers[2]);
  
+  GLfloat max_radius = (0.5*((GLfloat)( (MAX_SUB_DISPLACEMENT*2+1)*(MAX_DISPLACEMENT*2+1))))/((GLfloat)fbo_width);
+
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("num_subdivisions", NUM_CIRCLE_SUBDIVISIONS);
+  shader_projection->set_uniform("max_radius", max_radius);
 
   // Render vertices using the vertex buffer object.
   prim->render();
@@ -226,22 +229,18 @@ void EllipseRasterization::evaluatePixels( void )
   shader_evaluate->set_uniform("depth_test", depth_test);
   shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+  shader_evaluate->set_uniform("mask_size", (GLint)MAX_SUB_DISPLACEMENT);
 
   // pass texture with original normals and radius from projected pixel
   // textureA [n.x, n.y, n.z, radius]
   shader_evaluate->set_uniform("textureA", 2);
-// textureA [z, deltaZ, material_id, 0.0]
-//   shader_evaluate->set_uniform("textureB", 3);
-
-  GLfloat size[2] = {(GLfloat)(fbo_width),
-		     (GLfloat)(fbo_height)};
 
   int passes = 0;
   read_buffer = 1;
   for (int j = -MAX_DISPLACEMENT; j <= MAX_DISPLACEMENT; ++j)
     for (int i = -MAX_DISPLACEMENT; i <= MAX_DISPLACEMENT; ++i) {
       switchBuffers();
-      shader_evaluate->set_uniform("displacement", (GLfloat)i/size[0], (GLfloat)j/size[1]);
+      shader_evaluate->set_uniform("displacement", (GLint)i, (GLint)j);
       shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
       drawQuad();
       ++passes;
@@ -467,7 +466,7 @@ void EllipseRasterization::createFBO( void ) {
  **/
 void EllipseRasterization::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_point_projection_er.vert");

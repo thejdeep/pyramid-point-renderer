@@ -9,8 +9,10 @@
 
 const float pi = 3.1416;
 
-const float max_radius = (1.0/(816.0))*7.5;
 //const float max_radius = (1.0/(1024.0))*4.5;
+//const float max_radius = (1.0/(816.0))*2.5;
+
+uniform float max_radius;
 
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
@@ -26,8 +28,9 @@ void main(void)
   float r = abs(radius_depth_w.x / radius_depth_w.z);
   float z = radius_depth_w.y;
 
-  //r *= 0.001;
-
+  // Setting this to negative number so I can check later how many where over
+  // the max_radius by reading the buffer and counting in CPU
+  // This is for debugging and statistics purposes only
   if (r > max_radius)
     r *= -1.0;
 /*     discard; */

@@ -55,7 +55,7 @@ void main (void) {
   if (pixel.a != 0.0) {
 
     //int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
-    int material = 0;
+    int material = 1;
 
     vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
 
