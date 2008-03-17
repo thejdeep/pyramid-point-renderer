@@ -7,11 +7,11 @@ Stanford PLY format.
 
 = Details =
 
-The repository already includes the _ply.c_ and _ply.h_ files. These have been a little modified to compile without warnings. Unfornately, to my knowledge, the ply library was built specifically for 32-bits architectures, so if you are running on a 64-bits machine you'll not be able to use binary plys, only ascii plys.
+The repository already includes the _ply.c_ and _ply.h_ files. These have been a little modified to compile without warnings. Unfortunately, to my knowledge, the ply library was built specifically for 32-bits architectures, so if you are running on a 64-bits machine you'll not be able to use binary plys, only ASCII plys.
 
 Links to the complete ply library can be found at http://graphics.stanford.edu/data/3Dscanrep/
 
-To convert from binary to ascii use the *ply2ascii* program in the ply library.
+To convert from binary to ASCII use the *ply2ascii* program in the ply library.
 
 The accepted _ply_ files must have two more attributes besides the vertex coordinates:
 
@@ -51,4 +51,3 @@ Tree models are line-based representations converted from the original triangula
 Files with extensions _.scn_ contains one or more models with position, rotation, material and renderer type information. It also stores the camera's position and direction as well as light position. A scene file can be loaded as any other kind of file from the *Open* file menu option.
 
 After setting up the models a scene file can be created by selecting the option *Write Scene* from the *File* menu. For the moment it always creates a file named *scene.scn* that should be renamed to avoid overwriting.
-
