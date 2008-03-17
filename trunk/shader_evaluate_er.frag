@@ -1,6 +1,8 @@
 /* Synthesis step */
 
 #extension GL_ARB_draw_buffers : enable
+ #extension GL_EXT_gpu_shader4 : enable
+
 #version 120
 
 const float pi = 3.1416;
@@ -48,8 +50,8 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
 
   if (len == 0.0)
-    return pointInCircle(d, radius);
-    //normal.y = 0.0;
+    //return pointInCircle(d, radius);
+    normal.y = 0.0;
   else
     normal.y /= len;
 
