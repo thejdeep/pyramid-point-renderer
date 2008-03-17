@@ -5,6 +5,8 @@ The Qt interface provides the main interface with the application. It still cont
 
 = Details =
 
-Since this is a _Beta_ version, not all boxes are clickable safe, that is, they are not always enabled and disabled appropiately with each kind of model.
-
 ==Filter Sizes==
+
+Two different filters were inherited from the _Surface Splatting_ method: the reconstruction  filter and the prefilter.
+
+The reconstruction filter is a global size modifier for all ellipses, thus increasing it will enlarge all ellipses proportionally. The prefilter is added to reconstruction filter and is used for anti-aliasing purposes.
