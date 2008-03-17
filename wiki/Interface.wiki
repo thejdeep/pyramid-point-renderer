@@ -25,8 +25,10 @@ A flag for turning depth test _on/off_.
 
 The *LOD* check box will only work for models with _.lod_ extension. It alternates between constant splat size rendering and using the lod structure.
 
-The *LOD Colors* renders each resolution level splat with a different color.
+The *LOD Colors* renders each resolution level splat with a different color, where the they are respectively from coarsest to finest: Ruby - Turquoise - Gold - Silver
 
-When rendering in *LOD* mode the *Colors Bar* The check box renders on screen a colored graph depicting the usage of each level of resolution.
+==Colors Bar==
 
-== 
+When rendering in *LOD* mode this check box renders on screen a colored graph depicting the usage of each level of resolution.
+
+The color bars will in the future also work for the "Ellipse Rasterization" rendering mode.
