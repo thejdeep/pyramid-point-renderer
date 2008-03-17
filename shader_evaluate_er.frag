@@ -121,7 +121,7 @@ void main (void) {
 	  float pixelZ = buffer.z / buffer.w;
 
 	  // sum contribution to current values if pixel near current surface (elipse)
-	  if ((!depth_test) || (buffer.w == 0.0) || (abs(ellipse.z - pixelZ) <= 2.0*ellipse.w)) {
+	  if ((!depth_test) || (buffer.w == 0.0) || (abs(ellipse.z - pixelZ) <= 1.0*ellipse.w)) {
 	    buffer.xy *= pi;
 	    vec3 curr_normal = vec3 (cos(buffer.x)*sin(buffer.y), sin(buffer.x)*sin(buffer.y), cos(buffer.y));
 

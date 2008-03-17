@@ -27,8 +27,6 @@
 #include <vector>
 
 //#include "ewa_surface_splatting.h"
-//#include "pyramid_triangle_renderer.h"
-//#include "triangle_renderer.h"
 
 #include "pyramid_point_render.h"
 #include "pyramid_point_render_nearest.h"
@@ -38,7 +36,6 @@
 #include "pyramid_triangle_renderer.h"
 #include "ellipse_rasterization.h"
 #include "triangle_renderer.h"
-
 
 #include "object.h"
 #include "camera.h"
