@@ -10,7 +10,7 @@ I hope to soon add also support to Glut for a lightweight and more compatible ve
 
 Before you compile:
 
-  * Download the [http://code.google.com/p/lcgtk/ LcgTk] library.
+  * Download and compile at least the glslKernel of the [http://code.google.com/p/lcgtk/ LcgTk] library.
 
   * Have Qt4 installed.
 
