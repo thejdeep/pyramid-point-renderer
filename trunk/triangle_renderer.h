@@ -20,24 +20,8 @@ class TriangleRenderer : public PointBasedRender
   ~TriangleRenderer();
 
   void draw();
-  void draw( double[3] ); 
-
-  void setTriangles( vector<Triangle> *t );
-  void setVertices( vector<Surfel> *s );
-
-  void setReconstructionFilterSize( void ) {}
-  void setPreilterSize( void ) {}
 
  private:
-
-   /// Triangle Display List
-   GLuint triangleDisplayList;
-   
-   /// Pointer to list of surfels (vertices).
-   vector<Surfel> *surfels;
-   
-   /// Pointer to list of triangles.
-   vector<Triangle> *triangles;
 
 };
 

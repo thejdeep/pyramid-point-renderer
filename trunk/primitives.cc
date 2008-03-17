@@ -1024,21 +1024,6 @@ void Primitives::setTrianglesDisplayList( void ) {
   Vector n[3];
   glNewList(triangleDisplayList, GL_COMPILE);
 
-  //GLfloat black[] = {0.6, 0.6, 0.6, 1.0};
-
-  //surfelVectorIter it_s = surfels[0].begin();
-//   GLfloat color[] = {(GLfloat)(it_s->color().x()),
-// 		     (GLfloat)(it_s->color().y()), 
-// 		     (GLfloat)(it_s->color().z())};
-
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
-
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
-//   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 50);
-
-  //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
@@ -1052,14 +1037,11 @@ void Primitives::setTrianglesDisplayList( void ) {
 
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
-      //      glColor4fv(obj_colors[id]);
       glNormal3f(n[i].x(), n[i].y(), n[i].z());
       glVertex4f(p[i].x(), p[i].y(), p[i].z(), 1.0);
     }
     glEnd();
   }
- 
-  //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, black);
 
   glEndList();
 }

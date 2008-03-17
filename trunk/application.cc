@@ -537,8 +537,8 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( PYRAMID_POINTS );
-  //  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  //primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
 
   num_objects = objects.size();
 
