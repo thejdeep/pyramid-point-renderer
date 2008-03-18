@@ -17,6 +17,7 @@ HEADERS += application.h \
            ewa_surface_splatting.h \
            file_io.h \
            kd-tree.h \
+           manipulator.h \
            materials.h \
            modelsTreeWidget.h \
            object.h \
@@ -43,6 +44,7 @@ SOURCES += application.cc \
            ellipse_rasterization.cc \
            ewa_surface_splatting.cc \
            main.cpp \
+           manipulator.cc \
            matrix.cc \
            modelsTreeWidget.cpp \
            object.cc \

@@ -228,6 +228,26 @@ void pprMainWindow::on_doubleSpinBoxPrefilter_valueChanged( double d ) {
   widget->updateGL();
 }
 
+void pprMainWindow::on_spinBoxCpuMask_valueChanged( int i ) {
+  application->setCpuMask ( i );
+  widget->updateGL();
+}
+
+void pprMainWindow::on_spinBoxGpuMask_valueChanged( int i ) {
+  application->setGpuMask ( i );
+  widget->updateGL();
+}
+
+void pprMainWindow::on_spinBoxSampleSubdivision_valueChanged( int i ) {
+  application->setSampleSubdivision ( i );
+  widget->updateGL();
+}
+
+void pprMainWindow::on_pushButtonResetMaxValues_pressed( ) {
+  application->resetMaxValues ( );
+  widget->updateGL();
+}
+
 void pprMainWindow::on_actionCreateKeyFrame_triggered( bool ) {
   application->createKeyFrame();
 }

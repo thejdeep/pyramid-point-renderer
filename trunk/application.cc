@@ -193,8 +193,7 @@ void Application::draw(void) {
 
 	  surfs_per_level[2] = max_surfs_per_level[0];
 	  surfs_per_level[3] = max_surfs_per_level[1];
-	}
-	
+	}	
       }
     }
   }
@@ -807,6 +806,18 @@ void Application::setPrefilter ( double s ) {
     point_based_render->setPrefilterSize(prefilter_size);
 }
 
+void Application::setCpuMask ( int m ) {
+  point_based_render->setCpuMaskSize( m );
+}
+
+void Application::setGpuMask ( int m ) {
+  point_based_render->setGpuMaskSize( m );
+}
+
+void Application::setSampleSubdivision ( int s ) {
+  point_based_render->setNumSampleSubdivisions( s );
+}
+
 void Application::setPerVertexColor ( bool b, int object_id ) {
   vector< int >* prims = objects[object_id].getPrimitivesList();
   for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
@@ -814,6 +825,11 @@ void Application::setPerVertexColor ( bool b, int object_id ) {
     // Reset renderer type to load per vertex color or default color in vertex array
     primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
   }
+}
+
+void Application::resetMaxValues ( void ) {
+  max_surfs_per_level[0] = max_surfs_per_level[1] = 
+    max_surfs_per_level[2] = max_surfs_per_level[3] = 0;
 }
 
 void Application::setAutoRotate ( bool r ) {
