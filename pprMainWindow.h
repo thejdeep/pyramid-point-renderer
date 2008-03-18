@@ -28,6 +28,9 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
 
   void on_doubleSpinBoxReconstructionFilter_valueChanged( double d );
   void on_doubleSpinBoxPrefilter_valueChanged( double d );
+  void on_spinBoxCpuMask_valueChanged( int i );
+  void on_spinBoxGpuMask_valueChanged( int i );
+  void on_spinBoxSampleSubdivision_valueChanged( int i);
 
   void on_checkBoxPerVertexColor_stateChanged( int state );
   void on_checkBoxAutoRotate_stateChanged( int state );
@@ -35,6 +38,8 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   void on_checkBoxLODColors_stateChanged( int state );
   void on_checkBoxDepthTest_stateChanged( int state );
   void on_checkBoxColorBars_stateChanged( int state );
+
+  void on_pushButtonResetMaxValues_pressed(  );
 
   void on_actionCreateKeyFrame_triggered( bool ckecked = false );
   void on_actionRunKeyFrames_triggered( bool ckecked = false );

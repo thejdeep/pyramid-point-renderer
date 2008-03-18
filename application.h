@@ -90,6 +90,11 @@ class Application
   double getPrefilter ( void ) const { return prefilter_size; }
   int getMaterial ( void ) const { return material_id; }
 
+  void resetMaxValues ( void );
+
+  void setCpuMask ( int m );
+  void setGpuMask ( int m );
+  void setSampleSubdivision ( int s );
   void setPerVertexColor ( bool b, int object_id );
   void setAutoRotate ( bool r );
   void useLOD( bool l );

@@ -45,6 +45,11 @@ class PointBasedRender
 
    virtual void getDataProjectedPixels ( int* ) {}
 
+   /** For Ellipse Rasterization **/
+   virtual void setCpuMaskSize ( int ) {}
+   virtual void setGpuMaskSize ( int ) {}
+   virtual void setNumSampleSubdivisions ( int ) {}
+
    void setEye (double e[3]) {
      eye[0] = e[0];
      eye[1] = e[1];

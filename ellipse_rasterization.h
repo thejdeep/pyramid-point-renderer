@@ -15,10 +15,6 @@
 
 #include "point_based_render.h"
 
-#define MAX_DISPLACEMENT 1
-#define MAX_SUB_DISPLACEMENT 1
-#define NUM_CIRCLE_SUBDIVISIONS 1
-
 class EllipseRasterization : public PointBasedRender
 {
  private:
@@ -46,6 +42,11 @@ class EllipseRasterization : public PointBasedRender
 
   void getDataProjectedPixels ( int * );
   void getDataReconstructedPixels ( int buffer );
+
+  void setCpuMaskSize ( int s ) { cpu_mask_size = s; }
+  void setGpuMaskSize ( int s ) { gpu_mask_size = s; }
+  void setNumSampleSubdivisions ( int s );
+
 
  private:
 
@@ -84,10 +85,14 @@ class EllipseRasterization : public PointBasedRender
 
   /// Type of most recently used framebuffer.
   framebuffer_state_enum framebuffer_state; 
-  
-  /// Current rendering mode.
-  render_state_enum render_state;
 
+  /// Cpu mask size
+  int cpu_mask_size;
+  /// Gpu mask size (sub mask for each cpu mask pixel)
+  int gpu_mask_size;
+
+  /// Number of subdivisions applied to a overlarged sample
+  int sample_subdivision;
 };
 
 #endif

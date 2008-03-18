@@ -12,9 +12,11 @@
  * Default constructor.
  **/
 EllipseRasterization::EllipseRasterization() : PointBasedRender(),
-					     canvas_border_width(32),
-					     canvas_border_height(32),
-					     render_state(RS_BUFFER0) {
+					       canvas_border_width(32),
+					       canvas_border_height(32),
+					       cpu_mask_size(1),
+					       gpu_mask_size(1),
+					       sample_subdivision(1){
   createFBO();
   createShaders();
 }
@@ -23,9 +25,11 @@ EllipseRasterization::EllipseRasterization() : PointBasedRender(),
  * Constructor with screen size.
  **/
 EllipseRasterization::EllipseRasterization(int w, int h) : PointBasedRender(w, h),
-					   canvas_border_width(w/32),
-					   canvas_border_height(h/32),
-					   render_state(RS_BUFFER0) {
+							   canvas_border_width(w/32),
+							   canvas_border_height(h/32),
+							   cpu_mask_size(1),
+							   gpu_mask_size(1),
+							   sample_subdivision(1) {
   createFBO();
   createShaders();
 }
@@ -162,11 +166,11 @@ void EllipseRasterization::projectSurfels ( Primitives* prim )
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
   glDrawBuffer(fbo_buffers[2]);
  
-  GLfloat max_radius = (0.5*((GLfloat)( (MAX_SUB_DISPLACEMENT*2+1)*(MAX_DISPLACEMENT*2+1))))/((GLfloat)fbo_width);
+  GLfloat max_radius = (0.5*((GLfloat)( (gpu_mask_size*2+1)*(cpu_mask_size*2+1))))/((GLfloat)fbo_width);
 
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
-  shader_projection->set_uniform("num_subdivisions", NUM_CIRCLE_SUBDIVISIONS);
+  shader_projection->set_uniform("num_subdivisions", sample_subdivision);
   shader_projection->set_uniform("max_radius", max_radius);
 
   // Render vertices using the vertex buffer object.
@@ -229,7 +233,7 @@ void EllipseRasterization::evaluatePixels( void )
   shader_evaluate->set_uniform("depth_test", depth_test);
   shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
-  shader_evaluate->set_uniform("mask_size", (GLint)MAX_SUB_DISPLACEMENT);
+  shader_evaluate->set_uniform("mask_size", (GLint)gpu_mask_size);
 
   // pass texture with original normals and radius from projected pixel
   // textureA [n.x, n.y, n.z, radius]
@@ -237,8 +241,8 @@ void EllipseRasterization::evaluatePixels( void )
 
   int passes = 0;
   read_buffer = 1;
-  for (int j = -MAX_DISPLACEMENT; j <= MAX_DISPLACEMENT; ++j)
-    for (int i = -MAX_DISPLACEMENT; i <= MAX_DISPLACEMENT; ++i) {
+  for (int j = -cpu_mask_size; j <= cpu_mask_size; ++j)
+    for (int i = -cpu_mask_size; i <= cpu_mask_size; ++i) {
       switchBuffers();
       shader_evaluate->set_uniform("displacement", (GLint)i, (GLint)j);
       shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
@@ -471,7 +475,7 @@ void EllipseRasterization::createShaders ( void ) {
   shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_point_projection_er.vert");
   shader_projection->geometry_source("shader_point_projection_er.geom");
-  shader_projection->set_geom_max_output_vertices( NUM_CIRCLE_SUBDIVISIONS );
+  shader_projection->set_geom_max_output_vertices( sample_subdivision );
   shader_projection->set_geom_input_type(GL_POINTS);
   shader_projection->set_geom_output_type(GL_POINTS);
   shader_projection->fragment_source("shader_point_projection_er.frag");
@@ -487,4 +491,14 @@ void EllipseRasterization::createShaders ( void ) {
   shader_phong->fragment_source("shader_phong_er.frag");
   shader_phong->install( shader_inst_debug );
 
+}
+
+void EllipseRasterization::setNumSampleSubdivisions ( int s ) {
+  sample_subdivision = s;
+  
+  delete shader_projection;
+  delete shader_evaluate;
+  delete shader_phong;
+
+  createShaders();
 }

@@ -14,6 +14,7 @@
 
 #extension GL_EXT_gpu_shader4 : enable
 
+uniform float max_radius;
 uniform int num_subdivisions;
 
 const int max_num_subdivisions = 8;
@@ -39,9 +40,9 @@ void main() {
 
   vec4 v = gl_PositionIn[0];
 
-  if (radius_depth_w_vertex[0].x > 0) 
-    {
-    if (num_subdivisions == 1) {
+  if (radius_depth_w_vertex[0].x > 0) {
+    float r = abs(radius_depth_w_vertex[0].x / radius_depth_w_vertex[0].z);
+    if ((r <= max_radius) || (num_subdivisions == 1)) {
       normal_vec = normal_vec_vertex[0];
       radius_depth_w = radius_depth_w_vertex[0];
       gl_Position = v;
@@ -49,15 +50,15 @@ void main() {
       EndPrimitive();
     }
     else {
+      normal_vec = normal_vec_vertex[0];
+      radius_depth_w = radius_depth_w_vertex[0];
+      radius_depth_w.x *= 0.6;
       for (int i = 0; i < num_subdivisions; ++i) {
-	vec4 sub_position = vec4(v.xy + radius_depth_w_vertex[0].x * 0.3 * desloc[i].xy, v.zw);
-	normal_vec = normal_vec_vertex[0];
-	radius_depth_w = radius_depth_w_vertex[0];
-	radius_depth_w.x *= 0.65;
+	vec4 sub_position = vec4(v.xy + radius_depth_w_vertex[0].x * desloc[i].xy, v.zw);
 	gl_Position = sub_position;
 	EmitVertex();
 	EndPrimitive();
       }
-    }
+    }    
   }
 }
