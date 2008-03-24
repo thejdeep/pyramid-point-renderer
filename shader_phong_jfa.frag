@@ -43,7 +43,7 @@ void main (void) {
   vec4 closest_coord = texture2D (textureA, gl_TexCoord[0].st).xyzw;
   vec4 color = vec4(1.0);
 
-  if (closest_coord.xy != vec2(0.0)) {
+  if (closest_coord.w != 0.0) {
 
     vec4 pixel = texture2D (textureB, closest_coord.xy ).xyzw;
 

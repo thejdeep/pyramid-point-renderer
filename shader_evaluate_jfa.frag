@@ -24,14 +24,14 @@ uniform sampler2D textureB;
 float pointInCircle(in vec2 d, in float radius){
   float sqrt_len = d.x*d.x + d.y*d.y;
 
-  radius *= 1.0;
+  radius *= 1.0*reconstruction_filter_size;
   radius += prefilter_size;
 
   float dif = sqrt_len / (radius*radius);
 
-  if (dif <= reconstruction_filter_size)
+  //  if (dif <= reconstruction_filter_size)
     return dif;
-  else return -1.0;
+    //else return -1.0;
 }
 
 // tests if a point is inside an ellipse.
@@ -42,7 +42,7 @@ float pointInCircle(in vec2 d, in float radius){
 // @param radius Ellipse major axis length * 0.5.
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
-  
+
   float len = length(normal.xy);
 
   //  if (len == 0.0)
@@ -63,7 +63,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 			  -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = 1.0*radius;
+  float a = 1.0*radius*reconstruction_filter_size;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -73,64 +73,73 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size)
+  //if (test <= reconstruction_filter_size)
     return test;
-  else return -1.0;
+  //  else return -1;
 }
 
 void main (void) {
   vec4 ellipse;
   vec2 displacement;
   float dist_test;
-  vec4 closest_ellipse;
   vec3 normal;
   float ellipse_theta, ellipse_phi;
+  vec4 ellipse_coord;
 
   vec2 texSizeB = vec2(textureSize2D(textureB, 0));
 
   // retrieve actual pixel with current texture coords of closest ellipse
   vec4 curr_closest = texture2D (textureB, gl_TexCoord[0].st, 0).xyzw;
 
-  float min_dist = 100;
-  if (curr_closest.xy != vec2(0.0, 0.0)) {
-    // retrieve closest ellipse and compute its distance
-    closest_ellipse = texture2D(textureA, curr_closest.xy).xyzw;
+  float min_dist = 10000;
+/*   if (curr_closest.w != 0.0) { */
+/*     // retrieve closest ellipse and compute its distance */
+/* /\*     ellipse = texture2D(textureA, curr_closest.xy).xyzw; *\/ */
 
-    ellipse_theta = closest_ellipse.x * pi;
-    ellipse_phi = closest_ellipse.y * pi;
-    normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
+/* /\*     ellipse_theta = ellipse.x * pi; *\/ */
+/* /\*     ellipse_phi = ellipse.y * pi; *\/ */
+/* /\*     normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi)); *\/ */
 
-    // this is the current minimum distance to be checked with new fetches
-    min_dist = pointInEllipse(abs(gl_TexCoord[0].st - curr_closest.xy), closest_ellipse.w, normal);
-  }
+/* /\*     // this is the current minimum distance to be checked with new fetches *\/ */
+/* /\*     //    min_dist = pointInEllipse((gl_TexCoord[0].st - curr_closest.xy), ellipse.w, normal); *\/ */
+/* /\*     min_dist = pointInCircle(-(gl_TexCoord[0].st - curr_closest.xy), ellipse.w);	  *\/ */
+/* /\*     curr_closest.z = min_dist; *\/ */
 
-  for (int j = -1; j <= 1; ++j) {
-    for (int i = -1; i <= 1; ++i) {
+/*     // min_dist = curr_closest.z; */
 
-      displacement = gl_TexCoord[0].st + (vec2(float(i*step_length), float(j*step_length)) / texSizeB);
+/*   } */
 
-      vec2 ellipse_coord = texture2D (textureB, displacement).xy;
 
-      // if pixel from displacement position is a projected surfel, check if current
-      // pixel is inside its radius
-      if (ellipse_coord != vec2(0.0)) {
+  {
 
-	// retrieve candidadte ellipse from displacement position
-	ellipse = texture2D (textureA, ellipse_coord).xyzw;
-	ellipse.w = abs(ellipse.w); 
+    for (int j = -1; j <= 1; ++j) {
+      for (int i = -1; i <= 1; ++i) {
 
-	// convert from spherical coordinates
-	ellipse_theta = ellipse.x * pi;
-	ellipse_phi = ellipse.y * pi;
-	normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
+	displacement = gl_TexCoord[0].st + (vec2(float(i*step_length), float(j*step_length)) / texSizeB);
+	
+	ellipse_coord = texture2D (textureB, displacement).xyzw;
+	
+	// if pixel from displacement position is a projected surfel, check if current
+	// pixel is inside its radius
+	if (ellipse_coord.w != 0.0) {
+	  
+	  // retrieve candidadte ellipse from displacement position
+	  ellipse = texture2D (textureA, ellipse_coord.xy).xyzw;
+	  
+	  // convert from spherical coordinates
+	  ellipse_theta = ellipse.x * pi;
+	  ellipse_phi = ellipse.y * pi;
+	  normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
+	  
+	  //dist_test = pointInEllipse((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w, normal);
+	  dist_test = pointInCircle((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w);	 	  
 
-	dist_test = pointInEllipse(displacement.xy, ellipse.w, normal);
-	//float dist_test = pointInCircle(local_displacement.xy, ellipse.w);
-
-	// Ellipse in range
-	if (dist_test < min_dist) {
-	  curr_closest = vec4(displacement.xy, 1.0, 1.0);
-	  min_dist = dist_test;
+	  // Ellipse in range	
+	  //if (dist_test >= 0.0)
+	  if (dist_test < min_dist) {
+	    min_dist = dist_test;
+	    curr_closest = vec4(ellipse_coord.xy, min_dist, 1.0);
+	  }
 	}
       }
     }
