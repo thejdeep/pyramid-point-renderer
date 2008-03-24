@@ -35,11 +35,10 @@
 #include "pyramid_point_render_trees.h"
 #include "pyramid_triangle_renderer.h"
 #include "ellipse_rasterization.h"
+#include "jfa_splatting.h"
 #include "triangle_renderer.h"
 
-#include "object.h"
 #include "camera.h"
-#include "materials.h"
 
 #define PI 3.14159265
 #define HALF_PI 1.570796325

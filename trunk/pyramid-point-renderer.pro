@@ -16,6 +16,7 @@ HEADERS += application.h \
            ellipse_rasterization.h \
            ewa_surface_splatting.h \
            file_io.h \
+           jfa_splatting.h \
            kd-tree.h \
            manipulator.h \
            materials.h \
@@ -43,6 +44,7 @@ SOURCES += application.cc \
            camera.cc \
            ellipse_rasterization.cc \
            ewa_surface_splatting.cc \
+           jfa_splatting.cc \
            main.cpp \
            manipulator.cc \
            matrix.cc \
