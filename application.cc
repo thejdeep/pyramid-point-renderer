@@ -171,6 +171,7 @@ void Application::draw(void) {
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
       Primitives * prim = &(primitives[*prim_it]);
       int type = prim->getRendererType();
+
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
 	if (type == PYRAMID_POINTS_LOD)
 	  point_based_render->useLOD( true );
@@ -178,12 +179,14 @@ void Application::draw(void) {
 	  point_based_render->useLOD( false );
 
 	prim->eye = Point(eye[0], eye[1], eye[2]);
+
 	if (type == PYRAMID_POINTS_LOD)
 	  prim->countNumVertsLOD(&surfs_per_level[0]);
+
 	point_based_render->projectSamples( prim );
 
-	if ((show_color_bars) && (type == RASTERIZE_ELLIPSES))
-	{	   
+	if (((show_color_bars) && (type == RASTERIZE_ELLIPSES)) || (type == JFA_SPLATTING))
+	{
 	  point_based_render->getDataProjectedPixels( &surfs_per_level[0] );
 	  if (surfs_per_level[0] > max_surfs_per_level[0])
 	    max_surfs_per_level[0] = surfs_per_level[0];
@@ -238,7 +241,6 @@ void Application::draw(void) {
 
   // necessary to compute correct fps
   glFinish();
-
 }
 
 
@@ -265,7 +267,8 @@ void Application::renderLODColorBars( void ) {
       total = surfs_per_level[0] + surfs_per_level[1];
     }
   else
-    total = surfs_per_level[4]/2;
+    total = surfs_per_level[4];
+
   double x_max = 0.0;
 
   // BACKGROUND
@@ -443,6 +446,8 @@ void Application::createPointRender( void ) {
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == RASTERIZE_ELLIPSES)
     point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
+  else if (render_mode == JFA_SPLATTING)
+    point_based_render = new JFASplatting(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if ((render_mode == TRIANGLES) || (render_mode == LINES))
     point_based_render = new TriangleRenderer();
 
@@ -537,7 +542,8 @@ int Application::readFile ( const char * filename ) {
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
   //primitives.back().setRendererType( PYRAMID_POINTS );
-  primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  primitives.back().setRendererType( JFA_SPLATTING );
 
   num_objects = objects.size();
 
