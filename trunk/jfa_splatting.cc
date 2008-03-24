@@ -147,9 +147,9 @@ void JFASplatting::getDataProjectedPixels ( int* data ) {
  **/
 void JFASplatting::projectSurfels ( Primitives* prim )
 {
-  GLenum outputBuffers[3] = {fbo_buffers[2], fbo_buffers[0], fbo_buffers[1]};
+  GLenum outputBuffers[2] = {fbo_buffers[2], fbo_buffers[0]};
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  glDrawBuffers(3, outputBuffers);
+  glDrawBuffers(2, outputBuffers);
 
 //   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 //   glDrawBuffer(fbo_buffers[2]);
@@ -205,8 +205,6 @@ void JFASplatting::evaluatePixels( void )
   // Activate projected surfels texture
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(FBO_TYPE, fbo_textures[2]);
-//   glActiveTexture(GL_TEXTURE3);
-//   glBindTexture(FBO_TYPE, fbo_textures[3]);
 
   shader_evaluate->use();
   //shader_evaluate->set_uniform("depth_test", depth_test);
@@ -225,6 +223,11 @@ void JFASplatting::evaluatePixels( void )
     shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
     drawQuad();
   }
+
+//   switchBuffers();
+//   shader_evaluate->set_uniform("step_length", (GLint)0);
+//   shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
+//   drawQuad();
 
   shader_evaluate->use(0);
 
@@ -248,25 +251,16 @@ void JFASplatting::rasterizePhongShading( void )
   gluOrtho2D(0.0, canvas_width+2*canvas_border_width,
 	     0.0, canvas_height+2*canvas_border_height);
 
-//   glViewport(canvas_border_width, canvas_border_height, 
-// 	     canvas_width+canvas_border_width,
-// 	     canvas_height+canvas_border_height);
-//   CHECK_FOR_OGL_ERROR();
-//   glMatrixMode(GL_PROJECTION);
-//   glLoadIdentity();
-//   gluOrtho2D(canvas_border_width, canvas_width+canvas_border_width,
-// 	     canvas_border_height, canvas_height+canvas_border_height);
-
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
   glActiveTexture(GL_TEXTURE0+dest_buffer);
   glBindTexture(FBO_TYPE, fbo_textures[dest_buffer]);
-//   glActiveTexture(GL_TEXTURE4);
-//   glBindTexture(FBO_TYPE, fbo_textures[4]);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(FBO_TYPE, fbo_textures[2]);
   
   shader_phong->use();
-  shader_phong->set_uniform("textureA", 1);
+  shader_phong->set_uniform("textureA", (GLint)dest_buffer);
   shader_phong->set_uniform("textureB", 2);
 
   drawQuad();
