@@ -1,11 +1,12 @@
 /* Synthesis step */
 
 #extension GL_ARB_draw_buffers : enable
- #extension GL_EXT_gpu_shader4 : enable
+#extension GL_EXT_gpu_shader4 : enable
 
 #version 120
 
 const float pi = 3.1416;
+const int num_ellipses = 2;
 
 // flag for depth test on/off
 uniform bool depth_test;
@@ -32,8 +33,8 @@ float pointInCircle(in vec2 d, in float radius){
   float dif = sqrt_len / (radius*radius);
 
   //  if (dif <= reconstruction_filter_size)
-    return dif;
-    //else return -1.0;
+  return dif;
+  //else return -1.0;
 }
 
 // tests if a point is inside an ellipse.
@@ -76,7 +77,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
   //if (test <= reconstruction_filter_size)
-    return test;
+  return test;
   //  else return -1;
 }
 
@@ -86,49 +87,80 @@ void main (void) {
   float dist_test;
   vec3 normal;
   float ellipse_theta, ellipse_phi;
-  vec4 ellipse_coord;
-  vec4 curr_closest = vec4(0.0);
+  vec4 ellipse_coords;
+  vec2 ellipse_coord[2];
+  vec2 curr_closest[2] = vec2[2](vec2(0.0), vec2(0.0));
 
   vec2 texSizeB = vec2(textureSize2D(textureB, 0));
-  float min_dist = 100000.0;
-  float min_z = -1.0;
+  vec2 min_z = vec2(-1.0);
 
+  for (int j = -1; j <= 1; ++j) {
+    for (int i = -1; i <= 1; ++i) {
 
-    for (int j = -1; j <= 1; ++j) {
-      for (int i = -1; i <= 1; ++i) {
+      displacement = gl_TexCoord[0].st + (vec2(float(i*step_length), float(j*step_length)) / texSizeB);
 
-	displacement = gl_TexCoord[0].st + (vec2(float(i*step_length), float(j*step_length)) / texSizeB);
+      ellipse_coords = texture2D (textureB, displacement).xyzw;
+      ellipse_coord[0] = ellipse_coords.xy;
+      ellipse_coord[1] = ellipse_coords.zw;
 
-	ellipse_coord = texture2D (textureB, displacement).xyzw;
-
+      for (int k = 0; k < num_ellipses; ++k) {
 	// if pixel from displacement position is a projected surfel, check if current
 	// pixel is inside its radius
-	if (ellipse_coord.w != 0.0) 
-	  // if ((ellipse_coord.x >= 0.0) && (ellipse_coord.x < 1.0) && (ellipse_coord.y >= 0.0) && (ellipse_coord.y < 1.0))
-	    {
-	  
-	      // retrieve candidadte ellipse from displacement position
-	      ellipse = texture2D (textureA, ellipse_coord.xy).xyzw;
-	  
-	      // convert from spherical coordinates
-	      ellipse_theta = ellipse.x * pi;
-	      ellipse_phi = ellipse.y * pi;
-	      normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
-	  
-	      dist_test = pointInEllipse((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w, normal);	      
-	      //dist_test = pointInCircle((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w);	 	  
+	if ((ellipse_coord[k] != vec2(0.0))
+	    && (ellipse_coord[k] != curr_closest[0])
+	    && (ellipse_coord[k] != curr_closest[1]))
+	  {
+	    // retrieve candidadte ellipse from displacement position
+	    ellipse = texture2D (textureA, ellipse_coord[k]).xyzw;
 
-	      // Ellipse in range
-	      if (dist_test <= 1.0)
-		if ((!depth_test) || (curr_closest.w == 0.0) || (ellipse.z - min_z <= ellipse.w))
-		  //		  if (dist_test < min_dist)
-		   {
-		     min_dist = dist_test;
-		     min_z = ellipse.z;
-		     curr_closest = vec4(ellipse_coord.xy, min_dist, 1.0);
-		   }
+	    // convert from spherical coordinates
+	    ellipse_theta = ellipse.x * pi;
+	    ellipse_phi = ellipse.y * pi;
+	    normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
+
+	    dist_test = pointInEllipse((gl_TexCoord[0].st - ellipse_coord[k].xy), ellipse.w, normal);	      
+	    //dist_test = pointInCircle((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w);	 	  
+
+	    // Ellipse in range
+	    if (dist_test <= 1.0) {
+	      bool inserted = false;
+	      // check if any slot is still free
+	      for (int l = 0; l < num_ellipses; ++l) {
+		if (inserted == false)
+		  if (min_z[l] == -1.0) {
+		    min_z[l] = ellipse.z;
+		    curr_closest[l] = ellipse_coord[k];
+		    // stop searching
+		    inserted = true;
+		  }
+	      }
+	      // check if it is closer than any already stored ellipse
+	      for (int l = 0; l < num_ellipses; ++l) {
+		if (inserted == false) {
+		  // check if is closest than first slot,
+		  // in this case eliminates second slot and pushes first to second
+		  if ((!depth_test) || (ellipse.z <= min_z[l])) {
+		    // push everyone one slot back (except last that is kicked out of line)
+		    for (int m = num_ellipses-1; m > l; --m) {
+		      min_z[m] = min_z[m-1];
+		      curr_closest[m] = curr_closest[m-1];
+		    }
+		    // replace current position with ellipse
+		    min_z[l] = ellipse.z;
+		    curr_closest[l] = ellipse_coord[k];
+		    // stop searching
+		    inserted = true;
+		  }
+		}
+	      }
 	    }
+	  }
       }
-    }    
-  gl_FragColor = curr_closest;
+    }
+  }
+
+/*   if (curr_closest[0] == curr_closest[1]) */
+/*     discard; */
+
+  gl_FragColor = vec4(curr_closest[0].xy, curr_closest[1].xy);
 }

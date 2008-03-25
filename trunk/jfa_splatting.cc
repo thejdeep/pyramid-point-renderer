@@ -126,8 +126,6 @@ void JFASplatting::getDataProjectedPixels ( int* data ) {
   for (int i = 0; i < fbo_width * fbo_height * 4; i+=4) {
     radius = outputBuffer[i + 3];
     if (radius > 0.0)
-      cout << outputBuffer[i + 0] << " " << outputBuffer[i + 1] <<  " " << outputBuffer[i + 2] << " " << outputBuffer[i + 3] << endl;
-    if (radius > 0.0)
       ++splats;
   }
 
@@ -227,7 +225,7 @@ void JFASplatting::evaluatePixels( void )
   }
 
 //   switchBuffers();
-//   shader_evaluate->set_uniform("step_length", (GLint)1);
+//   shader_evaluate->set_uniform("step_length", (GLint)0);
 //   shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
 //   drawQuad();
 
@@ -319,6 +317,7 @@ void JFASplatting::interpolate( void ) {
   glDepthMask(GL_FALSE);
 
   // Interpolate scattered data using pyramid algorithm
+  evaluatePixels();
   evaluatePixels();
 }
 
