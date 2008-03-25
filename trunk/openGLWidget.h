@@ -61,8 +61,6 @@ class openGLWidget: public QGLWidget {
 	fps_loop = 0;	
       }
 
-
-
     }
     
     void setFpsDisplay ( QLCDNumber * d ) { fpsDisplay = d; }

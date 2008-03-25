@@ -117,14 +117,16 @@ void JFASplatting::getDataReconstructedPixels ( int buffer ) {
 void JFASplatting::getDataProjectedPixels ( int* data ) {
   
   GLfloat *outputBuffer = new GLfloat[fbo_width * fbo_height * 4];
-  glReadBuffer(fbo_buffers[2]);
+  glReadBuffer(fbo_buffers[0]);
   glReadPixels(0, 0, fbo_width, fbo_height, GL_RGBA, GL_FLOAT, &outputBuffer[0]);
 
-  GLfloat radius = 0.0;
+  GLfloat radius;
   int splats = 0;
 
   for (int i = 0; i < fbo_width * fbo_height * 4; i+=4) {
     radius = outputBuffer[i + 3];
+    if (radius > 0.0)
+      cout << outputBuffer[i + 0] << " " << outputBuffer[i + 1] <<  " " << outputBuffer[i + 2] << " " << outputBuffer[i + 3] << endl;
     if (radius > 0.0)
       ++splats;
   }
@@ -153,7 +155,7 @@ void JFASplatting::projectSurfels ( Primitives* prim )
 
 //   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 //   glDrawBuffer(fbo_buffers[2]);
- 
+
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
 
@@ -207,7 +209,7 @@ void JFASplatting::evaluatePixels( void )
   glBindTexture(FBO_TYPE, fbo_textures[2]);
 
   shader_evaluate->use();
-  //shader_evaluate->set_uniform("depth_test", depth_test);
+  shader_evaluate->set_uniform("depth_test", depth_test);
   shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
@@ -225,7 +227,7 @@ void JFASplatting::evaluatePixels( void )
   }
 
 //   switchBuffers();
-//   shader_evaluate->set_uniform("step_length", (GLint)0);
+//   shader_evaluate->set_uniform("step_length", (GLint)1);
 //   shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
 //   drawQuad();
 
