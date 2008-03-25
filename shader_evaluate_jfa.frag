@@ -8,14 +8,16 @@
 const float pi = 3.1416;
 
 // flag for depth test on/off
-//uniform bool depth_test;
+uniform bool depth_test;
 
 uniform int step_length;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
+// Projected samples texture
 uniform sampler2D textureA;
+// Min dist texture
 uniform sampler2D textureB;
 
 // tests if a point is inside a circle.
@@ -85,64 +87,48 @@ void main (void) {
   vec3 normal;
   float ellipse_theta, ellipse_phi;
   vec4 ellipse_coord;
+  vec4 curr_closest = vec4(0.0);
 
   vec2 texSizeB = vec2(textureSize2D(textureB, 0));
+  float min_dist = 100000.0;
+  float min_z = -1.0;
 
-  // retrieve actual pixel with current texture coords of closest ellipse
-  vec4 curr_closest = texture2D (textureB, gl_TexCoord[0].st, 0).xyzw;
-
-  float min_dist = 10000;
-/*   if (curr_closest.w != 0.0) { */
-/*     // retrieve closest ellipse and compute its distance */
-/* /\*     ellipse = texture2D(textureA, curr_closest.xy).xyzw; *\/ */
-
-/* /\*     ellipse_theta = ellipse.x * pi; *\/ */
-/* /\*     ellipse_phi = ellipse.y * pi; *\/ */
-/* /\*     normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi)); *\/ */
-
-/* /\*     // this is the current minimum distance to be checked with new fetches *\/ */
-/* /\*     //    min_dist = pointInEllipse((gl_TexCoord[0].st - curr_closest.xy), ellipse.w, normal); *\/ */
-/* /\*     min_dist = pointInCircle(-(gl_TexCoord[0].st - curr_closest.xy), ellipse.w);	  *\/ */
-/* /\*     curr_closest.z = min_dist; *\/ */
-
-/*     // min_dist = curr_closest.z; */
-
-/*   } */
-
-
-  {
 
     for (int j = -1; j <= 1; ++j) {
       for (int i = -1; i <= 1; ++i) {
 
 	displacement = gl_TexCoord[0].st + (vec2(float(i*step_length), float(j*step_length)) / texSizeB);
-	
+
 	ellipse_coord = texture2D (textureB, displacement).xyzw;
-	
+
 	// if pixel from displacement position is a projected surfel, check if current
 	// pixel is inside its radius
-	if (ellipse_coord.w != 0.0) {
+	if (ellipse_coord.w != 0.0) 
+	  // if ((ellipse_coord.x >= 0.0) && (ellipse_coord.x < 1.0) && (ellipse_coord.y >= 0.0) && (ellipse_coord.y < 1.0))
+	    {
 	  
-	  // retrieve candidadte ellipse from displacement position
-	  ellipse = texture2D (textureA, ellipse_coord.xy).xyzw;
+	      // retrieve candidadte ellipse from displacement position
+	      ellipse = texture2D (textureA, ellipse_coord.xy).xyzw;
 	  
-	  // convert from spherical coordinates
-	  ellipse_theta = ellipse.x * pi;
-	  ellipse_phi = ellipse.y * pi;
-	  normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
+	      // convert from spherical coordinates
+	      ellipse_theta = ellipse.x * pi;
+	      ellipse_phi = ellipse.y * pi;
+	      normal = vec3 (cos(ellipse_theta)*sin(ellipse_phi), sin(ellipse_theta)*sin(ellipse_phi), cos(ellipse_phi));
 	  
-	  //dist_test = pointInEllipse((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w, normal);
-	  dist_test = pointInCircle((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w);	 	  
+	      dist_test = pointInEllipse((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w, normal);	      
+	      //dist_test = pointInCircle((gl_TexCoord[0].st - ellipse_coord.xy), ellipse.w);	 	  
 
-	  // Ellipse in range	
-	  //if (dist_test >= 0.0)
-	  if (dist_test < min_dist) {
-	    min_dist = dist_test;
-	    curr_closest = vec4(ellipse_coord.xy, min_dist, 1.0);
-	  }
-	}
+	      // Ellipse in range
+	      if (dist_test <= 1.0)
+		if ((!depth_test) || (curr_closest.w == 0.0) || (ellipse.z - min_z <= ellipse.w))
+		  //		  if (dist_test < min_dist)
+		   {
+		     min_dist = dist_test;
+		     min_z = ellipse.z;
+		     curr_closest = vec4(ellipse_coord.xy, min_dist, 1.0);
+		   }
+	    }
       }
-    }
-  }
+    }    
   gl_FragColor = curr_closest;
 }
