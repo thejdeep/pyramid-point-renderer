@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D textureA;
 uniform sampler2D textureB;
 
@@ -82,11 +84,29 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   //  else return -1;
 }
 
+/**
+ * Unompresses two coordinates in range [0, texSize[ from one 32bits float.
+ * returns coordinates in range [0, 1]
+ **/
+vec2 uncompress(in float compressed, in vec2 tex_size) {
+  float total_size = tex_size.x * tex_size.y;
+  float uncompressed = compressed * total_size;
+  float y = uncompressed / tex_size.y;
+  float x = (y - floor(y));
+  return vec2(x, floor(y) / tex_size.y);
+}
+
 void main (void) {
 
   vec4 closest_coord = texture2D (textureA, gl_TexCoord[0].st).xyzw;
   vec4 color = vec4(1.0);
   vec3 normal = vec3(0.0);
+  vec2 ellipse_coord[2];
+
+  ellipse_coord[0] = uncompress(closest_coord.x, vec2(1024.0, 1024.0));
+  ellipse_coord[1] = uncompress(closest_coord.z, vec2(1024.0, 1024.0));
+
+  closest_coord = vec4(ellipse_coord[0], ellipse_coord[1]);
 
   if (closest_coord.zw != vec2(0.0, 0.0)) {
     vec4 pixel[2];

@@ -29,10 +29,10 @@ void main(void)
   float theta = atan( normal_vec.y, normal_vec.x );
   float phi = acos( normal_vec.z );
 
+  // compress coords by shifting s position 10 bits (2^10)
+  float compressed_coords = (floor(gl_FragCoord.t)*1024.0 + floor(gl_FragCoord.s)) / (1024.0*1024.0);
+
   // [theta, phi, depth, radius]
-  //gl_FragColor = vec4 (theta/pi, phi/pi, z, r);
-
-
   gl_FragData[0] = vec4 (theta/pi, phi/pi, z, r);
-  gl_FragData[1] = vec4 (gl_FragCoord.st/1024.0, 0.0, 0.0);
+  gl_FragData[1] = vec4 (compressed_coords, 0.0, 0.0, 0.0);
 }
