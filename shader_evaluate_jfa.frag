@@ -81,6 +81,27 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   //  else return -1;
 }
 
+/**
+ * Compresses two coordinates in range [0, texSize[ in one 32bits float.
+ * expects coordinates in range [0, 1]
+ **/
+float compress(in float i, in float j, in vec2 tex_size) {  
+  float total_size = tex_size.x * tex_size.y;
+  return float(j*total_size + i*tex_size.x) / total_size;
+}
+
+/**
+ * Unompresses two coordinates in range [0, texSize[ from one 32bits float.
+ * returns coordinates in range [0, 1]
+ **/
+vec2 uncompress(in float compressed, in vec2 tex_size) {
+  float total_size = tex_size.x * tex_size.y;
+  float uncompressed = compressed * total_size;
+  float y = uncompressed / tex_size.y;
+  float x = (y - floor(y));
+  return vec2(x, floor(y) / tex_size.y);
+}
+
 void main (void) {
   vec4 ellipse;
   vec2 displacement;
@@ -100,8 +121,9 @@ void main (void) {
       displacement = gl_TexCoord[0].st + (vec2(float(i*step_length), float(j*step_length)) / texSizeB);
 
       ellipse_coords = texture2D (textureB, displacement).xyzw;
-      ellipse_coord[0] = ellipse_coords.xy;
-      ellipse_coord[1] = ellipse_coords.zw;
+
+      ellipse_coord[0] = uncompress(ellipse_coords.x, texSizeB);
+      ellipse_coord[1] = uncompress(ellipse_coords.z, texSizeB);
 
       for (int k = 0; k < num_ellipses; ++k) {
 	// if pixel from displacement position is a projected surfel, check if current
@@ -159,8 +181,10 @@ void main (void) {
     }
   }
 
-/*   if (curr_closest[0] == curr_closest[1]) */
-/*     discard; */
+  for (int i = 0; i < num_ellipses; ++i) {
+    curr_closest[i].x = compress (curr_closest[i].x, curr_closest[i].y, texSizeB);
+    curr_closest[i].y = 0.0;
+  }
 
   gl_FragColor = vec4(curr_closest[0].xy, curr_closest[1].xy);
 }

@@ -101,12 +101,14 @@ void JFASplatting::getDataReconstructedPixels ( int buffer ) {
   int pixels = 0;
 
   for (int i = 0; i < fbo_width * fbo_height * 4; i+=4) {
-    if (outputBuffer[i + 3] > 0)
-    ++pixels;
+    if (outputBuffer[i + 0] > 0) {
+//       cout << outputBuffer[i + 0] << " " << outputBuffer[i + 1] << " " <<
+// 	outputBuffer[i + 2] << " " << outputBuffer[i + 3] << endl;
+      ++pixels;
+    }
   }
   
   cout << pixels << endl;
-//   cout << sqrt((double)pixels) / 2.0 << endl;
 
   delete outputBuffer;
 }
@@ -124,10 +126,15 @@ void JFASplatting::getDataProjectedPixels ( int* data ) {
   int splats = 0;
 
   for (int i = 0; i < fbo_width * fbo_height * 4; i+=4) {
-    radius = outputBuffer[i + 3];
-    if (radius > 0.0)
+    radius = outputBuffer[i + 0];
+    if (radius > 0.0) {
+//       cout << outputBuffer[i + 0] << " " << outputBuffer[i + 1] << " " <<
+// 	outputBuffer[i + 2] << " " << outputBuffer[i + 3] << endl;
       ++splats;
+    }
   }
+
+  cout << "********" << endl;
 
   data[0] += splats;
   data[1] += splats;
@@ -197,11 +204,9 @@ void JFASplatting::switchBuffers( void ) {
 }
 
 /**
-
  **/
 void JFASplatting::evaluatePixels( void )
 {  
-
   // Activate projected surfels texture
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(FBO_TYPE, fbo_textures[2]);
@@ -231,7 +236,8 @@ void JFASplatting::evaluatePixels( void )
 
   shader_evaluate->use(0);
 
-  //getDataReconstructedPixels ( dest_buffer );
+//   getDataReconstructedPixels ( dest_buffer );
+//   getDataReconstructedPixels ( read_buffer );
 }
 
 /**
