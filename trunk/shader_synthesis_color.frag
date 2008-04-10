@@ -26,7 +26,7 @@ uniform sampler2D textureC;
 float pointInCircle(in vec2 d, in float radius){
   float sqrt_len = d.x*d.x + d.y*d.y;
 
-  radius *= 2.0;
+  radius *= 1.0;
   radius += prefilter_size;
 
   float dif = sqrt_len / (radius*radius);
@@ -162,40 +162,6 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // @param d Difference vector from center of ellipse to point.
 // @param radius Ellipse major axis length * 0.5.
 // @param normal Normal vector.
-float pointInEllipse(in vec2 d, in float radius){
-  vec3 normal = vec3(0.0, 0.0, 1.0);
-
-  // angle between normal and z direction
-  float angle = 1.0;
-
-  // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-			 -d.x*sin(angle) + d.y*cos(angle));
-
-  // major and minor axis
-  float a = 2.0*radius;
-  float b = a*normal.z;
-
-  // include antialiasing filter (increase both axis)
-  a += prefilter_size;
-  b += prefilter_size;
-
-  // inside ellipse test
-  //  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
-  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
-
-  if (test <= 1.0)
-    return test;
-  else return -1.0;
-}
-
-// tests if a point is inside an ellipse.
-// Ellipse is centered at origin and point displaced by d.
-// Radius is the half the ellipse's major axis.
-// Minor axis is computed by normal direction.
-// @param d Difference vector from center of ellipse to point.
-// @param radius Ellipse major axis length * 0.5.
-// @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
   vec3 normal_vec = normal;
@@ -219,7 +185,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 			 -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 2.0*radius;
+  float a = 1.0*radius;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -230,16 +196,8 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   //  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size) {
-    //    normal_vec.xy += rotated_pos * test;
-/*     normal_vec += ((rotated_pos.x*rotated_pos.x)/(a*a)); */
-/*     normal = normalize(normal_vec); */
-
-/*     if (normal.z < 0.0) */
-/*       return -1.0; */
-    
+  if (test <= reconstruction_filter_size)
     return test;
-  }
   else return -1.0;
 }
 
@@ -261,7 +219,7 @@ float pointInRectangle(in vec2 d, in float radius, in vec3 normal){
 			 -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = 2.0*radius;
+  float a = 1.0*radius;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -307,12 +265,10 @@ void main (void) {
     if  (bufferA.w != 0.0) {
       vec4 up_pixelA = texture2D (textureA, gl_TexCoord[3].st).xyzw;
       vec4 up_pixelB = texture2D (textureB, gl_TexCoord[3].st).xyzw;
-      vec4 up_pixelC = texture2D (textureC, gl_TexCoord[3].st).xyzw;  
       if ( (up_pixelA.w != 0.0) && (bufferB.x  - bufferB.y > up_pixelB.x + up_pixelB.y) )
 	occluded = true;
-
     }
-  }  
+  }
 
   // unspecified pixel (weight == 0.0) or occluded pixel
   // synthesize pixel
@@ -446,7 +402,7 @@ void main (void) {
 	  weights[i] = 0.0;
 	}
 	else {
-	  if (!elliptical_weight)
+	  if (elliptical_weight)
 	    weights[i] = exp(-0.5*dist_test);
 
 	  total_weight ++;
@@ -462,11 +418,11 @@ void main (void) {
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
-      if (occluded) {
-	for (int i = 0; i < 4; ++i)
-	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
-	    occluded = false;
-      }
+/*       if (occluded) { */
+/* 	for (int i = 0; i < 4; ++i) */
+/* 	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0)) */
+/* 	    occluded = false; */
+/*       } */
 
       // If the pixel was set as occluded but there are no valid
       // pixels in range to synthesize, leave as it is
@@ -488,13 +444,11 @@ void main (void) {
 	      //if (abs(pixelC[i].w - obj_id) < 0.1 ) 
 	      {
 		// Depth test between ellipses in range
-		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {
-		  //float w = abs(4.0 * 3.1416 * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
-		  float w = 1.0;
-		  total_weight += weights[i] * w;
-		  bufferA += weights[i] * pixelA[i] * w;
-		  bufferB += weights[i] * pixelB[i] * w;
-		  bufferC += weights[i] * pixelC[i] * w;
+		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  
+		  total_weight += weights[i];
+		  bufferA += weights[i] * pixelA[i];
+		  bufferB += weights[i] * pixelB[i];
+		  bufferC += weights[i] * pixelC[i];
 		}
 	      }
 	    }
@@ -506,7 +460,6 @@ void main (void) {
 	    bufferA.xyz = normalize(bufferA.xyz);
 	    bufferB /= total_weight;
 	    bufferC.rgb /= total_weight;
-	    //bufferC.w = 1.0;
 	    bufferC.w = obj_id;
 	  }
       }

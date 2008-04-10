@@ -43,7 +43,7 @@ class EWASurfaceSplatting : public PointBasedRender
   void draw();
   void draw(int) {}
   
-  void setVertices( vector<Surfel> *surfels );
+  void setVertices( vector<Surfeld> *surfels );
 
  private:
 
@@ -51,7 +51,7 @@ class EWASurfaceSplatting : public PointBasedRender
   int number_points;
 
   /// Pointer to surfel vector.
-  vector<Surfel> *surfels;
+  vector<Surfeld> *surfels;
 
   /// Vector of pixels
   vector<zBufferPixel> zbuffer;

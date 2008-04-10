@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <cmath>
+#include "surfels.h"
 
 using namespace std;
 
@@ -49,13 +50,13 @@ public:
 
 
   // Rotate a vector using this quaternion
-  void rotate(double vec[]) {
-    double len = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+  void rotate(Point* vec) {
+    double len = sqrt(vec->x()*vec->x() + vec->y()*vec->y() + vec->z()*vec->z());
 
     if (len == 0.0)
       return;
 
-    Quat v(vec[0], vec[1], vec[2], 0);
+    Quat v(vec->x(), vec->y(), vec->z(), 1.0);
     Quat qbar(-x, -y, -z, a); // complement
     Quat qtmp;
  
@@ -64,9 +65,9 @@ public:
     qtmp.normalize();
 
     //rescale to original size
-    vec[0] = qtmp.x * len;
-    vec[1] = qtmp.y * len;
-    vec[2] = qtmp.z * len;
+    (*vec)[0] = qtmp.x * len;
+    (*vec)[0] = qtmp.y * len;
+    (*vec)[0] = qtmp.z * len;
   }
 
   // Multiply by given quaternion

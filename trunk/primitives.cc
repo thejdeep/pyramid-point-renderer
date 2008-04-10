@@ -6,12 +6,10 @@
 #include <fstream>
 #include <assert.h>
 
-#define PI 3.14159265
+#define NUM_MATERIALS 6
 
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
-
-#define NUM_MATERIALS 6
 
 GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
@@ -29,15 +27,21 @@ GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 void Primitives::render ( void ) {
 
   if ((renderer_type == PYRAMID_POINTS) ||
+      (renderer_type == PYRAMID_POINTS_UPSAMPLING) ||
       (renderer_type == RASTERIZE_ELLIPSES)||
       (renderer_type == JFA_SPLATTING)) {
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glVertexPointer(4, GL_FLOAT, 0, NULL); 
     
-    glEnableClientState(GL_COLOR_ARRAY);
+//     glEnableClientState(GL_COLOR_ARRAY);
+//     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+//     glColorPointer(4, GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-    glColorPointer(4, GL_FLOAT, 0, NULL);
+    glTexCoordPointer(4, GL_FLOAT, 0, NULL);
 
     glEnableClientState(GL_NORMAL_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
@@ -213,6 +217,8 @@ void Primitives::setRendererType ( int rtype ) {
 
   if (renderer_type == PYRAMID_POINTS)
     setPyramidPointsArraysColor();
+  else if (renderer_type == PYRAMID_POINTS_UPSAMPLING)
+    setPyramidPointsArraysColor();
   else if (renderer_type == PYRAMID_POINTS_LOD) {
     setPyramidPointsArraysLOD();
     setPatchesArray();
@@ -254,14 +260,14 @@ void Primitives::setPyramidPointsArrays ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
-    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
-    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
-    vertex_array[pos*4 + 3] = (GLfloat)(it->radius());
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
+    vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
-    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
-    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
 
     ++pos;
   }
@@ -300,27 +306,41 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
-    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
-    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
-    vertex_array[pos*4 + 3] = (GLfloat)(it->radius());
-
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
+    vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
+    
     if (color_model) {
-      color_array[pos*4 + 0] = (GLfloat)(it->color().x());
-      color_array[pos*4 + 1] = (GLfloat)(it->color().y());
-      color_array[pos*4 + 2] = (GLfloat)(it->color().z());
+      color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+      color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
+      color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
     else {
-      color_array[pos*4 + 0] = obj_colors[id][0];
-      color_array[pos*4 + 1] = obj_colors[id][1];
-      color_array[pos*4 + 2] = obj_colors[id][2];
+      std::pair<double, Vector> minor = it->MinorAxis();
+      minor.second = minor.second.norm() * minor.first;      
+
+      color_array[pos*4 + 0] = (GLfloat)minor.second.x();
+      color_array[pos*4 + 1] = (GLfloat)minor.second.y();
+      color_array[pos*4 + 2] = (GLfloat)minor.second.z();
+
+//       color_array[pos*4 + 0] = obj_colors[id][0];
+//       color_array[pos*4 + 1] = obj_colors[id][1];
+//       color_array[pos*4 + 2] = obj_colors[id][2];
     }
     //color_array[pos*4 + 3] = type;
     color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
-    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
-    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+    std::pair<double, Vector> major = it->MajorAxis();    
+    major.second = major.second.norm() * major.first;
+
+    normal_array[pos*3 + 0] = (GLfloat)major.second.x();
+    normal_array[pos*3 + 1] = (GLfloat)major.second.y();
+    normal_array[pos*3 + 2] = (GLfloat)major.second.z();
+
+//     normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+//     normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+//     normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
 
     ++pos;
   }
@@ -344,10 +364,14 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   glEnableClientState(GL_VERTEX_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL); 
-  
-  glEnableClientState(GL_COLOR_ARRAY);
+
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-  glColorPointer(4, GL_FLOAT, 0, NULL); 
+  glTexCoordPointer(4, GL_FLOAT, 0, NULL);
+
+//   glEnableClientState(GL_COLOR_ARRAY);
+//   glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+//   glColorPointer(4, GL_FLOAT, 0, NULL); 
 
   glEnableClientState(GL_NORMAL_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
@@ -372,10 +396,10 @@ void Primitives::countNumVertsLOD ( int *spl ) {
 
     for (uint i = 0; i < numPatches; ++i) {
       error = surfels[LOD_LEVELS-1][i].perpendicularError();
-      p = surfels[LOD_LEVELS-1][i].position();
-      n = surfels[LOD_LEVELS-1][i].normal();
+      p = surfels[LOD_LEVELS-1][i].Center();
+      n = surfels[LOD_LEVELS-1][i].Normal();
       
-      cos_alpha = (p - eye).normalize() * n;
+      cos_alpha = (p - eye).norm() * n;
       d = (p - eye).length();
       sin_alpha = sqrt( 1.0 - cos_alpha*cos_alpha);
       error *= sin_alpha / d;
@@ -409,14 +433,14 @@ void Primitives::setPyramidPointsArraysLOD ( void ) {
   uint pos = 0;
   for (surfelVectorIter it = surfels_lod.begin(); it != surfels_lod.end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
-    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
-    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
-    vertex_array[pos*4 + 3] = (GLfloat)(it->radius());
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
+    vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-    normal_array[pos*4 + 0] = (GLfloat)(it->normal().x());
-    normal_array[pos*4 + 1] = (GLfloat)(it->normal().y());
-    normal_array[pos*4 + 2] = (GLfloat)(it->normal().z());
+    normal_array[pos*4 + 0] = (GLfloat)(it->Normal().x());
+    normal_array[pos*4 + 1] = (GLfloat)(it->Normal().y());
+    normal_array[pos*4 + 2] = (GLfloat)(it->Normal().z());
     normal_array[pos*4 + 3] = 1.0;
 
     ++pos;
@@ -461,13 +485,13 @@ void Primitives::setPatchesArray ( void ) {
   surfels_per_level_array = new GLint[numPatches*4];
 
   for (uint i = 0; i < numPatches; ++i) {
-    Point p = surfels[LOD_LEVELS-1][i].position();
+    Point p = surfels[LOD_LEVELS-1][i].Center();
     vertex_array[i*4 + 0] = (GLfloat)p.x();
     vertex_array[i*4 + 1] = (GLfloat)p.y();
     vertex_array[i*4 + 2] = (GLfloat)p.z();
-    vertex_array[i*4 + 3] = (GLfloat)surfels[LOD_LEVELS-1][i].radius();
+    vertex_array[i*4 + 3] = (GLfloat)surfels[LOD_LEVELS-1][i].Radius();
 
-    Vector n = surfels[LOD_LEVELS-1][i].normal();
+    Vector n = surfels[LOD_LEVELS-1][i].Normal();
     normal_array[i*4 + 0] = (GLfloat)n.x();
     normal_array[i*4 + 1] = (GLfloat)n.y();
     normal_array[i*4 + 2] = (GLfloat)n.z();
@@ -519,8 +543,8 @@ void Primitives::setPyramidPointsDisplayList ( void ) {
   glBegin(GL_POINTS);
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
     glColor4fv(obj_colors[id]);
-    glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
-    glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
+    glNormal3f(it->Normal().x(), it->Normal().y(), it->Normal().z());
+    glVertex4f(it->Center().x(), it->Center().y(), it->Center().z(), it->Radius());
   }
   glEnd();
 
@@ -554,15 +578,15 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
-    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
-    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
     vertex_array[pos*4 + 3] = 0.0001;
 
     if (color_model) {
-      color_array[pos*4 + 0] = (GLfloat)(it->color().x());
-      color_array[pos*4 + 1] = (GLfloat)(it->color().y());
-      color_array[pos*4 + 2] = (GLfloat)(it->color().z());
+      color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+      color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
+      color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
     else {
       color_array[pos*4 + 0] = obj_colors[id][0];
@@ -570,11 +594,11 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
       color_array[pos*4 + 2] = obj_colors[id][2];
     }
     //    color_array[pos*4 + 3] = type;
-    color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
+    color_array[pos*4 + 3] = (GLfloat)material / (GLfloat)NUM_MATERIALS;
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
-    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
-    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
 
     ++pos;
   }
@@ -635,12 +659,12 @@ void Primitives::setPyramidTrianglesDisplayList( void ) {
   //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
 
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    p[0] = surfels[0].at( it->verts[0] ).position();
-    p[1] = surfels[0].at( it->verts[1] ).position();
-    p[2] = surfels[0].at( it->verts[2] ).position();
-    n[0] = surfels[0].at( it->verts[0] ).normal();
-    n[1] = surfels[0].at( it->verts[1] ).normal();
-    n[2] = surfels[0].at( it->verts[2] ).normal();
+    p[0] = surfels[0].at( it->verts[0] ).Center();
+    p[1] = surfels[0].at( it->verts[1] ).Center();
+    p[2] = surfels[0].at( it->verts[2] ).Center();
+    n[0] = surfels[0].at( it->verts[0] ).Normal();
+    n[1] = surfels[0].at( it->verts[1] ).Normal();
+    n[2] = surfels[0].at( it->verts[2] ).Normal();
 
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
@@ -675,15 +699,15 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
-    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
-    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
-    vertex_array[pos*4 + 3] = (GLfloat)(it->radius());
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
+    vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
     if (color_model) {
-      color_array[pos*4 + 0] = (GLfloat)(it->color().x());
-      color_array[pos*4 + 1] = (GLfloat)(it->color().y());
-      color_array[pos*4 + 2] = (GLfloat)(it->color().z());
+      color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+      color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
+      color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
     else {
       color_array[pos*4 + 0] = obj_colors[id][0];
@@ -692,9 +716,9 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
     }
     color_array[pos*4 + 3] = type;
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
-    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
-    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
 
     ++pos;
   }
@@ -758,15 +782,15 @@ void Primitives::setPyramidLinesDisplayList( void ) {
   glLineWidth(1.0);
   glDisable(GL_LINE_SMOOTH);
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    r[0] = surfels[0].at( it->verts[0] ).radius();
-    p[0] = surfels[0].at( it->verts[0] ).position();
-    n[0] = surfels[0].at( it->verts[0] ).normal();
-    r[1] = surfels[0].at( it->verts[1] ).radius();
-    p[1] = surfels[0].at( it->verts[1] ).position();
-    n[1] = surfels[0].at( it->verts[1] ).normal();
-    p[2] = surfels[0].at( it->verts[0] ).position() + Vector(0.0000001, 0.0000001, 0.0000001);
-    n[2] = surfels[0].at( it->verts[0] ).normal();
-    r[2] = surfels[0].at( it->verts[0] ).radius();
+    r[0] = surfels[0].at( it->verts[0] ).Radius();
+    p[0] = surfels[0].at( it->verts[0] ).Center();
+    n[0] = surfels[0].at( it->verts[0] ).Normal();
+    r[1] = surfels[0].at( it->verts[1] ).Radius();
+    p[1] = surfels[0].at( it->verts[1] ).Center();
+    n[1] = surfels[0].at( it->verts[1] ).Normal();
+    p[2] = surfels[0].at( it->verts[0] ).Center() + Vector(0.0000001, 0.0000001, 0.0000001);
+    n[2] = surfels[0].at( it->verts[0] ).Normal();
+    r[2] = surfels[0].at( it->verts[0] ).Radius();
 //     p[2] = Point ((p[0].x() + p[1].x())*0.5, (p[0].y() + p[1].y())*0.5, (p[0].z() + p[1].z())*0.5);
 //     n[2] = Vector((n[0].x() + n[1].x())*0.5, (n[0].y() + n[1].y())*0.5, (n[0].z() + n[1].z())*0.5);
 //     r[2] = (r[0] + r[1]) * 0.5;
@@ -816,12 +840,12 @@ void Primitives::setPyramidHybridDisplayList( void ) {
 
   // Half as triangles.
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    p[0] = surfels[0].at( it->verts[0] ).position();
-    p[1] = surfels[0].at( it->verts[1] ).position();
-    p[2] = surfels[0].at( it->verts[2] ).position();
-    n[0] = surfels[0].at( it->verts[0] ).normal();
-    n[1] = surfels[0].at( it->verts[1] ).normal();
-    n[2] = surfels[0].at( it->verts[2] ).normal();
+    p[0] = surfels[0].at( it->verts[0] ).Center();
+    p[1] = surfels[0].at( it->verts[1] ).Center();
+    p[2] = surfels[0].at( it->verts[2] ).Center();
+    n[0] = surfels[0].at( it->verts[0] ).Normal();
+    n[1] = surfels[0].at( it->verts[1] ).Normal();
+    n[2] = surfels[0].at( it->verts[2] ).Normal();
 
     if ((p[0].x() > 0.0) || (p[1].x() > 0.0) || (p[2].x() > 0.0)) {
 
@@ -847,12 +871,12 @@ void Primitives::setPyramidHybridDisplayList( void ) {
 
   glBegin(GL_POINTS);  
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
-    if (it->position().x() <= 0.001) 
+    if (it->Center().x() <= 0.001) 
       {
       //      glColor4fv(obj_colors[1]);
       glColor4f(obj_colors[0][0], obj_colors[0][1], obj_colors[0][2], 1.0);
-      glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
-      glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
+      glNormal3f(it->Normal().x(), it->Normal().y(), it->Normal().z());
+      glVertex4f(it->Center().x(), it->Center().y(), it->Center().z(), it->Radius());
     }
   }
   glEnd();
@@ -880,12 +904,12 @@ void Primitives::setPyramidHybridTestDisplayList( void ) {
 
   // Half as triangles.
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    p[0] = surfels[0].at( it->verts[0] ).position();
-    p[1] = surfels[0].at( it->verts[1] ).position();
-    p[2] = surfels[0].at( it->verts[2] ).position();
-    n[0] = surfels[0].at( it->verts[0] ).normal();
-    n[1] = surfels[0].at( it->verts[1] ).normal();
-    n[2] = surfels[0].at( it->verts[2] ).normal();
+    p[0] = surfels[0].at( it->verts[0] ).Center();
+    p[1] = surfels[0].at( it->verts[1] ).Center();
+    p[2] = surfels[0].at( it->verts[2] ).Center();
+    n[0] = surfels[0].at( it->verts[0] ).Normal();
+    n[1] = surfels[0].at( it->verts[1] ).Normal();
+    n[2] = surfels[0].at( it->verts[2] ).Normal();
 
     if ((p[0].x() > 0.0) || (p[1].x() > 0.0) || (p[2].x() > 0.0)) {
 
@@ -914,12 +938,12 @@ void Primitives::setPyramidHybridTestDisplayList( void ) {
 
   glBegin(GL_POINTS);  
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
-    if (it->position().x() <= 0.001) 
+    if (it->Center().x() <= 0.001) 
       {
       //      glColor4fv(obj_colors[1]);
       glColor4f(obj_colors[0][0], obj_colors[0][1], obj_colors[0][2], 1.0);
-      glNormal3f(it->normal().x(), it->normal().y(), it->normal().z());
-      glVertex4f(it->position().x(), it->position().y(), it->position().z(), it->radius());
+      glNormal3f(it->Normal().x(), it->Normal().y(), it->Normal().z());
+      glVertex4f(it->Center().x(), it->Center().y(), it->Center().z(), it->Radius());
     }
   }
   glEnd();
@@ -951,15 +975,15 @@ void Primitives::setTrianglesArrays ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->position().x());
-    vertex_array[pos*4 + 1] = (GLfloat)(it->position().y());
-    vertex_array[pos*4 + 2] = (GLfloat)(it->position().z());
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
     vertex_array[pos*4 + 3] = 1.0;
 
     if (color_model) {
-      color_array[pos*4 + 0] = (GLfloat)(it->color().x());
-      color_array[pos*4 + 1] = (GLfloat)(it->color().y());
-      color_array[pos*4 + 2] = (GLfloat)(it->color().z());
+      color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+      color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
+      color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
     else {
       color_array[pos*4 + 0] = obj_colors[id][0];
@@ -968,9 +992,9 @@ void Primitives::setTrianglesArrays ( void ) {
     }
     color_array[pos*4 + 3] = type;
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->normal().x());
-    normal_array[pos*3 + 1] = (GLfloat)(it->normal().y());
-    normal_array[pos*3 + 2] = (GLfloat)(it->normal().z());
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
 
     ++pos;
   }
@@ -1031,12 +1055,12 @@ void Primitives::setTrianglesDisplayList( void ) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    p[0] = surfels[0].at( it->verts[0] ).position();
-    p[1] = surfels[0].at( it->verts[1] ).position();
-    p[2] = surfels[0].at( it->verts[2] ).position();
-    n[0] = surfels[0].at( it->verts[0] ).normal();
-    n[1] = surfels[0].at( it->verts[1] ).normal();
-    n[2] = surfels[0].at( it->verts[2] ).normal();
+    p[0] = surfels[0].at( it->verts[0] ).Center();
+    p[1] = surfels[0].at( it->verts[1] ).Center();
+    p[2] = surfels[0].at( it->verts[2] ).Center();
+    n[0] = surfels[0].at( it->verts[0] ).Normal();
+    n[1] = surfels[0].at( it->verts[1] ).Normal();
+    n[2] = surfels[0].at( it->verts[2] ).Normal();
 
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 3; ++i) {
@@ -1068,12 +1092,12 @@ void Primitives::setLinesDisplayList( void ) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   for (triangleVectorIter it = triangles.begin(); it != triangles.end(); ++it) {
-    p[0] = surfels[0].at( it->verts[0] ).position();
-    p[1] = surfels[0].at( it->verts[1] ).position();
-    p[2] = surfels[0].at( it->verts[2] ).position();
-    n[0] = surfels[0].at( it->verts[0] ).normal();
-    n[1] = surfels[0].at( it->verts[1] ).normal();
-    n[2] = surfels[0].at( it->verts[2] ).normal();
+    p[0] = surfels[0].at( it->verts[0] ).Center();
+    p[1] = surfels[0].at( it->verts[1] ).Center();
+    p[2] = surfels[0].at( it->verts[2] ).Center();
+    n[0] = surfels[0].at( it->verts[0] ).Normal();
+    n[1] = surfels[0].at( it->verts[1] ).Normal();
+    n[2] = surfels[0].at( it->verts[2] ).Normal();
 
     glBegin(GL_LINES);
     for (int i = 0; i < 3; ++i) {
@@ -1109,7 +1133,7 @@ void Primitives::createLOD ( int lod ) {
   Box worldCoords(min, max);
   kdTree = new KdTree3D(worldCoords);
 
-  vector<Surfel> s = surfels[lod-1];
+  vector<Surfeld> s = surfels[lod-1];
 
   cout << "creating kd-tree " << lod << endl;
 
@@ -1126,8 +1150,8 @@ void Primitives::createLOD ( int lod ) {
     if ( node->isLeaf() )
       {
 	if (node->itemPtrCount() > 0) {
-	  Surfel s = *(node->element(0));
-	  s.setId(id);
+	  Surfeld s = *(node->element(0));
+	  s.SetID(id);
 	  surfels[lod].push_back( s );
 	  ++id;
 	}
@@ -1143,15 +1167,15 @@ void Primitives::createLOD ( int lod ) {
   node = kdTree->begin();
   int id_merge = 0;
   id = 0;
-  double max_error = DBL_MIN;
+  //  double max_error = DBL_MIN;
   while (node != NULL) {
 
     if ( node->isLeaf() )
       {
       if (node->itemPtrCount() > 0) {
 	
-	Surfel *son;
-	Surfel *s = &surfels[lod][id];
+	Surfeld *son;
+	Surfeld *s = &surfels[lod][id];
 	double max = DBL_MIN, min = DBL_MAX;
 	double max_son_error = DBL_MIN;
 	vector<int> *ids = node->mergedElements();
@@ -1163,12 +1187,14 @@ void Primitives::createLOD ( int lod ) {
 
 	  // Compute perpendicular error between merged node and this son
 	  son = &surfels[lod-1][*it];
-	  double normal_dot = son->normal().normalize() * s->normal().normalize();
+	  Vector son_normal = son->Normal();
+	  Vector s_normal = s->Normal();
+	  double normal_dot =  son_normal.norm() * s_normal.norm();
 	  if (normal_dot*normal_dot > 1.0) 
 	    normal_dot = 1.0;
-	  double di = son->radius() * sqrt(1.0 - normal_dot*normal_dot);
-	  Vector v = son->position() - s->position();
-	  double ei = v * s->normal();
+	  double di = son->Radius() * sqrt(1.0 - normal_dot*normal_dot);
+	  Vector v = son->Center() - s->Center();
+	  double ei = v * s->Normal();
 	  if (ei + di > max)
 	    max = ei + di;
 	  if (ei - di < min)
@@ -1180,11 +1206,11 @@ void Primitives::createLOD ( int lod ) {
 	}
 	// The perpendicular error of this node is the difference between
 	// the max and min error between all sons -- PBG pg 335
-	s->ep = (max - min) + max_son_error;
+	//s->perpendicularError() = (max - min) + max_son_error;
 
-	if (lod == LOD_LEVELS-1)
-	  if (s->ep > max_error)
-	    max_error = s->ep;
+// 	if (lod == LOD_LEVELS-1)
+// 	  if (s->ep > max_error)
+// 	    max_error = s->ep;
 
 	assert (max >= min);
 
@@ -1201,10 +1227,10 @@ void Primitives::createLOD ( int lod ) {
   }
 
   //normalize error for highest level
-  if (lod == LOD_LEVELS-1) {
-    for (vector<Surfel>::iterator it = surfels[LOD_LEVELS-1].begin(); it != surfels[LOD_LEVELS-1].end(); ++it)
-      it->ep /= max_error;
-  }
+//   if (lod == LOD_LEVELS-1) {
+//     for (vector<Surfeld>::iterator it = surfels[LOD_LEVELS-1].begin(); it != surfels[LOD_LEVELS-1].end(); ++it)
+//       it->ep /= max_error;
+//   }
 
   cout << "created ids " << lod << endl;
 
@@ -1224,14 +1250,14 @@ void Primitives::reorderSurfels ( void ) {
   int num_surfels_per_level[LOD_LEVELS];
   num_surfels_per_level[LOD_LEVELS-1] = 1;
 
-  vector<Surfel>::iterator curr_surfel = surfels_lod.begin();
+  vector<Surfeld>::iterator curr_surfel = surfels_lod.begin();
 
   int patch_id = 0;
-  for (vector<Surfel>::iterator it = surfels[LOD_LEVELS-1].begin(); it != surfels[LOD_LEVELS-1].end(); ++it) {
+  for (vector<Surfeld>::iterator it = surfels[LOD_LEVELS-1].begin(); it != surfels[LOD_LEVELS-1].end(); ++it) {
 
     surfels_per_level.push_back( surfels_lod.size() );
 
-    patch_id = it->id();
+    patch_id = it->ID();
 
     for (int i = LOD_LEVELS-2; i >= 0; --i) {
 
@@ -1252,7 +1278,7 @@ void Primitives::reorderSurfels ( void ) {
 	else
 	  curr_surfel++;
 
-	patch_id = curr_surfel->id();
+	patch_id = curr_surfel->ID();
 
       }
     }
@@ -1319,20 +1345,20 @@ void Primitives::writeFileLOD ( const char* fn ) {
 
 		px=0; py=0; pz=0; r=0; nx=0; ny=0; nz=0;
 
-		if ( !isnan( (GLfloat)(it->position().x()) ) )
-			px = (GLfloat)(it->position().x());
-		if ( !isnan( (GLfloat)(it->position().y()) ) )
-			py = (GLfloat)(it->position().y());
-		if ( !isnan( (GLfloat)(it->position().z()) ) )
-			pz = (GLfloat)(it->position().z());
-		if ( !isnan( (GLfloat)(it->radius()) ) )
-			r = (GLfloat)(it->radius());
-		if ( !isnan( (GLfloat)(it->normal().x()) ) )
-			nx = (GLfloat)(it->normal().x());
-		if ( !isnan( (GLfloat)(it->normal().y()) ) )
-			ny = (GLfloat)(it->normal().y());
-		if ( !isnan( (GLfloat)(it->normal().z()) ) )
-			nz = (GLfloat)(it->normal().z());
+		if ( !isnan( (GLfloat)(it->Center().x()) ) )
+			px = (GLfloat)(it->Center().x());
+		if ( !isnan( (GLfloat)(it->Center().y()) ) )
+			py = (GLfloat)(it->Center().y());
+		if ( !isnan( (GLfloat)(it->Center().z()) ) )
+			pz = (GLfloat)(it->Center().z());
+		if ( !isnan( (GLfloat)(it->Radius()) ) )
+			r = (GLfloat)(it->Radius());
+		if ( !isnan( (GLfloat)(it->Normal().x()) ) )
+			nx = (GLfloat)(it->Normal().x());
+		if ( !isnan( (GLfloat)(it->Normal().y()) ) )
+			ny = (GLfloat)(it->Normal().y());
+		if ( !isnan( (GLfloat)(it->Normal().z()) ) )
+			nz = (GLfloat)(it->Normal().z());
 
 		out << px << " " << py << " " << pz << " " << r << " "
 		    << nx << " " << ny << " " << nz << endl;
@@ -1348,9 +1374,9 @@ void Primitives::writeFileLOD ( const char* fn ) {
 
 	  px=0; py=0; pz=0; r=0; nx=0; ny=0; nz=0; ep=0;
 
-		p = surfels[LOD_LEVELS-1][i].position();
-		n = surfels[LOD_LEVELS-1][i].normal();
-		radius = (GLfloat)(surfels[LOD_LEVELS-1][i].radius());
+		p = surfels[LOD_LEVELS-1][i].Center();
+		n = surfels[LOD_LEVELS-1][i].Normal();
+		radius = (GLfloat)(surfels[LOD_LEVELS-1][i].Radius());
 		perp_error = (GLfloat)(surfels[LOD_LEVELS-1][i].perpendicularError());
 
 		if ( !isnan( p.x() ) )
@@ -1396,7 +1422,7 @@ void Primitives::readFileLOD ( const char* fn ) {
   GLfloat x, y, z, nx, ny, nz, r;
   for (uint i = 0; i < numVertsArray; i++) {
     in >> x >> y >> z >> r >> nx >> ny >> nz;
-    surfels_lod.push_back(Surfel(Point(x, y, z), Vector(nx, ny, nz), r, i));
+    surfels_lod.push_back(Surfeld(Point(x, y, z), Vector(nx, ny, nz), r, i));
   }
 
   in >> numPatches;
@@ -1409,7 +1435,7 @@ void Primitives::readFileLOD ( const char* fn ) {
   for (uint i = 0; i < numPatches; ++i) {
     in >> x >> y >> z >> r >> nx >> ny >> nz >> ep;
     in >> spl[0] >> spl[1] >> spl[2] >> spl[3];
-    surfels[LOD_LEVELS-1].push_back(Surfel(Point(x, y, z), Vector(nx, ny, nz), r, i, ep));
+    surfels[LOD_LEVELS-1].push_back(Surfeld(Point(x, y, z), Vector(nx, ny, nz), r, i, ep));
     for (uint j = 0; j < 4; ++j)
       surfels_per_level.push_back(spl[j]);
   }

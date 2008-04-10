@@ -97,7 +97,7 @@ void EWASurfaceSplatting::splatShader ( surfelVectorIter s, double mv[][4], doub
   
   // Diffuse color
   double light[3] = {light_dir[0], light_dir[1], light_dir[2]};
-  Vector sn = s->normal();
+  Vector sn = s->Normal();
 
   // Using arrays instead of cgal vector just to make it faster - RM - 02-02-07
   double n[3] = { sn.x(), sn.y(), sn.z() };
@@ -135,7 +135,7 @@ void EWASurfaceSplatting::splatShader ( surfelVectorIter s, double mv[][4], doub
   c[2] = color[2];
 }
 
-void EWASurfaceSplatting::setVertices( vector<Surfel> *s ) {
+void EWASurfaceSplatting::setVertices( vector<Surfeld> *s ) {
   surfels = s;
 
   zbuffer.clear();
@@ -275,8 +275,8 @@ void EWASurfaceSplatting::draw ( void ) {
     sta_sh = glutGet(GLUT_ELAPSED_TIME);
 #endif
 
-    p0 = it->position();
-    n = it->normal();
+    p0 = it->Center();
+    n = it->Normal();
 
     // Back-face culling
     dir = eye_vec - p0; 
@@ -301,7 +301,7 @@ void EWASurfaceSplatting::draw ( void ) {
     // Tangent plane in object space
     Vector tu (perpendicular(n));
     tu.normalize();
-    Vector tv = n.cross(tu);
+    Vector tv = n ^ tu;
     tv.normalize();
 
     // Transform the tangent vectors and the splat center to screen-space
@@ -323,7 +323,7 @@ void EWASurfaceSplatting::draw ( void ) {
       
 
     // View-frustum culling, skip splats that are totally outside the view frustum
-    double r = it->radius();
+    double r = it->Radius();
     if ((p0h.x() + r < -p0h_w) || (p0.x() - r > p0h_w) ||
 	(p0h.y() + r < -p0h_w) || (p0.y() - r > p0h_w) ||
 	(p0h.z() + r < -p0h_w) || (p0.z() - r > p0h_w)) {
@@ -536,7 +536,7 @@ void EWASurfaceSplatting::draw ( void ) {
     // Splat shader
     double color[3] = { 0.0, 1.0, 0.0};
     if (interpolate_normals) {
-      Vector n = it->normal();
+      Vector n = it->Normal();
       Vector rot_n (  n[0]*modelview[0][0] + n[1]*modelview[1][0] + n[2]*modelview[2][0],
 		      n[0]*modelview[0][1] + n[1]*modelview[1][1] + n[2]*modelview[2][1],
 		      n[0]*modelview[0][2] + n[1]*modelview[1][2] + n[2]*modelview[2][2]);
@@ -572,7 +572,7 @@ void EWASurfaceSplatting::draw ( void ) {
 	  pixelZ = zbuffer[x + y*canvas_width].z / zbuffer[x + y*canvas_width].weight;	 	  
 	  
 	  // Fragment near current surface -- Blend fragment with current surface
-	  if (fabs(z - pixelZ) < it->radius()) {
+	  if (fabs(z - pixelZ) < it->Radius()) {
 	    weight = exp_table[max(0, (int)floor(radius * exp_table_scale))]; // rasanem
 	    pixel = zbuffer[x + y*canvas_width];
 

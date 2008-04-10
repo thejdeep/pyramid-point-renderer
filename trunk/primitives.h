@@ -31,6 +31,7 @@ typedef enum
     PYRAMID_LINES,
     PYRAMID_HYBRID,
     PYRAMID_POINTS_LOD,
+    PYRAMID_POINTS_UPSAMPLING,
     RASTERIZE_ELLIPSES,
     JFA_SPLATTING,
     NONE,
@@ -43,7 +44,7 @@ typedef enum
 
 using namespace std;
 
-typedef KdTree<Surfel*, OverflowRefine <Surfel*, MAX_LEAF_SURFELS> > KdTree3D;
+typedef KdTree<Surfeld*, OverflowRefine <Surfeld*, MAX_LEAF_SURFELS> > KdTree3D;
 typedef KdTree3D::Node KdTree3DNode;
 
 class Primitives
@@ -60,7 +61,7 @@ class Primitives
 
   void render ( void );
 
-  vector<Surfel> * getSurfels ( void ) { return &surfels[0]; }
+  vector<Surfeld> * getSurfels ( void ) { return &surfels[0]; }
   vector<Triangle> * getTriangles( void ) { return &triangles; }
 
   int getRendererType ( void ) { return renderer_type; }
@@ -170,17 +171,20 @@ class Primitives
   uint numPatches, numVertsArray;
 
   // Vector of surfels belonging to this object.
-  vector<Surfel> surfels[LOD_LEVELS];
+  vector<Surfeld> surfels[LOD_LEVELS];
 
   GLint * merged_ids[LOD_LEVELS];
 
-  vector<Surfel> surfels_lod;
+  vector<Surfeld> surfels_lod;
   vector<GLuint> surfels_per_level;
 
   KdTree3D * kdTree;
 
   // Flag indicating if primitive has LOD structure or not
   bool has_lod;
+
+  // Flag indicating if surfels are circles or ellipses
+  bool elliptical_surfels;
 
 };
 

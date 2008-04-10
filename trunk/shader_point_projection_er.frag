@@ -11,13 +11,11 @@
 
 const float pi = 3.1416;
 
-//const float max_radius = (1.0/(1024.0))*4.5;
-//const float max_radius = (1.0/(816.0))*2.5;
-
 uniform float max_radius;
 
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
+//varying vec2 center;
 
 void main(void)
 { 
@@ -42,6 +40,10 @@ void main(void)
   float theta = atan( normal_vec.y, normal_vec.x );
   float phi = acos( normal_vec.z );
 
+  //  vec2 c = center.xy / radius_depth_w.z;
+
   // [theta, phi, depth, radius]
   gl_FragColor = vec4 (theta/pi, phi/pi, z, r);
+  //gl_FragData[0] = vec4 (theta/pi, phi/pi, z, r);
+  //  gl_FragData[1] = vec4 ( c.xy, 1.0, 1.0);
 }

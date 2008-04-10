@@ -1,7 +1,15 @@
 #version 120
 
+#extension GL_EXT_gpu_shader4 : enable
+
 uniform sampler2D textureA;
 uniform sampler2D textureB;
+uniform sampler2D textureC;
+
+//uniform int dist_type;
+
+uniform float reconstruction_filter_size;
+uniform float prefilter_size;
 
 //silver
 //gold
@@ -11,6 +19,7 @@ uniform sampler2D textureB;
 
 const float pi = 3.1416;
 const int num_materials = 6;
+const int num_ellipses = 8;
 
 vec4 ambient[num_materials] = vec4[num_materials](vec4(0.192250, 0.192250, 0.192250, 1.000000),
 						  vec4(0.247250, 0.199500, 0.074500, 1.000000),
@@ -73,15 +82,15 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
-/*   a += prefilter_size; */
-/*   b += prefilter_size; */
+  a += prefilter_size;
+  b += prefilter_size;
 
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  //if (test <= reconstruction_filter_size)
+  if (test <= reconstruction_filter_size)
     return test;
-  //  else return -1;
+  else return -1.0;
 }
 
 /**
@@ -89,51 +98,51 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
  * returns coordinates in range [0, 1]
  **/
 vec2 uncompress(in float compressed, in vec2 tex_size) {
-  float total_size = tex_size.x * tex_size.y;
-  float uncompressed = compressed * total_size;
-  float y = uncompressed / tex_size.y;
-  float x = (y - floor(y));
-  return vec2(x, floor(y) / tex_size.y);
+  float uncompressed = compressed * tex_size.y;
+  return vec2(fract(uncompressed), floor(uncompressed) / tex_size.y);
+
 }
 
 void main (void) {
 
-  vec4 closest_coord = texture2D (textureA, gl_TexCoord[0].st).xyzw;
   vec4 color = vec4(1.0);
+
+  vec4 closest_coord_0 = texture2D (textureA, gl_TexCoord[0].st).xyzw;
+  vec4 closest_coord_1 = texture2D (textureB, gl_TexCoord[0].st).xyzw;
+
+  float closest_coord[] = float[num_ellipses](closest_coord_0[0], closest_coord_0[1], closest_coord_0[2], closest_coord_0[3],
+				 closest_coord_1[0], closest_coord_1[1], closest_coord_1[2], closest_coord_1[3]);
+
   vec3 normal = vec3(0.0);
-  vec2 ellipse_coord[2];
+  float total_weight = 0.0;
+  vec2 ellipse_coord;
 
-  ellipse_coord[0] = uncompress(closest_coord.x, vec2(1024.0, 1024.0));
-  ellipse_coord[1] = uncompress(closest_coord.z, vec2(1024.0, 1024.0));
+  vec2 texSizeA = vec2(textureSize2D(textureA, 0));
 
-  closest_coord = vec4(ellipse_coord[0], ellipse_coord[1]);
+  // average all k-nearest ellipses
+  for (int i = 0; i < num_ellipses; ++i) {
+    if (closest_coord[i] != 0.0) {
+      ellipse_coord = uncompress(closest_coord[i], texSizeA);
 
-  if (closest_coord.zw != vec2(0.0, 0.0)) {
-    vec4 pixel[2];
-    pixel[0] = texture2D (textureB, closest_coord.xy ).xyzw;
-    pixel[1] = texture2D (textureB, closest_coord.zw ).xyzw;
-
-    vec3 p_normal[2];
-    for (int i = 0; i < 2; ++i) {
-      // convert from spherical coordinates, note normal has already length = 1
-      pixel[i].xy *= pi;
-      p_normal[i] = vec3 (cos(pixel[i].x)*sin(pixel[i].y), sin(pixel[i].x)*sin(pixel[i].y), cos(pixel[i].y));
-    }
-    vec2 dist_test;
-    dist_test[0] = exp(-pointInEllipse((gl_TexCoord[0].st - closest_coord.xy), pixel[0].w, p_normal[0]));
-    dist_test[1] = exp(-pointInEllipse((gl_TexCoord[0].st - closest_coord.zw), pixel[1].w, p_normal[1]));
-    normal = (dist_test[0] * p_normal[0] + dist_test[1] * p_normal[1]);// / (dist_test[0] + dist_test[1]);
-  }
-  else if (closest_coord.xy != vec2(0.0, 0.0))
-    {
-      vec4 pixel = texture2D (textureB, closest_coord.xy ).xyzw;
+      vec4 pixel = texture2D (textureC, ellipse_coord).xyzw;
       pixel.xy *= pi;
-      normal = vec3 (cos(pixel.x)*sin(pixel.y), sin(pixel.x)*sin(pixel.y), cos(pixel.y));
+      vec3 ellipse_normal = vec3 (cos(pixel.x)*sin(pixel.y), sin(pixel.x)*sin(pixel.y), cos(pixel.y));
+
+      float dist = pointInEllipse((gl_TexCoord[0].st - ellipse_coord), pixel.w, ellipse_normal);
+
+      // if ((dist_type == 0) || (dist <= 1.0)) {
+      if (dist != -1.0) {
+	float weight = exp(-dist);
+	normal += ellipse_normal * weight;
+	total_weight += weight;
+      }
     }
+  }
 
-  if (normal != vec3(0.0)) {
-
-    normal = normalize(normal);
+  // computes pixel color if one or more ellipses are in range
+  if (total_weight > 0.0) {    
+    normal /= total_weight;
+    //normal = normalize(normal);
 
     //int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
     int material = 1;
@@ -151,8 +160,8 @@ void main (void) {
       color += specular[0] * gl_LightSource[0].specular * pow(NdotHV, shininess[0]);
     }
   }
-  else
-    color = vec4(1.0);
+/*   else */
+/*     color = vec4(1.0); */
 
   gl_FragColor = vec4(color.rgb, 1.0);
 }

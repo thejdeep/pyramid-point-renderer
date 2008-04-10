@@ -166,37 +166,6 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
-float pointInEllipse(in vec2 d, in float radius){
-
-  vec3 normal = vec3(0.0, 0.0, 1.0);
-
-  // angle between normal and z direction
-  float angle = 1.0;
-
-  // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-			 -d.x*sin(angle) + d.y*cos(angle));
-
-  // major and minor axis
-  float a = 2.0*radius;
-  float b = a*normal.z;
-
-  // include antialiasing filter
-  a += prefilter_size;
-  b += prefilter_size;
-
-  // inside ellipse test
-  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
-
-  if (test <= 1.0)
-    return test;
-  else return -1.0;
-}
-
-// tests if a point is inside an ellipse.
-// Ellipse is centered at origin and point displaced by d.
-// Radius is the half the ellipse's major axis.
-// Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float len = length(normal.xy);
 
@@ -218,7 +187,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 			 -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 2.0*radius;
+  float a = 1.0*radius;
   float b = a*normal.z;
 
   // include antialiasing filter
@@ -229,8 +198,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
   if (test <= reconstruction_filter_size)
-    return 1.0;
-    //    return test;
+    return test;
   else return -1.0;
 }
 
@@ -276,7 +244,7 @@ void main (void) {
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-	if  (dist_test >= 0.0)
+	if  (dist_test != -10.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
@@ -306,10 +274,10 @@ void main (void) {
 	  // Depth test between valid in reach ellipses
 	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
 	    {
-	      //	      float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 	      float w = 1.0;
 	      bufferA += pixelA[i] * w;
-		
+
 	      // Increment ellipse total path with distance from gather pixel to center
 	      bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
 	      
@@ -329,7 +297,7 @@ void main (void) {
   
   if (valid_pixels > 0.0)
     {
-      bufferA /= valid_pixels;
+      bufferA.w /= valid_pixels;
       bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
       bufferB.y = new_zmax - zmin;

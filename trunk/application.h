@@ -40,7 +40,7 @@
 
 #include "camera.h"
 
-#define PI 3.14159265
+//#define PI 3.14159265
 #define HALF_PI 1.570796325
 #define QUARTER_PI 0.785398163
 #define E 2.71828183
@@ -53,7 +53,7 @@ class Application
  private :
 
   void createPointRender( void );
-  void glVertex ( const Surfel * s );
+  void glVertex ( const Surfeld * s );
   void glVertex ( surfelVectorIter it );
   void glVertex ( Point p );
 
@@ -96,9 +96,11 @@ class Application
   void setSampleSubdivision ( int s );
   void setPerVertexColor ( bool b, int object_id );
   void setAutoRotate ( bool r );
-  void useLOD( bool l );
+  void useLOD( int l );
   void setLodColors( bool l );
   void switchLodsPerc ( void );
+  void setDistanceType ( int n );
+  void setBackFaceCulling ( bool b );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );

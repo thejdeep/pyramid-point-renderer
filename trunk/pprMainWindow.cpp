@@ -186,9 +186,28 @@ void pprMainWindow::on_checkBoxLOD_stateChanged( int state ) {
   selectCurrObject();
 
   if (state == Qt::Checked)
-    application->useLOD( true );
+    application->useLOD( 0 );
   else
-    application->useLOD( false );
+    application->useLOD( 1 );
+
+  widget->updateGL();
+}
+
+void pprMainWindow::on_radioButtonNoLOD_pressed( void ) {
+  selectCurrObject();
+  application->useLOD( 0 );
+  widget->updateGL();
+}
+
+void pprMainWindow::on_radioButtonLOD_pressed( void ) {
+  selectCurrObject();
+  application->useLOD( 1 );
+  widget->updateGL();
+}
+
+void pprMainWindow::on_radioButtonUpsampling_pressed( void ) {
+  selectCurrObject();
+  application->useLOD( 2 );
 
   widget->updateGL();
 }
@@ -198,6 +217,14 @@ void pprMainWindow::on_checkBoxLODColors_stateChanged( int state ) {
     application->setLodColors(true);
   else
     application->setLodColors(false);
+  widget->updateGL();
+}
+
+void pprMainWindow::on_checkBoxDistanceType_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->setDistanceType(true);
+  else
+    application->setDistanceType(false);
   widget->updateGL();
 }
 
@@ -297,4 +324,10 @@ void pprMainWindow::keyPressEvent( QKeyEvent* event) {
     application->runFrames();
   else if (event->key() == Qt::Key_P)
     application->switchLodsPerc();
+  else if (event->key() == Qt::Key_B)
+    application->setBackFaceCulling(true);
+  else if (event->key() == Qt::Key_N)
+    application->setBackFaceCulling(false);
+
+
 }

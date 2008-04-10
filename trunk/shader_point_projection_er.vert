@@ -6,6 +6,7 @@
 // stores output on texture
 
 uniform vec3 eye;
+
 varying vec3 normal_vec_vertex;
 varying vec3 radius_depth_w_vertex;
 

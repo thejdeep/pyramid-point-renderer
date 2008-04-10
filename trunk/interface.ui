@@ -158,9 +158,9 @@
     <property name="geometry" >
      <rect>
       <x>0</x>
-      <y>500</y>
+      <y>590</y>
       <width>191</width>
-      <height>281</height>
+      <height>201</height>
      </rect>
     </property>
     <column>
@@ -234,6 +234,11 @@
     <item>
      <property name="text" >
       <string>Pyramid Points LOD</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Pyramid Points Upsampling</string>
      </property>
     </item>
     <item>
@@ -334,7 +339,7 @@
     </item>
     <item>
      <property name="text" >
-      <string>None (Blue)</string>
+      <string>Normal Map</string>
      </property>
     </item>
    </widget>
@@ -402,8 +407,8 @@
    <widget class="QCheckBox" name="checkBoxLOD" >
     <property name="geometry" >
      <rect>
-      <x>0</x>
-      <y>450</y>
+      <x>110</x>
+      <y>420</y>
       <width>51</width>
       <height>23</height>
      </rect>
@@ -429,7 +434,7 @@
     <property name="geometry" >
      <rect>
       <x>90</x>
-      <y>450</y>
+      <y>560</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -442,7 +447,7 @@
     <property name="geometry" >
      <rect>
       <x>0</x>
-      <y>480</y>
+      <y>560</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -534,6 +539,9 @@
     <property name="minimum" >
      <number>1</number>
     </property>
+    <property name="value" >
+     <number>4</number>
+    </property>
    </widget>
    <widget class="QLabel" name="labelSampleSubdivision" >
     <property name="geometry" >
@@ -560,6 +568,105 @@
     <property name="text" >
      <string>Reset Max Values</string>
     </property>
+   </widget>
+   <widget class="QLabel" name="labelJFASplatting" >
+    <property name="geometry" >
+     <rect>
+      <x>1030</x>
+      <y>300</y>
+      <width>91</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="font" >
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text" >
+     <string>JFA Splatting</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxDistanceType" >
+    <property name="geometry" >
+     <rect>
+      <x>1030</x>
+      <y>330</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Distance Type</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox" >
+    <property name="enabled" >
+     <bool>false</bool>
+    </property>
+    <property name="geometry" >
+     <rect>
+      <x>0</x>
+      <y>460</y>
+      <width>181</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Dynamic Sampling</string>
+    </property>
+    <widget class="QRadioButton" name="radioButtonNoLOD" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>99</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>None</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonLOD" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>99</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>LOD</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonUpsampling" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>99</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Upsampling</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar" >
