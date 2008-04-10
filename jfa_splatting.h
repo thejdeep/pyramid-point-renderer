@@ -42,6 +42,8 @@ class JFASplatting : public PointBasedRender
   void getDataProjectedPixels ( int * );
   void getDataReconstructedPixels ( int buffer );
 
+  void setDistanceType ( int n) { dist_type = n; }
+
  private:
 
   // Size of framebuffer, usually a power of 2
@@ -79,6 +81,9 @@ class JFASplatting : public PointBasedRender
 
   /// Type of most recently used framebuffer.
   framebuffer_state_enum framebuffer_state; 
+
+  // Distance type (ellipse, pixel)
+  int dist_type;
 
 };
 

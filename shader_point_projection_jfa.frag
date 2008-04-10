@@ -34,5 +34,6 @@ void main(void)
 
   // [theta, phi, depth, radius]
   gl_FragData[0] = vec4 (theta/pi, phi/pi, z, r);
-  gl_FragData[1] = vec4 (compressed_coords, 0.0, 0.0, 0.0);
+  gl_FragData[1] = vec4 (compressed_coords);
+  gl_FragData[2] = vec4 (compressed_coords);
 }

@@ -51,9 +51,11 @@ class PyramidPointRenderColor : public PointBasedRender
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
-  void useLOD( bool l ) {
+  void useLOD( int l ) {
     use_lod = l;
-    if (l)
+    if (l == 2)
+      shader_projection = shader_projection_upsampling;
+    else if (l == 1)
       shader_projection = shader_projection_lod;
     else
       shader_projection = shader_projection_no_lod;
@@ -75,6 +77,8 @@ class PyramidPointRenderColor : public PointBasedRender
   glslKernel *shader_projection;
   /// Projection shader without LOD rendering
   glslKernel *shader_projection_no_lod;
+  /// Projection shader with upsampling rendering
+  glslKernel *shader_projection_upsampling;
   /// Projection shader with LOD rendering
   glslKernel *shader_projection_lod;
   /// Pyramid copy phase shader.

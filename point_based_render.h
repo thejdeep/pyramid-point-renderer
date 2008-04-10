@@ -9,7 +9,7 @@
 #ifndef __POINT_BASED_RENDER_H__
 #define __POINT_BASED_RENDER_H__
 
-#include "glslKernel.h"
+#include "glslKernel/glslKernel.h"
 #include "surfels.h"
 #include "pyramid_types.h"
 #include "materials.h"
@@ -50,10 +50,11 @@ class PointBasedRender
    virtual void setGpuMaskSize ( int ) {}
    virtual void setNumSampleSubdivisions ( int ) {}
 
-   void setEye (double e[3]) {
-     eye[0] = e[0];
-     eye[1] = e[1];
-     eye[2] = e[2];
+   /** For JFA Splatting **/
+   virtual void setDistanceType ( int ) {}
+
+   void setEye (Point e) {
+     eye = e;
    }
    
    void setLight (double l[3]) {
@@ -95,7 +96,7 @@ class PointBasedRender
      elliptical_weight = w;
    }
 
-   virtual void useLOD( const bool l ) {
+   virtual void useLOD( const int l ) {
      use_lod = l;
    }
 
@@ -117,7 +118,7 @@ class PointBasedRender
    /// Light direction vector.
    double light_dir[3];
    /// Eye position.
-   double eye[3];
+   Point eye;
 
    /// Identification of the material from materials.h table.
    int material_id;
@@ -136,8 +137,8 @@ class PointBasedRender
    /// Size of antialising filter.
    double prefilter_size;
 
-   /// Flag for enabling/disabling LOD rendering
-   bool use_lod;
+   /// Flag for enabling/disabling LOD rendering 0 = none, 1 = lod, 2 = upsampling
+   int use_lod;
 
    /// Flag for enabling/disabling color per LOD level
    bool color_per_lod;

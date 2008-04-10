@@ -71,15 +71,15 @@ static int nverts, nfaces;
 static PlyOtherProp *vert_other, *face_other;
 
 /// Normalize the input points in the range [-1, 1].
-void normalize (vector<Surfel> * surfels) {
+void normalize (vector<Surfeld> * surfels) {
 
   double max = 0, min = 0;
-  Point p = surfels->begin()->position();
+  Point p = surfels->begin()->Center();
   double xMax=p.x(), yMax=p.y(), zMax=p.z(), xMin=p.x(), yMin=p.y(), zMin=p.z();
 
   //compute min and max values for x and y coordinates
   for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
-    p = it->position();
+    p = it->Center();
     if (p[0] > xMax) xMax = p[0];
     if (p[0] < xMin) xMin = p[0];
     if (p[1] > yMax) yMax = p[1];
@@ -124,14 +124,14 @@ void normalize (vector<Surfel> * surfels) {
 
   Vector n;
   for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
-    p = it->position();    
+    p = it->Center();    
     p = Point ((((p[0] - xMin) / (max - min))) * 2.0 - 1.0 + compX,
 	       (((p[1] - yMin) / (max - min))) * 2.0 - 1.0 + compY,
 	       (((p[2] - zMin) / (max - min))) * 2.0 - 1.0 + compZ);
-    n = it->normal();
+    n = it->Normal();
     n.normalize();
-    ((Surfel*)&(*it))->setPosition( (Point) p );
-    ((Surfel*)&(*it))->setNormal( (Vector) n );
+    ((Surfeld*)&(*it))->SetCenter( (Point) p );
+    ((Surfeld*)&(*it))->SetNormal( (Vector) n );
 
   }
 
@@ -141,7 +141,7 @@ void normalize (vector<Surfel> * surfels) {
 /// Loads a sls 3d file and insert all points in the kd-tree
 /// @param filenam Given plg filename
 /// @return 1 if file read with success, 0 otherwise
-bool loadSls (const char * filename, vector<Surfel> *surfels) {  
+bool loadSls (const char * filename, vector<Surfeld> *surfels) {  
   std::ifstream input (filename);
 
   if(input.fail())
@@ -155,7 +155,7 @@ bool loadSls (const char * filename, vector<Surfel> *surfels) {
     input >> x >> y >> z >> cr >> cg >> cb >> nx >> ny >> nz >> r;
     Point p (x, y, z);
     Vector n (nx, ny, nz);
-    surfels->push_back ( Surfel (p, n, r, i) );
+    surfels->push_back ( Surfeld (p, n, r, i) );
   }
 
   return true;
@@ -164,7 +164,7 @@ bool loadSls (const char * filename, vector<Surfel> *surfels) {
 /// Read an normals file, contains positions, normals and splat radius for each point
 /// @param filename Given off filename
 /// @return 1 if file read with success, 0 otherwise
-bool loadNormals (const char * filename, vector<Surfel> *surfels) {  
+bool loadNormals (const char * filename, vector<Surfeld> *surfels) {  
   std::ifstream input (filename);
 
   if(input.fail())
@@ -179,13 +179,13 @@ bool loadNormals (const char * filename, vector<Surfel> *surfels) {
       input >> x >> y >> z >> nx >> ny >> nz >> r;
       Point p (x, y, z);
       Vector n (nx, ny, nz);
-      surfels->push_back ( Surfel (p, n, r, i) );
+      surfels->push_back ( Surfeld (p, n, r, i) );
     }
 
   return true;
 }
 
-void readPly (const char *filename, vector<Surfel> *surfels) {
+void readPly (const char *filename, vector<Surfeld> *surfels) {
 
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
@@ -235,7 +235,7 @@ void readPly (const char *filename, vector<Surfel> *surfels) {
 	Point p (v.x, v.y, v.z);
 	Vector n (v.nx, v.ny, v.nz);
 	
-	surfels->push_back ( Surfel (p, n, (double)v.radius, j) );
+	surfels->push_back ( Surfeld (p, n, (double)v.radius, j) );
       }
     }
 
@@ -249,7 +249,7 @@ void readPly (const char *filename, vector<Surfel> *surfels) {
     and normal as average of the three vertices. The radius
     is two times the distance from the barycenter to a vertex.
  **/
-void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
+void readPlyHighRes (const char *filename, vector<Surfeld> *surfels) {
 
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
@@ -258,7 +258,7 @@ void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
   int elem_count;
   char *elem_name;
   
-  vector<Surfel> temp_surfels;
+  vector<Surfeld> temp_surfels;
   for (i = 0; i < in_ply->num_elem_types; i++) {
 
     /* prepare to read the i'th vector of elements */
@@ -299,7 +299,7 @@ void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
 	Point p (v.x, v.y, v.z);
 	Vector n (v.nx, v.ny, v.nz);
 	
-	temp_surfels.push_back ( Surfel (p, n, (double)v.radius, j) );
+	temp_surfels.push_back ( Surfeld (p, n, (double)v.radius, j) );
       }
     }
     else if (equal_strings ("face", elem_name)) {
@@ -315,29 +315,29 @@ void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
       /* grab all the face elements */
       for (j = 0; j < elem_count; j++) {
 	get_element_ply (in_ply, (void *) &f);
-	Surfel s[3];
+	Surfeld s[3];
 	s[0] = temp_surfels[ f.verts[0] ];
 	s[1] = temp_surfels[ f.verts[1] ];
 	s[2] = temp_surfels[ f.verts[2] ];
 
-	Point p = Point( (s[0].p.x() + s[1].p.x() + s[2].p.x()) / 3.0,
-			 (s[0].p.y() + s[1].p.y() + s[2].p.y()) / 3.0,
-			 (s[0].p.z() + s[1].p.z() + s[2].p.z()) / 3.0);
+	Point p = Point( (s[0].Center().x() + s[1].Center().x() + s[2].Center().x()) / 3.0,
+			 (s[0].Center().y() + s[1].Center().y() + s[2].Center().y()) / 3.0,
+			 (s[0].Center().z() + s[1].Center().z() + s[2].Center().z()) / 3.0);
 
-	Vector n = Vector( (s[0].n.x() + s[1].n.x() + s[2].n.x()) / 3.0,
-			   (s[0].n.y() + s[1].n.y() + s[2].n.y()) / 3.0,
-			   (s[0].n.z() + s[1].n.z() + s[2].n.z()) / 3.0);
+	Vector n = Vector( (s[0].Normal().x() + s[1].Normal().x() + s[2].Normal().x()) / 3.0,
+			   (s[0].Normal().y() + s[1].Normal().y() + s[2].Normal().y()) / 3.0,
+			   (s[0].Normal().z() + s[1].Normal().z() + s[2].Normal().z()) / 3.0);
 
 	double max_dist = 0.0;
 	for (int k = 0; k < 3; ++k) {
-	  double length = (p - s[k].p).length();
+	  double length = (p - s[k].Center()).length();
 	  if (max_dist < length)
 	    max_dist = length;
 	}
 
 	max_dist *= 2.0;
 
-	surfels->push_back ( Surfel (p, n, max_dist, j) );
+	surfels->push_back ( Surfeld (p, n, max_dist, j) );
 
       }
     }
@@ -347,7 +347,7 @@ void readPlyHighRes (const char *filename, vector<Surfel> *surfels) {
   close_ply(in_ply);
 }
 
-void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
+void readPlyTriangles (const char *filename, vector<Surfeld> *surfels,
 		       vector<Triangle> *triangles, Point rgb = Point()) {
 
   FILE *fp = fopen(filename, "r");
@@ -397,7 +397,7 @@ void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
 	Point p (v.x, v.y, v.z);
 	Vector n (v.nx, v.ny, v.nz);
 	
-	surfels->push_back ( Surfel (p, n, rgb, (double)v.radius, j) );
+	surfels->push_back ( Surfeld (p, n, rgb, (double)v.radius, j) );
       }
     }
     else if (equal_strings ("face", elem_name)) {
@@ -428,7 +428,7 @@ void readPlyTriangles (const char *filename, vector<Surfel> *surfels,
   close_ply(in_ply);
 }
 
-void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
+void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 		       vector<Triangle> *triangles) {
 
   FILE *fp = fopen(filename, "r");
@@ -489,9 +489,10 @@ void readPlyTrianglesColor (const char *filename, vector<Surfel> *surfels,
 
 	Point p (v.x, v.y, v.z);
 	Vector n (v.nx, v.ny, v.nz);
-	Point c (v.r/255.0, v.g/255.0, v.b/255.0);
-	
-	surfels->push_back ( Surfel (p, n, c, (double)v.radius, j) );
+	Color c (v.r/255.0, v.g/255.0, v.b/255.0);
+	double r = v.radius;
+      
+	surfels->push_back ( Surfeld (p, n, c, r, (unsigned int)j) );
       }
     }
     else if (equal_strings ("face", elem_name)) {
@@ -591,7 +592,7 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
 
 
   // read camera attributes
-  double camera_pos[3];
+  Point camera_pos;
   GLfloat light_pos[3];
   in >> camera_pos[0] >> camera_pos[1] >> camera_pos[2] >> q.x >> q.y >> q.z >> q.a;
   camera->setPositionVector( camera_pos );
@@ -682,7 +683,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object>
 
 
 
-int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,
+int readPointsAndTriangles(int argc, char **argv, vector<Surfeld> *surfels,
 			   vector<Triangle> *triangles){
     
   for (int i = 1; i < argc; ++i)
@@ -692,7 +693,7 @@ int readPointsAndTriangles(int argc, char **argv, vector<Surfel> *surfels,
 }
 
 /// Command line argument processor
-int readPoints(int argc, char **argv, vector<Surfel> *surfels) {
+int readPoints(int argc, char **argv, vector<Surfeld> *surfels) {
 
   // Use default file
   if (argc < 2) {

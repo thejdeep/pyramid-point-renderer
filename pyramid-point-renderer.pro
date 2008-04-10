@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ .
+INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
@@ -18,7 +18,6 @@ HEADERS += application.h \
            file_io.h \
            jfa_splatting.h \
            kd-tree.h \
-           manipulator.h \
            materials.h \
            modelsTreeWidget.h \
            object.h \
@@ -35,6 +34,7 @@ HEADERS += application.h \
            pyramid_triangle_renderer.h \
            pyramid_types.h \
            quat.h \
+           surfel.hpp \         
            surfels.h \      
            timer.h \
            triangle_renderer.h \
@@ -46,7 +46,6 @@ SOURCES += application.cc \
            ewa_surface_splatting.cc \
            jfa_splatting.cc \
            main.cpp \
-           manipulator.cc \
            matrix.cc \
            modelsTreeWidget.cpp \
            object.cc \

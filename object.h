@@ -20,16 +20,12 @@ class Object
   Object() { }
 
   Object(int id_num, double x, double y, double z, Quat q) : _id(id_num) {
-    center[0] = x;
-    center[1] = y;
-    center[2] = z;
+    center = Point(x, y, z);
     q_rot = q;
   }
 
   Object(int id_num, double x, double y, double z) : _id(id_num) {
-    center[0] = x;
-    center[1] = y;
-    center[2] = z;
+    center = Point(x, y, z);
     q_rot.a = 1; 
     q_rot.x = 0.0; 
     q_rot.y = 0.0; 
@@ -37,13 +33,14 @@ class Object
   }
 
   Object(int id_num) : _id(id_num) {
-    center[0] = center[1] = center[2] = 0.0;
+    center = Point(0.0, 0.0, 0.0);
     q_rot.a = 1; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
   }
 
   ~Object() {}
 
   void render ( void );
+  void render ( Point camera_pos );
 
   void setId ( int id_num ) { _id = id_num; }
   int id ( void ) const { return _id; }
@@ -53,10 +50,10 @@ class Object
     strcpy (&_filename[0], name);
   }
 
-  double* getCenter ( void ) { return &center[0]; }
-  void setCenter ( double c[3] ) { 
-    for (int i = 0; i < 3; ++i)
-      center[i]=c[i]; 
+  Point* getCenter ( void ) { return &center; }
+
+  void setCenter ( Point c ) { 
+    center = c;
   }
 
   Quat* getRotationQuat ( void ) { return &q_rot; }
@@ -68,7 +65,7 @@ class Object
  private:
 
   // Center position (for individual translation)
-  double center[3];
+  Point center;
   vector<Point> centers;
 
   // Rotation quaternion (for individual rotation)

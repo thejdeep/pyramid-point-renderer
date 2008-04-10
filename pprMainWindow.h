@@ -32,12 +32,17 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   void on_spinBoxGpuMask_valueChanged( int i );
   void on_spinBoxSampleSubdivision_valueChanged( int i);
 
+  void on_radioButtonNoLOD_pressed( void );
+  void on_radioButtonLOD_pressed( void );
+  void on_radioButtonUpsampling_pressed( void );
+
   void on_checkBoxPerVertexColor_stateChanged( int state );
   void on_checkBoxAutoRotate_stateChanged( int state );
   void on_checkBoxLOD_stateChanged( int state );
   void on_checkBoxLODColors_stateChanged( int state );
   void on_checkBoxDepthTest_stateChanged( int state );
   void on_checkBoxColorBars_stateChanged( int state );
+  void on_checkBoxDistanceType_stateChanged( int state );
 
   void on_pushButtonResetMaxValues_pressed(  );
 

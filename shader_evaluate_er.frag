@@ -1,7 +1,7 @@
 /* Synthesis step */
 
-#extension GL_ARB_draw_buffers : enable
- #extension GL_EXT_gpu_shader4 : enable
+//#extension GL_ARB_draw_buffers : enable
+#extension GL_EXT_gpu_shader4 : enable
 
 #version 120
 
@@ -20,6 +20,8 @@ uniform float prefilter_size;
 
 uniform sampler2D textureA;
 uniform sampler2D textureB;
+//uniform sampler2D textureC;
+
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -87,7 +89,7 @@ void main (void) {
 
   // retrieve actual pixel with current values
   //  vec4 buffer = texelFetch2D (textureB, ivec2(gl_TexCoord[0].st)*texSizeB, 0).xyzw;  
-  vec4 buffer = texture2D (textureB, gl_TexCoord[0].st, 0).xyzw;
+  vec4 buffer = texture2D (textureA, gl_TexCoord[0].st, 0).xyzw;
   //  vec2 global_displacement = (vec2(displacement) / texSizeB) * float(mask_size*2+1);
   vec2 global_displacement = (vec2(displacement) * float(mask_size*2+1)) / texSizeB;
 
@@ -98,7 +100,11 @@ void main (void) {
       vec2 local_displacement = global_displacement.xy + (vec2(i, j) / texSizeB);
 
       // retrieve candidadte ellipse from displacement position
-      vec4 ellipse = texture2D (textureA, gl_TexCoord[0].st + local_displacement.xy).xyzw;
+      vec4 ellipse = texture2D (textureB, gl_TexCoord[0].st + local_displacement.xy).xyzw;
+      //      vec2 center = texture2D (textureC, gl_TexCoord[0].st + local_displacement.xy).xy;
+
+      //      local_displacement = gl_TexCoord[0].st - center;//local_displacement;
+
       ellipse.w = abs(ellipse.w);
   
       // if pixel from displacement position is a projected surfel, check if current

@@ -54,7 +54,7 @@ class PyramidTriangleRenderer : public PointBasedRender
   void draw(int timing_profile);
   
   void setTriangles( vector<Triangle> *t );
-  void setVertices( vector<Surfel> *s );
+  void setVertices( vector<Surfeld> *s );
  
  private:
   /// Frame buffer object width.
@@ -121,7 +121,7 @@ class PyramidTriangleRenderer : public PointBasedRender
   render_state_enum render_state;
 
   /// Pointer to list of surfels (vertices).
-  vector<Surfel> *surfels;
+  vector<Surfeld> *surfels;
 
   /// Pointer to list of triangles.
   vector<Triangle> *triangles;

@@ -46,14 +46,14 @@ struct OverflowRefine : public KdTreeRefine <ItemPtr> {
     Point centroid;
     Vector normal;
     // compute centroid of point list
-    centroid[0] += a->p[0]*a->radius() + b->p[0]*b->radius();
-    centroid[1] += a->p[1]*a->radius() + b->p[1]*b->radius();
-    centroid[2] += a->p[2]*a->radius() + b->p[2]*b->radius();
-    normal += a->normal()*a->radius();
-    normal += b->normal()*b->radius();
+    centroid[0] += a->Center()[0]*a->Radius() + b->Center()[0]*b->Radius();
+    centroid[1] += a->Center()[1]*a->Radius() + b->Center()[1]*b->Radius();
+    centroid[2] += a->Center()[2]*a->Radius() + b->Center()[2]*b->Radius();
+    normal += a->Normal()*a->Radius();
+    normal += b->Normal()*b->Radius();
 
-    centroid /= a->radius() + b->radius();
-    normal /= a->radius() + b->radius();
+    centroid /= a->Radius() + b->Radius();
+    normal /= a->Radius() + b->Radius();
 
 /*     centroid[0] = a->p[0] + b->p[0]; */
 /*     centroid[1] = a->p[1] + b->p[1]; */
@@ -64,21 +64,21 @@ struct OverflowRefine : public KdTreeRefine <ItemPtr> {
 /*     centroid /= 2.0; */
 /*     normal /= 2.0; */
 
-    double max = sqrt(squared_distance(a->p, centroid)) + a->radius();
-    double dist_radius_b = sqrt(squared_distance(b->p, centroid)) + b->radius();
+    double max = sqrt(centroid.SquaredDistance(a->Center())) + a->Radius();
+    double dist_radius_b = sqrt(centroid.SquaredDistance(b->Center())) + b->Radius();
 
     if (dist_radius_b > max)
       max = dist_radius_b;
   
-    a->setPosition(centroid);
-    a->setNormal(normal);
-    a->setRadius(max);
+    a->SetCenter(centroid);
+    a->SetNormal(normal);
+    a->SetRadius(max);
   }
 
   /// Split a leaf node iff the list contains more than Max items
   static bool split (vector<ItemPtr>& items, vector<int> *mergedItems) {
     if (items.size() == 1) {
-      mergedItems->push_back(items[0]->id());
+      mergedItems->push_back(items[0]->ID());
       return false;
     }
 
@@ -86,17 +86,19 @@ struct OverflowRefine : public KdTreeRefine <ItemPtr> {
     if (items.size() != 2)
       cout << items.size() << endl;
 
-    double d = sqrt(items[0]->p.squared_distance(items[1]->p));
+    Point p0 = items[0]->Center();
+    Point p1 = items[1]->Center();
+    double d = sqrt(p0.SquaredDistance(p1));
 
     if (mergedItems->size() == Max)
       return true;
-    else if (d >= (items[0]->r + items[1]->r))
+    else if (d >= (items[0]->Radius() + items[1]->Radius()))
       return true;
 
-    mergedItems->push_back(items[1]->id());
+    mergedItems->push_back(items[1]->ID());
 
     // Merge the two items
-    if ((d + items[1]->r) > items[0]->r) {
+    if ((d + items[1]->Radius()) > items[0]->Radius()) {
       merge (items[0], items[1]);
     }
 
@@ -282,7 +284,7 @@ public:
     else if (p.z() >= world.zmax())
       cls = Point(cls.x(), cls.y(), world.zmax());
 
-    return p.squared_distance(cls);
+    return p.SquaredDistance(cls);
   }
 
   /// Inserts a point in the set of k-nearest points
@@ -317,7 +319,7 @@ public:
     for (unsigned int i = 0; i < PtrList.size(); ++i) {
       Point q = PtrList[i]->p;
       if (PtrList[i]->p != p) { // Check if not trying to insert itself
-	double dist = p.squared_distance (q);
+	double dist = p.SquaredDistance (q);
 	++comps;
 	if (dist < minDist || k_nearest.size() < k)
 	  minDist = insertNeighbor (PtrList[i], dist, k_nearest, k);
@@ -377,13 +379,13 @@ public:
 
 	/// Check largest box dimension for subdivision
 	split_dim = (world.max().x() - world.min().x() > world.max().y() - world.min().y()) ? 0 : 1;
-	split_dim = (world.max().pos(split_dim) - world.min().pos(split_dim) > world.max().z() - world.min().z()) ? split_dim : 2;
+	split_dim = (world.max()[split_dim] - world.min()[split_dim] > world.max().z() - world.min().z()) ? split_dim : 2;
 
 	/// Search for point closest to the center of split_dim
 	//double center = 0.5 * (world.max().pos(split_dim) + world.min().pos(split_dim));
 
 	//assert (PtrList.size() == 2);
-	double center = (PtrList[0]->p[split_dim] + PtrList[1]->p[split_dim]) * 0.5;
+	double center = (PtrList[0]->Center()[split_dim] + PtrList[1]->Center()[split_dim]) * 0.5;
 	//	double minDist = HUGE;
 
 /* 	ItemPtr middleItem = NULL; */
@@ -406,7 +408,7 @@ public:
 	son[0] = newLeftNode;
 	son[1] = newRightNode;
 
-	if (PtrList[0]->p[split_dim] < split_coord) {
+	if (PtrList[0]->Center()[split_dim] < split_coord) {
 	  son[0]->insert(level + 1, PtrList[0]);
 	  son[1]->insert(level + 1, PtrList[1]);
 	  son[0]->setMergedItems(mergedItems);
@@ -433,7 +435,7 @@ public:
       }
     }
     else { // internal node, continue descending
-      if (p->p[split_dim] < split_coord)
+      if (p->Center()[split_dim] < split_coord)
 	son[0]->insert(level + 1, p);
       else
 	son[1]->insert(level + 1, p);   
@@ -560,11 +562,11 @@ public:
   /// Inserts a pointer to an object in this kd-tree
   /// @param p pointer to object
   virtual void insert (const ItemPtr item) {
-    Point *p = &(item->p);
+    Point p = item->Center();
     // Check if point is inside kd-tree world before inserting
-    if ( (p->x() >= root->getBox().xmin()) && (p->x() <= root->getBox().xmax()) &&
-	 (p->y() >= root->getBox().ymin()) && (p->y() <= root->getBox().ymax()) &&
-	 (p->z() >= root->getBox().zmin()) && (p->z() <= root->getBox().zmax()))
+    if ( (p.x() >= root->getBox().xmin()) && (p.x() <= root->getBox().xmax()) &&
+	 (p.y() >= root->getBox().ymin()) && (p.y() <= root->getBox().ymax()) &&
+	 (p.z() >= root->getBox().zmin()) && (p.z() <= root->getBox().zmax()))
       root->insert (0, item);
   }
 

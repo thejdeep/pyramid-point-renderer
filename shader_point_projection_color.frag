@@ -55,12 +55,9 @@ void main(void)
   if (radius_depth_w.x <= 0.0)
     discard;
 
-/*   if (normal_vec.z < 0.0) */
-/*     discard; */
-
   float depth_interval;
 
-  depth_interval = radius_depth_w.x;  
+  depth_interval = radius_depth_w.x;
 
 /*   if (gl_Color.a > 0.50) */
 /*     depth_interval = radius_depth_w.x; */
@@ -71,7 +68,7 @@ void main(void)
   // First buffer  : normal.x, normal.y, normal.z, radius
   // Second buffer : minimum depth, depth interval, center.x, center.y
   // Third buffer  : color
-  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.y ); 
+  gl_FragData[0] = vec4 (normalize(normal_vec), radius_depth_w.x / radius_depth_w.z ); 
   gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval, 0.0, 0.0);
   gl_FragData[2] = gl_Color;
 }

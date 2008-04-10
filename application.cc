@@ -85,15 +85,15 @@ Application::~Application( void ) {
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
-void Application::glVertex(const Surfel * s) {
-  Point p = s->position();
+void Application::glVertex(const Surfeld * s) {
+  Point p = s->Center();
   glVertex3f(p.x(), p.y(), p.z());
 }
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
 void Application::glVertex(surfelVectorIter it) {
-  Point p = it->position();
+  Point p = it->Center();
   glVertex3f(p.x(), p.y(), p.z());
 }
 
@@ -135,36 +135,33 @@ void Application::draw(void) {
 
   point_based_render->clearBuffers();
 
+  // Reset camera position and direction
+  camera->setView();
+  camera->setTranslation();
+  camera->setRotation();
+
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
 //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-//     int i = *it;
-    
-    // Reset camera position and direction
-    camera->setView();
+//     int i = *it;   
+
     if (camera->runningFrames()) {
       point_based_render->setReconstructionFilterSize(camera->getKeyFrameReconstructionFilter());
       point_based_render->setPrefilterSize(camera->getKeyFramePrefilter());
     }
 
     // Compute rotated eye position for this object for back face culling   
-    double eye[3];
-    eye[0] = objects[i].getCenter()[0];
-    eye[1] = objects[i].getCenter()[1];
-    eye[2] = objects[i].getCenter()[2];
+    //    Point eye = *(objects[i].getCenter());
 
     // Compute the rotated eye (opposite direction) of the camera + object center position
-    camera->computeEyePosition(*(objects[i].getRotationQuat()), eye);
+    //camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
 
-//     double eye[3];
-//     eye[0] = camera->positionVector()[0];
-//     eye[1] = camera->positionVector()[1];
-//     eye[2] = camera->positionVector()[2];
-    
-    point_based_render->setEye(eye);
+    point_based_render->setEye(camera->positionVector());
+
+    glPushMatrix();
 
     // Translate and rotate object
-    objects[i].render();
+    objects[i].render( );
 
     // Projects to image plane surfels of all primitives for this object
     vector< int >* prims = objects[i].getPrimitivesList();
@@ -173,15 +170,18 @@ void Application::draw(void) {
       int type = prim->getRendererType();
 
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	if (type == PYRAMID_POINTS_LOD)
-	  point_based_render->useLOD( true );
+	if (type == PYRAMID_POINTS_UPSAMPLING)
+	  point_based_render->useLOD( 2 );
+	else if (type == PYRAMID_POINTS_LOD)
+	  point_based_render->useLOD( 1 );
 	else
-	  point_based_render->useLOD( false );
+	  point_based_render->useLOD( 0 );
 
-	prim->eye = Point(eye[0], eye[1], eye[2]);
 
-	if (type == PYRAMID_POINTS_LOD)
+	if (type == PYRAMID_POINTS_LOD) {
+	  //prim->eye = Point(eye[0], eye[1], eye[2]);	 
 	  prim->countNumVertsLOD(&surfs_per_level[0]);
+	}
 
 	point_based_render->projectSamples( prim );
 
@@ -199,6 +199,7 @@ void Application::draw(void) {
 	}	
       }
     }
+    glPopMatrix();
   }
 
   // Interpolates projected surfels using pyramid algorithm
@@ -426,6 +427,7 @@ void Application::changeRendererType( int type ) {
     render_mode = type;
     createPointRender( );
   }
+
 }
 
 void Application::createPointRender( void ) {
@@ -436,6 +438,7 @@ void Application::createPointRender( void ) {
   delete point_based_render;
 
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
+      (render_mode == PYRAMID_POINTS_UPSAMPLING) ||
       (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)){
     if (color_model)
       point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -541,9 +544,9 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
-  primitives.back().setRendererType( JFA_SPLATTING );
+  //primitives.back().setRendererType( JFA_SPLATTING );
 
   num_objects = objects.size();
 
@@ -646,7 +649,7 @@ int Application::writeSceneFile ( void ) {
       objects[i].getRotationQuat()->a  << " 1 " << i << endl;
   }
 
-  out << camera->positionVector()[0] << " " << camera->positionVector()[1] << " " << camera->positionVector()[2] << " " <<
+  out << camera->positionVector().x() << " " << camera->positionVector().y() << " " << camera->positionVector().z() << " " <<
     camera->rotationQuat().x << " " << camera->rotationQuat().y << " " << camera->rotationQuat().z << " " << camera->rotationQuat().a << endl;
   
   out << camera->lightVector()[0] << " " << camera->lightVector()[1] << " " << camera->lightVector()[2] << endl;
@@ -848,10 +851,12 @@ void Application::setDepthTest ( bool d ) {
     point_based_render->setDepthTest(depth_culling);
 }
 
-void Application::useLOD ( bool lod ) {
+void Application::useLOD ( int lod ) {
   int type = PYRAMID_POINTS;
-  if ( lod )
+  if ( lod == 1)
     type = PYRAMID_POINTS_LOD;
+  else if ( lod == 2)
+    type = PYRAMID_POINTS_UPSAMPLING;
 
   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
     vector< int >* prims = objects[*it].getPrimitivesList();
@@ -881,4 +886,12 @@ void Application::switchLodsPerc ( void ) {
 
 void Application::setColorBars ( bool c ) {
   show_color_bars = c;
+}
+
+void Application::setDistanceType ( int n ) {
+  point_based_render->setDistanceType(n);
+}
+
+void Application::setBackFaceCulling ( bool b ) {
+  point_based_render->setBackFaceCulling(b);
 }

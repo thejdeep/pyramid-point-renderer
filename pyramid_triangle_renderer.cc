@@ -843,12 +843,12 @@ void PyramidTriangleRenderer::setTriangles( vector<Triangle> *t ) {
   glNewList(triangleDisplayList, GL_COMPILE);
   
   for (triangleVectorIter it = triangles->begin(); it != triangles->end(); ++it) {
-    p[0] = surfels->at( it->verts[0] ).position();
-    p[1] = surfels->at( it->verts[1] ).position();
-    p[2] = surfels->at( it->verts[2] ).position();
-    n[0] = surfels->at( it->verts[0] ).normal();
-    n[1] = surfels->at( it->verts[1] ).normal();
-    n[2] = surfels->at( it->verts[2] ).normal();
+    p[0] = surfels->at( it->verts[0] ).Center();
+    p[1] = surfels->at( it->verts[1] ).Center();
+    p[2] = surfels->at( it->verts[2] ).Center();
+    n[0] = surfels->at( it->verts[0] ).Normal();
+    n[1] = surfels->at( it->verts[1] ).Normal();
+    n[2] = surfels->at( it->verts[2] ).Normal();
 
     glBegin(GL_TRIANGLES);  
     for (int i = 0; i < 3; ++i) {
@@ -866,6 +866,6 @@ void PyramidTriangleRenderer::setTriangles( vector<Triangle> *t ) {
 /**
  * Sets the vertex array.
  **/
-void PyramidTriangleRenderer::setVertices( vector<Surfel> *s ) {
+void PyramidTriangleRenderer::setVertices( vector<Surfeld> *s ) {
   surfels = s;
 }

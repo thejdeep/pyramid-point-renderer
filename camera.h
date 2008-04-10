@@ -20,6 +20,7 @@
 #include <fstream>
 
 #include "quat.h"
+#include "surfels.h"
 
 // Rendering mode
 enum renderMode {ORTHOGRAPHIC, PERSPECTIVE};
@@ -35,13 +36,13 @@ typedef struct _keyframe {
     reconstruction_filter = prefilter = 0.0;
   }
   /// Constructor
-  _keyframe(double _p[], Quat _r) : rot(_r) {
+  _keyframe(Point _p, Quat _r) : rot(_r) {
     pos[0] = _p[0]; pos[1] = _p[1]; pos[2] = _p[2];
     light_pos[0] = light_pos[1] = light_pos[2] = light_pos[3] = 0.0;
     reconstruction_filter = prefilter = 0.0;
   }
   /// Constructor
-  _keyframe(double _p[], Quat _r, GLfloat _lp[], double& _rf, double& _pf) : rot(_r) {
+  _keyframe(Point _p, Quat _r, GLfloat _lp[], double& _rf, double& _pf) : rot(_r) {
     pos[0] = _p[0]; pos[1] = _p[1]; pos[2] = _p[2];
     light_pos[0] = _lp[0]; light_pos[1] = _lp[1]; light_pos[2] = _lp[2]; light_pos[3] = _lp[3];
     reconstruction_filter = _rf;
@@ -50,7 +51,7 @@ typedef struct _keyframe {
   /// I/O operator - output
   inline friend ostream& operator << (ostream& out, const struct _keyframe& k) {
     out << k.rot.x << " " << k.rot.y << " " << k.rot.z << " " << k.rot.a << " "
-	<< k.pos[0] << " " << k.pos[1] << " " << k.pos[2] << " " << k.light_pos[0]
+	<< k.pos.x() << " " << k.pos.y() << " " << k.pos.z() << " " << k.light_pos[0]
 	<< " " << k.light_pos[1] << " " << k.light_pos[2] << " " << k.light_pos[3] 
 	<< " " << k.reconstruction_filter << " " << k.prefilter;
     return out;
@@ -65,7 +66,7 @@ typedef struct _keyframe {
 
   /// Data
   Quat rot;
-  double pos[3];
+  Point pos;
   GLfloat light_pos[4];
   double reconstruction_filter;
   double prefilter;
@@ -96,6 +97,10 @@ public:
   /// Initialize light properties
   void initLight (void);
 
+  void setTranslation (void);
+  void setRotation (void);
+
+
   /// Return the current view mode
   /// @return current view mode (orthograpic or perspective)
   int viewMode ( void ) const { return view_mode; }
@@ -111,7 +116,7 @@ public:
   void updateMouse ( void );
 
   /// Starts a quat rotation procedure
-  void startQuatRotation(int x, int y, Quat*, double[3]);
+  void startQuatRotation(int x, int y, Quat*, Point*);
   /// Starts a rotation procedure
   void startRotation(int x, int y);
   /// Ends a rotation procedure
@@ -123,7 +128,7 @@ public:
   void rotate (void);
 
   /// Compute new eye position given a rotation quaternion
-  void computeEyePosition(Quat q, double *new_eye);
+  void computeEyePosition(Quat q, Point *new_eye);
 
   /// Translate light position
   void lightTranslate (int x, int y);
@@ -137,11 +142,11 @@ public:
   void translate (int x, int y);
 
   /// Translate a given vector
-  void translateVec (int x, int y, double* vec);
+  void translateVec (int x, int y, Point* );
   /// Translate a given vector in the z axis
-  void zoomingVec (int x, int y, double* vec);
+  void zoomingVec (int x, int y, Point* );
   /// Rotate a given quaternion
-  void rotateQuat(int x, int y, Quat *q, double[3]);
+  void rotateQuat(int x, int y, Quat *q, Point* );
 
   /// Return rotation matrix
   const double* rotationMatrix ( void );// { return rotation_matrix; }
@@ -152,25 +157,22 @@ public:
 
   /// Return zoom factor
   const double zoom ( void ) const { return zoom_factor; }
-
   /// Return position
-  const double* positionVector ( void ) const { return &position[0]; }
-  void setPositionVector ( double p[3] ) { 
-    position[0] = p[0]; position[1] = p[1]; position[2] = p[2]; }
+  const Point positionVector ( void ) const { return position; }
+  void setPositionVector ( Point p ) { position = p; }
   
   /// Return light position
   const GLfloat* lightVector ( void ) const { return &light_position[0]; }
   void setLightVector ( GLfloat p[3] ) { 
-    light_position[0] = p[0]; light_position[1] = p[1]; light_position[2] = p[2]; }
+    light_position[0] = p[0]; light_position[1] = p[1]; light_position[2] = p[2]; }  
   
-
   /// Return far and near planes
   const double zNear ( void ) const { return z_near; }
   const double zFar ( void ) const { return z_far; }
   const double fieldOfVision ( void ) const { return fov; }
 
   void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
-  void positionVec ( double e[] ) const { e[0] = position[0]; e[1] = position[1]; e[2] = -position[2]; };
+  void positionVec ( double e[] ) const { e[0] = position.x(); e[1] = position.y(); e[2] = -position.z(); }
 
   void createKeyFrame( double reconstruction_filter, double prefilter ) {
     keyframe k( position, q_rot, light_position, reconstruction_filter, prefilter );
@@ -240,11 +242,8 @@ private:
   double rotation_matrix[16];
   double prev_matrix[16];
 
-  // Trackball center
-  double center[3];
-
   // Translation vector
-  double position[3];
+  Point position;
 
   // Trackball radius
   double radius;
@@ -292,7 +291,7 @@ private:
 
   void mapToSphere(const double p_screen[3], double p[], const double r) const;
 
-  void projectToScreen(double p[3], double* screen_pos);
+  void projectToScreen(Point* p, double* screen_pos);
 };
 
 #endif

@@ -12,8 +12,9 @@
  * Default constructor.
  **/
 JFASplatting::JFASplatting() : PointBasedRender(),
-					       canvas_border_width(32),
-					       canvas_border_height(32) {
+			       canvas_border_width(32),
+			       canvas_border_height(32),
+			       dist_type(0){
   createFBO();
   createShaders();
 }
@@ -22,8 +23,9 @@ JFASplatting::JFASplatting() : PointBasedRender(),
  * Constructor with screen size.
  **/
 JFASplatting::JFASplatting(int w, int h) : PointBasedRender(w, h),
-							   canvas_border_width(w/32),
-							   canvas_border_height(h/32) {
+					   canvas_border_width(w/32),
+					   canvas_border_height(h/32),
+					   dist_type(0){
   createFBO();
   createShaders();
 }
@@ -154,12 +156,9 @@ void JFASplatting::getDataProjectedPixels ( int* data ) {
  **/
 void JFASplatting::projectSurfels ( Primitives* prim )
 {
-  GLenum outputBuffers[2] = {fbo_buffers[2], fbo_buffers[0]};
+  GLenum outputBuffers[3] = {fbo_buffers[4], fbo_buffers[0], fbo_buffers[2]};
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  glDrawBuffers(2, outputBuffers);
-
-//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-//   glDrawBuffer(fbo_buffers[2]);
+  glDrawBuffers(3, outputBuffers);
 
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
@@ -200,6 +199,8 @@ void JFASplatting::switchBuffers( void ) {
 
   glActiveTexture(GL_TEXTURE0 + read_buffer);
   glBindTexture(FBO_TYPE, fbo_textures[read_buffer]);
+  glActiveTexture(GL_TEXTURE0 + read_buffer + 2);
+  glBindTexture(FBO_TYPE, fbo_textures[read_buffer+2]);
   //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
@@ -208,24 +209,29 @@ void JFASplatting::switchBuffers( void ) {
 void JFASplatting::evaluatePixels( void )
 {  
   // Activate projected surfels texture
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(FBO_TYPE, fbo_textures[2]);
+//   glActiveTexture(GL_TEXTURE2);
+//   glBindTexture(FBO_TYPE, fbo_textures[2]);
 
   shader_evaluate->use();
-  shader_evaluate->set_uniform("depth_test", depth_test);
-  shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
-  shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+  //  shader_evaluate->set_uniform("depth_test", depth_test);
+  //  shader_evaluate->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
+  //  shader_evaluate->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+
 
   // pass texture with original normals and radius from projected pixel
   // textureA [n.x, n.y, n.z, radius]
-  shader_evaluate->set_uniform("textureA", 2);
+  //  shader_evaluate->set_uniform("textureA", 2);
+  //  shader_evaluate->set_uniform("dist_type", (GLint)dist_type);
 
   read_buffer = 1;
   
-  for (int l = fbo_width/2; l >= 1; l=l/2) {
+  int max_lookup = fbo_width/4;
+
+  for (int l = max_lookup; l >= 1; l=l/2) {
     switchBuffers();
     shader_evaluate->set_uniform("step_length", (GLint)l);
     shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
+    shader_evaluate->set_uniform("textureC", (GLint)read_buffer+2);
     drawQuad();
   }
 
@@ -262,12 +268,19 @@ void JFASplatting::rasterizePhongShading( void )
 
   glActiveTexture(GL_TEXTURE0+dest_buffer);
   glBindTexture(FBO_TYPE, fbo_textures[dest_buffer]);
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(FBO_TYPE, fbo_textures[2]);
+  glActiveTexture(GL_TEXTURE0+dest_buffer+2);
+  glBindTexture(FBO_TYPE, fbo_textures[dest_buffer+2]);
+  glActiveTexture(GL_TEXTURE4);
+  glBindTexture(FBO_TYPE, fbo_textures[4]);
   
   shader_phong->use();
   shader_phong->set_uniform("textureA", (GLint)dest_buffer);
-  shader_phong->set_uniform("textureB", 2);
+  shader_phong->set_uniform("textureB", (GLint)dest_buffer+2);
+  shader_phong->set_uniform("textureC", 4);
+  //  shader_phong->set_uniform("dist_type", (GLint)dist_type);
+
+  shader_phong->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
+  shader_phong->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
   drawQuad();
 

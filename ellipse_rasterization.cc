@@ -16,7 +16,7 @@ EllipseRasterization::EllipseRasterization() : PointBasedRender(),
 					       canvas_border_height(32),
 					       cpu_mask_size(1),
 					       gpu_mask_size(1),
-					       sample_subdivision(1){
+					       sample_subdivision(4){
   createFBO();
   createShaders();
 }
@@ -29,7 +29,7 @@ EllipseRasterization::EllipseRasterization(int w, int h) : PointBasedRender(w, h
 							   canvas_border_height(h/32),
 							   cpu_mask_size(1),
 							   gpu_mask_size(1),
-							   sample_subdivision(1) {
+							   sample_subdivision(4) {
   createFBO();
   createShaders();
 }
@@ -159,9 +159,9 @@ void EllipseRasterization::getDataProjectedPixels ( int* data ) {
  **/
 void EllipseRasterization::projectSurfels ( Primitives* prim )
 {
-//   GLenum outputBuffers[3] = {fbo_buffers[2], fbo_buffers[3], fbo_buffers[4]};
+//   GLenum outputBuffers[2] = {fbo_buffers[2], fbo_buffers[3]};
 //   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-//   glDrawBuffers(3, outputBuffers);
+//   glDrawBuffers(2, outputBuffers);
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
   glDrawBuffer(fbo_buffers[2]);
@@ -237,7 +237,8 @@ void EllipseRasterization::evaluatePixels( void )
 
   // pass texture with original normals and radius from projected pixel
   // textureA [n.x, n.y, n.z, radius]
-  shader_evaluate->set_uniform("textureA", 2);
+  shader_evaluate->set_uniform("textureB", 2);
+  //  shader_evaluate->set_uniform("textureC", 3);
 
   int passes = 0;
   read_buffer = 1;
@@ -245,7 +246,7 @@ void EllipseRasterization::evaluatePixels( void )
     for (int i = -cpu_mask_size; i <= cpu_mask_size; ++i) {
       switchBuffers();
       shader_evaluate->set_uniform("displacement", (GLint)i, (GLint)j);
-      shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
+      shader_evaluate->set_uniform("textureA", (GLint)read_buffer);
       drawQuad();
       ++passes;
     }
@@ -286,12 +287,9 @@ void EllipseRasterization::rasterizePhongShading( void )
 
   glActiveTexture(GL_TEXTURE0+dest_buffer);
   glBindTexture(FBO_TYPE, fbo_textures[dest_buffer]);
-//   glActiveTexture(GL_TEXTURE4);
-//   glBindTexture(FBO_TYPE, fbo_textures[4]);
-
+  
   shader_phong->use();
-  shader_phong->set_uniform("textureA", 1);
-//   shader_phong->set_uniform("textureB", 4);
+  shader_phong->set_uniform("textureA", (GLint)dest_buffer);
 
   drawQuad();
 
@@ -470,7 +468,7 @@ void EllipseRasterization::createFBO( void ) {
  **/
 void EllipseRasterization::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("shader_point_projection_er.vert");

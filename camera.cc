@@ -9,8 +9,6 @@
 
 #include "camera.h"
 
-#define PI 3.14159265
-
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/PI;
 
@@ -21,7 +19,7 @@ const double rad_to_deg = 180.0/PI;
  **/
 Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				   zoom_factor(1.0), fov(1.0),
-				   z_near(0.01), z_far(100.0) {
+				   z_near(0.001), z_far(100.0) {
   view_mode = PERSPECTIVE;
 
   static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -30,7 +28,7 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
   q_last.a = 1.0; q_last.x = 0.0; q_last.y = 0.0; q_last.z = 0.0;
   q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
 
-  position[0] = 0.0; position[1] = 0.0; position[2] = -1.0;
+  position = Point(0.0, 0.0, -3.0);
     
   light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
 
@@ -120,10 +118,10 @@ void Camera::computeKeyFrame( void ) {
  **/
 void Camera::setView (void) {
 
-  glViewport(0, 0, screen_width, screen_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
+  glViewport(0, 0, screen_width, screen_height);
   resetViewMode();
   
   glMatrixMode(GL_MODELVIEW);
@@ -133,8 +131,25 @@ void Camera::setView (void) {
 
   if ( runningFrames() )
     computeKeyFrame();
+}
+
+/**
+ * Sets OpenGL camera.
+ * Initialize viewport and resets projection and modelview matrices.
+ * Translates and rotates camera direction and position.
+ **/
+void Camera::setTranslation (void) {
 
   glTranslatef(position[0], position[1], position[2]);
+
+}
+
+/**
+ * Sets OpenGL camera.
+ * Initialize viewport and resets projection and modelview matrices.
+ * Translates and rotates camera direction and position.
+ **/
+void Camera::setRotation (void) {
 
 //   Quat q = q_rot;
 //   q.x *= -1;
@@ -215,20 +230,14 @@ void Camera::reshape(int w, int h) {
   screen_width = w;
   screen_height = h;
 
-  // Center of arcball is located at normalized window center
-  center[0] = 0.0;
-  center[1] = 0.0;
-  center[2] = 0.0;
-
   // Arcball radius
   radius = 1.0;
 
   glClearColor (0.0, 0.0, 0.0, 1.0);
 
+  glViewport(0, 0, (GLsizei) w, (GLsizei) h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-
-  glViewport(0, 0, (GLsizei) w, (GLsizei) h);
 
   resetViewMode ();
 
@@ -256,7 +265,7 @@ void Camera::startRotation(int x, int y) {
  * @param q Object's rotation quaternion.
  * @param obj_center Position of object being rotated.
  **/
-void Camera::startQuatRotation(int x, int y, Quat* q, double obj_center[3]) {
+void Camera::startQuatRotation(int x, int y, Quat* q, Point* obj_center) {
 
   q_last = *q;
 
@@ -286,8 +295,8 @@ void Camera::mapToSphere(const double p_screen[3], double p[], const double r) c
   p[0] = 2.0 *(p_screen[0]/((double)screen_width)) - 1.0;
   p[1] = 2.0 *(p_screen[1]/((double)screen_height)) - 1.0;
 
-  p[0] = (p[0] - center[0]) / r;
-  p[1] = (p[1] - center[1]) / r;
+  p[0] = (p[0] - position.x()) / r;
+  p[1] = (p[1] - position.y()) / r;
 
   double sq_len = p[0]*p[0] + p[1]*p[1];
 
@@ -307,7 +316,7 @@ void Camera::mapToSphere(const double p_screen[3], double p[], const double r) c
  * @param p Given point in world coordinates.
  * @param screen_pos Screen position of given point.
  **/
-void Camera::projectToScreen(double p[3], double* screen_pos) {
+void Camera::projectToScreen(Point* p, double* screen_pos) {
 
   GLdouble pos_x, pos_y, pos_z;
 
@@ -324,7 +333,7 @@ void Camera::projectToScreen(double p[3], double* screen_pos) {
 	
   // get 2D coordinates based on 3D coordinates
 
-  gluProject(p[0], p[1], p[2],
+  gluProject(p->x(), p->y(), p->z(),
 	     model_view, projection, viewport,
 	     &pos_x, &pos_y, &pos_z);
 
@@ -384,7 +393,7 @@ void Camera::rotate(int x, int y) {
  * @param q Object's rotation quaternion.
  * @param obj_center Position of object being rotated.
  **/
-void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
+void Camera::rotateQuat(int x, int y, Quat *q, Point* obj_center) {
 
   double screen_obj_center[3];
   projectToScreen(obj_center, screen_obj_center);
@@ -418,7 +427,7 @@ void Camera::rotateQuat(int x, int y, Quat *q, double obj_center[3]) {
  * @param q Given rotation.
  * @param new_eye New computed eye position.
  **/
-void Camera::computeEyePosition(Quat q, double *new_eye) {
+void Camera::computeEyePosition(Quat q, Point *new_eye) {
   Quat q_new_rot = q_rot;
   q_new_rot = q_new_rot.composeWith(q);
 
@@ -427,9 +436,12 @@ void Camera::computeEyePosition(Quat q, double *new_eye) {
 
   q_new_rot = q_new_rot.inverse();
 
-  new_eye[0] = position[0];
-  new_eye[1] = position[1];
-  new_eye[2] = position[2];
+  // increment given vector by oriented displacement
+  (*new_eye)[0] = new_eye->x() + position[0];
+  (*new_eye)[1] = new_eye->y() + position[1];
+  (*new_eye)[2] = new_eye->z() + position[2];
+
+  //cout << new_eye[0] << " " << new_eye[1] << " " << new_eye[2] << endl;
 
   q_new_rot.rotate(new_eye);
 }
@@ -489,14 +501,14 @@ void Camera::translate (int x, int y) {
  * @param y Mouse screen y coordinate
  * @param vec Object's position vector.
  **/
-void Camera::translateVec (int x, int y, double* vec) {
+void Camera::translateVec (int x, int y, Point* center) {
 
   mouse_curr[0] = x;
   mouse_curr[1] = screen_height - y;
   mouse_curr[2] = 0.0;
 
   // translation displacement vector
-  double rotVec[3] = {0.0, 0.0, 0.0};
+  Point rotVec;
 
   rotVec[0] = 10*(mouse_curr[0] - mouse_start[0]) / screen_width;
   rotVec[1] = 10*(mouse_curr[1] - mouse_start[1]) / screen_height;
@@ -508,12 +520,12 @@ void Camera::translateVec (int x, int y, double* vec) {
   // rotates displacement to align with object axis
   Quat q = q_rot;
   q.x *= -1; q.y *= -1; q.z *= -1;
-  q.rotate(rotVec);
+  q.rotate(&rotVec);
 
   // increment given vector by oriented displacement
-  vec[0] += rotVec[0];
-  vec[1] += rotVec[1];
-  vec[2] += rotVec[2];
+  (*center)[0] = center->x() + rotVec[0];
+  (*center)[1] = center->y() + rotVec[1];
+  (*center)[2] = center->z() + rotVec[2];
 }
 
 /**
@@ -533,14 +545,14 @@ void Camera::updateMouse ( void ) {
  * @param y Mouse screen y coordinate.
  * @param vec Object's position vector.
 **/
-void Camera::zoomingVec (int x, int y, double* vec) {
+void Camera::zoomingVec (int x, int y, Point* center) {
 
   mouse_curr[0] = x;
   mouse_curr[1] = screen_height - y;
   mouse_curr[2] = 0.0;
 
   // translation displacement vector
-  double rotVec[3] = {0.0, 0.0, 0.0};
+  Point rotVec;
 
   rotVec[2] -= 15.0*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
@@ -551,14 +563,13 @@ void Camera::zoomingVec (int x, int y, double* vec) {
   // rotates displacement to align with object axis
   Quat q = q_rot;
   q.x *= -1; q.y *= -1; q.z *= -1;
-  q.rotate(rotVec);
+  q.rotate(&rotVec);
 
   // increment given vector by oriented displacement
-  vec[0] += rotVec[0];
-  vec[1] += rotVec[1];
-  vec[2] += rotVec[2];
+  (*center)[0] = center->x() + rotVec[0];
+  (*center)[1] = center->y() + rotVec[1];
+  (*center)[2] = center->z() + rotVec[2];
 }
-
 
 /**
  * Translate ligth position

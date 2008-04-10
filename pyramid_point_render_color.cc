@@ -363,10 +363,14 @@ int PyramidPointRenderColor::projectionCallbackFunc( void )
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
 
-  if (use_lod) {
+  if (use_lod == 1) { //lod
     shader_projection->set_uniform("vertex_buffer", 6);
     shader_projection->set_uniform("normal_buffer", 7);
     shader_projection->set_uniform("color_per_lod", (GLint)color_per_lod);
+  }
+  else if (use_lod == 2) { //upsampling
+    GLfloat max_radius = 2.0/(GLfloat)canvas_width;
+    shader_projection->set_uniform("max_radius", max_radius);
   }
 
   return TRUE;
@@ -399,6 +403,7 @@ void PyramidPointRenderColor::projectSurfels( Primitives* prim )
 double PyramidPointRenderColor::computeHalfPixelSize( void ) {
 
   double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
+  //double d = pow(2.0, (double)cur_level) / (double)(fbo_height);
   d *= 0.5;
 
   return d;
@@ -408,7 +413,6 @@ int PyramidPointRenderColor::analysisCallbackFunc( void )
 {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
-  //shader_analysis->set_uniform("half_pixel_size", (GLfloat)(0.5 / src0.width));
 
   shader_analysis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_analysis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
@@ -793,12 +797,21 @@ void PyramidPointRenderColor::createFBO() {
  **/
 void PyramidPointRenderColor::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
   shader_projection_no_lod = new glslKernel();
   shader_projection_no_lod->vertex_source("shader_point_projection_color.vert");
   shader_projection_no_lod->fragment_source("shader_point_projection_color.frag");
   shader_projection_no_lod->install( shader_inst_debug );
+
+  shader_projection_upsampling = new glslKernel();
+  shader_projection_upsampling->vertex_source("shader_point_projection_upsampling.vert");
+  shader_projection_upsampling->geometry_source("shader_point_projection_upsampling.geom");
+  shader_projection_upsampling->set_geom_max_output_vertices( 9 );
+  shader_projection_upsampling->set_geom_input_type(GL_POINTS);
+  shader_projection_upsampling->set_geom_output_type(GL_POINTS);
+  shader_projection_upsampling->fragment_source("shader_point_projection_upsampling.frag");
+  shader_projection_upsampling->install( shader_inst_debug );
 
   shader_projection_lod = new glslKernel();
   shader_projection_lod->vertex_source("shader_point_projection_lod.vert");
