@@ -185,7 +185,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 			 -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 1.0*radius;
+  float a = 2.0*radius;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
