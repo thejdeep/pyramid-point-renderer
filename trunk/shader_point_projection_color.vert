@@ -38,24 +38,43 @@ void main(void)
 
       // the projected normal is the smaller projection between the minor and major axis
       // compute first the projected axis
-      vec3 minor_axis = normalize(gl_NormalMatrix * gl_TexCoord[0].xyz);
-      vec3 major_axis = normalize(gl_NormalMatrix * gl_Normal.xyz);
-/*       float minor_len = length(minor_axis.xy); */
-/*       float major_len = length(major_axis.xy); */
+/*       vec3 minor_axis = normalize(gl_NormalMatrix * gl_TexCoord[0].xyz); */
+/*       vec3 major_axis = normalize(gl_NormalMatrix * gl_Normal.xyz); */
+/* /\*       float minor_len = length(gl_TexCoord[0].xyz); *\/ */
+/* /\*       float major_len = length(gl_Normal.xyz); *\/ */
+/*       float minor_len = length(gl_NormalMatrix * gl_TexCoord[0].xyz); */
+/*       float major_len = length(gl_NormalMatrix * gl_Normal.xyz); */
      
       normal_vec = normalize(gl_NormalMatrix * unprojected_normal);
 
       float radius = gl_Vertex.w;
 
-      if (minor_axis.z > major_axis.z) {
-	radius = length(gl_TexCoord[0].xyz);
-      }
-      else {
-	radius = length(gl_Normal.rgb);
-      }
+      //      if (minor_axis.z * minor_len > major_axis.z * major_len) {
+/*       if (length((gl_NormalMatrix * gl_TexCoord[0].xyz).xy) > length((gl_NormalMatrix * gl_Normal.xyz).xy)) { */
+/* 	radius = minor_len; */
+/* 	normal_vec = vec3(major_axis.xy, major_len / minor_len); */
+/*       } */
+/*       else { */
+/* 	radius = major_len; */
+/* 	normal_vec = vec3(minor_axis.xy, minor_len / major_len); */
+/*       } */
+
+/*       if (minor_len < major_len) { */
+/* 	radius = major_len; */
+/* 	normal_vec = minor_axis; */
+/* 	normal_vec.z = minor_len / major_len;	 */
+/*       } */
+/*       else { */
+/* 	radius = minor_len; */
+/* 	normal_vec = major_axis; */
+/* 	normal_vec.z = major_len / minor_len; */
+/*       } */
+/*       normal_vec.xy = normalize(normal_vec.xy); */
+
+/*       normal_vec.xy *= (1.0 - normal_vec.z*normal_vec.z) / (normal_vec.x*normal_vec.x + normal_vec.y*normal_vec.y); */
 
       // compute depth value without projection matrix, only modelview
-	radius_depth_w = vec3(radius, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
+      radius_depth_w = vec3(radius, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
       
       gl_Position = v;
     }

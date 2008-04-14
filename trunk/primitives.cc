@@ -318,7 +318,7 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     }
     else {
       std::pair<double, Vector> minor = it->MinorAxis();
-      minor.second = minor.second.norm() * minor.first;      
+      minor.second = minor.second.norm() * minor.first; 
 
       color_array[pos*4 + 0] = (GLfloat)minor.second.x();
       color_array[pos*4 + 1] = (GLfloat)minor.second.y();
@@ -331,8 +331,8 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     //color_array[pos*4 + 3] = type;
     color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
 
-    std::pair<double, Vector> major = it->MajorAxis();    
-    major.second = major.second.norm() * major.first;
+    std::pair<double, Vector> major = it->MajorAxis();
+    major.second = major.second.norm() * major.first * 2.0;
 
     normal_array[pos*3 + 0] = (GLfloat)major.second.x();
     normal_array[pos*3 + 1] = (GLfloat)major.second.y();
