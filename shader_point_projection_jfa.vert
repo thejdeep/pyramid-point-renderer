@@ -14,7 +14,7 @@ void main(void)
 {
   gl_TexCoord[0] = gl_MultiTexCoord0;
 
-  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -0.0 ) {
+  if ( dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < -1000.0 ) {
 
   // back face culling (rotated eye, fixed point)  
     radius_depth_w.x = 0.0;

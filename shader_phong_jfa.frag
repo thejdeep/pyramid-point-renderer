@@ -78,7 +78,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 			  -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = 1.0*radius;
+  float a = 2.0*radius;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -132,7 +132,7 @@ void main (void) {
 
       // if ((dist_type == 0) || (dist <= 1.0)) {
       if (dist != -1.0) {
-	float weight = exp(-dist);
+	float weight = exp(-0.5*dist);
 	normal += ellipse_normal * weight;
 	total_weight += weight;
       }
@@ -142,7 +142,7 @@ void main (void) {
   // computes pixel color if one or more ellipses are in range
   if (total_weight > 0.0) {    
     normal /= total_weight;
-    //normal = normalize(normal);
+    normal = normalize(normal);
 
     //int material = int(floor( color.a*(float(num_materials)) + 0.5 ));
     int material = 1;

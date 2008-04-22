@@ -438,9 +438,9 @@ void Application::createPointRender( void ) {
   delete point_based_render;
 
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
-      (render_mode == PYRAMID_POINTS_UPSAMPLING) ||
-      (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)){
-    if (color_model)
+      (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
+      (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)) {
+    if (color_model) 
       point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);

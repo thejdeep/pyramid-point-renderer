@@ -29,7 +29,8 @@ void Primitives::render ( void ) {
   if ((renderer_type == PYRAMID_POINTS) ||
       (renderer_type == PYRAMID_POINTS_UPSAMPLING) ||
       (renderer_type == RASTERIZE_ELLIPSES)||
-      (renderer_type == JFA_SPLATTING)) {
+      (renderer_type == JFA_SPLATTING) || 
+      (renderer_type == PYRAMID_POINTS_JFA)) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -223,6 +224,8 @@ void Primitives::setRendererType ( int rtype ) {
     setPyramidPointsArraysLOD();
     setPatchesArray();
   }
+  else if (renderer_type == PYRAMID_POINTS_JFA)
+    setPyramidPointsArraysColor();
   else if (renderer_type == RASTERIZE_ELLIPSES)
     setPyramidPointsArraysColor();
   else if (renderer_type == JFA_SPLATTING)

@@ -55,11 +55,46 @@ void main (void) {
   float curr_coords[] = float[num_ellipses](curr_coords_0[0], curr_coords_0[1], curr_coords_0[2], curr_coords_0[3],
 				 curr_coords_1[0], curr_coords_1[1], curr_coords_1[2], curr_coords_1[3]);
 
-  int pos = 0;
 
+/*   float fetch_coord; */
+/*   // up-left - 0 */
+/*   displacement = gl_TexCoord[0].st + (vec2(-1.0,  1.0) * jump); */
+/*   fetch_coords[0] = texture2D (textureC, displacement).w; */
+/*   // up-center - 1 */
+/*   displacement = gl_TexCoord[0].st + (vec2( 0.0,  1.0) * jump); */
+/*   fetch_coords[1] = texture2D (textureC, displacement).z; */
+/*   // up-right - 2 */
+/*   displacement = gl_TexCoord[0].st + (vec2( 1.0,  1.0) * jump); */
+/*   fetch_coords[2] = texture2D (textureC, displacement).y; */
+/*   // center-left - 3 */
+/*   displacement = gl_TexCoord[0].st + (vec2(-1.0,  0.0) * jump); */
+/*   fetch_coords[3] = texture2D (textureC, displacement).x; */
+/*   // center-right - 4 */
+/*   displacement = gl_TexCoord[0].st + (vec2( 1.0,  0.0) * jump); */
+/*   fetch_coords[4] = texture2D (textureB, displacement).w; */
+/*   // bottom-left - 5 */
+/*   displacement = gl_TexCoord[0].st + (vec2(-1.0, -1.0) * jump); */
+/*   fetch_coords[5] = texture2D (textureB, displacement).z; */
+/*   // bottom-center - 6 */
+/*   displacement = gl_TexCoord[0].st + (vec2( 0.0, -1.0) * jump); */
+/*   fetch_coords[6] = texture2D (textureB, displacement).y; */
+/*   // bottom-right - 7 */
+/*   displacement = gl_TexCoord[0].st + (vec2( 1.0, -1.0) * jump); */
+/*   fetch_coords[7] = texture2D (textureB, displacement).x; */
+
+/*   for (int i = 0; i < num_ellipses; ++i) { */
+/*     ellipse_coord = uncompress(fetch_coords[i], texSizeB); */
+    
+/*     if ((curr_coords[i] == 0.0) ||  */
+/* 	(length(gl_TexCoord[0].st - ellipse_coord) < length(gl_TexCoord[0].st - uncompress(curr_coords[i], texSizeB)))) */
+/*       curr_coords[i] = fetch_coords[i]; */
+/*   } */
+
+  int pos = 0;
   for (int j = -1; j <= 1; ++j) {
     for (int i = -1; i <= 1; ++i) {
-      if ((i != 0) || (j != 0)) {
+      //      if ((i != 0) || (j != 0))
+	{
 
 	// fetch compressed indices from position (i,j)
 	displacement = gl_TexCoord[0].st + (vec2(float(i), float(j)) * jump);
@@ -77,7 +112,7 @@ void main (void) {
 	// find the mininum distance between the current indice stored, and the four fetched indices
 	for (int k = 0; k < num_ellipses; ++k) {
 	  if (fetch_coords[k] != 0.0) {
-	    ellipse_coord = uncompress(fetch_coords[k], texSizeB);	
+	    ellipse_coord = uncompress(fetch_coords[k], texSizeB);
 	    dist_pixel = length (gl_TexCoord[0].st - ellipse_coord);
 	    if (dist_pixel < min_dist) {
 	      min_dist = dist_pixel;
