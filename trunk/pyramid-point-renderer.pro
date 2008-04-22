@@ -29,6 +29,7 @@ HEADERS += application.h \
            pyramid_point_render.h \
            pyramid_point_render_nearest.h \
            pyramid_point_render_color.h \
+           pyramid_point_render_jfa.h \
            pyramid_point_render_lod.h \
            pyramid_point_render_trees.h \
            pyramid_triangle_renderer.h \
@@ -56,6 +57,7 @@ SOURCES += application.cc \
            pyramid_point_render.cc \
            pyramid_point_render_nearest.cc \
            pyramid_point_render_color.cc \
+           pyramid_point_render_jfa.cc \
            pyramid_point_render_lod.cc \
            pyramid_point_render_trees.cc \
            pyramid_triangle_renderer.cc \

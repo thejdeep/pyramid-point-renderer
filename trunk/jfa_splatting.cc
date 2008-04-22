@@ -185,8 +185,12 @@ void JFASplatting::switchBuffers( void ) {
     dest_buffer = 1;
   }
 
+  GLenum outputBuffers[2] = {fbo_buffers[dest_buffer], fbo_buffers[dest_buffer+2]};
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  glDrawBuffer(fbo_buffers[dest_buffer]);
+  glDrawBuffers(2, outputBuffers);
+
+//   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+//   glDrawBuffer(fbo_buffers[dest_buffer]);
 
   glViewport(0, 0, canvas_width+2*canvas_border_width,
 	     canvas_height+2*canvas_border_height);
@@ -225,9 +229,9 @@ void JFASplatting::evaluatePixels( void )
 
   read_buffer = 1;
   
-  int max_lookup = fbo_width/4;
+  int max_lookup = fbo_width/2;
 
-  for (int l = max_lookup; l >= 1; l=l/2) {
+  for (int l = 1; l <= max_lookup; l=l*2) {
     switchBuffers();
     shader_evaluate->set_uniform("step_length", (GLint)l);
     shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
@@ -235,15 +239,11 @@ void JFASplatting::evaluatePixels( void )
     drawQuad();
   }
 
-//   switchBuffers();
-//   shader_evaluate->set_uniform("step_length", (GLint)0);
-//   shader_evaluate->set_uniform("textureB", (GLint)read_buffer);
-//   drawQuad();
-
   shader_evaluate->use(0);
 
 //   getDataReconstructedPixels ( dest_buffer );
-//   getDataReconstructedPixels ( read_buffer );
+//   getDataReconstructedPixels ( dest_buffer+2 );
+//   cout << "************" << endl;
 }
 
 /**
@@ -337,7 +337,7 @@ void JFASplatting::interpolate( void ) {
 
   // Interpolate scattered data using pyramid algorithm
   evaluatePixels();
-  evaluatePixels();
+  //evaluatePixels();
 }
 
 /**
