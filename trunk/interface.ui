@@ -248,6 +248,11 @@
     </item>
     <item>
      <property name="text" >
+      <string>Pyramid Points ER</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
       <string>Ellipse Rasterization</string>
      </property>
     </item>

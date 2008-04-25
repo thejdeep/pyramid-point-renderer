@@ -445,6 +445,8 @@ void Application::createPointRender( void ) {
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
+  else if (render_mode == PYRAMID_POINTS_ER)
+    point_based_render = new PyramidPointRenderER(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == PYRAMID_LINES)
     point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == RASTERIZE_ELLIPSES)
@@ -544,9 +546,10 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( PYRAMID_POINTS );
+  //primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
+  primitives.back().setRendererType( PYRAMID_POINTS_ER );
 
   num_objects = objects.size();
 
