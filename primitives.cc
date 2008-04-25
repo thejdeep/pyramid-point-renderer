@@ -29,6 +29,7 @@ void Primitives::render ( void ) {
   if ((renderer_type == PYRAMID_POINTS) ||
       (renderer_type == PYRAMID_POINTS_UPSAMPLING) ||
       (renderer_type == RASTERIZE_ELLIPSES)||
+      (renderer_type == PYRAMID_POINTS_ER)||
       (renderer_type == JFA_SPLATTING) || 
       (renderer_type == PYRAMID_POINTS_JFA)) {
 
@@ -227,6 +228,8 @@ void Primitives::setRendererType ( int rtype ) {
   else if (renderer_type == PYRAMID_POINTS_JFA)
     setPyramidPointsArraysColor();
   else if (renderer_type == RASTERIZE_ELLIPSES)
+    setPyramidPointsArraysColor();
+  else if (renderer_type == PYRAMID_POINTS_ER)
     setPyramidPointsArraysColor();
   else if (renderer_type == JFA_SPLATTING)
     setPyramidPointsArraysColor();

@@ -33,6 +33,7 @@
 #include "pyramid_point_render_color.h"
 #include "pyramid_point_render_lod.h"
 #include "pyramid_point_render_trees.h"
+#include "pyramid_point_render_er.h"
 #include "pyramid_triangle_renderer.h"
 #include "ellipse_rasterization.h"
 #include "jfa_splatting.h"
