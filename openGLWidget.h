@@ -35,7 +35,7 @@ class openGLWidget: public QGLWidget {
 
     int argc = 0;
     char * argv[1];
-    argv[0] = "";
+    argv[0] = (char*)"";
 
     // GLUT initialization, just for writing text to screen
     glutInit(&argc, argv);
