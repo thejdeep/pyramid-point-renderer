@@ -634,7 +634,7 @@ int Application::readLodFile ( const char * filename ) {
 }
 
 int Application::writeSceneFile ( void ) {
-  char * fn = "../plys/scene.scn";
+  const char * fn = "../plys/scene.scn";
   ofstream out(fn, ios::trunc);
 
   out << "#Scene file : type;renderType;material id -- id;x;y;z;q.x;q.y;q.z;q.a;n" << endl;

@@ -29,7 +29,7 @@ typedef struct Face {
   void *other_props;       /* other properties */
 } Face;
 
-char *elem_names[] = { /* list of the kinds of elements in the user's object */
+const char *elem_names[] = { /* list of the kinds of elements in the user's object */
   "vertex", "face"
 };
 
@@ -192,7 +192,7 @@ void readPly (const char *filename, vector<Surfeld> *surfels) {
 
   int i,j;
   int elem_count;
-  char *elem_name;
+  const char *elem_name;
   
   for (i = 0; i < in_ply->num_elem_types; i++) {
 
@@ -256,7 +256,7 @@ void readPlyHighRes (const char *filename, vector<Surfeld> *surfels) {
 
   int i,j;
   int elem_count;
-  char *elem_name;
+  const char *elem_name;
   
   vector<Surfeld> temp_surfels;
   for (i = 0; i < in_ply->num_elem_types; i++) {
@@ -355,7 +355,7 @@ void readPlyTriangles (const char *filename, vector<Surfeld> *surfels,
 
   int i,j;
   int elem_count;
-  char *elem_name;
+  const char *elem_name;
   
   for (i = 0; i < in_ply->num_elem_types; i++) {
 
@@ -436,7 +436,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
   int i,j;
   int elem_count;
-  char *elem_name;
+  const char *elem_name;
 
   if (!in_ply) {
     cerr << "bad filename!" << endl;

@@ -511,26 +511,51 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRenderER::rasterizeSynthesisPyramid()
+void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
-  pixels_struct sourcePixels; /* same level as destination */
+//   pixels_struct sourcePixels; /* same level as destination */
+//   pixels_struct destinationPixels;
+//   pixels_struct nullPixels;
+
+//   nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
+
+//   sourcePixels = generatePixels(0, fbo, 3,
+// 				fbo_buffers[1],
+// 				fbo_buffers[3],
+// 				fbo_buffers[5]);
+
+//   destinationPixels = generatePixels(0, fbo, 3,
+// 				     fbo_buffers[0],
+// 				     fbo_buffers[2],
+// 				     fbo_buffers[4]);
+//   rasterizePixels(destinationPixels, sourcePixels, nullPixels, SYNTHESIS);
+//   shader_synthesis->use(0);
+
+  int level;
+  pixels_struct source0Pixels; /* same level as destination */
+  pixels_struct source1Pixels; /* coarser level than destination */
   pixels_struct destinationPixels;
-  pixels_struct nullPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
+  for (level = levels_count - 2; level >= 0; level--)
+    {
+      cur_level = level;
 
-  sourcePixels = generatePixels(0, fbo, 3,
-				fbo_buffers[1],
-				fbo_buffers[3],
-				fbo_buffers[5]);
-
-  destinationPixels = generatePixels(0, fbo, 3,
-				     fbo_buffers[0],
-				     fbo_buffers[2],
-				     fbo_buffers[4]);
-  rasterizePixels(destinationPixels, sourcePixels, nullPixels, SYNTHESIS);
-  shader_synthesis->use(0);
+      source0Pixels = generatePixels(level, fbo, 3,
+				     fbo_buffers[0 + ((level + 1) % 2)],
+				     fbo_buffers[2 + ((level + 1) % 2)],
+      				     fbo_buffers[4 + ((level + 1) % 2)]);
+      source1Pixels = generatePixels(level + 1, fbo, 3,
+				     fbo_buffers[0 + ((level + 1) % 2)],
+				     fbo_buffers[2 + ((level + 1) % 2)],
+      				     fbo_buffers[4 + ((level + 1) % 2)]);
+      destinationPixels = generatePixels(level, fbo, 3,
+					 fbo_buffers[0 + (level % 2)],
+					 fbo_buffers[2 + (level % 2)],
+     					 fbo_buffers[4 + (level % 2)]);
+      rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
+      shader_synthesis->use(0);
+    }
 }
 
 /* rasterize level 0 of pyramid with per pixel shading */
@@ -674,7 +699,7 @@ void PyramidPointRenderER::interpolate() {
 void PyramidPointRenderER::draw( void ) {
 
   // Deffered shading of the final image containing normal map
-  rasterizePhongShading(1  );
+  rasterizePhongShading(0);
   //showPixels(1);
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
