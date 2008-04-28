@@ -86,9 +86,9 @@ void pprMainWindow::fileOpen( void )
 
   selectCurrObject();
 
+
   if (filetype.compare("lod") == 0)
     checkBoxLOD->setCheckState( (Qt::CheckState) 2 );
-
 
 }
 
@@ -229,6 +229,7 @@ void pprMainWindow::on_checkBoxDistanceType_stateChanged( int state ) {
 }
 
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
+
   application->changeRendererType ( index );
 
   // Get the renderer type of the object to make sure it was possible to change the renderer type

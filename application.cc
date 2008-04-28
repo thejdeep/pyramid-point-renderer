@@ -204,6 +204,7 @@ void Application::draw(void) {
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
+
   // Computes per pixel color with deferred shading
   point_based_render->draw();
 
@@ -242,6 +243,7 @@ void Application::draw(void) {
 
   // necessary to compute correct fps
   glFinish();
+
 }
 
 
@@ -435,7 +437,7 @@ void Application::createPointRender( void ) {
   if (render_mode == NONE)
     return;
 
-  delete point_based_render;
+  //delete point_based_render;
 
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
@@ -462,6 +464,8 @@ void Application::createPointRender( void ) {
     point_based_render->setBackFaceCulling(0);
   else
     point_based_render->setBackFaceCulling(1);
+
+
 
 
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
@@ -546,7 +550,7 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //primitives.back().setRendererType( PYRAMID_POINTS );
+  ;;primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
   primitives.back().setRendererType( PYRAMID_POINTS_ER );
@@ -556,7 +560,7 @@ int Application::readFile ( const char * filename ) {
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
   
-  render_mode = PYRAMID_POINTS;
+  render_mode = PYRAMID_POINTS_ER;
 
   //  if (!point_based_render)
   createPointRender( );

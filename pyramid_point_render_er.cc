@@ -492,21 +492,22 @@ void PyramidPointRenderER::copyAnalysisPyramid()
 int PyramidPointRenderER::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
-  //  shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
-  //  shader_synthesis->set_uniform("oo_fbo_size", (GLfloat)(1.0/fbo_width), (GLfloat)(1.0/fbo_height));
+  //shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
+  shader_synthesis->set_uniform("oo_fbo_size", (GLfloat)(1.0/fbo_width), (GLfloat)(1.0/fbo_height));
 
-  //  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
+  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_synthesis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_synthesis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
-  shader_synthesis->set_uniform("mask_size", (GLint)7);
+  shader_synthesis->set_uniform("mask_size", (GLint)1);
 
-  //  shader_synthesis->set_uniform("depth_test", depth_test);
-  //  shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
+  //shader_synthesis->set_uniform("depth_test", (GLint)0);
+  shader_synthesis->set_uniform("depth_test", depth_test);
+  //shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
 
-  shader_synthesis->set_uniform("textureA", 1);
-  shader_synthesis->set_uniform("textureB", 3);
-  //  shader_synthesis->set_uniform("textureC", 2);
+  shader_synthesis->set_uniform("textureA", 0);
+  shader_synthesis->set_uniform("textureB", 1);
+  shader_synthesis->set_uniform("textureC", 2);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -514,34 +515,17 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
 void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
-//   pixels_struct sourcePixels; /* same level as destination */
-//   pixels_struct destinationPixels;
-//   pixels_struct nullPixels;
-
-//   nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
-
-//   sourcePixels = generatePixels(0, fbo, 3,
-// 				fbo_buffers[1],
-// 				fbo_buffers[3],
-// 				fbo_buffers[5]);
-
-//   destinationPixels = generatePixels(0, fbo, 3,
-// 				     fbo_buffers[0],
-// 				     fbo_buffers[2],
-// 				     fbo_buffers[4]);
-//   rasterizePixels(destinationPixels, sourcePixels, nullPixels, SYNTHESIS);
-//   shader_synthesis->use(0);
-
   int level;
   pixels_struct source0Pixels; /* same level as destination */
   pixels_struct source1Pixels; /* coarser level than destination */
   pixels_struct destinationPixels;
 
   for (level = levels_count - 2; level >= 0; level--)
+  //for (level = 1; level >= 0; level--)
     {
       cur_level = level;
 
-      source0Pixels = generatePixels(level, fbo, 3,
+      source0Pixels = generatePixels(0, fbo, 3,
 				     fbo_buffers[0 + ((level + 1) % 2)],
 				     fbo_buffers[2 + ((level + 1) % 2)],
       				     fbo_buffers[4 + ((level + 1) % 2)]);
@@ -549,13 +533,32 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 				     fbo_buffers[0 + ((level + 1) % 2)],
 				     fbo_buffers[2 + ((level + 1) % 2)],
       				     fbo_buffers[4 + ((level + 1) % 2)]);
-      destinationPixels = generatePixels(level, fbo, 3,
+      destinationPixels = generatePixels(0, fbo, 3,
 					 fbo_buffers[0 + (level % 2)],
 					 fbo_buffers[2 + (level % 2)],
      					 fbo_buffers[4 + (level % 2)]);
       rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
-      shader_synthesis->use(0);
+      //      shader_synthesis->use(0);
     }
+
+  // last pass on level 0
+//   level = 0;
+//   cur_level = level;
+//   source0Pixels = generatePixels(0, fbo, 3,
+// 				 fbo_buffers[0 + ((level + 1) % 2)],
+// 				 fbo_buffers[2 + ((level + 1) % 2)],
+// 				 fbo_buffers[4 + ((level + 1) % 2)]);
+//   source1Pixels = generatePixels(0, fbo, 3,
+// 				 fbo_buffers[0 + ((level + 1) % 2)],
+// 				 fbo_buffers[2 + ((level + 1) % 2)],
+// 				 fbo_buffers[4 + ((level + 1) % 2)]);
+//   destinationPixels = generatePixels(0, fbo, 3,
+// 				     fbo_buffers[0 + (level % 2)],
+// 				     fbo_buffers[2 + (level % 2)],
+// 				     fbo_buffers[4 + (level % 2)]);
+//   rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
+
+  shader_synthesis->use(0);
 }
 
 /* rasterize level 0 of pyramid with per pixel shading */
@@ -565,7 +568,6 @@ int PyramidPointRenderER::phongShadingCallbackFunc( void )
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
   shader_phong->set_uniform("textureC", 1);
-
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -820,8 +822,8 @@ void PyramidPointRenderER::createShaders ( void ) {
   shader_projection->install( shader_inst_debug );
 
   shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("shader_analysis_color.vert");
-  shader_analysis->fragment_source("shader_analysis_color.frag");
+  shader_analysis->vertex_source("shader_analysis_er.vert");
+  shader_analysis->fragment_source("shader_analysis_er.frag");
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
