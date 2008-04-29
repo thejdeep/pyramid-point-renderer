@@ -99,6 +99,9 @@ class PyramidPointRenderER : public PointBasedRender
   /// Current rasterize level
   int cur_level;
 
+  /// Texture displacement for current level
+  GLfloat tex_start[2];
+
   /// Type of most recently used framebuffer.
   framebuffer_state_enum framebuffer_state; 
   

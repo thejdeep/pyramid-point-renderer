@@ -465,9 +465,6 @@ void Application::createPointRender( void ) {
   else
     point_based_render->setBackFaceCulling(1);
 
-
-
-
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
   point_based_render->setDepthTest(depth_culling);

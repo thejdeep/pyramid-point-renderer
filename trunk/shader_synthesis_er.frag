@@ -11,7 +11,10 @@ const float reduc_factor = 1.0;
 
 //uniform vec2 fbo_size;
 uniform vec2 oo_fbo_size;
-uniform float half_pixel_size;
+//uniform float half_pixel_size;
+
+uniform vec2 tex_start;
+uniform int level;
 
 // flag for depth test on/off
 uniform bool depth_test;
@@ -111,8 +114,8 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
     }
     // overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
     else if (ellipseZ < (buffer1.x/buffer0.w)) {
-      buffer0 = vec4(normal * weight, weight);
-      buffer1 = vec4(ellipseZ * weight, 0.0, 0.0, 0.0);
+      buffer0 = vec4(normal * weight, r * weight);
+      buffer1 = vec4(ellipseZ * weight, weight, 0.0, 0.0);
     }
   }
 }
@@ -126,33 +129,30 @@ void main (void) {
   vec4 ellipse0, ellipse1;
   vec2 local_displacement;
 
-  buffer1.y = 0.0;
-
-  // coordinates for pixel above on coarser level
-  vec2 tex_coord = gl_TexCoord[3].st;
+  vec2 tex_displacement = gl_TexCoord[0].st - (gl_TexCoord[3].st - tex_start) * pow(2.0, level);
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
       if ((i != 0) || (j != 0)) {
-	
+
 	//vec2 local_displacement = global_displacement.xy + (vec2(i, j) / texSizeB);
 	local_displacement = vec2(i, j) * oo_fbo_size.st;
 
 	// retrieve candidadte ellipse from displacement position
-	ellipse0 = texture2D (textureA, tex_coord.st + local_displacement.xy).xyzw;
-	ellipse1 = texture2D (textureB, tex_coord.st + local_displacement.xy).xyzw;
+	ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+	ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
-	if (ellipse0.w != 0.0)       
-	  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, ellipse1.zw + vec2(i, j) * 2.0 * half_pixel_size);
-	//splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, ellipse1.zw + local_displacement);
+	if (ellipse0.w != 0.0)
+	  //  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, tex_displacement + ellipse1.zw + vec2(i, j) * half_pixel_size);
+	  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, 
+		       tex_displacement + ellipse1.zw - local_displacement * pow(2.0, level));
       }
     }
   }
 
   if (buffer0.w > 0.0) {
-    buffer1.y += 1.0;
-    buffer0.xyz = normalize(buffer0.xyz);
-    buffer0.w /= buffer1.y;
+    //buffer0.xyz = buffer0.xyz;
+    //buffer0.w /= buffer1.y;
     buffer1.x /= buffer1.y;
   }
   else {
