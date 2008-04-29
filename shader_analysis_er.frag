@@ -243,7 +243,7 @@ void main (void) {
       dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
-      if (pixelA[i].w <= half_pixel_size*3.0)
+      if (pixelA[i].w <= half_pixel_size*0.0)
 	dist_test = 0.0;
 
       if  (dist_test != 0.0)

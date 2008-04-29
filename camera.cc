@@ -29,7 +29,7 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
   q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
 
   position = Point(0.0, 0.0, -3.0);
-    
+
   light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
 
   radius = 1.0;

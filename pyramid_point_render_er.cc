@@ -402,7 +402,7 @@ void PyramidPointRenderER::projectSurfels( Primitives* prim )
 double PyramidPointRenderER::computeHalfPixelSize( void ) {
 
   double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
-  //double d = pow(2.0, (double)cur_level) / (double)(fbo_height);
+  //double d = pow(2.0, (double)cur_level) / (double)(fbo_width);
   d *= 0.5;
 
   return d;
@@ -495,15 +495,18 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
   //shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
   shader_synthesis->set_uniform("oo_fbo_size", (GLfloat)(1.0/fbo_width), (GLfloat)(1.0/fbo_height));
 
-  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
+  //shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_synthesis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_synthesis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
   shader_synthesis->set_uniform("mask_size", (GLint)1);
 
-  //shader_synthesis->set_uniform("depth_test", (GLint)0);
-  shader_synthesis->set_uniform("depth_test", depth_test);
+  shader_synthesis->set_uniform("depth_test", (GLint)0);
+  //shader_synthesis->set_uniform("depth_test", depth_test);
   //shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
+
+  shader_synthesis->set_uniform("tex_start", tex_start[0]/(GLfloat)fbo_width, tex_start[1]/(GLfloat)fbo_height);
+  shader_synthesis->set_uniform("level", cur_level+1);
 
   shader_synthesis->set_uniform("textureA", 0);
   shader_synthesis->set_uniform("textureB", 1);
@@ -521,7 +524,8 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
   pixels_struct destinationPixels;
 
   for (level = levels_count - 2; level >= 0; level--)
-  //for (level = 1; level >= 0; level--)
+  //for (level = 0; level <= levels_count - 2; level++)
+  //for (level = 5; level >= 0; level--)
     {
       cur_level = level;
 
@@ -537,8 +541,13 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 					 fbo_buffers[0 + (level % 2)],
 					 fbo_buffers[2 + (level % 2)],
      					 fbo_buffers[4 + (level % 2)]);
+
+      tex_start[0] = source1Pixels.x - canvas_border_width;
+      tex_start[1] = source1Pixels.y - canvas_border_height;
+
       rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
-      //      shader_synthesis->use(0);
+
+      //shader_synthesis->use(0);
     }
 
   // last pass on level 0
