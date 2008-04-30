@@ -9,11 +9,14 @@ const float pi = 3.1416;
 
 const float reduc_factor = 1.0;
 
-//uniform vec2 fbo_size;
+uniform vec2 fbo_size;
 uniform vec2 oo_fbo_size;
 //uniform float half_pixel_size;
 
 uniform vec2 tex_start;
+uniform vec2 canvas_start;
+uniform vec2 oo_tex_size;
+uniform float oo_canvas_width;
 uniform int level;
 
 // flag for depth test on/off
@@ -129,7 +132,18 @@ void main (void) {
   vec4 ellipse0, ellipse1;
   vec2 local_displacement;
 
-  vec2 tex_displacement = gl_TexCoord[0].st - (gl_TexCoord[3].st - tex_start) * pow(2.0, level);
+
+  vec2 tex_displacement = ((gl_TexCoord[0].st - canvas_start) * fbo_size) -
+    ((gl_TexCoord[3].st - tex_start) * fbo_size * pow(2.0, level));
+
+/*   vec2 tex_displacement = (gl_TexCoord[0].st - level_0_border) - */
+/*     ((gl_TexCoord[3].st - tex_start) * pow(2.0, level)); */
+
+/*   // convert to a number in pixels (whole number) */
+/*   tex_displacement *= fbo_size; */
+
+  // convert to pixel dimension
+  tex_displacement *= oo_canvas_width;
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
@@ -137,6 +151,7 @@ void main (void) {
 
 	//vec2 local_displacement = global_displacement.xy + (vec2(i, j) / texSizeB);
 	local_displacement = vec2(i, j) * oo_fbo_size.st;
+	vec2 local_pixel_displacement = (vec2(-i, -j) * pow(2.0, level)) * oo_canvas_width;
 
 	// retrieve candidadte ellipse from displacement position
 	ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
@@ -145,19 +160,19 @@ void main (void) {
 	if (ellipse0.w != 0.0)
 	  //  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, tex_displacement + ellipse1.zw + vec2(i, j) * half_pixel_size);
 	  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, 
-		       tex_displacement + ellipse1.zw - local_displacement * pow(2.0, level));
+		       tex_displacement + ellipse1.zw);// + local_pixel_displacement);
       }
     }
   }
 
   if (buffer0.w > 0.0) {
-    //buffer0.xyz = buffer0.xyz;
+    buffer0.xyz = normalize(buffer0.xyz);
     //buffer0.w /= buffer1.y;
     buffer1.x /= buffer1.y;
   }
   else {
-    buffer0 = vec4(0.0);
-    buffer1 = vec4(0.0);
+/*     buffer0 = vec4(0.0); */
+/*     buffer1 = vec4(0.0); */
   }
 
   gl_FragData[0] = buffer0;

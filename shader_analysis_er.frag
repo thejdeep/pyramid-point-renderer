@@ -12,7 +12,7 @@ uniform bool depth_test;
 uniform vec2 oo_2fbo_size;
 
 // size of half a pixel
-uniform float half_pixel_size;
+uniform vec2 half_pixel_size;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
@@ -21,10 +21,10 @@ uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
 
-vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size), 
-				      vec2(half_pixel_size, -half_pixel_size), 
-				      vec2(-half_pixel_size, half_pixel_size), 
-				      vec2(half_pixel_size, half_pixel_size));
+vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size[0], -half_pixel_size[1]),
+				      vec2(half_pixel_size[0], -half_pixel_size[1]), 
+				      vec2(-half_pixel_size[0], half_pixel_size[1]), 
+				      vec2(half_pixel_size[0], half_pixel_size[1]));
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -243,10 +243,11 @@ void main (void) {
       dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
-      if (pixelA[i].w <= half_pixel_size*0.0)
-	dist_test = 0.0;
 
-      if  (dist_test != 0.0)
+      if (pixelA[i].w < half_pixel_size.s*6.0)
+	dist_test = -1.0;
+
+      if  (dist_test != -1.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
