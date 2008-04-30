@@ -10,7 +10,7 @@ uniform bool elliptical_weight;
 uniform vec2 fbo_size;
 uniform vec2 oo_fbo_size;
 //uniform vec2 dest_size;
-uniform float half_pixel_size;
+uniform vec2 half_pixel_size;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
