@@ -12,7 +12,7 @@ uniform bool depth_test;
 uniform vec2 oo_2fbo_size;
 
 // size of half a pixel
-uniform vec2 half_pixel_size;
+uniform float half_pixel_size;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
@@ -21,10 +21,10 @@ uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
 
-vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size[0], -half_pixel_size[1]),
-				      vec2(half_pixel_size[0], -half_pixel_size[1]), 
-				      vec2(-half_pixel_size[0], half_pixel_size[1]), 
-				      vec2(half_pixel_size[0], half_pixel_size[1]));
+vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size),
+				      vec2(half_pixel_size, -half_pixel_size), 
+				      vec2(-half_pixel_size, half_pixel_size), 
+				      vec2(half_pixel_size, half_pixel_size));
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -130,7 +130,6 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
   a += prefilter_size;
   b += prefilter_size;
     
-
   // rotated pixel box to match ellipse coordinate system
   // box order = | 2  3 |
   //             | 0  1 |
@@ -244,10 +243,10 @@ void main (void) {
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-      if (pixelA[i].w < half_pixel_size.s*6.0)
-	dist_test = -1.0;
+/*       if (pixelA[i].w < half_pixel_size.s*3.0) */
+/* 	dist_test = -1.0; */
 
-      if  (dist_test != -1.0)
+      if  (dist_test != -10.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
@@ -282,7 +281,8 @@ void main (void) {
 	      bufferA += pixelA[i] * w;
 
 	      // Increment ellipse total path with distance from gather pixel to center
-	      bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
+	      //	      bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
+	      bufferB.zw += pixelB[i].zw * w;
 	      
 	      bufferC += pixelC[i] * w;
 	      

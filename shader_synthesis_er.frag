@@ -13,11 +13,12 @@ uniform vec2 fbo_size;
 uniform vec2 oo_fbo_size;
 //uniform float half_pixel_size;
 
-uniform vec2 tex_start;
-uniform vec2 canvas_start;
-uniform vec2 oo_tex_size;
-uniform float oo_canvas_width;
-uniform int level;
+uniform vec2 oo_canvas_size;
+/* uniform vec2 tex_start; */
+/* uniform vec2 canvas_start; */
+/* uniform vec2 oo_tex_size; */
+/* //uniform int level; */
+/* uniform float level_size; */
 
 // flag for depth test on/off
 uniform bool depth_test;
@@ -132,9 +133,8 @@ void main (void) {
   vec4 ellipse0, ellipse1;
   vec2 local_displacement;
 
-
-  vec2 tex_displacement = ((gl_TexCoord[0].st - canvas_start) * fbo_size) -
-    ((gl_TexCoord[3].st - tex_start) * fbo_size * pow(2.0, level));
+/*   vec2 tex_displacement = ((gl_TexCoord[0].st - canvas_start) * fbo_size) - */
+/*     ((gl_TexCoord[3].st - tex_start) * fbo_size * pow(2.0, level)); */
 
 /*   vec2 tex_displacement = (gl_TexCoord[0].st - level_0_border) - */
 /*     ((gl_TexCoord[3].st - tex_start) * pow(2.0, level)); */
@@ -142,25 +142,32 @@ void main (void) {
 /*   // convert to a number in pixels (whole number) */
 /*   tex_displacement *= fbo_size; */
 
-  // convert to pixel dimension
-  tex_displacement *= oo_canvas_width;
+/*   vec2 tex_displacement = ((gl_TexCoord[0].st - canvas_start) * fbo_size) - */
+/*     ((gl_TexCoord[3].st - tex_start) * fbo_size * level_size); */
+
+/*   // convert to pixel dimension */
+/*   tex_displacement *= oo_canvas_width; */
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
-      if ((i != 0) || (j != 0)) {
+      //if ((i != 0) || (j != 0)) 
+	{
 
 	//vec2 local_displacement = global_displacement.xy + (vec2(i, j) / texSizeB);
 	local_displacement = vec2(i, j) * oo_fbo_size.st;
-	vec2 local_pixel_displacement = (vec2(-i, -j) * pow(2.0, level)) * oo_canvas_width;
+	//	vec2 local_pixel_displacement = (vec2(-i, -j) * pow(2.0, level)) * oo_canvas_width;
 
 	// retrieve candidadte ellipse from displacement position
 	ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 	ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
+	vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw)*fbo_size*oo_canvas_size;
+
+
 	if (ellipse0.w != 0.0)
 	  //  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, tex_displacement + ellipse1.zw + vec2(i, j) * half_pixel_size);
 	  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, 
-		       tex_displacement + ellipse1.zw);// + local_pixel_displacement);
+		       local_pixel_displacement);
       }
     }
   }
