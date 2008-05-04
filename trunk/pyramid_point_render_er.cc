@@ -551,9 +551,9 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 				     fbo_buffers[4 + ((level+1) % 2)]);
   rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
 
-  for (level = levels_count - 1; level >= 0; level--)
+  for (level = levels_count - 2; level >= 0; level--)
   //for (level = 0; level <= levels_count - 2; level++)
-  //  for (level = 0; level >= 0; level--)
+  //for (level = 5; level >= 0; level--)
     {
       cur_level = level + 1;
 
@@ -577,13 +577,10 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 
       rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
 
-      //shader_synthesis->use(0);
+      shader_synthesis->use(0);
     }
 
-  // last pass on level 0
-
-
-  shader_synthesis->use(0);
+  //  shader_synthesis->use(0);
 }
 
 /* rasterize level 0 of pyramid with per pixel shading */

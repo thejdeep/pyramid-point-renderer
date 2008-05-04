@@ -585,7 +585,7 @@ void EWASurfaceSplatting::draw ( void ) {
 	  // Empty pixel or new surface in front of current surface -- replace with new fragment
 	  else if ((!depth_test) || (z < pixelZ) )
 	    {	      
-	      weight = exp_table[max(0, (int)floor(radius * exp_table_scale))]; // rasanem	   
+	      weight = exp_table[max(0, (int)floor(radius * exp_table_scale))]; // rasanem
 	      pixel = zbuffer[x + y*canvas_width];
 	      
 	      pixel.weight = weight;
