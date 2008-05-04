@@ -249,7 +249,7 @@ void main (void) {
 
       dist_test = 1.0;
 
-      if (pixelA[i].w < half_pixel_size*1.5)
+      if (pixelA[i].w < half_pixel_size*2.0)
 	dist_test = -1.0;
 
       if  (dist_test != -1.0)
@@ -307,7 +307,7 @@ void main (void) {
   if (valid_pixels > 0.0)
     {
       bufferA /= valid_pixels;
-      bufferA.xyz = normalize(bufferA.xyz);
+      //bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
       bufferB.y = new_zmax - zmin;
       bufferB.zw /= valid_pixels;
