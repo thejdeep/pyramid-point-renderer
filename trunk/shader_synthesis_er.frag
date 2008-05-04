@@ -17,7 +17,7 @@ uniform vec2 oo_canvas_size;
 /* uniform vec2 tex_start; */
 /* uniform vec2 canvas_start; */
 /* uniform vec2 oo_tex_size; */
-/* //uniform int level; */
+//uniform int level;
 /* uniform float level_size; */
 
 // flag for depth test on/off
@@ -32,6 +32,7 @@ uniform float prefilter_size;
 uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
+
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -93,12 +94,14 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   else return -1.0;
 }
 
-void splatEllipse(inout vec4 buffer0, inout vec4 buffer1, 
+void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
 		  in vec3 normal, in float r, in float ellipseZ, in vec2 local_displacement) {
   // if pixel from displacement position is a projected surfel, check if current
   // pixel is inside its radius
 
-  float dist_test = pointInEllipse(local_displacement.xy, r, normal);
+  float dist_test;
+  dist_test = pointInEllipse(local_displacement.xy, r, normal);
+  //    dist_test = intersectEllipsePixel (local_displacement.xy, r, normal, 1.0);
   //float dist_test = pointInCircle(local_displacement.xy, r);
 
   // Ellipse in range
@@ -109,8 +112,7 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
     //float weight = 1.0;
 
     // sum contribution to current values if pixel near current surface (elipse)
-    if ((!depth_test) || (buffer0.w == 0.0) || (abs(ellipseZ - (buffer1.x / buffer0.w)) <= 1.0*r)) {
-      float pixelZ = buffer1.x / buffer0.w;
+    if ((!depth_test) || (buffer0.w == 0.0) || (abs(ellipseZ - (buffer1.x)) <= 1.0*r)) {
       
       buffer0 += vec4(normal * weight, r * weight);
       buffer1.x += ellipseZ * weight;
@@ -173,13 +175,13 @@ void main (void) {
   }
 
   if (buffer0.w > 0.0) {
-    buffer0.xyz = normalize(buffer0.xyz);
+    //buffer0.xyz = normalize(buffer0.xyz);
     //buffer0.w /= buffer1.y;
     buffer1.x /= buffer1.y;
   }
   else {
-/*     buffer0 = vec4(0.0); */
-/*     buffer1 = vec4(0.0); */
+    buffer0 = vec4(0.0);
+    buffer1 = vec4(0.0);
   }
 
   gl_FragData[0] = buffer0;

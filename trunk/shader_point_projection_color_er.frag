@@ -42,7 +42,7 @@ void main(void)
 
   depth_interval = radius_depth_w.x;
 
-  vec2 texCoord = vec2(floor(gl_FragCoord.st)*oo_fbo_size) + canvas_border;
+  vec2 texCoord = vec2(floor(gl_FragCoord.st)*oo_fbo_size);
 
   // First buffer  : normal.x, normal.y, normal.z, radius
   // Second buffer : minimum depth, depth interval, center.x, center.y

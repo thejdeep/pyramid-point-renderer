@@ -48,6 +48,9 @@
 
 #define CANVAS_WIDTH  768
 #define CANVAS_HEIGHT 768
+/* #define CANVAS_WIDTH  512 */
+/* #define CANVAS_HEIGHT 512 */
+
 
 class Application
 {
