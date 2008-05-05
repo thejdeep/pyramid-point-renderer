@@ -280,8 +280,7 @@ void main (void) {
 	{
 	  // Depth test between valid in reach ellipses
 	  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
-	  if ((!depth_test) || (abs(zmin - pixelB[i].x) <= pixelC[i].x+zmax))
-
+	  if ((!depth_test) || (abs(zmin - pixelB[i].x) <= pixelC[i].x))
 	    {
 	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 	      float w = 1.0;
@@ -291,7 +290,7 @@ void main (void) {
 
 	      bufferB.zw += pixelB[i].zw * w;
 	      
-	      bufferC += pixelC[i] * w;
+	      bufferC.x += pixelC[i].x * w;
 	      
 	      valid_pixels += w;
 	  }
