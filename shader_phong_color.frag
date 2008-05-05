@@ -50,6 +50,8 @@ void main (void) {
 
     if (material == 5) {
       color = normal;
+      color.xyz += 1.0;
+      color.xyz *= 0.5;
     }
     else 
     {

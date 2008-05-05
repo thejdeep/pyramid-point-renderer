@@ -329,6 +329,4 @@ void pprMainWindow::keyPressEvent( QKeyEvent* event) {
     application->setBackFaceCulling(true);
   else if (event->key() == Qt::Key_N)
     application->setBackFaceCulling(false);
-
-
 }

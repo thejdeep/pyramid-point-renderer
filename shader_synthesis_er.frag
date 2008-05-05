@@ -111,17 +111,18 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1, inout vec4 buffer2,
     float pixelZ = buffer1.x / buffer1.y;
 
     // sum contribution to current values if pixel near current surface (elipse)
-    if ((!depth_test) || (buffer1.y == 0.0) || (abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius)) {
+    if ((!depth_test) || (buffer1.y == 0.0) || (abs(ellipseZ - pixelZ) <= unprojected_radius)) {
       buffer0 += vec4(normal * weight, r * weight);
       buffer1 += vec4(ellipseZ * weight, weight, 0.0, 0.0);
-      buffer2 += vec4(unprojected_radius * weight, 0.0, 0.0, 0.0);
+      buffer2 += vec4(unprojected_radius * weight, 0.0, 0.0, color * weight);
     }
     // overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
     else if (ellipseZ < pixelZ) {
       buffer0 = vec4(normal * weight, r * weight);
       buffer1 = vec4(ellipseZ * weight, weight, 0.0, 0.0);
-      buffer2 = vec4(unprojected_radius * weight, 0.0, 0.0, 0.0);
+      buffer2 = vec4(unprojected_radius * weight, 0.0, 0.0, color * weight);
     }
+    buffer2.w = color;
   }
 }
 
@@ -134,8 +135,8 @@ void main (void) {
   vec4 ellipse0, ellipse1, ellipse2;
   vec2 local_displacement;
 
-  // make sure weight is not clamped if greater than 1.0
-  buffer1.y *= 100.0;
+  // this is to make sure weight is not clamped if greater than 1.0
+  buffer1.y *= 10.0;
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
@@ -165,6 +166,7 @@ void main (void) {
     //buffer0.xyz = normalize(buffer0.xyz);
     //buffer0.w /= buffer1.y;
     //buffer1.x /= buffer1.y;
+    //    buffer2.w /= buffer1.y;
   }
   else {
     buffer0 = vec4(0.0);
@@ -173,7 +175,7 @@ void main (void) {
   }
 
   // make sure weight is not clamped if greater than 1.0
-  buffer1.y *= 0.01;
+  buffer1.y *= 0.1;
 
   gl_FragData[0] = buffer0;
   gl_FragData[1] = buffer1;

@@ -38,7 +38,7 @@ class PyramidPointRenderColor : public PointBasedRender
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);
 
-  double computeHalfPixelSize( int );
+  double computeHalfPixelSize( void );
 
  public:
   PyramidPointRenderColor();

@@ -399,15 +399,9 @@ void PyramidPointRenderColor::projectSurfels( Primitives* prim )
   shader_projection->use(0);
 }
 
-double PyramidPointRenderColor::computeHalfPixelSize( int coord ) {
+double PyramidPointRenderColor::computeHalfPixelSize( void ) {
 
-  //  double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
-  double d = 0.0;
-  if (coord == 0)
-    d = pow(2.0, (double)cur_level) / (double)(fbo_width);
-  else if (coord == 1)
-    d = pow(2.0, (double)cur_level) / (double)(fbo_height);
-
+  double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
   d *= 0.5;
 
   return d;
@@ -418,7 +412,7 @@ int PyramidPointRenderColor::analysisCallbackFunc( void )
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
 
-  shader_analysis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize(0), (GLfloat)computeHalfPixelSize(0));
+  shader_analysis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_analysis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_analysis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
@@ -500,7 +494,7 @@ int PyramidPointRenderColor::synthesisCallbackFunc( void )
   shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
   shader_synthesis->set_uniform("oo_fbo_size", (GLfloat)(1.0/fbo_width), (GLfloat)(1.0/fbo_height));
 
-  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize(0), (GLfloat)computeHalfPixelSize(0));
+  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_synthesis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
   shader_synthesis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
