@@ -94,8 +94,9 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   else return -1.0;
 }
 
-void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
-		  in vec3 normal, in float r, in float ellipseZ, in vec2 local_displacement) {
+void splatEllipse(inout vec4 buffer0, inout vec4 buffer1, inout vec4 buffer2,
+		  in vec3 normal, in float r, in float ellipseZ, in float unprojected_radius, 
+		  in float color, in vec2 local_displacement) {
   // if pixel from displacement position is a projected surfel, check if current
   // pixel is inside its radius
   float dist_test = pointInEllipse(local_displacement.xy, r, normal);
@@ -106,18 +107,20 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
     // weight is the gaussian exponential of the distance to the ellipse's center
     float weight = exp(-0.5*dist_test);
 
-    // current depth value of pixel
-    float pixelZ = buffer1.x/buffer1.y;
+    // current depth value of pixel (weighted depth / accumulated weight)
+    float pixelZ = buffer1.x / buffer1.y;
 
     // sum contribution to current values if pixel near current surface (elipse)
-    if ((!depth_test) || (buffer1.y == 0.0) || (abs(ellipseZ - pixelZ) <= 2.0*r)) {
+    if ((!depth_test) || (buffer1.y == 0.0) || (abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius)) {
       buffer0 += vec4(normal * weight, r * weight);
       buffer1 += vec4(ellipseZ * weight, weight, 0.0, 0.0);
+      buffer2 += vec4(unprojected_radius * weight, 0.0, 0.0, 0.0);
     }
     // overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
     else if (ellipseZ < pixelZ) {
       buffer0 = vec4(normal * weight, r * weight);
       buffer1 = vec4(ellipseZ * weight, weight, 0.0, 0.0);
+      buffer2 = vec4(unprojected_radius * weight, 0.0, 0.0, 0.0);
     }
   }
 }
@@ -128,11 +131,11 @@ void main (void) {
   vec4 buffer0 = texture2D (textureA, gl_TexCoord[0].st, 0).xyzw;
   vec4 buffer1 = texture2D (textureB, gl_TexCoord[0].st, 0).xyzw;
   vec4 buffer2 = texture2D (textureC, gl_TexCoord[0].st, 0).xyzw;
-  vec4 ellipse0, ellipse1;
+  vec4 ellipse0, ellipse1, ellipse2;
   vec2 local_displacement;
 
   // make sure weight is not clamped if greater than 1.0
-  buffer1.y *= 10.0;
+  buffer1.y *= 100.0;
 
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
@@ -141,14 +144,19 @@ void main (void) {
 
 	local_displacement = vec2(i, j) * oo_fbo_size.st;
 
-	// retrieve candidadte ellipse from displacement position
+	// retrieve candidate ellipse from displacement position
 	ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-	ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
-	vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw)*fbo_size*oo_canvas_size;
+	if (ellipse0.w != 0.0) {	 
+	  ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+	  ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
-	if (ellipse0.w != 0.0)
-	  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse0.w, ellipse1.x, local_pixel_displacement);
+	  // displacement from current pixel and ellipse center in pixel dimension
+	  vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
+
+	  splatEllipse(buffer0, buffer1, buffer2, ellipse0.xyz, ellipse0.w, 
+		       ellipse1.x, ellipse2.x, ellipse2.w, local_pixel_displacement);
+	}
       }
     }
   }
@@ -156,15 +164,16 @@ void main (void) {
   if (buffer1.y > 0.0) {
     //buffer0.xyz = normalize(buffer0.xyz);
     //buffer0.w /= buffer1.y;
-    buffer1.x /= buffer1.y;
+    //buffer1.x /= buffer1.y;
   }
   else {
     buffer0 = vec4(0.0);
     buffer1 = vec4(0.0);
+    buffer2 = vec4(0.0);
   }
 
   // make sure weight is not clamped if greater than 1.0
-  buffer1.y *= 0.1;
+  buffer1.y *= 0.01;
 
   gl_FragData[0] = buffer0;
   gl_FragData[1] = buffer1;

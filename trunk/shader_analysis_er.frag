@@ -257,7 +257,7 @@ void main (void) {
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
 	    zmin = pixelB[i].x;
-	    zmax = zmin + pixelB[i].y;
+	    zmax = pixelC[i].x;
 	    obj_id = pixelC[i].w;
 	  }
 	}
@@ -275,25 +275,23 @@ void main (void) {
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) 
-      {
-	  	
+      {	  	
 	//if (abs(pixelC[i].w - obj_id) < 0.1 )
 	{
 	  // Depth test between valid in reach ellipses
-	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
+	  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
+	  if ((!depth_test) || (abs(zmin - pixelB[i].x) <= pixelC[i].x+zmax))
+
 	    {
 	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 	      float w = 1.0;
 	      bufferA += pixelA[i] * w;
 
-	      // Increment ellipse total path with distance from gather pixel to center
-	      //	      bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
+	      bufferB.x += pixelB[i].x * w;
+
 	      bufferB.zw += pixelB[i].zw * w;
 	      
 	      bufferC += pixelC[i] * w;
-	      
-	      // Take maximum depth range
-	      new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
 	      
 	      valid_pixels += w;
 	  }
@@ -308,8 +306,10 @@ void main (void) {
     {
       bufferA /= valid_pixels;
       //bufferA.xyz = normalize(bufferA.xyz);
-      bufferB.x = zmin;
-      bufferB.y = new_zmax - zmin;
+      //      bufferB.x = zmin;
+/*       bufferB.y = new_zmax - zmin; */
+      bufferB.x /= valid_pixels;
+      bufferB.y = 0.0;
       bufferB.zw /= valid_pixels;
       bufferC.rgb /= valid_pixels;
       bufferC.w = obj_id;
