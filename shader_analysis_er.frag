@@ -14,7 +14,7 @@ uniform vec2 oo_2fbo_size;
 // size of half a pixel
 uniform float half_pixel_size;
 
-/* uniform float reconstruction_filter_size; */
+//uniform float reconstruction_filter_size;
 /* uniform float prefilter_size; */
 
 const float reconstruction_filter_size = 1.0;
