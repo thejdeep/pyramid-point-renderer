@@ -40,6 +40,8 @@ class PyramidPointRenderER : public PointBasedRender
 
   double computeHalfPixelSize( void );
 
+  void getDataProjectedPixels ( int* data );
+
  public:
   PyramidPointRenderER();
   PyramidPointRenderER(int w, int h);
@@ -98,10 +100,6 @@ class PyramidPointRenderER : public PointBasedRender
 
   /// Current rasterize level
   int cur_level;
-
-  /// Texture displacement for current level
-  GLfloat tex_start[2];
-  GLfloat tex_size[2];
 
   /// Type of most recently used framebuffer.
   framebuffer_state_enum framebuffer_state; 

@@ -61,7 +61,7 @@ void main (void) {
 
       float NdotL = max(dot(normal.xyz, lightDir.xyz), 0.0);
 
-      //      color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
+      //color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
 
       if (NdotL > 0.0) {
 	color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;

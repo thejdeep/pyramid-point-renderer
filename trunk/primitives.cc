@@ -105,9 +105,13 @@ void Primitives::render ( void ) {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glVertexPointer(4, GL_FLOAT, 0, NULL); 
     
-    glEnableClientState(GL_COLOR_ARRAY);
+//     glEnableClientState(GL_COLOR_ARRAY);
+//     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+//     glColorPointer(4, GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-    glColorPointer(4, GL_FLOAT, 0, NULL);
+    glTexCoordPointer(4, GL_FLOAT, 0, NULL);
 
     glEnableClientState(GL_NORMAL_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
@@ -595,16 +599,33 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
       color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
     else {
-      color_array[pos*4 + 0] = obj_colors[id][0];
-      color_array[pos*4 + 1] = obj_colors[id][1];
-      color_array[pos*4 + 2] = obj_colors[id][2];
-    }
-    //    color_array[pos*4 + 3] = type;
-    color_array[pos*4 + 3] = (GLfloat)material / (GLfloat)NUM_MATERIALS;
+      std::pair<double, Vector> minor = it->MinorAxis();
+      minor.second = minor.second.norm() * minor.first; 
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
-    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
-    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
+      color_array[pos*4 + 0] = (GLfloat)minor.second.x();
+      color_array[pos*4 + 1] = (GLfloat)minor.second.y();
+      color_array[pos*4 + 2] = (GLfloat)minor.second.z();
+
+//       color_array[pos*4 + 0] = obj_colors[id][0];
+//       color_array[pos*4 + 1] = obj_colors[id][1];
+//       color_array[pos*4 + 2] = obj_colors[id][2];
+    }
+
+    color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
+
+    std::pair<double, Vector> major = it->MajorAxis();
+    major.second = major.second.norm() * major.first * 2.0;
+
+    normal_array[pos*3 + 0] = (GLfloat)major.second.x();
+    normal_array[pos*3 + 1] = (GLfloat)major.second.y();
+    normal_array[pos*3 + 2] = (GLfloat)major.second.z();
+
+//     //    color_array[pos*4 + 3] = type;
+//     color_array[pos*4 + 3] = (GLfloat)material / (GLfloat)NUM_MATERIALS;
+
+//     normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+//     normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+//     normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
 
     ++pos;
   }
@@ -639,9 +660,13 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL); 
   
-  glEnableClientState(GL_COLOR_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-  glColorPointer(4, GL_FLOAT, 0, NULL); 
+  glTexCoordPointer(4, GL_FLOAT, 0, NULL);
+
+//   glEnableClientState(GL_COLOR_ARRAY);
+//   glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+//   glColorPointer(4, GL_FLOAT, 0, NULL); 
 
   glEnableClientState(GL_NORMAL_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);

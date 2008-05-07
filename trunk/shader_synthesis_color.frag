@@ -402,8 +402,10 @@ void main (void) {
 	  weights[i] = 0.0;
 	}
 	else {
+	  weights[i] = exp(-0.5*dist_test);
 	  if (elliptical_weight)
-	    weights[i] = exp(-0.5*dist_test);
+	    weights[i] = 1.0 - dist_test;
+
 
 	  total_weight ++;
 

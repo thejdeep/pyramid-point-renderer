@@ -185,7 +185,7 @@ void Application::draw(void) {
 
 	point_based_render->projectSamples( prim );
 
-	if ((show_color_bars) && ((type == RASTERIZE_ELLIPSES) || (type == JFA_SPLATTING)))
+	if ((show_color_bars) && ((type == RASTERIZE_ELLIPSES) || (type == JFA_SPLATTING) || (type == PYRAMID_POINTS_ER)))
 	{
 	  point_based_render->getDataProjectedPixels( &surfs_per_level[0] );
 	  if (surfs_per_level[0] > max_surfs_per_level[0])
@@ -898,4 +898,8 @@ void Application::setDistanceType ( int n ) {
 
 void Application::setBackFaceCulling ( bool b ) {
   point_based_render->setBackFaceCulling(b);
+}
+
+void Application::setEllipticalWeight ( bool b ) {
+  point_based_render->setEllipticalWeight(b);
 }

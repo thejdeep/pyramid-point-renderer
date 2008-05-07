@@ -46,11 +46,12 @@
 #define QUARTER_PI 0.785398163
 #define E 2.71828183
 
+/* #define CANVAS_WIDTH  1024 */
+/* #define CANVAS_HEIGHT 1024 */
 #define CANVAS_WIDTH  768
 #define CANVAS_HEIGHT 768
 /* #define CANVAS_WIDTH  512 */
 /* #define CANVAS_HEIGHT 512 */
-
 
 class Application
 {
@@ -105,6 +106,7 @@ class Application
   void switchLodsPerc ( void );
   void setDistanceType ( int n );
   void setBackFaceCulling ( bool b );
+  void setEllipticalWeight ( bool b );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
