@@ -12,13 +12,15 @@ uniform bool depth_test;
 uniform vec2 oo_2fbo_size;
 
 // size of half a pixel
-uniform float half_pixel_size;
+//uniform float half_pixel_size;
+uniform float canvas_width;
+uniform int level;
 
-//uniform float reconstruction_filter_size;
-/* uniform float prefilter_size; */
+uniform float reconstruction_filter_size;
+uniform float prefilter_size;
 
-const float reconstruction_filter_size = 1.0;
-const float prefilter_size = 1.0;
+///const float reconstruction_filter_size = 1.0;
+//const float prefilter_size = 1.0;
 
 uniform sampler2D textureA;
 uniform sampler2D textureB;
@@ -242,15 +244,21 @@ void main (void) {
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
     if (pixelA[i].w > 0.0) {
-      //      dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
-      //      dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
+      //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
       dist_test = 1.0;
 
-      if (pixelA[i].w < half_pixel_size*2.0)
+      // radius small enough to fit at lower level entirely
+      if (pixelC[i].y == 1.0)
 	dist_test = -1.0;
+
+      if ( level == int( ceil( log2( ( pixelA[i].w * reconstruction_filter_size * 2.0 * canvas_width ) / 6.0 ) ) ) )
+	//if (pixelA[i].w < half_pixel_size*prefilter_size)
+	pixelC[i].y = 1.0;
+/*       else */
+/* 	pixelC[i].y = 0.0; */
 
       if  (dist_test != -1.0)
 	{
@@ -291,6 +299,7 @@ void main (void) {
 	      bufferB.zw += pixelB[i].zw * w;
 	      
 	      bufferC.x += pixelC[i].x * w;
+	      bufferC.y += pixelC[i].y * w;
 	      
 	      valid_pixels += w;
 	  }
@@ -299,8 +308,7 @@ void main (void) {
     }
 
   // average values if there are any valid ellipses
-  // otherwise the pixel will be writen as unspecified
-  
+  // otherwise the pixel will be writen as unspecified  
   if (valid_pixels > 0.0)
     {
       bufferA /= valid_pixels;
@@ -310,7 +318,9 @@ void main (void) {
       bufferB.x /= valid_pixels;
       bufferB.y = 0.0;
       bufferB.zw /= valid_pixels;
-      bufferC.rgb /= valid_pixels;
+      bufferC.x /= valid_pixels;
+      if (bufferC.y >= 1.0)
+	bufferC.y = 1.0;
       bufferC.w = obj_id;
     }
 

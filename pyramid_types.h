@@ -1,7 +1,7 @@
 /* types */
 
 #define FBO_TYPE GL_TEXTURE_2D
-#define FBO_FORMAT GL_RGBA32F_ARB
+#define FBO_FORMAT GL_RGBA16F_ARB
 #define FBO_BUFFERS_COUNT 6
 
 /** A pixels_struct specifies a rectangle of pixels 

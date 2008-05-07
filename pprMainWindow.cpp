@@ -228,6 +228,14 @@ void pprMainWindow::on_checkBoxDistanceType_stateChanged( int state ) {
   widget->updateGL();
 }
 
+void pprMainWindow::on_checkBoxEllipticalWeight_stateChanged( int state ) {
+  if (state == Qt::Checked)
+    application->setEllipticalWeight(true);
+  else
+    application->setEllipticalWeight(false);
+  widget->updateGL();
+}
+
 void pprMainWindow::on_comboRendererType_currentIndexChanged( int index ) {
 
   application->changeRendererType ( index );

@@ -49,5 +49,5 @@ void main(void)
   // Third buffer  : color
   gl_FragData[0] = vec4 (normalize(normal_vec), radius_depth_w.x / radius_depth_w.z ); 
   gl_FragData[1] = vec4 (radius_depth_w.y, 0.0, texCoord.st);
-  gl_FragData[2] = vec4 (radius_depth_w.x, gl_Color.yzw);
+  gl_FragData[2] = vec4 (radius_depth_w.x, 0.0, gl_Color.zw);
 }

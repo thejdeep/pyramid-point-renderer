@@ -43,6 +43,7 @@ class pprMainWindow : public QMainWindow, public Ui::MainWindow
   void on_checkBoxDepthTest_stateChanged( int state );
   void on_checkBoxColorBars_stateChanged( int state );
   void on_checkBoxDistanceType_stateChanged( int state );
+  void on_checkBoxEllipticalWeight_stateChanged( int state );
 
   void on_pushButtonResetMaxValues_pressed(  );
 
