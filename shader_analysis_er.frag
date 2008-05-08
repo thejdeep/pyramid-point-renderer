@@ -11,6 +11,9 @@ uniform bool depth_test;
 // one over 2 * fbo size
 uniform vec2 oo_2fbo_size;
 
+uniform vec2 fbo_size;
+uniform vec2 oo_canvas_size;
+
 // size of half a pixel
 //uniform float half_pixel_size;
 uniform float canvas_width;
@@ -250,15 +253,16 @@ void main (void) {
 
       dist_test = 1.0;
 
-      // radius small enough to fit at lower level entirely
+      // radius small enough to fit in lower level entirely, no need to propagate further
       if (pixelC[i].y == 1.0)
-	dist_test = -1.0;
-
-      if ( level == int( ceil( log2( ( pixelA[i].w * reconstruction_filter_size * 2.0 * canvas_width ) / 6.0 ) ) ) )
-	//if (pixelA[i].w < half_pixel_size*prefilter_size)
-	pixelC[i].y = 1.0;
-/*       else */
-/* 	pixelC[i].y = 0.0; */
+ 	dist_test = -1.0;
+      else {
+	int pixel_level = int( ( ceil( log2( ( pixelA[i].w * reconstruction_filter_size * 2.0 * canvas_width ) / 5.0 ) ) ) );
+	if ((level ==  pixel_level) || ((level <= 1) && (pixel_level < 1)) )
+	  pixelC[i].y = 1.0;
+	else
+	  pixelC[i].y = 0.0;
+      }
 
       if  (dist_test != -1.0)
 	{
@@ -292,7 +296,11 @@ void main (void) {
 	    {
 	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 	      float w = 1.0;
-	      bufferA += pixelA[i] * w;
+	      bufferA.xyz += pixelA[i].xyz * w;
+
+	      // radius computation
+	      //vec2 dist = (bufferB.zw - pixelB[i].zw)* fbo_size * oo_canvas_size;
+	      bufferA.w = max(bufferA.w, pixelA[i].w);
 
 	      bufferB.x += pixelB[i].x * w;
 
@@ -302,7 +310,7 @@ void main (void) {
 	      bufferC.y += pixelC[i].y * w;
 	      
 	      valid_pixels += w;
-	  }
+	    }
 	}
       }
     }
@@ -311,16 +319,11 @@ void main (void) {
   // otherwise the pixel will be writen as unspecified  
   if (valid_pixels > 0.0)
     {
-      bufferA /= valid_pixels;
-      //bufferA.xyz = normalize(bufferA.xyz);
-      //      bufferB.x = zmin;
-/*       bufferB.y = new_zmax - zmin; */
+      bufferA.xyz /= valid_pixels;
       bufferB.x /= valid_pixels;
       bufferB.y = 0.0;
       bufferB.zw /= valid_pixels;
       bufferC.x /= valid_pixels;
-      if (bufferC.y >= 1.0)
-	bufferC.y = 1.0;
       bufferC.w = obj_id;
     }
 
