@@ -177,7 +177,6 @@ void Application::draw(void) {
 	else
 	  point_based_render->useLOD( 0 );
 
-
 	if (type == PYRAMID_POINTS_LOD) {
 	  //prim->eye = Point(eye[0], eye[1], eye[2]);	 
 	  prim->countNumVertsLOD(&surfs_per_level[0]);
@@ -196,7 +195,7 @@ void Application::draw(void) {
 
 	  surfs_per_level[2] = max_surfs_per_level[0];
 	  surfs_per_level[3] = max_surfs_per_level[1];
-	}	
+	}
       }
     }
     glPopMatrix();

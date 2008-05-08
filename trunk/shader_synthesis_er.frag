@@ -75,7 +75,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 			  -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = 1.0*radius;
+  float a = 1.0*radius*reconstruction_filter_size;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -85,7 +85,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size)
+  if (test <= 1.0)
     return test;
   else return -1.0;
 }
@@ -145,7 +145,6 @@ void main (void) {
 	ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
 	if (ellipse0.w != 0.0)
-	  //if (ellipse0.w < half_pixel_size*600.0)
 	    {
 	      ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
