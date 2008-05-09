@@ -184,7 +184,7 @@ void Application::draw(void) {
 
 	point_based_render->projectSamples( prim );
 
-	if ((show_color_bars) && ((type == RASTERIZE_ELLIPSES) || (type == JFA_SPLATTING) || (type == PYRAMID_POINTS_ER)))
+	if ((show_color_bars) && ((type == RASTERIZE_ELLIPSES) || (type == JFA_SPLATTING)))
 	{
 	  point_based_render->getDataProjectedPixels( &surfs_per_level[0] );
 	  if (surfs_per_level[0] > max_surfs_per_level[0])

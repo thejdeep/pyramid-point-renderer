@@ -14,6 +14,8 @@ uniform vec2 oo_2fbo_size;
 uniform vec2 fbo_size;
 uniform vec2 oo_canvas_size;
 
+uniform int mask_size;
+
 // size of half a pixel
 //uniform float half_pixel_size;
 uniform float canvas_width;
@@ -257,8 +259,9 @@ void main (void) {
       if (pixelC[i].y == 1.0)
  	dist_test = -1.0;
       else {
-	int pixel_level = int( ( ceil( log2( ( pixelA[i].w * reconstruction_filter_size * 2.0 * canvas_width ) / 5.0 ) ) ) );
-	if ((level ==  pixel_level) || ((level <= 1) && (pixel_level < 1)) )
+	float mask = float(mask_size*2 + 1);
+	int pixel_level = int( ( ceil( log2( ( pixelA[i].w * reconstruction_filter_size * 2.0 * canvas_width ) / mask ) ) ) );
+	if ((level ==  pixel_level) || ((level <= 1) && (pixel_level <= 1)) )
 	  pixelC[i].y = 1.0;
 	else
 	  pixelC[i].y = 0.0;
@@ -288,7 +291,7 @@ void main (void) {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) 
       {	  	
-	//if (abs(pixelC[i].w - obj_id) < 0.1 )
+	if (abs(pixelC[i].w - obj_id) < 0.1 )
 	{
 	  // Depth test between valid in reach ellipses
 	  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
@@ -306,7 +309,7 @@ void main (void) {
 
 	      bufferB.zw += pixelB[i].zw * w;
 	      
-	      bufferC.x += pixelC[i].x * w;
+	      bufferC.x += max(bufferC.x, pixelC[i].x);
 	      bufferC.y += pixelC[i].y * w;
 	      
 	      valid_pixels += w;
@@ -323,7 +326,7 @@ void main (void) {
       bufferB.x /= valid_pixels;
       bufferB.y = 0.0;
       bufferB.zw /= valid_pixels;
-      bufferC.x /= valid_pixels;
+      //bufferC.x /= valid_pixels;
       bufferC.w = obj_id;
     }
 

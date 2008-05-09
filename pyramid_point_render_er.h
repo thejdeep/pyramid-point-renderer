@@ -34,8 +34,6 @@ class PyramidPointRenderER : public PointBasedRender
   int projectionCallbackFunc( void );
   void projectSurfels( Primitives* prim );
 
-  void copyAnalysisPyramidLevel0 ();
-
   pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2);
   void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
   GLuint getTextureOfBuffer(GLuint buffer);

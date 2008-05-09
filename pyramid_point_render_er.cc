@@ -463,6 +463,7 @@ int PyramidPointRenderER::analysisCallbackFunc( void )
   // shader_analysis->set_uniform("prefilter_size", (GLfloat)(prefilter_size));
  
   shader_analysis->set_uniform("depth_test", depth_test);
+  shader_analysis->set_uniform("mask_size", 2);
 
   shader_analysis->set_uniform("textureA", 0);
   shader_analysis->set_uniform("textureB", 1);
@@ -534,33 +535,6 @@ void PyramidPointRenderER::copyAnalysisPyramid()
     }
 }
 
-void PyramidPointRenderER::copyAnalysisPyramidLevel0()
-     /* copies odd levels from color attachment pair 1-3 to buffer pair 0-2 and 
-      * even levels from 0-2 to 1-3.
-      */
-{
-  int level;
-  pixels_struct nullPixels;
-  pixels_struct sourcePixels;
-  pixels_struct destinationPixels;
-
-  nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
-
-  level = 0;
-    {
-      sourcePixels = generatePixels(level, fbo, 3,
-				    fbo_buffers[0 + (level % 2)], 
-				    fbo_buffers[2 + (level % 2)],
-      				    fbo_buffers[4 + (level % 2)]);
-      destinationPixels = generatePixels(level, fbo, 3,
-					 fbo_buffers[0 + ((level + 1) % 2)], 
-					 fbo_buffers[2 + ((level + 1) % 2)],
-      					 fbo_buffers[4 + ((level + 1) % 2)]);
-      rasterizePixels(destinationPixels, sourcePixels, nullPixels, COPY);
-      shader_copy->use(0);
-    }
-}
-
 int PyramidPointRenderER::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
@@ -573,8 +547,9 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
 
   //  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
+  //shader_synthesis->set_uniform("level", cur_level);
 
-  shader_synthesis->set_uniform("mask_size", (GLint)2);
+  shader_synthesis->set_uniform("mask_size", 2);
   shader_synthesis->set_uniform("depth_test", depth_test);
 
   shader_synthesis->set_uniform("textureA", 0);
@@ -594,7 +569,7 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 
   //  for (level = levels_count - 2; level >= 0; level--)
   //  for (level = 0; level <= levels_count - 1; level++)
-  for (level = 0; level <= levels_count - 5; level++)
+  for (level = 0; level <= levels_count - 3; level++)
     {
       cur_level = level;
 
@@ -623,7 +598,7 @@ int PyramidPointRenderER::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
-  shader_phong->set_uniform("textureB", 1);
+  //shader_phong->set_uniform("textureB", 1);
   shader_phong->set_uniform("textureC", 2);
 
   return FALSE; /* not done, rasterize quad */
@@ -742,8 +717,6 @@ void PyramidPointRenderER::interpolate() {
   glDepthMask(GL_FALSE);
 
   // Interpolate scattered data using pyramid algorithm
-
-  //  copyAnalysisPyramidLevel0();
 
   rasterizeAnalysisPyramid();
 

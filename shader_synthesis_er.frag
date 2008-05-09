@@ -22,6 +22,8 @@ uniform bool elliptical_weight;
 uniform ivec2 displacement;
 uniform int mask_size;
 
+//uniform int level;
+
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
@@ -109,18 +111,29 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1, inout vec4 buffer2,
     float pixelZ = buffer1.x / buffer1.y;
 
     // sum contribution to current values if pixel near current surface (elipse)
-    if ((!depth_test) || (buffer1.y == 0.0) || (abs(ellipseZ - pixelZ) <= unprojected_radius)) {
-      buffer0 += vec4(normal * weight, r * weight);
-      buffer1 += vec4(ellipseZ * weight, weight, 0.0, 0.0);
-      buffer2 += vec4(unprojected_radius * weight, 0.0, 0.0, color * weight);
-    }
-    // overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
-    else if (ellipseZ < pixelZ) {
+    /*if ((buffer1.y != 0.0) && (ellipseZ > pixelZ) &&  { */
+    if (buffer1.x == 0.0) {
       buffer0 = vec4(normal * weight, r * weight);
       buffer1 = vec4(ellipseZ * weight, weight, 0.0, 0.0);
-      buffer2 = vec4(unprojected_radius * weight, 0.0, 0.0, color * weight);
+      buffer2 = vec4(unprojected_radius * weight, 0.0, 0.0, color);
     }
-    buffer2.w = color;
+    //else
+      {
+	if ( (!depth_test) || ((abs(ellipseZ - pixelZ) <= 1.0*unprojected_radius) && (color == buffer2.w)) ) {
+	  {
+	    buffer0 += vec4(normal * weight, r * weight);
+	    buffer1 += vec4(ellipseZ * weight, weight, 0.0, 0.0);
+	    buffer2 += vec4(unprojected_radius * weight, 0.0, 0.0, 0.0);
+	  }
+	}
+	// overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
+	else if (ellipseZ < pixelZ) {
+	  buffer0 = vec4(normal * weight, r * weight);
+	  buffer1 = vec4(ellipseZ * weight, weight, 0.0, 0.0);
+	  buffer2 = vec4(unprojected_radius * weight, 0.0, 0.0, color);
+	}
+      }
+    //buffer2.w = color;
   }
 }
 
@@ -139,40 +152,43 @@ void main (void) {
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
       {
-	local_displacement = vec2(i, j) * oo_fbo_size.st;
+	//	if ((level < 3) || ((abs(i) == mask_size) && (abs(j) == mask_size)))
+	{
+	  local_displacement = vec2(i, j) * oo_fbo_size.st;
 
-	// retrieve candidate ellipse from displacement position
-	ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-
-	if (ellipse0.w != 0.0)
-	    {
-	      ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-
-	      if (ellipse2.y > 0.0) {
+	  ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;	      
+	  if ((ellipse2.y > 0.0) && (ellipse2.x > 0.0)) {
+	    
+	    // retrieve candidate ellipse from displacement position
+	    ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+	    
+	    //if (ellipse0.w != 0.0)
+	      {
 		ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-
+		
 		// displacement from current pixel and ellipse center in pixel dimension
 		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
-	      
+
 		splatEllipse(buffer0, buffer1, buffer2, ellipse0.xyz, ellipse0.w, 
-			   ellipse1.x, ellipse2.x, ellipse2.w, local_pixel_displacement);
+			     ellipse1.x, ellipse2.x, ellipse2.w, local_pixel_displacement);
 	      }
 	    }
 	}
+      }
     }
   }
 
-  if (buffer1.y > 0.0) {
-    //buffer0.xyz = normalize(buffer0.xyz);
-    //buffer0.w /= buffer1.y;
-    //buffer1.x /= buffer1.y;
-    //    buffer2.w /= buffer1.y;
-  }
-  else {
-    buffer0 = vec4(0.0);
-    buffer1 = vec4(0.0);
-    buffer2 = vec4(0.0);
-  }
+/*   if (buffer1.y > 0.0) { */
+/*     //buffer0.xyz = normalize(buffer0.xyz); */
+/*     //buffer0.w /= buffer1.y; */
+/*     //buffer1.x /= buffer1.y; */
+/*     //    buffer2.w /= buffer1.y; */
+/*   } */
+/*   else { */
+/*     buffer0 = vec4(0.0); */
+/*     buffer1 = vec4(0.0); */
+/*     buffer2 = vec4(0.0); */
+/*   } */
 
   // make sure weight is not clamped if greater than 1.0
   buffer1.y *= 0.1;
