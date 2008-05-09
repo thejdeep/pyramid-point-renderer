@@ -43,9 +43,9 @@ template <class Real > class Surfel
 {
 public:
 		
-  typedef CGL::Point3<Real>  Point3; 
-  typedef CGL::Vector3<Real> Vector3;
-  typedef CGL::Color         Color;
+  typedef LAL::Point3<Real>  Point3; 
+  typedef LAL::Vector3<Real> Vector3;
+  typedef LAL::Color         Color;
 
 
   typedef std::list<Point3* >       			ListPtrPoint3;
