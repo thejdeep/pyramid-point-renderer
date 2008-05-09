@@ -7,6 +7,8 @@
 
 #include "pyramid_point_render_er.h"
 
+#define MASK_SIZE 2
+
 /**
  * Default constructor.
  **/
@@ -463,7 +465,7 @@ int PyramidPointRenderER::analysisCallbackFunc( void )
   // shader_analysis->set_uniform("prefilter_size", (GLfloat)(prefilter_size));
  
   shader_analysis->set_uniform("depth_test", depth_test);
-  shader_analysis->set_uniform("mask_size", 2);
+  shader_analysis->set_uniform("mask_size", MASK_SIZE);
 
   shader_analysis->set_uniform("textureA", 0);
   shader_analysis->set_uniform("textureB", 1);
@@ -549,7 +551,7 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
   //shader_synthesis->set_uniform("level", cur_level);
 
-  shader_synthesis->set_uniform("mask_size", 2);
+  shader_synthesis->set_uniform("mask_size", MASK_SIZE);
   shader_synthesis->set_uniform("depth_test", depth_test);
 
   shader_synthesis->set_uniform("textureA", 0);
@@ -575,16 +577,16 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 
       source0Pixels = generatePixels(0, fbo, 3,
 				     fbo_buffers[0 + ((level + 1) % 2)],
-				     fbo_buffers[2 + ((level + 1) % 2)],
-      				     fbo_buffers[4 + ((level + 1) % 2)]);
+				     fbo_buffers[2 + ((level + 1) % 2)], 
+				     fbo_buffers[4 + ((level + 1) % 2)] );
       source1Pixels = generatePixels(level, fbo, 3,
 				     fbo_buffers[0 + ((level + 1) % 2)],
 				     fbo_buffers[2 + ((level + 1) % 2)],
       				     fbo_buffers[4 + ((level + 1) % 2)]);
-      destinationPixels = generatePixels(0, fbo, 3,
+      destinationPixels = generatePixels(0, fbo, 2,
 					 fbo_buffers[0 + (level % 2)],
-					 fbo_buffers[2 + (level % 2)],
-     					 fbo_buffers[4 + (level % 2)]);
+					 fbo_buffers[2 + (level % 2)], 
+					 0);
 
       rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
 
@@ -598,8 +600,8 @@ int PyramidPointRenderER::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
-  //shader_phong->set_uniform("textureB", 1);
-  shader_phong->set_uniform("textureC", 2);
+  shader_phong->set_uniform("textureB", 1);
+  //shader_phong->set_uniform("textureC", 2);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -620,7 +622,7 @@ void PyramidPointRenderER::rasterizePhongShading(int bufferIndex)
   shader_synthesis->use(0);
   shader_show->use(0);
 
-  sourcePixels = generatePixels(level, fbo, 3, fbo_buffers[bufferIndex], fbo_buffers[bufferIndex + 2], fbo_buffers[bufferIndex + 4]);
+  sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[bufferIndex], fbo_buffers[bufferIndex + 2], 0);
   destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0, 0);
   rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
 

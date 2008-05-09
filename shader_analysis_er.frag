@@ -248,23 +248,23 @@ void main (void) {
   float zmax = -10000.0;
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
-    if (pixelA[i].w > 0.0) {
+    // radius > 0
+    if (pixelC[i].y > 0.0) {
+
       //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
-      //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
-      //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
       dist_test = 1.0;
 
       // radius small enough to fit in lower level entirely, no need to propagate further
-      if (pixelC[i].y == 1.0)
+      if (pixelB[i].y == 1.0)
  	dist_test = -1.0;
       else {
 	float mask = float(mask_size*2 + 1);
-	int pixel_level = int( ( ceil( log2( ( pixelA[i].w * reconstruction_filter_size * 2.0 * canvas_width ) / mask ) ) ) );
+	int pixel_level = int( ( ceil( log2( ( pixelC[i].y * reconstruction_filter_size * 2.0 * canvas_width ) / mask ) ) ) );
 	if ((level ==  pixel_level) || ((level <= 1) && (pixel_level <= 1)) )
-	  pixelC[i].y = 1.0;
+	  pixelB[i].y = 1.0;
 	else
-	  pixelC[i].y = 0.0;
+	  pixelB[i].y = 0.0;
       }
 
       if  (dist_test != -1.0)
@@ -272,13 +272,13 @@ void main (void) {
 	  // test for minimum depth coordinate of valid ellipses
 	  if (pixelB[i].x <= zmin) {
 	    zmin = pixelB[i].x;
-	    zmax = pixelC[i].x;
-	    obj_id = pixelC[i].w;
+	    zmax = pixelB[i].y;
+	    obj_id = pixelB[i].w;
 	  }
 	}
       else {
 	// if the ellipse does not reach the center ignore it in the averaging
-	pixelA[i].w = -1.0;
+	pixelC[i].y = -1.0;
       }
     }
   }
@@ -289,9 +289,9 @@ void main (void) {
   for (int i = 0; i < 4; ++i)
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
-      if (pixelA[i].w > 0.0) 
-      {	  	
-	if (abs(pixelC[i].w - obj_id) < 0.1 )
+      if (pixelC[i].y > 0.0) 
+      {
+	if (abs(pixelB[i].w - obj_id) < 0.1 )
 	{
 	  // Depth test between valid in reach ellipses
 	  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
@@ -303,14 +303,14 @@ void main (void) {
 
 	      // radius computation
 	      //vec2 dist = (bufferB.zw - pixelB[i].zw)* fbo_size * oo_canvas_size;
-	      bufferA.w = max(bufferA.w, pixelA[i].w);
+	      bufferC.x += max(bufferC.x, pixelC[i].x);
+	      bufferC.y = max(bufferC.y, pixelC[i].y);
 
 	      bufferB.x += pixelB[i].x * w;
 
-	      bufferB.zw += pixelB[i].zw * w;
+	      bufferC.zw += pixelC[i].zw * w;
 	      
-	      bufferC.x += max(bufferC.x, pixelC[i].x);
-	      bufferC.y += pixelC[i].y * w;
+	      bufferB.y += pixelB[i].y * w;
 	      
 	      valid_pixels += w;
 	    }
@@ -324,10 +324,9 @@ void main (void) {
     {
       bufferA.xyz /= valid_pixels;
       bufferB.x /= valid_pixels;
-      bufferB.y = 0.0;
-      bufferB.zw /= valid_pixels;
+      bufferC.zw /= valid_pixels;
       //bufferC.x /= valid_pixels;
-      bufferC.w = obj_id;
+      bufferB.w = obj_id;
     }
 
   // first buffer = (n.x, n.y, n.z, radius)
