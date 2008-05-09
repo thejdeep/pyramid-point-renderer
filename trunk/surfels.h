@@ -17,7 +17,7 @@
 #include "surfel.hpp"
 
 using namespace std;
-using namespace CGL;
+using namespace LAL;
 
 typedef Point3<double> Point;
 typedef Vector3<double> Vector;
