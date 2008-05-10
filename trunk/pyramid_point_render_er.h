@@ -53,6 +53,8 @@ class PyramidPointRenderER : public PointBasedRender
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
+  void setGpuMaskSize ( int s ) { gpu_mask_size = s; }
+
  private:
   /// Frame buffer object width.
   int fbo_width;
@@ -110,6 +112,8 @@ class PyramidPointRenderER : public PointBasedRender
   /// Num of primitives to be passed to the geom shader when using LOD
   int num_primitives;
 
+  /// Gpu mask size (sub mask for each cpu mask pixel)
+  int gpu_mask_size;
 };
 
 #endif

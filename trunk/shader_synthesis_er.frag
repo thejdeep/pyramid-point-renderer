@@ -147,7 +147,9 @@ void main (void) {
   // this is to make sure weight is not clamped if greater than 1.0
   buffer0.w *= 10.0;
 
-  for (int j = -mask_size; j <= mask_size; ++j) {
+  for (int j = -mask_size; j <= mask_size; ++j) 
+  //int j = level;
+    {
     for (int i = -mask_size; i <= mask_size; ++i) {
       {
 	{
