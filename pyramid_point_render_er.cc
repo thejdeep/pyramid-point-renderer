@@ -7,30 +7,30 @@
 
 #include "pyramid_point_render_er.h"
 
-#define MASK_SIZE 2
-
 /**
  * Default constructor.
  **/
 PyramidPointRenderER::PyramidPointRenderER() : PointBasedRender(),
-						     fbo_width(1800),
-						     fbo_height(1200),
-						     fbo_buffers_count(6),
-						     canvas_border_width(32),
-						     canvas_border_height(32),
-						     render_state(RS_BUFFER0) {
+					       fbo_width(1800),
+					       fbo_height(1200),
+					       fbo_buffers_count(6),
+					       canvas_border_width(32),
+					       canvas_border_height(32),
+					       render_state(RS_BUFFER0),
+					       gpu_mask_size(1){
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
 PyramidPointRenderER::PyramidPointRenderER(int w, int h) : PointBasedRender(w, h),
-								 fbo_width(1800),
-								 fbo_height(1200),
-								 fbo_buffers_count(6),
-								 canvas_border_width(w/32),
-								 canvas_border_height(h/32),
-								 render_state(RS_BUFFER0) {
+							   fbo_width(1800),
+							   fbo_height(1200),
+							   fbo_buffers_count(6),
+							   canvas_border_width(w/32),
+							   canvas_border_height(h/32),
+							   render_state(RS_BUFFER0),
+							   gpu_mask_size(1) {
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
@@ -465,7 +465,7 @@ int PyramidPointRenderER::analysisCallbackFunc( void )
   // shader_analysis->set_uniform("prefilter_size", (GLfloat)(prefilter_size));
  
   shader_analysis->set_uniform("depth_test", depth_test);
-  shader_analysis->set_uniform("mask_size", MASK_SIZE);
+  shader_analysis->set_uniform("mask_size", gpu_mask_size);
 
   shader_analysis->set_uniform("textureA", 0);
   shader_analysis->set_uniform("textureB", 1);
@@ -549,9 +549,9 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
 
   //  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
-  //shader_synthesis->set_uniform("level", cur_level);
+  //  shader_synthesis->set_uniform("level", cur_level);
 
-  shader_synthesis->set_uniform("mask_size", MASK_SIZE);
+  shader_synthesis->set_uniform("mask_size", gpu_mask_size);
   shader_synthesis->set_uniform("depth_test", depth_test);
 
   shader_synthesis->set_uniform("textureA", 0);
@@ -571,27 +571,28 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
 
   //  for (level = levels_count - 2; level >= 0; level--)
   //  for (level = 0; level <= levels_count - 1; level++)
-  for (level = 0; level <= levels_count - 3; level++)
-    {
-      cur_level = level;
-
-      source0Pixels = generatePixels(0, fbo, 3,
+  //  for (int i = 0; i < 5; ++i)
+    for (level = 0; level <= levels_count - 3; level++)
+      {
+	//	cur_level = i - MASK_SIZE;
+	
+	source0Pixels = generatePixels(0, fbo, 3,
 				     fbo_buffers[0 + ((level + 1) % 2)],
 				     fbo_buffers[2 + ((level + 1) % 2)], 
 				     fbo_buffers[4 + ((level + 1) % 2)] );
-      source1Pixels = generatePixels(level, fbo, 3,
+	source1Pixels = generatePixels(level, fbo, 3,
 				     fbo_buffers[0 + ((level + 1) % 2)],
 				     fbo_buffers[2 + ((level + 1) % 2)],
       				     fbo_buffers[4 + ((level + 1) % 2)]);
-      destinationPixels = generatePixels(0, fbo, 2,
+	destinationPixels = generatePixels(0, fbo, 2,
 					 fbo_buffers[0 + (level % 2)],
 					 fbo_buffers[2 + (level % 2)], 
 					 0);
 
-      rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
+	rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
 
-      shader_synthesis->use(0);
-    }
+	shader_synthesis->use(0);
+      }
 }
 
 /* rasterize level 0 of pyramid with per pixel shading */
