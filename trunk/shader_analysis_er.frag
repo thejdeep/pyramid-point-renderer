@@ -260,8 +260,15 @@ void main (void) {
  	dist_test = -1.0;
       else {
 	float mask = float(mask_size*2 + 1);
-	int pixel_level = int( ( ceil( log2( ( pixelC[i].y * reconstruction_filter_size * 2.0 * canvas_width ) / mask ) ) ) );
-	if ((level ==  pixel_level) || ((level <= 1) && (pixel_level <= 1)) )
+	int pixel_level;
+
+	float log_level = log2( ( pixelC[i].y * reconstruction_filter_size * 2.0 * canvas_width ) / mask );
+	if (log_level <= 0.0)
+	  pixel_level = 0;
+	else
+	  pixel_level = int(ceil(log_level));
+
+	if ((level == pixel_level))
 	  pixelB[i].y = 1.0;
 	else
 	  pixelB[i].y = 0.0;

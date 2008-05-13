@@ -147,24 +147,27 @@ void main (void) {
   // this is to make sure weight is not clamped if greater than 1.0
   buffer0.w *= 10.0;
 
-  for (int j = -mask_size; j <= mask_size; ++j) 
-  //int j = level;
-    {
+  if (level == 0) {
+    buffer0 = vec4(0.0);
+    buffer1 = vec4(0.0);
+  }
+
+  for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
       {
 	{
 	  local_displacement = vec2(i, j) * oo_fbo_size.st;
 	  ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 	  ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+
+	  // if pixel is set as in current level and radius > 0
 	  if ((ellipse1.y > 0.0) && (ellipse2.x > 0.0)) {
 	    
 	    // retrieve candidate ellipse from displacement position
 	    ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 	    
-	    //if (ellipse0.w != 0.0)
 	      {
-		
-		
+				
 		// displacement from current pixel and ellipse center in pixel dimension
 		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse2.zw) * fbo_size * oo_canvas_size;
 

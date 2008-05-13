@@ -510,17 +510,17 @@ void Camera::translateVec (int x, int y, Point* center) {
   // translation displacement vector
   Point rotVec;
 
-  rotVec[0] = 10*(mouse_curr[0] - mouse_start[0]) / screen_width;
-  rotVec[1] = 10*(mouse_curr[1] - mouse_start[1]) / screen_height;
+  rotVec[0] = 5*(mouse_curr[0] - mouse_start[0]) / screen_width;
+  rotVec[1] = 5*(mouse_curr[1] - mouse_start[1]) / screen_height;
 
   mouse_start[0] = mouse_curr[0];
   mouse_start[1] = mouse_curr[1];
   mouse_start[2] = mouse_curr[2];
 
   // rotates displacement to align with object axis
-  Quat q = q_rot;
-  q.x *= -1; q.y *= -1; q.z *= -1;
-  q.rotate(&rotVec);
+//   Quat q = q_rot;
+//   q.x *= -1; q.y *= -1; q.z *= -1;
+//   q.rotate(&rotVec);
 
   // increment given vector by oriented displacement
   (*center)[0] = center->x() + rotVec[0];
@@ -561,9 +561,9 @@ void Camera::zoomingVec (int x, int y, Point* center) {
   mouse_start[2] = mouse_curr[2];
 
   // rotates displacement to align with object axis
-  Quat q = q_rot;
-  q.x *= -1; q.y *= -1; q.z *= -1;
-  q.rotate(&rotVec);
+//   Quat q = q_rot;
+//   q.x *= -1; q.y *= -1; q.z *= -1;
+//   q.rotate(&rotVec);
 
   // increment given vector by oriented displacement
   (*center)[0] = center->x() + rotVec[0];

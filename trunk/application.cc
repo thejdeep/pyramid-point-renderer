@@ -137,7 +137,7 @@ void Application::draw(void) {
 
   // Reset camera position and direction
   camera->setView();
-  camera->setTranslation();
+  //  camera->setTranslation();
   camera->setRotation();
 
   // Render objects primitives with pyramid algorithm
@@ -151,17 +151,19 @@ void Application::draw(void) {
     }
 
     // Compute rotated eye position for this object for back face culling   
-    //    Point eye = *(objects[i].getCenter());
+    Point eye = *(objects[i].getCenter());
 
     // Compute the rotated eye (opposite direction) of the camera + object center position
-    //camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
+    camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
 
-    point_based_render->setEye(camera->positionVector());
+    //point_based_render->setEye(camera->positionVector());
+    point_based_render->setEye(eye);
 
     glPushMatrix();
 
     // Translate and rotate object
-    objects[i].render( );
+    //    objects[i].render( );
+    objects[i].render( camera->positionVector() );
 
     // Projects to image plane surfels of all primitives for this object
     vector< int >* prims = objects[i].getPrimitivesList();

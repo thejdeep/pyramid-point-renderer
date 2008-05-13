@@ -390,18 +390,18 @@ void PyramidPointRenderER::getDataProjectedPixels ( int* data ) {
 
 }
 
-
 int PyramidPointRenderER::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
-
 //   shader_projection->set_uniform("canvas_border",
 // 				 (GLfloat)(canvas_border_width)/(GLfloat)fbo_width, 
 // 				 (GLfloat)(canvas_border_height)/(GLfloat)fbo_height);
-
   shader_projection->set_uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
+
+  shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
+//
 
   if (use_lod == 1) { //lod
     shader_projection->set_uniform("vertex_buffer", 6);
@@ -549,7 +549,7 @@ int PyramidPointRenderER::synthesisCallbackFunc( void )
 
   //  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
-  //  shader_synthesis->set_uniform("level", cur_level);
+  shader_synthesis->set_uniform("level", cur_level);
 
   shader_synthesis->set_uniform("mask_size", gpu_mask_size);
   shader_synthesis->set_uniform("depth_test", depth_test);
@@ -574,7 +574,7 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
   //  for (int i = 0; i < 5; ++i)
     for (level = 0; level <= levels_count - 3; level++)
       {
-	//	cur_level = i - MASK_SIZE;
+	cur_level = level;
 	
 	source0Pixels = generatePixels(0, fbo, 3,
 				     fbo_buffers[0 + ((level + 1) % 2)],
