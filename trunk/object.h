@@ -41,6 +41,8 @@ class Object
 
   void render ( void );
   void render ( Point camera_pos );
+  void translate ( void );
+  void rotate ( void );
 
   void setId ( int id_num ) { _id = id_num; }
   int id ( void ) const { return _id; }

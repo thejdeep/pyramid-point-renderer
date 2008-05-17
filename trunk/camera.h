@@ -164,7 +164,7 @@ public:
   /// Return light position
   const GLfloat* lightVector ( void ) const { return &light_position[0]; }
   void setLightVector ( GLfloat p[3] ) { 
-    light_position[0] = p[0]; light_position[1] = p[1]; light_position[2] = p[2]; }  
+    light_position[0] = p[0]; light_position[1] = p[1]; light_position[2] = p[2];}
   
   /// Return far and near planes
   const double zNear ( void ) const { return z_near; }
@@ -272,6 +272,9 @@ private:
   // Mouse button
   int button_pressed;
 
+  double angle_h, angle_v;
+  Point target;
+
   // Array with key frames
   vector< keyframe > keyFrames;
 
@@ -292,6 +295,12 @@ private:
   void mapToSphere(const double p_screen[3], double p[], const double r) const;
 
   void projectToScreen(Point* p, double* screen_pos);
+
+  void newTarget( const Point* p );
+
+  void computePosition( void );
+
+
 };
 
 #endif

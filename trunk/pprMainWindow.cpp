@@ -46,7 +46,7 @@ void pprMainWindow::fileOpen( void )
 {
   QString sfile;
 		
-  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol *.lod *.scn)"));
+  sfile = QFileDialog::getOpenFileName(this, tr("Open Model"), "../plys/", tr("Files (*.ply *.pol *.lod *.scn *.normals)"));
   
   vector<int> objs_ids;
 
@@ -60,6 +60,8 @@ void pprMainWindow::fileOpen( void )
   if ( !sfile.isEmpty() ) {  
     if (filetype.compare("ply") == 0)
       objs_ids.push_back( application->readFile( filename ) );
+    else if (filetype.compare("normals") == 0)
+      objs_ids.push_back( application->readNormalsFile( filename ) );
     else if (filetype.compare("pol") == 0)
       application->readPolFile( filename, &objs_ids );
     else if (filetype.compare("lod") == 0)

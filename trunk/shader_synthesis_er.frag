@@ -158,21 +158,24 @@ void main (void) {
 	{
 	  local_displacement = vec2(i, j) * oo_fbo_size.st;
 	  ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-	  ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+	  //	  ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
 	  // if pixel is set as in current level and radius > 0
-	  if ((ellipse1.y > 0.0) && (ellipse2.x > 0.0)) {
+	  if ((ellipse1.y > 0.0) && (ellipse1.x > 0.0)) {
 	    
 	    // retrieve candidate ellipse from displacement position
 	    ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-	    
+	    ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 	      {
 				
 		// displacement from current pixel and ellipse center in pixel dimension
-		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse2.zw) * fbo_size * oo_canvas_size;
+		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
 
-		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse2.y, 
-			     ellipse1.x, ellipse2.x, ellipse1.w, local_pixel_displacement);
+/* 		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse2.y,  */
+/* 			     ellipse1.x, ellipse2.x, ellipse1.w, local_pixel_displacement); */
+
+		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse1.y, 
+			     ellipse0.w, ellipse1.x, ellipse2.w, local_pixel_displacement);
 	      }
 	    }
 	}

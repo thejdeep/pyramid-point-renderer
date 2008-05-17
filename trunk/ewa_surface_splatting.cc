@@ -156,8 +156,6 @@ void EWASurfaceSplatting::setVertices( vector<Surfeld> *s ) {
     zbuffer.push_back(pixel);
 }
 
-
-
 /// Splat renderer as described in Jussi Hasanen Master Thesis
 /// "Surface Splatting: Theory, Extensions and Implementation"
 /// Appendix A
