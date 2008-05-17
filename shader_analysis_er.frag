@@ -249,43 +249,49 @@ void main (void) {
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
     // radius > 0
-    if (pixelC[i].y > 0.0) {
+/*     if (pixelC[i].y > 0.0) { */
+    if (pixelB[i].y > 0.0) {
 
       //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
 
       dist_test = 1.0;
 
       // radius small enough to fit in lower level entirely, no need to propagate further
-      if (pixelB[i].y == 1.0)
+      // the sign of the unprojected radius determines if it is the correct level (positive) or not (negative)
+      if (pixelB[i].x > 0.0)
  	dist_test = -1.0;
       else {
 	float mask = float(mask_size*2 + 1);
 	int pixel_level;
 
-	float log_level = log2( ( pixelC[i].y * reconstruction_filter_size * 2.0 * canvas_width ) / mask );
+	// compute level
+	float log_level = log2( ( pixelB[i].y * reconstruction_filter_size * 2.0 * canvas_width ) / mask );
+	
+	// if negative log2 -> level = 0
 	if (log_level <= 0.0)
-	  pixel_level = 0;
+	  pixel_level = 1;
 	else
 	  pixel_level = int(ceil(log_level));
 
+	// found correct level, turn unprojected radius positive to mark it
 	if ((level == pixel_level))
-	  pixelB[i].y = 1.0;
-	else
-	  pixelB[i].y = 0.0;
+	  pixelB[i].x = max (pixelB[i].x, -pixelB[i].x);
+ 	else
+	  pixelB[i].x = min (pixelB[i].x, -pixelB[i].x);
       }
 
       if  (dist_test != -1.0)
 	{
 	  // test for minimum depth coordinate of valid ellipses
-	  if (pixelB[i].x <= zmin) {
-	    zmin = pixelB[i].x;
-	    zmax = pixelB[i].y;
-	    obj_id = pixelB[i].w;
+	  if (pixelA[i].w <= zmin) {
+	    zmin = pixelA[i].w;
+	    zmax = pixelB[i].x;
+	    obj_id = pixelC[i].w; //only if using color buffer
 	  }
 	}
       else {
 	// if the ellipse does not reach the center ignore it in the averaging
-	pixelC[i].y = -1.0;
+	pixelB[i].y = -1.0;
       }
     }
   }
@@ -296,13 +302,13 @@ void main (void) {
   for (int i = 0; i < 4; ++i)
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
-      if (pixelC[i].y > 0.0) 
+      if (pixelB[i].y > 0.0) 
       {
-	if (abs(pixelB[i].w - obj_id) < 0.1 )
+	if (abs(pixelC[i].w - obj_id) < 0.1 )
 	{
 	  // Depth test between valid in reach ellipses
 	  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
-	  if ((!depth_test) || (abs(zmin - pixelB[i].x) <= pixelC[i].x))
+	  if ((!depth_test) || (abs(zmin - pixelA[i].w) <= 1.0*abs(pixelB[i].x)))
 	    {
 	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
 	      float w = 1.0;
@@ -310,14 +316,16 @@ void main (void) {
 
 	      // radius computation
 	      //vec2 dist = (bufferB.zw - pixelB[i].zw)* fbo_size * oo_canvas_size;
-	      bufferC.x += max(bufferC.x, pixelC[i].x);
-	      bufferC.y = max(bufferC.y, pixelC[i].y);
+	      bufferB.x += max(bufferB.x, pixelB[i].x);
+	      bufferB.y = max(bufferB.y, pixelB[i].y);
 
-	      bufferB.x += pixelB[i].x * w;
+	      // average depth
+	      bufferA.w += pixelA[i].w * w;
 
-	      bufferC.zw += pixelC[i].zw * w;
-	      
-	      bufferB.y += pixelB[i].y * w;
+	      // average tex coords
+	      bufferB.zw += pixelB[i].zw * w;
+	      	     
+	      //	      bufferB.y += pixelB[i].y * w;
 	      
 	      valid_pixels += w;
 	    }
@@ -329,11 +337,10 @@ void main (void) {
   // otherwise the pixel will be writen as unspecified  
   if (valid_pixels > 0.0)
     {
-      bufferA.xyz /= valid_pixels;
-      bufferB.x /= valid_pixels;
-      bufferC.zw /= valid_pixels;
+      bufferA /= valid_pixels;
+      bufferB.zw /= valid_pixels;
       //bufferC.x /= valid_pixels;
-      bufferB.w = obj_id;
+      bufferC.w = obj_id;
     }
 
   // first buffer = (n.x, n.y, n.z, radius)

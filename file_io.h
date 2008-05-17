@@ -164,7 +164,7 @@ bool loadSls (const char * filename, vector<Surfeld> *surfels) {
 /// Read an normals file, contains positions, normals and splat radius for each point
 /// @param filename Given off filename
 /// @return 1 if file read with success, 0 otherwise
-bool loadNormals (const char * filename, vector<Surfeld> *surfels) {  
+bool readNormals (const char * filename, vector<Surfeld> *surfels) {  
   std::ifstream input (filename);
 
   if(input.fail())
@@ -513,7 +513,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 	  t.verts[k] = f.verts[k];
 	t.id = j;
 	triangles->push_back( t );	
-      }      
+      }
     }
     else
       get_other_element_ply (in_ply);
@@ -547,12 +547,11 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
     in >> id >> ply_file[i] >> type >> renderer_type >> material;
     prims->push_back ( Primitives(id, type) );
     prims->back().setType( type );
-    prims->back().setPerVertexColor( 1 );
+    prims->back().setPerVertexColor( 0 );
     prims->back().setMaterial(material);
     filenames.push_back( ply_file[i] );
     
     if (strstr(ply_file[i], ".lod") != NULL ) {
-
       char fn[200];
       strcpy(fn, ply_file[i]);
       char* ptr = strstr(fn, ".lod");
@@ -561,7 +560,7 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
       prims->back().readFileLOD(ply_file[i]);
     }
     else
-      readPlyTriangles (ply_file[i], (prims->back()).getSurfels(), (prims->back()).getTriangles(), rgb);
+      readPlyTrianglesColor (ply_file[i], (prims->back()).getSurfels(), (prims->back()).getTriangles());
 
     // Must call after reading file because this next function creates
     // the vertex array or display lists, and needs the surfels structure loaded
@@ -589,7 +588,6 @@ int readObjsFiles (const char* filename, vector<Primitives> *prims, vector<Objec
       (objs->at(id)).addPrimitives( prim_id );
     }
   }
-
 
   // read camera attributes
   Point camera_pos;
@@ -658,7 +656,7 @@ int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object>
   for (int i = 1; i < argc; ++i) {
     if (strstr(argv[i], ".normals") != NULL) { 
       prims->push_back( Primitives(i-1) );
-      loadNormals (argv[i], (prims->at(i-1)).getSurfels());
+      readNormals (argv[i], (prims->at(i-1)).getSurfels());
     }
     else if (strstr(argv[i], ".sls") != NULL) { 
       prims->push_back( Primitives(i-1) );
@@ -706,7 +704,7 @@ int readPoints(int argc, char **argv, vector<Surfeld> *surfels) {
   cout << "ply ok!" << endl;
   return 1;
 
-  if (loadNormals (argv[1], surfels))
+  if (readNormals (argv[1], surfels))
     return 1;
 
   //  normalize(surfels);

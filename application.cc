@@ -137,13 +137,13 @@ void Application::draw(void) {
 
   // Reset camera position and direction
   camera->setView();
-  //  camera->setTranslation();
-  camera->setRotation();
+     camera->setTranslation();
+     camera->setRotation();
 
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
 //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-//     int i = *it;   
+//     int i = *it;
 
     if (camera->runningFrames()) {
       point_based_render->setReconstructionFilterSize(camera->getKeyFrameReconstructionFilter());
@@ -153,17 +153,21 @@ void Application::draw(void) {
     // Compute rotated eye position for this object for back face culling   
     Point eye = *(objects[i].getCenter());
 
-    // Compute the rotated eye (opposite direction) of the camera + object center position
-    camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
-
-    //point_based_render->setEye(camera->positionVector());
-    point_based_render->setEye(eye);
-
-    glPushMatrix();
+    //glPushMatrix();
 
     // Translate and rotate object
+
+    objects[i].translate();
+    objects[i].rotate();
+
     //    objects[i].render( );
-    objects[i].render( camera->positionVector() );
+    //objects[i].render( camera->positionVector() );
+
+    // Compute the rotated eye (opposite direction) of the camera + object center position
+//     camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
+//     point_based_render->setEye(eye);
+ 
+    point_based_render->setEye(eye + camera->positionVector());
 
     // Projects to image plane surfels of all primitives for this object
     vector< int >* prims = objects[i].getPrimitivesList();
@@ -200,7 +204,7 @@ void Application::draw(void) {
 	}
       }
     }
-    glPopMatrix();
+    //glPopMatrix();
   }
 
   // Interpolates projected surfels using pyramid algorithm
@@ -210,24 +214,26 @@ void Application::draw(void) {
   point_based_render->draw();
 
   // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-  for (unsigned int i = 0; i < objects.size(); ++i) {
-//   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-//     int i = *it;
-    // Reset camera position and direction
-    camera->setView();
-    
-    // Translate and rotate object
-    objects[i].render();
+//   for (unsigned int i = 0; i < objects.size(); ++i) {
+// //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+// //     int i = *it;
+//     // Reset camera position and direction
+//     camera->setView();
+//     camera->setTranslation();
+//     camera->setRotation();
 
-    // Render primitives using opengl triangles or lines
-    vector< int >* prims = objects[i].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      Primitives * prim = &(primitives[*prim_it]);
-      int type = prim->getRendererType();
-      if ((type != NONE) && ((type == TRIANGLES) || (type == LINES)))
-	prim->render();
-    }
-  }
+//     // Translate and rotate object
+//     objects[i].render();
+
+//     // Render primitives using opengl triangles or lines
+//     vector< int >* prims = objects[i].getPrimitivesList();
+//     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+//       Primitives * prim = &(primitives[*prim_it]);
+//       int type = prim->getRendererType();
+//       if ((type != NONE) && ((type == TRIANGLES) || (type == LINES)))
+// 	prim->render();
+//     }
+//   }
   
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
@@ -244,7 +250,6 @@ void Application::draw(void) {
 
   // necessary to compute correct fps
   glFinish();
-
 }
 
 
@@ -460,7 +465,7 @@ void Application::createPointRender( void ) {
     point_based_render = new TriangleRenderer();
 
   assert (point_based_render);
-
+  
   if ((render_mode == PYRAMID_TRIANGLES) || (render_mode == PYRAMID_HYBRID))
     point_based_render->setBackFaceCulling(0);
   else
@@ -544,6 +549,47 @@ int Application::readFile ( const char * filename ) {
   objects.back().setFilename( filename );
 
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+
+  // connect new object to new primitive
+  objects.back().addPrimitives( primitives.back().getId() );
+  primitives.back().setType( 1.0 );
+  //primitives.back().setRendererType( PYRAMID_POINTS );
+  //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
+  //primitives.back().setRendererType( JFA_SPLATTING );
+  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+
+  num_objects = objects.size();
+
+  // Count total number of points being rendered
+  number_surfels += primitives.back().getSurfels()->size();
+  
+  render_mode = PYRAMID_POINTS_ER;
+
+  //  if (!point_based_render)
+  createPointRender( );
+ 
+  return id;
+}
+
+/**
+ * Reads a ply file, creates an object and
+ * loads the vertices and triangles in the associated primitive.
+ * @param filename Given file name.
+ * @return Id number of created object.
+ **/
+int Application::readNormalsFile ( const char * filename ) {
+
+  // Create a new primitive from given file
+  primitives.push_back( Primitives( primitives.size() ) );
+
+  primitives.back().setPerVertexColor(0);
+
+  // Create a new object
+  int id = objects.size();
+  objects.push_back( Object( id ) );
+  objects.back().setFilename( filename );
+
+  readNormals (filename, (primitives.back()).getSurfels());
 
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
@@ -647,9 +693,9 @@ int Application::writeSceneFile ( void ) {
     out << i << " " << objects[i].filename() << " " << 1.0 << " " << primitives[i].getRendererType() << " " <<
       primitives[i].getMaterial() << endl;
   }
-
+ 
   for (unsigned int i = 0; i < objects.size(); ++i) {
-    out << i << " " << objects[i].getCenter()[0] << " " << objects[i].getCenter()[1] << " " << objects[i].getCenter()[2] << " " <<
+    out << i << " " << objects[i].getCenter()->x() << " " << objects[i].getCenter()->y() << " " << objects[i].getCenter()->z() << " " <<
       objects[i].getRotationQuat()->x << " " << objects[i].getRotationQuat()->y << " " << objects[i].getRotationQuat()->z << " " <<
       objects[i].getRotationQuat()->a  << " 1 " << i << endl;
   }
@@ -735,6 +781,7 @@ void Application::mouseLeftMotion(int x, int y) {
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotion(int x, int y) {
+
   if (selected_objs.empty())
     camera->zooming (x, y);
   else {
@@ -748,6 +795,7 @@ void Application::mouseMiddleMotion(int x, int y) {
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotionShift(int x, int y) {
+
   if (selected_objs.empty())
     camera->translate(x, y);
   else {

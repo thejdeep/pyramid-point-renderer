@@ -76,6 +76,7 @@ class Application
   int writeLodFile ( void );
   int writeSceneFile ( void );
   int readFile ( const char * filename );
+  int readNormalsFile ( const char * filename );
   int readLodFile ( const char * filename );
   int readPolFile (const char * filename, vector<int> * ids);
   int readSceneFile (const char * filename, vector<int> *objs_ids);
