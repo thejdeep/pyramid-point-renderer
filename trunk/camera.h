@@ -245,6 +245,15 @@ private:
   // Translation vector
   Point position;
 
+  // Normal vector = side translation direction
+  Vector normal;
+
+  // View vector - target - position
+  Vector view;
+
+  // Up vector
+  Vector up;
+
   // Trackball radius
   double radius;
 
@@ -262,13 +271,15 @@ private:
 
   // Quaternion accumulation during rotation
   Quat q_rot;
+  Quat q_lookAt;
+  Quat q_last_lookAt;
 
   // Light position
   GLfloat light_position[4];
 
   /*************** Mouse **************/
   // Mouse rotation
-  double mouse_start[3], mouse_curr[3];
+  Point mouse_start, mouse_curr;
   // Mouse button
   int button_pressed;
 
@@ -292,14 +303,13 @@ private:
 
   Quat getQuaternion(float x1, float y1, float x2, float y2);
 
-  void mapToSphere(const double p_screen[3], double p[], const double r) const;
+  void mapToSphere(Point &, const double r) const;
 
-  void projectToScreen(Point* p, double* screen_pos);
+  void projectToScreen(Point* p, Point &screen_pos);
 
   void newTarget( const Point* p );
 
-  void computePosition( void );
-
+  void normalizeCoordinates(Point& p);
 
 };
 

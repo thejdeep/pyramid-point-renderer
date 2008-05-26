@@ -8,8 +8,6 @@
 
 #define NUM_MATERIALS 6
 
-// Conversion from radians to degrees
-const double rad_to_deg = 180.0/PI;
 
 GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},

@@ -28,7 +28,7 @@ extern "C"
 }
 
 
-#define PI 3.1415926535897932384626433832795
+//#define PI 3.1415926535897932384626433832795
 
 /**
  * Surfel class.
@@ -263,7 +263,7 @@ public:
 	 
   Real Area() const
   {
-    return (  (PI * mMinorAxis.first) * (PI * mMajorAxis.first) );
+    return (  (M_PI * mMinorAxis.first) * (M_PI * mMajorAxis.first) );
   }
 	 
 	 
@@ -334,7 +334,7 @@ public:
     while (i < 360) 
       {
 
-	lAlpha = ( i / 180 ) * PI;       
+	lAlpha = ( i / 180 ) * M_PI;
 	lSinAlpha =  sin( lAlpha );
 	lCosAlpha =  cos( lAlpha );
 

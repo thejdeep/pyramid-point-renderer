@@ -137,8 +137,8 @@ void Application::draw(void) {
 
   // Reset camera position and direction
   camera->setView();
-     camera->setTranslation();
-     camera->setRotation();
+//   camera->setTranslation();
+//   camera->setRotation();
 
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
@@ -153,10 +153,9 @@ void Application::draw(void) {
     // Compute rotated eye position for this object for back face culling   
     Point eye = *(objects[i].getCenter());
 
-    //glPushMatrix();
+    glPushMatrix();
 
     // Translate and rotate object
-
     objects[i].translate();
     objects[i].rotate();
 
@@ -204,7 +203,7 @@ void Application::draw(void) {
 	}
       }
     }
-    //glPopMatrix();
+    glPopMatrix();
   }
 
   // Interpolates projected surfels using pyramid algorithm

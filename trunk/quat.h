@@ -50,13 +50,13 @@ public:
 
 
   // Rotate a vector using this quaternion
-  void rotate(Point* vec) {
-    double len = sqrt(vec->x()*vec->x() + vec->y()*vec->y() + vec->z()*vec->z());
+  Vector rotate(Vector vec) {
+    double len = vec.length();
 
-    if (len == 0.0)
-      return;
+/*     if (len == 0.0) */
+/*       return; */
 
-    Quat v(vec->x(), vec->y(), vec->z(), 1.0);
+    Quat v(vec.x(), vec.y(), vec.z(), 1.0);
     Quat qbar(-x, -y, -z, a); // complement
     Quat qtmp;
  
@@ -65,9 +65,7 @@ public:
     qtmp.normalize();
 
     //rescale to original size
-    (*vec)[0] = qtmp.x * len;
-    (*vec)[0] = qtmp.y * len;
-    (*vec)[0] = qtmp.z * len;
+    return Vector(qtmp.x, qtmp.y, qtmp.z) * len;
   }
 
   // Multiply by given quaternion
@@ -152,6 +150,8 @@ public:
     
     return Quat(q.x*c, q.y*c, q.z*c, 0);
   }
+
+
 
   // quaternion to the power of t
   Quat power ( double t ) const {
