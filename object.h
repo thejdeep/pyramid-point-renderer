@@ -9,9 +9,12 @@
 #ifndef __OBJECT_H__
 #define __OBJECT_H__
 
+#include "lal/Matrix4x4.hpp"
 #include "primitives.h"
 
 using namespace std;
+
+typedef LAL::Matrix4x4<double> Matrix4;
 
 class Object
 {
@@ -26,7 +29,7 @@ class Object
 
   Object(int id_num, double x, double y, double z) : _id(id_num) {
     center = Point(x, y, z);
-    q_rot.a = 1; 
+    q_rot.a = 1.0; 
     q_rot.x = 0.0; 
     q_rot.y = 0.0; 
     q_rot.z = 0.0;
@@ -34,7 +37,7 @@ class Object
 
   Object(int id_num) : _id(id_num) {
     center = Point(0.0, 0.0, 0.0);
-    q_rot.a = 1; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
+    q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
   }
 
   ~Object() {}
@@ -43,6 +46,9 @@ class Object
   void render ( Point camera_pos );
   void translate ( void );
   void rotate ( void );
+
+  void multMatrix ( const Matrix4 mat) {stateMatrix = stateMatrix * mat;}
+  const Matrix4* getMatrix ( void ) const {return &stateMatrix;}
 
   void setId ( int id_num ) { _id = id_num; }
   int id ( void ) const { return _id; }
@@ -85,6 +91,9 @@ class Object
 
   // Object identification number.
   int _id;
+
+  // State matrix with objects current translation and rotation
+  Matrix4 stateMatrix;
 };
 
 #endif
