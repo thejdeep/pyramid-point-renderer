@@ -32,6 +32,11 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
   position = Point(0.0, 0.0, 1.0);
   up = Vector(0.0, 1.0, 0.0);
 
+  // Initialize values
+  q_lookAt.normalize();
+  position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
+  up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
+
   target = Point(0.0, 0.0, 0.0);
 
   angle_h = M_PI/2.0;
@@ -355,6 +360,7 @@ void Camera::rotate(int x, int y) {
   Quat inc = q0*q1;
   q_lookAt = (q_last_lookAt*inc*q_last_lookAt.conjugate())*q_last_lookAt;
   q_lookAt.normalize();
+
   position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
   up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
 
@@ -653,13 +659,13 @@ const double* Camera::rotationMatrix ( void ) {
 void Camera::mapToSphere(Point &p, const double r) const {
 
   double sq_len =  p[0]*p[0] + p[1]*p[1];
-
-  if (sq_len > r)
-    p[2] = 1.0 / sqrt(sq_len);
+  if (sq_len > r / 2.0)
+    p[2] = r / (2*sqrt(sq_len));
   else
-    p[2] = sqrt (1.0 - sq_len);
+    p[2] = sqrt (r - sq_len);
 
-  p /= sqrt(sq_len);
+  sq_len = sqrt (p[0]*p[0] + p[1]*p[1] + p[2]*p[2]);
+  p /= sq_len;
 }
 
 /**
@@ -670,6 +676,10 @@ void Camera::mapToSphere(Point &p, const double r) const {
 void Camera::projectToScreen(Point* p, Point& screen_pos) {
 
   GLdouble pos_x, pos_y, pos_z;
+
+  glPushMatrix();
+  
+  setView();
 
   GLdouble model_view[16];
   glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
@@ -684,6 +694,8 @@ void Camera::projectToScreen(Point* p, Point& screen_pos) {
   gluProject(p->x(), p->y(), p->z(),
 	     model_view, projection, viewport,
 	     &pos_x, &pos_y, &pos_z);
+
+  glPopMatrix();
 
   screen_pos = Point(pos_x - screen_width*0.5,
 		     screen_height*0.5 - pos_y,
