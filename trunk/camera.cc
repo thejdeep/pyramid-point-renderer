@@ -374,7 +374,7 @@ void Camera::rotate(int x, int y) {
  * @param q Object's rotation quaternion.
  * @param obj_center Position of object being rotated.
  **/
-void Camera::startQuatRotation(int x, int y, Quat* q, Point* obj_center) {
+void Camera::startQuatRotation(int x, int y, Quat* q) {
   mouse_start = Point(x, y, 0.0);
   mouse_curr = mouse_start;
   q_last = *q;
@@ -475,20 +475,16 @@ void Camera::zooming(int x, int y) {
 **/
 void Camera::translate (int x, int y) {
 
-  mouse_curr = Point(x, screen_height - y, 0.0);
+  mouse_curr = Point(x, y, 0.0);
 
-  Vector dist = 10.0*(mouse_start - mouse_curr);
-  dist[0] /= screen_width;
-  dist[1] /= screen_height;
-  dist[2] = 0.0;
+  Point start =  projectToWorld(mouse_start);
+  Point current =  projectToWorld(mouse_curr);
 
-  position += normal * dist[0];
-  position += up * dist[1];
-
-  target += normal * dist[0];
-  target += up * dist[1];
+  //  radius += 0.01*(current.y() - start.y());
 
   mouse_start = mouse_curr;
+
+
 }
 
 /**
@@ -500,15 +496,12 @@ void Camera::translate (int x, int y) {
  **/
 void Camera::translateVec (int x, int y, Point* center) {
 
-  mouse_curr = Point(x, screen_height - y, 0.0);
+  mouse_curr = Point(x, y, 0.0);
 
-  Vector dist = 10.0*(mouse_start - mouse_curr);
-  dist[0] /= screen_width;
-  dist[1] /= screen_height;
-  dist[2] = 0.0;
+  Point start =  projectToWorld(mouse_start);
+  Point current =  projectToWorld(mouse_curr);
 
-  (*center) = (*center) - normal * dist[0];
-  (*center) = (*center) - up * dist[1];
+  *center += 0.01*(current - start);
 
   mouse_start = mouse_curr;
 }
@@ -700,4 +693,20 @@ void Camera::projectToScreen(Point* p, Point& screen_pos) {
   screen_pos = Point(pos_x - screen_width*0.5,
 		     screen_height*0.5 - pos_y,
 		     pos_z);
+}
+
+/**
+ * Converts a 2D (viewport space) point into 3D (world space) point
+ * @param p The point to be converted
+ */
+Point Camera::projectToWorld(const Point& p) {
+  GLdouble xo, yo, zo;
+  GLint _viewport[4];
+  GLdouble _modelview[16];
+  GLdouble _projection[16];
+  glGetIntegerv(GL_VIEWPORT, _viewport);
+  glGetDoublev(GL_MODELVIEW_MATRIX, _modelview);
+  glGetDoublev(GL_PROJECTION_MATRIX, _projection);
+  gluUnProject(p[0], _viewport[3] - p[1], p[2], _modelview, _projection, _viewport, &xo, &yo, &zo);
+  return Point(xo, yo, zo);
 }
