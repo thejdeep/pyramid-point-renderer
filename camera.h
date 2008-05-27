@@ -313,7 +313,6 @@ private:
 
   Point projectToWorld(const Point& p);
 
-
 };
 
 #endif

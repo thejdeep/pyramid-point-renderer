@@ -410,17 +410,14 @@ void Camera::computeEyePosition(Quat q, Point *new_eye) {
   Quat q_new_rot = q_rot;
   q_new_rot = q_new_rot.composeWith(q);
 
-//   Quat q_new_rot = q;
-//   q_new_rot = q_new_rot.composeWith(q_rot);
-
   q_new_rot = q_new_rot.inverse();
 
   // increment given vector by oriented displacement
-  (*new_eye)[0] = new_eye->x() + position[0];
-  (*new_eye)[1] = new_eye->y() + position[1];
-  (*new_eye)[2] = new_eye->z() + position[2];
+  *new_eye = (*new_eye) + position;
 
-  //  q_new_rot.rotate(new_eye);
+  //Vector eye = Vector(new_eye->x(), new_eye->y(), new_eye->z());
+
+  //  *new_eye = q_new_rot.rotate(eye);
 }
 
 /**
@@ -499,12 +496,13 @@ void Camera::translate (int x, int y) {
  **/
 void Camera::translateVec (int x, int y, Point* center) {
 
-  mouse_curr = Point(x, y, 0.0);
+  mouse_curr = Point(x, y, 1.0);
+  mouse_start[2] = mouse_curr[2];
 
-  Point start =  projectToWorld(mouse_start);
-  Point current =  projectToWorld(mouse_curr);
+  Point start = projectToWorld(mouse_start);
+  Point current = projectToWorld(mouse_curr);
 
-  *center += 0.01*(current - start);
+  *center += (current - start)*0.1;
 
   mouse_start = mouse_curr;
 }
@@ -525,14 +523,18 @@ void Camera::updateMouse ( void ) {
 **/
 void Camera::zoomingVec (int x, int y, Point* center) {
 
-  mouse_curr = Point(x, y, 0.0);
+  mouse_curr = Point(x, y, 1.0);
+  mouse_start[2] = mouse_curr[2];
 
   Point start =  projectToWorld(mouse_start);
   Point current =  projectToWorld(mouse_curr);
 
-  (*center)[2] -= 0.01*(current.y() - start.y());
+  Vector view = (position*radius) - *center;
+  view.normalize();
 
-  mouse_start = mouse_curr;
+  (*center) -= view*(current.y() - start.y())*0.1;
+
+  //  mouse_start = mouse_curr;
 }
 
 /**
@@ -678,12 +680,10 @@ void Camera::projectToScreen(Point* p, Point& screen_pos) {
   setView();
 
   GLdouble model_view[16];
-  glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
-
   GLdouble projection[16];
-  glGetDoublev(GL_PROJECTION_MATRIX, projection);
-
   GLint viewport[4];
+  glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
+  glGetDoublev(GL_PROJECTION_MATRIX, projection);
   glGetIntegerv(GL_VIEWPORT, viewport);
 
   // get 2D coordinates based on 3D coordinates
@@ -704,12 +704,21 @@ void Camera::projectToScreen(Point* p, Point& screen_pos) {
  */
 Point Camera::projectToWorld(const Point& p) {
   GLdouble xo, yo, zo;
-  GLint _viewport[4];
-  GLdouble _modelview[16];
-  GLdouble _projection[16];
-  glGetIntegerv(GL_VIEWPORT, _viewport);
-  glGetDoublev(GL_MODELVIEW_MATRIX, _modelview);
-  glGetDoublev(GL_PROJECTION_MATRIX, _projection);
-  gluUnProject(p[0], _viewport[3] - p[1], p[2], _modelview, _projection, _viewport, &xo, &yo, &zo);
+
+  glPushMatrix();
+
+  setView();
+
+  GLdouble model_view[16];
+  GLdouble projection[16];
+  GLint viewport[4];
+  glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
+  glGetDoublev(GL_PROJECTION_MATRIX, projection);
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
+  gluUnProject(p.x(), viewport[3] - p.y(), p.z(), model_view, projection, viewport, &xo, &yo, &zo);
+
+  glPopMatrix();
+
   return Point(xo, yo, zo);
 }
