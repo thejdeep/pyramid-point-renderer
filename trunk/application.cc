@@ -137,7 +137,7 @@ void Application::draw(void) {
 
   // Reset camera position and direction
   camera->setView();
-//   camera->setTranslation();
+  //camera->setTranslation();
   //camera->setRotation();
 
   // Render objects primitives with pyramid algorithm
@@ -159,12 +159,12 @@ void Application::draw(void) {
     objects[i].translate();
     objects[i].rotate();
 
-    //    objects[i].render( );
+    //objects[i].render( );
     //objects[i].render( camera->positionVector() );
 
     // Compute the rotated eye (opposite direction) of the camera + object center position
-//     camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
-//     point_based_render->setEye(eye);
+    //camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
+    //point_based_render->setEye(eye);
  
     point_based_render->setEye(eye + camera->positionVector());
 
