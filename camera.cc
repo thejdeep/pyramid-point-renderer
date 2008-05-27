@@ -165,18 +165,7 @@ void Camera::setTranslation (void) {
  **/
 void Camera::setRotation (void) {
 
-//   Quat q = q_rot;
-//   q.x *= -1;
-//   q.y *= -1;
-//   q.z *= -1;
-//   eye_rot[0] = eye[0];
-//   eye_rot[1] = eye[1];
-//   eye_rot[2] = eye[2];
-//   q.rotate(eye_rot);
-
-  //glTranslatef(0.0, 0.0, position[2]);
-
-    // Convert from quaternion to angle+axis
+  // Convert from quaternion to angle+axis
   double s = 1.0 / sqrt(1 - q_rot.a*q_rot.a);
   double rot[4] = {acos(q_rot.a) * 2.0 * rad_to_deg,
 		   q_rot.x * s, q_rot.y * s, q_rot.z * s};
@@ -185,8 +174,6 @@ void Camera::setRotation (void) {
   }
 
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
-
-  //glTranslatef(position[0], position[1], 0.0);
 }
 
 /**
@@ -247,9 +234,6 @@ void Camera::reshape(int w, int h) {
 
   screen_width = w;
   screen_height = h;
-
-  // Arcball radius
-  //  radius = 1.0;
 
   glClearColor (0.0, 0.0, 0.0, 1.0);
 
@@ -475,16 +459,35 @@ void Camera::zooming(int x, int y) {
 **/
 void Camera::translate (int x, int y) {
 
+//   mouse_curr = Point(x, y, 0.0);
+
+//   Point start =  projectToWorld(mouse_start);
+//   Point current =  projectToWorld(mouse_curr);
+
+//   //  radius += 0.01*(current.y() - start.y());
+
+//   mouse_start = mouse_curr;
+
   mouse_curr = Point(x, y, 0.0);
 
-  Point start =  projectToWorld(mouse_start);
-  Point current =  projectToWorld(mouse_curr);
+  Point d_curr = mouse_curr;
+  Point d_start = mouse_start;
 
-  //  radius += 0.01*(current.y() - start.y());
+  normalizeCoordinates(d_curr);
+  normalizeCoordinates(d_start);
 
-  mouse_start = mouse_curr;
+  d_start[2] = 0.0;
+  d_curr[2] = 0.0;
 
+  mapToSphere(d_start, 1.0);
+  mapToSphere(d_curr, 1.0);
 
+  Quat q0 (d_start.x(), d_start.y(), d_start.z(), 0.0);
+  Quat q1 (d_curr.x(), d_curr.y(), d_curr.z(), 0.0);
+
+  Quat inc = q1*q0;
+  q_rot = (q_lookAt*inc*q_lookAt.conjugate())*q_last;
+  q_rot.normalize();
 }
 
 /**
@@ -524,12 +527,12 @@ void Camera::zoomingVec (int x, int y, Point* center) {
 
   mouse_curr = Point(x, y, 0.0);
 
-  Vector dist = 10.0*(mouse_start - mouse_curr);
-  dist[0] = 0.0;
-  dist[1] /= screen_height;
-  dist[2] = 0.0;
+  Point start =  projectToWorld(mouse_start);
+  Point current =  projectToWorld(mouse_curr);
 
-  (*center) = (*center) - view * dist[1];
+  (*center)[2] -= 0.01*(current.y() - start.y());
+
+  mouse_start = mouse_curr;
 }
 
 /**

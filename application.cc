@@ -138,7 +138,7 @@ void Application::draw(void) {
   // Reset camera position and direction
   camera->setView();
 //   camera->setTranslation();
-//   camera->setRotation();
+  //camera->setRotation();
 
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
