@@ -116,7 +116,7 @@ public:
   void updateMouse ( void );
 
   /// Starts a quat rotation procedure
-  void startQuatRotation(int x, int y, Quat*, Point*);
+  void startQuatRotation(int x, int y, Quat*);
   /// Starts a rotation procedure
   void startRotation(int x, int y);
   /// Ends a rotation procedure
@@ -310,6 +310,9 @@ private:
   void newTarget( const Point* p );
 
   void normalizeCoordinates(Point& p);
+
+  Point projectToWorld(const Point& p);
+
 
 };
 

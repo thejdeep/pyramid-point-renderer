@@ -740,7 +740,7 @@ void Application::mouseLeftButton(int x, int y) {
     camera->startRotation(x, y);
   else {
     for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->startQuatRotation(x, y, objects[*it].getRotationQuat(), objects[*it].getCenter());
+      camera->startQuatRotation(x, y, objects[*it].getRotationQuat());
   }
 }
 
