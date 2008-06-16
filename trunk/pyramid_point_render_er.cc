@@ -574,7 +574,7 @@ void PyramidPointRenderER::rasterizeSynthesisPyramid( void )
   //  for (level = levels_count - 2; level >= 0; level--)
   //  for (level = 0; level <= levels_count - 1; level++)
   //  for (int i = 0; i < 5; ++i)
-    for (level = 0; level <= levels_count - 3; level++)
+    for (level = 0; level <= levels_count - 1; level++)
       {
 	cur_level = level;
 	

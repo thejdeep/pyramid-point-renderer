@@ -36,6 +36,9 @@ void main(void)
       
       material = gl_TexCoord[0].w;
 
+      normal_vec = normalize(gl_NormalMatrix * unprojected_normal);
+      float radius = gl_Vertex.w;
+
       // the projected normal is the smaller projection between the minor and major axis
       // compute first the projected axis
 /*       vec3 minor_axis = normalize(gl_NormalMatrix * gl_TexCoord[0].xyz); */
@@ -44,11 +47,20 @@ void main(void)
 /* /\*       float major_len = length(gl_Normal.xyz); *\/ */
 /*       float minor_len = length(gl_NormalMatrix * gl_TexCoord[0].xyz); */
 /*       float major_len = length(gl_NormalMatrix * gl_Normal.xyz); */
-     
-      normal_vec = normalize(gl_NormalMatrix * unprojected_normal);
 
-      float radius = gl_Vertex.w;
+/*       vec3 minor_axis = normalize(gl_NormalMatrix * gl_TexCoord[0].xyz); */
+/*       vec3 major_axis = normalize(gl_NormalMatrix * gl_Normal.xyz); */
+/*       float minor_len = length(gl_NormalMatrix * gl_TexCoord[0].xyz); */
+/*       float major_len = length(gl_NormalMatrix * gl_Normal.xyz); */
 
+/* /\*       float n_factor = 1.0 / sqrt(minor_axis.x*minor_axis.x + minor_axis.y*minor_axis.y); *\/ */
+/* /\*       normal_vec.x *= n_factor; *\/ */
+/* /\*       normal_vec.y *= n_factor; *\/ */
+/*       normal_vec.xy = normalize(minor_axis.xy); */
+/*       normal_vec.z = minor_len / major_len; */
+
+/*       float radius = major_len; */
+ 
       //      if (minor_axis.z * minor_len > major_axis.z * major_len) {
 /*       if (length((gl_NormalMatrix * gl_TexCoord[0].xyz).xy) > length((gl_NormalMatrix * gl_Normal.xyz).xy)) { */
 /* 	radius = minor_len; */
