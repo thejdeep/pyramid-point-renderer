@@ -48,12 +48,14 @@ void Object::render ( Point camera_pos ) {
 
   glTranslatef(c.x(), c.y(), c.z());
 
-    // Convert from quaternion to angle+axis
-  double s = 1.0 / sqrt(1 - q_rot.a*q_rot.a);
-  double rot[4] = {acos(q_rot.a) * 2.0 * rad_to_deg,
-		   q_rot.x * s, q_rot.y * s, q_rot.z * s};
-  if (q_rot.a == 1) {
-    rot[1] = rot[2] = 0.0; rot[3] = 0.0;
-  }
-  glRotatef(rot[0], rot[1], rot[2], rot[3]);
+  rotate();
+
+//     // Convert from quaternion to angle+axis
+//   double s = 1.0 / sqrt(1 - q_rot.a*q_rot.a);
+//   double rot[4] = {acos(q_rot.a) * 2.0 * rad_to_deg,
+// 		   q_rot.x * s, q_rot.y * s, q_rot.z * s};
+//   if (q_rot.a == 1) {
+//     rot[1] = rot[2] = 0.0; rot[3] = 0.0;
+//   }
+//   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 }

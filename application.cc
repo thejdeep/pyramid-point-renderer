@@ -159,14 +159,14 @@ void Application::draw(void) {
     objects[i].translate();
     objects[i].rotate();
 
-    //objects[i].render( );
+    // objects[i].render( );
     //objects[i].render( camera->positionVector() );
 
     // Compute the rotated eye (opposite direction) of the camera + object center position
-    //camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
-    //point_based_render->setEye(eye);
+    // camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
+    // point_based_render->setEye(eye);
  
-    point_based_render->setEye(eye + camera->positionVector());
+    point_based_render->setEye( camera->positionVector() );
 
     // Projects to image plane surfels of all primitives for this object
     vector< int >* prims = objects[i].getPrimitivesList();
