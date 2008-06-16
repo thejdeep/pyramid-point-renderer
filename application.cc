@@ -160,7 +160,7 @@ void Application::draw(void) {
     objects[i].rotate();
 
     // objects[i].render( );
-    //objects[i].render( camera->positionVector() );
+    // objects[i].render( camera->positionVector() );
 
     // Compute the rotated eye (opposite direction) of the camera + object center position
     // camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
