@@ -439,6 +439,7 @@ void Application::changeRendererType( int type ) {
 
 void Application::createPointRender( void ) {
 
+
   if (render_mode == NONE)
     return;
 
@@ -447,8 +448,8 @@ void Application::createPointRender( void ) {
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
       (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)) {
-    if (color_model) 
-      point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+    if (color_model)
+      point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
@@ -462,6 +463,8 @@ void Application::createPointRender( void ) {
     point_based_render = new JFASplatting(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if ((render_mode == TRIANGLES) || (render_mode == LINES))
     point_based_render = new TriangleRenderer();
+
+
 
   assert (point_based_render);
   
@@ -549,6 +552,8 @@ int Application::readFile ( const char * filename ) {
 
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
+
+
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
@@ -566,7 +571,7 @@ int Application::readFile ( const char * filename ) {
 
   //  if (!point_based_render)
   createPointRender( );
- 
+
   return id;
 }
 

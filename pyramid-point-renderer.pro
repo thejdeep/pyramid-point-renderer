@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer .
+INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_templates .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
@@ -29,7 +29,7 @@ HEADERS += application.h \
            pyramid_point_render.h \
            pyramid_point_render_nearest.h \
            pyramid_point_renderer/pyramid_point_render_color.h \
-           pyramid_point_render_er.h \
+           pyramid_templates/pyramid_point_render_er.h \
            pyramid_point_render_lod.h \
            pyramid_point_render_trees.h \
            pyramid_triangle_renderer.h \
@@ -57,7 +57,7 @@ SOURCES += application.cc \
            pyramid_point_render.cc \
            pyramid_point_render_nearest.cc \
            pyramid_point_renderer/pyramid_point_render_color.cc \
-           pyramid_point_render_er.cc \
+           pyramid_templates/pyramid_point_render_er.cc \
            pyramid_point_render_lod.cc \
            pyramid_point_render_trees.cc \
            pyramid_triangle_renderer.cc \

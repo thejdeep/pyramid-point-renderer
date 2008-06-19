@@ -881,30 +881,28 @@ void PyramidPointRenderER::createShaders ( void ) {
   bool shader_inst_debug = 1;
 
   shader_projection = new glslKernel();
-  shader_projection->vertex_source("shader_point_projection_color_er.vert");
-  shader_projection->fragment_source("shader_point_projection_color_er.frag");
+  shader_projection->vertex_source("pyramid_templates/shader_point_projection_color_er.vert");                                    
+  shader_projection->fragment_source("pyramid_templates/shader_point_projection_color_er.frag");
   shader_projection->install( shader_inst_debug );
 
   shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("shader_analysis_er.vert");
-  shader_analysis->fragment_source("shader_analysis_er.frag");
+  shader_analysis->vertex_source("pyramid_templates/shader_analysis_er.vert");
+  shader_analysis->fragment_source("pyramid_templates/shader_analysis_er.frag");
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
-  shader_copy->vertex_source("shader_copy_er.vert");
-  shader_copy->fragment_source("shader_copy_er.frag");
-//   shader_copy->vertex_source("shader_copy.vert");
-//   shader_copy->fragment_source("shader_copy.frag");
+  shader_copy->vertex_source("pyramid_templates/shader_copy_er.vert");
+  shader_copy->fragment_source("pyramid_templates/shader_copy_er.frag");
   shader_copy->install( shader_inst_debug );
 
   shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("shader_synthesis_er.vert");
-  shader_synthesis->fragment_source("shader_synthesis_er.frag");
+  shader_synthesis->vertex_source("pyramid_templates/shader_synthesis_er.vert");
+  shader_synthesis->fragment_source("pyramid_templates/shader_synthesis_er.frag");
   shader_synthesis->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong_er.vert");
-  shader_phong->fragment_source("shader_phong_er.frag");
+  shader_phong->vertex_source("pyramid_templates/shader_phong_er.vert");
+  shader_phong->fragment_source("pyramid_templates/shader_phong_er.frag");
   shader_phong->install( shader_inst_debug );
 
 }
