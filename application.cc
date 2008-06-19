@@ -552,10 +552,10 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
-  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+  //  primitives.back().setRendererType( PYRAMID_POINTS_ER );
 
   num_objects = objects.size();
 
@@ -596,7 +596,7 @@ int Application::readNormalsFile ( const char * filename ) {
   ;;primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
-  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+  //  primitives.back().setRendererType( PYRAMID_POINTS_ER );
 
   num_objects = objects.size();
 
