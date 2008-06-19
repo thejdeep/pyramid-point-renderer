@@ -881,7 +881,7 @@ void PyramidPointRenderER::createShaders ( void ) {
   bool shader_inst_debug = 1;
 
   shader_projection = new glslKernel();
-  shader_projection->vertex_source("shader_point_projection_color.vert");
+  shader_projection->vertex_source("shader_point_projection_color_er.vert");
   shader_projection->fragment_source("shader_point_projection_color_er.frag");
   shader_projection->install( shader_inst_debug );
 
@@ -891,8 +891,8 @@ void PyramidPointRenderER::createShaders ( void ) {
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
-  shader_copy->vertex_source("shader_copy_color.vert");
-  shader_copy->fragment_source("shader_copy_color.frag");
+  shader_copy->vertex_source("shader_copy_er.vert");
+  shader_copy->fragment_source("shader_copy_er.frag");
 //   shader_copy->vertex_source("shader_copy.vert");
 //   shader_copy->fragment_source("shader_copy.frag");
   shader_copy->install( shader_inst_debug );
@@ -903,8 +903,8 @@ void PyramidPointRenderER::createShaders ( void ) {
   shader_synthesis->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong_color.vert");
-  shader_phong->fragment_source("shader_phong_color_er.frag");
+  shader_phong->vertex_source("shader_phong_er.vert");
+  shader_phong->fragment_source("shader_phong_er.frag");
   shader_phong->install( shader_inst_debug );
 
 }
