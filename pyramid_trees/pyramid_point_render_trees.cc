@@ -789,27 +789,27 @@ void PyramidPointRenderTrees::createShaders ( void ) {
   shader_projection->install( shader_inst_debug );
 
   shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("shader_analysis_color.vert");
+  shader_analysis->vertex_source("shader_analysis_trees.vert");
   shader_analysis->fragment_source("shader_analysis_trees.frag");
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
-  shader_copy->vertex_source("shader_copy_color.vert");  
-  shader_copy->fragment_source("shader_copy_color.frag");
+  shader_copy->vertex_source("shader_copy_trees.vert");  
+  shader_copy->fragment_source("shader_copy_trees.frag");
   shader_copy->install( shader_inst_debug );
 
   shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("shader_synthesis_color.vert");
+  shader_synthesis->vertex_source("shader_synthesis_synthesis.vert");
   shader_synthesis->fragment_source("shader_synthesis_trees.frag");
   shader_synthesis->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong_color.vert");
+  shader_phong->vertex_source("shader_phong_trees.vert");
   shader_phong->fragment_source("shader_phong_trees.frag");
   shader_phong->install( shader_inst_debug );
 
-  shader_show = new glslKernel();
-  shader_show->vertex_source("shader_show.vert");
-  shader_show->fragment_source("shader_show.frag");
-  shader_show->install( shader_inst_debug );
+//   shader_show = new glslKernel();
+//   shader_show->vertex_source("shader_show_trees.vert");
+//   shader_show->fragment_source("shader_show_trees.frag");
+//   shader_show->install( shader_inst_debug );
 }
