@@ -798,33 +798,33 @@ void PyramidTriangleRenderer::createShaders ( void ) {
   shader_projection = new glslKernel();
 //   shader_projection->vertex_source("shader_projection_triangles.vert");
 //   shader_projection->fragment_source("shader_projection_triangles.frag");
-  shader_projection->vertex_source("shader_point_projection_color.vert");
-  shader_projection->fragment_source("shader_point_projection_color.frag");
+  shader_projection->vertex_source("pyramid_triangle_renderer/shader_point_projection_color.vert");
+  shader_projection->fragment_source("pyramid_triangle_renderer/shader_point_projection_color.frag");
   shader_projection->install( shader_inst_debug );
 
   shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("shader_analysis_color.vert");
-  shader_analysis->fragment_source("shader_analysis_color.frag");
+  shader_analysis->vertex_source("pyramid_triangle_renderer/shader_analysis_color.vert");
+  shader_analysis->fragment_source("pyramid_triangle_renderer/shader_analysis_color.frag");
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
-  shader_copy->vertex_source("shader_copy_color.vert");  
-  shader_copy->fragment_source("shader_copy_color.frag");
+  shader_copy->vertex_source("pyramid_triangle_renderer/shader_copy_color.vert");  
+  shader_copy->fragment_source("pyramid_triangle_renderer/shader_copy_color.frag");
   shader_copy->install( shader_inst_debug );
 
   shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("shader_synthesis_color.vert");
-  shader_synthesis->fragment_source("shader_synthesis_color.frag");
+  shader_synthesis->vertex_source("pyramid_triangle_renderer/shader_synthesis_color.vert");
+  shader_synthesis->fragment_source("pyramid_triangle_renderer/shader_synthesis_color.frag");
   shader_synthesis->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong_color.vert");
-  shader_phong->fragment_source("shader_phong_color.frag");
+  shader_phong->vertex_source("pyramid_triangle_renderer/shader_phong_color.vert");
+  shader_phong->fragment_source("pyramid_triangle_renderer/shader_phong_color.frag");
   shader_phong->install( shader_inst_debug );
 
   shader_show = new glslKernel();
-  shader_show->vertex_source("shader_show.vert");
-  shader_show->fragment_source("shader_show.frag");
+  shader_show->vertex_source("pyramid_triangle_renderer/shader_show.vert");
+  shader_show->fragment_source("pyramid_triangle_renderer/shader_show.frag");
   shader_show->install( shader_inst_debug );
 
   CHECK_FOR_OGL_ERROR();

@@ -464,18 +464,18 @@ void JFASplatting::createShaders ( void ) {
   bool shader_inst_debug = 1;
 
   shader_projection = new glslKernel();
-  shader_projection->vertex_source("shader_point_projection_jfa.vert");
-  shader_projection->fragment_source("shader_point_projection_jfa.frag");
+  shader_projection->vertex_source("jfa_splatting/shader_point_projection_jfa.vert");
+  shader_projection->fragment_source("jfa_splatting/shader_point_projection_jfa.frag");
   shader_projection->install( shader_inst_debug );
 
   shader_evaluate = new glslKernel();
-  shader_evaluate->vertex_source("shader_evaluate_jfa.vert");
-  shader_evaluate->fragment_source("shader_evaluate_jfa.frag");
+  shader_evaluate->vertex_source("jfa_splatting/shader_evaluate_jfa.vert");
+  shader_evaluate->fragment_source("jfa_splatting/shader_evaluate_jfa.frag");
   shader_evaluate->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong_jfa.vert");
-  shader_phong->fragment_source("shader_phong_jfa.frag");
+  shader_phong->vertex_source("jfa_splatting/shader_phong_jfa.vert");
+  shader_phong->fragment_source("jfa_splatting/shader_phong_jfa.frag");
   shader_phong->install( shader_inst_debug );
 
 }
