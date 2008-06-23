@@ -5,8 +5,8 @@
 TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer \
-  ./pyramid_templates ./pyramid_lod ./pyramid_trees ./ellipse_rasterization .
+INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_triangle_renderer \
+  ./pyramid_templates ./pyramid_lod ./pyramid_trees ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
@@ -15,9 +15,9 @@ QT += opengl
 HEADERS += application.h \
            camera.h \
            ellipse_rasterization/ellipse_rasterization.h \
-           ewa_surface_splatting.h \
+           ewa_surface_splatting/ewa_surface_splatting.h \
            file_io.h \
-           jfa_splatting.h \
+           jfa_splatting/jfa_splatting.h \
            kd-tree.h \
            materials.h \
            modelsTreeWidget.h \
@@ -33,7 +33,7 @@ HEADERS += application.h \
            pyramid_templates/pyramid_point_render_er.h \
            pyramid_lod/pyramid_point_render_lod.h \
            pyramid_trees/pyramid_point_render_trees.h \
-           pyramid_triangle_renderer.h \
+           pyramid_triangle_renderer/pyramid_triangle_renderer.h \
            pyramid_types.h \
            quat.h \
            surfel.hpp \         
@@ -45,8 +45,8 @@ FORMS += interface.ui
 SOURCES += application.cc \
            camera.cc \
            ellipse_rasterization/ellipse_rasterization.cc \
-           ewa_surface_splatting.cc \
-           jfa_splatting.cc \
+           ewa_surface_splatting/ewa_surface_splatting.cc \
+           jfa_splatting/jfa_splatting.cc \
            main.cpp \
            matrix.cc \
            modelsTreeWidget.cpp \
@@ -61,7 +61,7 @@ SOURCES += application.cc \
            pyramid_templates/pyramid_point_render_er.cc \
            pyramid_lod/pyramid_point_render_lod.cc \
            pyramid_trees/pyramid_point_render_trees.cc \
-           pyramid_triangle_renderer.cc \
+           pyramid_triangle_renderer/pyramid_triangle_renderer.cc \
            surfels.cc \
            timer.c \
            triangle_renderer.cc
