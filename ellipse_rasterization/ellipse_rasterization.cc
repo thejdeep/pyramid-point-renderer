@@ -471,22 +471,22 @@ void EllipseRasterization::createShaders ( void ) {
   bool shader_inst_debug = 1;
 
   shader_projection = new glslKernel();
-  shader_projection->vertex_source("shader_point_projection_er.vert");
-  shader_projection->geometry_source("shader_point_projection_er.geom");
+  shader_projection->vertex_source("ellipse_rasterization/shader_point_projection_er.vert");
+  shader_projection->geometry_source("ellipse_rasterization/shader_point_projection_er.geom");
   shader_projection->set_geom_max_output_vertices( sample_subdivision );
   shader_projection->set_geom_input_type(GL_POINTS);
   shader_projection->set_geom_output_type(GL_POINTS);
-  shader_projection->fragment_source("shader_point_projection_er.frag");
+  shader_projection->fragment_source("ellipse_rasterization/shader_point_projection_er.frag");
   shader_projection->install( shader_inst_debug );
 
   shader_evaluate = new glslKernel();
-  shader_evaluate->vertex_source("shader_evaluate_er.vert");
-  shader_evaluate->fragment_source("shader_evaluate_er.frag");
+  shader_evaluate->vertex_source("ellipse_rasterization/shader_evaluate_er.vert");
+  shader_evaluate->fragment_source("ellipse_rasterization/shader_evaluate_er.frag");
   shader_evaluate->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("shader_phong_er.vert");
-  shader_phong->fragment_source("shader_phong_er.frag");
+  shader_phong->vertex_source("ellipse_rasterization/shader_phong_er.vert");
+  shader_phong->fragment_source("ellipse_rasterization/shader_phong_er.frag");
   shader_phong->install( shader_inst_debug );
 
 }
