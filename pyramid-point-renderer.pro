@@ -5,8 +5,9 @@
 TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_triangle_renderer \
-  ./pyramid_templates ./pyramid_lod ./pyramid_trees ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting .
+INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
+  ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees \
+  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
@@ -27,9 +28,9 @@ HEADERS += application.h \
            point_based_render.h \
            pprMainWindow.h \
            primitives.h \
-           pyramid_point_render.h \
+           pyramid_point_renderer/pyramid_point_render.h \
            pyramid_point_render_nearest.h \
-           pyramid_point_renderer/pyramid_point_render_color.h \
+           pyramid_point_renderer_color/pyramid_point_render_color.h \
            pyramid_templates/pyramid_point_render_er.h \
            pyramid_lod/pyramid_point_render_lod.h \
            pyramid_trees/pyramid_point_render_trees.h \
@@ -55,9 +56,9 @@ SOURCES += application.cc \
            point_based_render.cc \
            pprMainWindow.cpp \
            primitives.cc \
-           pyramid_point_render.cc \
+           pyramid_point_renderer/pyramid_point_render.cc \
            pyramid_point_render_nearest.cc \
-           pyramid_point_renderer/pyramid_point_render_color.cc \
+           pyramid_point_renderer_color/pyramid_point_render_color.cc \
            pyramid_templates/pyramid_point_render_er.cc \
            pyramid_lod/pyramid_point_render_lod.cc \
            pyramid_trees/pyramid_point_render_trees.cc \

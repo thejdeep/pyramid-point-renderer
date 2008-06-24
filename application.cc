@@ -439,7 +439,6 @@ void Application::changeRendererType( int type ) {
 
 void Application::createPointRender( void ) {
 
-
   if (render_mode == NONE)
     return;
 
