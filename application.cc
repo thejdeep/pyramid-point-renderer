@@ -130,7 +130,7 @@ void Application::draw(void) {
     surfs_per_level[i] = 0;
 
   // Clear all buffers including pyramid algorithm buffers
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   point_based_render->clearBuffers();
