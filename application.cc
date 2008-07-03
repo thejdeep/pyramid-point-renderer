@@ -463,8 +463,6 @@ void Application::createPointRender( void ) {
   else if ((render_mode == TRIANGLES) || (render_mode == LINES))
     point_based_render = new TriangleRenderer();
 
-
-
   assert (point_based_render);
   
   if ((render_mode == PYRAMID_TRIANGLES) || (render_mode == PYRAMID_HYBRID))

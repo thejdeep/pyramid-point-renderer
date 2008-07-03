@@ -6,7 +6,7 @@ TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
 INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
-  ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees \
+  ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees ./triangle_renderer \
   ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting .
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
@@ -40,7 +40,7 @@ HEADERS += application.h \
            surfel.hpp \         
            surfels.h \      
            timer.h \
-           triangle_renderer.h \
+           triangle_renderer/triangle_renderer.h \
            matrix.cc
 FORMS += interface.ui
 SOURCES += application.cc \
@@ -65,4 +65,4 @@ SOURCES += application.cc \
            pyramid_triangle_renderer/pyramid_triangle_renderer.cc \
            surfels.cc \
            timer.c \
-           triangle_renderer.cc
+           triangle_renderer/triangle_renderer.cc
