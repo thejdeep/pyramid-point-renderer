@@ -46,6 +46,7 @@ class PyramidPointRenderColor : public PointBasedRender
   ~PyramidPointRenderColor();
 
   void draw();
+  void draw ( GLfloat* data, int w, int h );
   
   void clearBuffers (void);
   void projectSamples ( Primitives* prim );

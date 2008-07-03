@@ -675,6 +675,33 @@ void PyramidPointRenderColor::interpolate() {
 }
 
 /**
+ * Render final image to a given buffer instead of screen.
+ **/
+void PyramidPointRenderColor::draw ( GLfloat* data, int w, int h ) {
+  int level = 0;
+  pixels_struct nullPixels;
+  pixels_struct sourcePixels;
+  pixels_struct destinationPixels;
+
+  nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
+
+  shader_projection->use(0);
+  shader_analysis->use(0);
+  shader_copy->use(0);
+  shader_synthesis->use(0);
+  shader_show->use(0);
+
+  sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[0], fbo_buffers[4], 0);
+  destinationPixels = generatePixels(level, fbo, 1, fbo_buffers[1], 0, 0);
+  rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
+
+  shader_phong->use(0);
+
+  glReadBuffer(fbo_buffers[1]);
+  glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
+}
+
+/**
  * Renders reconstructed model on screen with
  * per pixel shading.
  **/
@@ -797,53 +824,53 @@ void PyramidPointRenderColor::createShaders ( void ) {
   bool shader_inst_debug = 1;
 
   shader_projection_no_lod = new glslKernel();
-  shader_projection_no_lod->vertex_source("pyramid_point_renderer/shader_point_projection_color.vert");
-  shader_projection_no_lod->fragment_source("pyramid_point_renderer/shader_point_projection_color.frag");
+  shader_projection_no_lod->vertex_source("pyramid_point_renderer_color/shader_point_projection_color.vert");
+  shader_projection_no_lod->fragment_source("pyramid_point_renderer_color/shader_point_projection_color.frag");
   shader_projection_no_lod->install( shader_inst_debug );
 
   shader_projection_upsampling = new glslKernel();
-  shader_projection_upsampling->vertex_source("pyramid_point_renderer/shader_point_projection_upsampling.vert");
-  shader_projection_upsampling->geometry_source("pyramid_point_renderer/shader_point_projection_upsampling.geom");
+  shader_projection_upsampling->vertex_source("pyramid_point_renderer_color/shader_point_projection_upsampling.vert");
+  shader_projection_upsampling->geometry_source("pyramid_point_renderer_color/shader_point_projection_upsampling.geom");
   shader_projection_upsampling->set_geom_max_output_vertices( 9 );
   shader_projection_upsampling->set_geom_input_type(GL_POINTS);
   shader_projection_upsampling->set_geom_output_type(GL_POINTS);
-  shader_projection_upsampling->fragment_source("pyramid_point_renderer/shader_point_projection_upsampling.frag");
+  shader_projection_upsampling->fragment_source("pyramid_point_renderer_color/shader_point_projection_upsampling.frag");
   shader_projection_upsampling->install( shader_inst_debug );
 
   shader_projection_lod = new glslKernel();
-  shader_projection_lod->vertex_source("pyramid_point_renderer/shader_point_projection_lod.vert");
-  shader_projection_lod->geometry_source("pyramid_point_renderer/shader_point_projection_lod.geom");
+  shader_projection_lod->vertex_source("pyramid_point_renderer_color/shader_point_projection_lod.vert");
+  shader_projection_lod->geometry_source("pyramid_point_renderer_color/shader_point_projection_lod.geom");
   shader_projection_lod->set_geom_max_output_vertices( (int)pow((double)MAX_LEAF_SURFELS, (double)LOD_LEVELS-1) );
   shader_projection_lod->set_geom_input_type(GL_POINTS);
   shader_projection_lod->set_geom_output_type(GL_POINTS);
-  shader_projection_lod->fragment_source("pyramid_point_renderer/shader_point_projection_color.frag");
+  shader_projection_lod->fragment_source("pyramid_point_renderer_color/shader_point_projection_color.frag");
   shader_projection_lod->install( shader_inst_debug );
 
   shader_projection = shader_projection_no_lod;
 
   shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("pyramid_point_renderer/shader_analysis_color.vert");
-  shader_analysis->fragment_source("pyramid_point_renderer/shader_analysis_color.frag");
+  shader_analysis->vertex_source("pyramid_point_renderer_color/shader_analysis_color.vert");
+  shader_analysis->fragment_source("pyramid_point_renderer_color/shader_analysis_color.frag");
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
-  shader_copy->vertex_source("pyramid_point_renderer/shader_copy_color.vert");
-  shader_copy->fragment_source("pyramid_point_renderer/shader_copy_color.frag");
+  shader_copy->vertex_source("pyramid_point_renderer_color/shader_copy_color.vert");
+  shader_copy->fragment_source("pyramid_point_renderer_color/shader_copy_color.frag");
   shader_copy->install( shader_inst_debug );
 
   shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("pyramid_point_renderer/shader_synthesis_color.vert");
-  shader_synthesis->fragment_source("pyramid_point_renderer/shader_synthesis_color.frag");
+  shader_synthesis->vertex_source("pyramid_point_renderer_color/shader_synthesis_color.vert");
+  shader_synthesis->fragment_source("pyramid_point_renderer_color/shader_synthesis_color.frag");
   shader_synthesis->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("pyramid_point_renderer/shader_phong_color.vert");
-  shader_phong->fragment_source("pyramid_point_renderer/shader_phong_color.frag");
+  shader_phong->vertex_source("pyramid_point_renderer_color/shader_phong_color.vert");
+  shader_phong->fragment_source("pyramid_point_renderer_color/shader_phong_color.frag");
   shader_phong->install( shader_inst_debug );
 
   shader_show = new glslKernel();
-  shader_show->vertex_source("shader_show.vert");
-  shader_show->fragment_source("shader_show.frag");
+  shader_show->vertex_source("pyramid_point_renderer_color/shader_show.vert");
+  shader_show->fragment_source("pyramid_point_renderer_color/shader_show.frag");
   shader_show->install( shader_inst_debug );
 }
 
