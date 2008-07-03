@@ -71,7 +71,7 @@ void main (void) {
     }
   }
   else
-    color = vec4(1.0);
+    color = vec4(1.0, 1.0, 1.0, 0.0);
   
   gl_FragColor = vec4(color.rgb, 1.0);
 }
