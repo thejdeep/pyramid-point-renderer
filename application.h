@@ -82,6 +82,7 @@ class Application
   int readSceneFile (const char * filename, vector<int> *objs_ids);
   void drawPoints ( void );
   void draw ( void );
+  void drawNormalBuffer( GLfloat* data, int bw, int bh );
   void reshape ( int w, int h );
 
   void changeRendererType ( int type );

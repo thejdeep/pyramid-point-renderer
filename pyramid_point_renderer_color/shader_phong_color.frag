@@ -1,5 +1,6 @@
 uniform sampler2D textureA;
 uniform sampler2D textureC;
+uniform int normalBuffer;
 
 //uniform int color_per_lod;
 
@@ -48,7 +49,7 @@ void main (void) {
 
     normal = normalize(normal);
 
-    if (material == 5) {
+    if (material == 5 || normalBuffer) {
       color = normal;
       color.xyz += 1.0;
       color.xyz *= 0.5;

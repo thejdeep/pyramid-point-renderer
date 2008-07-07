@@ -6,11 +6,10 @@ void main (void) {
   vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;
   vec4 color = texture2D (textureC, gl_TexCoord[0].st).xyzw;
 
-
-  if (normal.a != 0.0) {    
+  if (normal.a != 0.0) {
     vec4 lightDir = vec4(normalize(gl_LightSource[0].position.xyz), 1.0);
    
-      if (abs(color.a - 0.5) < 0.1)
+    if (abs(color.a - 0.5) < 0.1)
     {
       normal *= -1.0;
       normal = lightDir - normal * ( dot(lightDir, normal) / dot(normal, normal) );

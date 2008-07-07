@@ -799,7 +799,7 @@ void PyramidPointRenderTrees::createShaders ( void ) {
   shader_copy->install( shader_inst_debug );
 
   shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("pyramid_trees/shader_synthesis_synthesis.vert");
+  shader_synthesis->vertex_source("pyramid_trees/shader_synthesis_trees.vert");
   shader_synthesis->fragment_source("pyramid_trees/shader_synthesis_trees.frag");
   shader_synthesis->install( shader_inst_debug );
 
@@ -807,6 +807,7 @@ void PyramidPointRenderTrees::createShaders ( void ) {
   shader_phong->vertex_source("pyramid_trees/shader_phong_trees.vert");
   shader_phong->fragment_source("pyramid_trees/shader_phong_trees.frag");
   shader_phong->install( shader_inst_debug );
+
 
 //   shader_show = new glslKernel();
 //   shader_show->vertex_source("shader_show_trees.vert");
