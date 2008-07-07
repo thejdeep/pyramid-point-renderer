@@ -120,6 +120,50 @@ void Application::drawPoints(void)
   glEnd();
 }
 
+void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
+  
+  if (primitives.size() == 0)
+    return;
+
+  // Clear all buffers including pyramid algorithm buffers
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  point_based_render->clearBuffers();
+  camera->setView();
+
+  // Render objects primitives with pyramid algorithm
+  for (unsigned int i = 0; i < objects.size(); ++i) {
+
+    // Compute rotated eye position for this object for back face culling   
+    Point eye = *(objects[i].getCenter());
+
+    glPushMatrix();
+
+    // Translate and rotate object
+    objects[i].translate();
+    objects[i].rotate();
+    point_based_render->setEye( camera->positionVector() );
+
+    // Projects to image plane surfels of all primitives for this object
+    vector< int >* prims = objects[i].getPrimitivesList();
+    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
+      Primitives * prim = &(primitives[*prim_it]);
+      int type = prim->getRendererType();
+
+      if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
+	point_based_render->projectSamples( prim );	
+      }
+    }
+    glPopMatrix();
+  }
+
+  // Interpolates projected surfels using pyramid algorithm
+  point_based_render->interpolate();
+
+  // Computes per pixel color with deferred shading
+  point_based_render->draw(data, bw, bh);
+}
+
 /// Display func
 void Application::draw(void) {
 
@@ -444,6 +488,8 @@ void Application::createPointRender( void ) {
 
   //delete point_based_render;
 
+  cout << "mode  " << render_mode << endl;
+
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
       (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)) {
@@ -454,8 +500,8 @@ void Application::createPointRender( void ) {
   }
   else if (render_mode == PYRAMID_POINTS_ER)
     point_based_render = new PyramidPointRenderER(CANVAS_WIDTH, CANVAS_HEIGHT);
-  else if (render_mode == PYRAMID_LINES)
-    point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT);
+  else if (render_mode == PYRAMID_LINES) 
+    point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT); 
   else if (render_mode == RASTERIZE_ELLIPSES)
     point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == JFA_SPLATTING)

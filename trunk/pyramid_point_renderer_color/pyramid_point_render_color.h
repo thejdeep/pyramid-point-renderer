@@ -125,6 +125,9 @@ class PyramidPointRenderColor : public PointBasedRender
   /// Num of primitives to be passed to the geom shader when using LOD
   int num_primitives;
 
+  /// Flag for rendering normal buffer
+  bool normal_buffer;
+
 };
 
 #endif

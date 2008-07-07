@@ -57,7 +57,7 @@ void pprMainWindow::fileOpen( void )
 
   const char* filename = sfile.toLatin1().data();
 
-  if ( !sfile.isEmpty() ) {  
+  if ( !sfile.isEmpty() ) {
     if (filetype.compare("ply") == 0)
       objs_ids.push_back( application->readFile( filename ) );
     else if (filetype.compare("normals") == 0)

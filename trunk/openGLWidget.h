@@ -49,6 +49,7 @@ class openGLWidget: public QGLWidget {
 
       timer.restart(); 
       application->draw();
+
       elapsed_millisecs += timer.elapsed();
 
       fps_loop ++;

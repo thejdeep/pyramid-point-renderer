@@ -544,6 +544,7 @@ int PyramidPointRenderColor::phongShadingCallbackFunc( void )
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
   shader_phong->set_uniform("textureC", 1);
+  shader_phong->set_uniform("normalBuffer", normal_buffer);
 
 //   if (use_lod)
 //     shader_phong->set_uniform("color_per_lod", (GLint)color_per_lod);
@@ -690,6 +691,7 @@ void PyramidPointRenderColor::draw ( GLfloat* data, int w, int h ) {
   shader_copy->use(0);
   shader_synthesis->use(0);
   shader_show->use(0);
+  normal_buffer = 1;
 
   sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[0], fbo_buffers[4], 0);
   destinationPixels = generatePixels(level, fbo, 1, fbo_buffers[1], 0, 0);
@@ -699,6 +701,9 @@ void PyramidPointRenderColor::draw ( GLfloat* data, int w, int h ) {
 
   glReadBuffer(fbo_buffers[1]);
   glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
+
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  glDrawBuffer(GL_BACK);
 }
 
 /**
@@ -708,6 +713,7 @@ void PyramidPointRenderColor::draw ( GLfloat* data, int w, int h ) {
 void PyramidPointRenderColor::draw( void ) {
 
   // Deffered shading of the final image containing normal map
+  normal_buffer = 0;
   rasterizePhongShading(0);
   //showPixels(1);
 
