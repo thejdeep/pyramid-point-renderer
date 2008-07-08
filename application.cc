@@ -486,9 +486,6 @@ void Application::createPointRender( void ) {
   if (render_mode == NONE)
     return;
 
-  //delete point_based_render;
-
-  cout << "mode  " << render_mode << endl;
 
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
@@ -497,7 +494,7 @@ void Application::createPointRender( void ) {
       point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
+  }  
   else if (render_mode == PYRAMID_POINTS_ER)
     point_based_render = new PyramidPointRenderER(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == PYRAMID_LINES) 
@@ -600,10 +597,10 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( PYRAMID_POINTS );
+  //  primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
-  //  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+  primitives.back().setRendererType( PYRAMID_POINTS_ER );
 
   num_objects = objects.size();
 

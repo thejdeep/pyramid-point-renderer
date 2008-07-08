@@ -49,7 +49,7 @@ void main (void) {
 
     normal = normalize(normal);
 
-    if (material == 5 || normalBuffer) {
+    if ((material == 5) || (normalBuffer == 1)) {
       color = normal;
       color.xyz += 1.0;
       color.xyz *= 0.5;
