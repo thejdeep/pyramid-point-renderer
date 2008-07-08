@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = ppr
+TARGET = pyramid-point-renderer
 DEPENDPATH += .
 INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
   ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees ./triangle_renderer \

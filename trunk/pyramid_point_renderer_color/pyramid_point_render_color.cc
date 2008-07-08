@@ -850,7 +850,7 @@ void PyramidPointRenderColor::createShaders ( void ) {
   shader_projection_lod->set_geom_input_type(GL_POINTS);
   shader_projection_lod->set_geom_output_type(GL_POINTS);
   shader_projection_lod->fragment_source("pyramid_point_renderer_color/shader_point_projection_color.frag");
-  shader_projection_lod->install( shader_inst_debug );
+  shader_projection_lod->install( shader_inst_debug );  
 
   shader_projection = shader_projection_no_lod;
 
