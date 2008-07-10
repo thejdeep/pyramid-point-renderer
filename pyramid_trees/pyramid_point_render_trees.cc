@@ -623,7 +623,7 @@ void PyramidPointRenderTrees::clearBuffers() {
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
-  glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   //glClear(GL_COLOR_BUFFER_BIT); 
   framebuffer_state = FBS_UNDEFINED;
@@ -807,10 +807,4 @@ void PyramidPointRenderTrees::createShaders ( void ) {
   shader_phong->vertex_source("pyramid_trees/shader_phong_trees.vert");
   shader_phong->fragment_source("pyramid_trees/shader_phong_trees.frag");
   shader_phong->install( shader_inst_debug );
-
-
-//   shader_show = new glslKernel();
-//   shader_show->vertex_source("shader_show_trees.vert");
-//   shader_show->fragment_source("shader_show_trees.frag");
-//   shader_show->install( shader_inst_debug );
 }

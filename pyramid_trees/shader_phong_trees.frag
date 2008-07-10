@@ -9,6 +9,7 @@ void main (void) {
   if (normal.a != 0.0) {
     vec4 lightDir = vec4(normalize(gl_LightSource[0].position.xyz), 1.0);
    
+    //tube
     if (abs(color.a - 0.5) < 0.1)
     {
       normal *= -1.0;
@@ -16,6 +17,7 @@ void main (void) {
       /* vec3 NxL = normalize(cross(-normal.xyz, lightDir.xyz)); */
       /* normal = vec4(cross(NxL, -normal.xyz), 1.0); */
     }
+    //ribbon
     else {
       if (dot(normal.xyz, lightDir.xyz) < 0.0)
 	normal *= -1.0;
@@ -38,7 +40,7 @@ void main (void) {
 /*     } */
   }
   else
-    color = vec4(1.0);
+    color = vec4(1.0, 1.0, 1.0, 0.0);
   
-  gl_FragColor = vec4(color.rgb, 1.0);
+  gl_FragColor = color;
 }

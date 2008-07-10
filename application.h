@@ -83,6 +83,8 @@ class Application
   void drawPoints ( void );
   void draw ( void );
   void drawNormalBuffer( GLfloat* data, int bw, int bh );
+  void drawPointsBuffer( GLfloat* data, int bw, int bh );
+  void projectPoints ( void );
   void reshape ( int w, int h );
 
   void changeRendererType ( int type );

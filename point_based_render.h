@@ -36,7 +36,8 @@ class PointBasedRender
 
    virtual void draw( ) {}
    virtual void draw(int) {}
-   virtual void draw ( GLfloat*, int, int ) {}
+   virtual void drawNormalsToBuffer ( GLfloat*, int, int ) {}
+   virtual void drawPointsToBuffer ( GLfloat*, int, int ) {}
    virtual void interpolate( ) {}
    virtual void projectSamples(Primitives*) {}
    virtual void clearBuffers( ) {}

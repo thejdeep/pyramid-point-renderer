@@ -5,14 +5,12 @@
 TEMPLATE = app
 TARGET = pyramid-point-renderer
 DEPENDPATH += .
-INCLUDEPATH += $(HOME)/lcgtk/glslKernel/ $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
+INCLUDEPATH += $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
   ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees ./triangle_renderer \
-  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting .
+  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
-
-CONFIG += opengl staticlib warn_on $$(QMAKESPEC)
 
 # Input
 HEADERS += application.h \
