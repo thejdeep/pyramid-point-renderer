@@ -1,4 +1,4 @@
-#include "glslKernel.h"
+#include "glslKernel/glslKernel.h"
 
 #include "primitives.h"
 
@@ -9,7 +9,7 @@
 #define NUM_MATERIALS 6
 
 
-GLfloat obj_colors[8][4] = {{0.0, 0.0, 0.0, 1.0},
+GLfloat obj_colors[8][4] = {{0.0, 1.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
 			    {0.0, 0.0, 0.0, 1.0},
@@ -97,6 +97,10 @@ void Primitives::render ( void ) {
     
     glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
 
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
   }
   else if (renderer_type == PYRAMID_TRIANGLES) {
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -113,9 +117,13 @@ void Primitives::render ( void ) {
 
     glEnableClientState(GL_NORMAL_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-    glNormalPointer(GL_FLOAT, 0, NULL); 
+    glNormalPointer(GL_FLOAT, 0, NULL);
     
     glDrawElements(GL_TRIANGLES, number_triangles*3, GL_UNSIGNED_INT, &indices[0]);
+
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
   }
   else if ( (renderer_type == PYRAMID_HYBRID)
 	    || (renderer_type == PYRAMID_HYBRID_TEST)) {
@@ -574,14 +582,7 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  cout << "triangle type : " << type << endl;
-
-  obj_colors[id][3] = type;
-  //  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, obj_colors[id]);
-
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
-//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, black);
-//   glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+  //  cout << "triangle type : " << type << endl;
 
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
@@ -657,13 +658,13 @@ void Primitives::setPyramidTrianglesArrays ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexPointer(4, GL_FLOAT, 0, NULL); 
   
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-  glTexCoordPointer(4, GL_FLOAT, 0, NULL);
-
-//   glEnableClientState(GL_COLOR_ARRAY);
+//   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 //   glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-//   glColorPointer(4, GL_FLOAT, 0, NULL); 
+//   glTexCoordPointer(4, GL_FLOAT, 0, NULL);
+
+  glEnableClientState(GL_COLOR_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glColorPointer(4, GL_FLOAT, 0, NULL); 
 
   glEnableClientState(GL_NORMAL_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
@@ -722,7 +723,7 @@ void Primitives::setPyramidLinesArraysColor ( void ) {
   number_triangles = triangles.size();
   indices = new GLuint[number_triangles*2];
 
-  cout << "type : " << type << " " << color_model << endl;
+  //cout << "type : " << type << " " << color_model << endl;
 
   int pos = 0;
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {

@@ -54,7 +54,6 @@ PyramidPointRenderColor::~PyramidPointRenderColor() {
 }
 
 
-
 GLuint PyramidPointRenderColor::getTextureOfBuffer(GLuint buffer)
      /* returns the OpenGL texture name of a color attachment buffer (GL_COLOR_ATTACHMENTx_EXT) 
       * of the global framebuffer object or 0 if the color attachment buffer is not bound
@@ -676,9 +675,12 @@ void PyramidPointRenderColor::interpolate() {
 }
 
 /**
- * Render final image to a given buffer instead of screen.
+ * Render final image with normal map to a given buffer instead of screen.
+ * @param data Given buffer to write data to.
+ * @param w Width of buffer.
+ * @param h Height of buffer.
  **/
-void PyramidPointRenderColor::draw ( GLfloat* data, int w, int h ) {
+void PyramidPointRenderColor::drawNormalsToBuffer ( GLfloat* data, int w, int h ) {
   int level = 0;
   pixels_struct nullPixels;
   pixels_struct sourcePixels;
@@ -699,6 +701,20 @@ void PyramidPointRenderColor::draw ( GLfloat* data, int w, int h ) {
 
   shader_phong->use(0);
 
+  glReadBuffer(fbo_buffers[1]);
+  glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
+
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  glDrawBuffer(GL_BACK);
+}
+
+/**
+ * Render final image with points to a given buffer instead of screen.
+ * @param data Given buffer to write data to.
+ * @param w Width of buffer.
+ * @param h Height of buffer.
+ **/
+void PyramidPointRenderColor::drawPointsToBuffer ( GLfloat* data, int w, int h ) {
   glReadBuffer(fbo_buffers[1]);
   glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
 

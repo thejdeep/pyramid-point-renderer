@@ -120,7 +120,7 @@ void Application::drawPoints(void)
   glEnd();
 }
 
-void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
+void Application::projectPoints ( void ) {
   
   if (primitives.size() == 0)
     return;
@@ -156,12 +156,25 @@ void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
     }
     glPopMatrix();
   }
+}
+
+void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
+
+  projectPoints();
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
 
   // Computes per pixel color with deferred shading
-  point_based_render->draw(data, bw, bh);
+  point_based_render->drawNormalsToBuffer(data, bw, bh);
+}
+
+void Application::drawPointsBuffer( GLfloat* data, int bw, int bh ) {
+
+  projectPoints();
+
+  // Computes per pixel color with deferred shading
+  point_based_render->drawPointsToBuffer(data, bw, bh);
 }
 
 /// Display func
@@ -473,7 +486,7 @@ void Application::changeRendererType( int type ) {
   if (selected_objs.size() == 0)
     return;
 
-  if ((render_mode != PYRAMID_LINES) && (type != PYRAMID_LINES)) {
+  if ((render_mode != PYRAMID_LINES) && (type != PYRAMID_LINES))  {
     changePrimitivesRendererType ( (point_render_type_enum)type );
     render_mode = type;
     createPointRender( );
@@ -592,22 +605,20 @@ int Application::readFile ( const char * filename ) {
 
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
-
-
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  //  primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
-  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+  //  primitives.back().setRendererType( PYRAMID_POINTS_ER );
 
   num_objects = objects.size();
 
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
   
-  render_mode = PYRAMID_POINTS_ER;
+  render_mode = PYRAMID_POINTS;
 
   //  if (!point_based_render)
   createPointRender( );

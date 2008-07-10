@@ -634,8 +634,11 @@ void PyramidPointRenderER::rasterizePhongShading(int bufferIndex)
 
 /**
  * Render final image to a given buffer instead of screen.
+ * @param data Given buffer to write data to.
+ * @param w Width of buffer.
+ * @param h Height of buffer.
  **/
-void PyramidPointRenderER::draw ( GLfloat* data, int w, int h ) {
+void PyramidPointRenderER::drawNormalsToBuffer ( GLfloat* data, int w, int h ) {
   int level = 0;
   pixels_struct nullPixels;
   pixels_struct sourcePixels;
@@ -658,6 +661,8 @@ void PyramidPointRenderER::draw ( GLfloat* data, int w, int h ) {
   glReadBuffer(fbo_buffers[1]);
   glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
 }
+
+
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
