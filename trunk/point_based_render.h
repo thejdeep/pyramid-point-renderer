@@ -40,6 +40,7 @@ class PointBasedRender
    virtual void drawPointsToBuffer ( GLfloat*, int, int ) {}
    virtual void interpolate( ) {}
    virtual void projectSamples(Primitives*) {}
+   virtual void projectSamplesIds(Primitives*) {}
    virtual void clearBuffers( ) {}
 
    virtual void setPrefilterSize(double s) { prefilter_size = s; }

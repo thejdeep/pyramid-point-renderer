@@ -42,7 +42,7 @@ typedef struct _keyframe {
     reconstruction_filter = prefilter = 0.0;
   }
   /// Constructor
-  _keyframe(Point _p, Quat _r, GLfloat _lp[], double& _rf, double& _pf) : rot(_r) {
+  _keyframe(Point _p, Quat _r, Point _lp, double& _rf, double& _pf) : rot(_r) {
     pos[0] = _p[0]; pos[1] = _p[1]; pos[2] = _p[2];
     light_pos[0] = _lp[0]; light_pos[1] = _lp[1]; light_pos[2] = _lp[2]; light_pos[3] = _lp[3];
     reconstruction_filter = _rf;
@@ -162,16 +162,20 @@ public:
   void setPositionVector ( Point p ) { position = p; }
   
   /// Return light position
-  const GLfloat* lightVector ( void ) const { return &light_position[0]; }
+  const Point lightVector ( void ) const { return light_position; }
   void setLightVector ( GLfloat p[3] ) { 
     light_position[0] = p[0]; light_position[1] = p[1]; light_position[2] = p[2];}
+
+  const Vector ambientLight ( void ) const { return ambient_light; }
+  const Vector diffuseLight ( void ) const { return diffuse_light; }
+  const Vector specularLight ( void ) const { return specular_light; }
   
   /// Return far and near planes
   const double zNear ( void ) const { return z_near; }
   const double zFar ( void ) const { return z_far; }
   const double fieldOfVision ( void ) const { return fov; }
 
-  void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
+  //void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
   void positionVec ( double e[] ) const { e[0] = position.x(); e[1] = position.y(); e[2] = -position.z(); }
 
   void createKeyFrame( double reconstruction_filter, double prefilter ) {
@@ -275,7 +279,12 @@ private:
   Quat q_last_lookAt;
 
   // Light position
-  GLfloat light_position[4];
+  Point light_position;
+
+  Vector ambient_light;
+  Vector diffuse_light;
+  Vector specular_light;
+
 
   /*************** Mouse **************/
   // Mouse rotation
