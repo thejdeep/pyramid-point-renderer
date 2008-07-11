@@ -47,7 +47,6 @@ class PyramidPointRenderColor : public PointBasedRender
 
   void draw();
   void drawNormalsToBuffer ( GLfloat* data, int w, int h );
-  void drawPointsToBuffer ( GLfloat* data, int w, int h );
   
   void clearBuffers (void);
   void projectSamples ( Primitives* prim );
@@ -128,6 +127,10 @@ class PyramidPointRenderColor : public PointBasedRender
 
   /// Flag for rendering normal buffer
   bool normal_buffer;
+
+  /// Flag for rendering point ids buffer
+  bool point_ids_buffer;
+
 
 };
 

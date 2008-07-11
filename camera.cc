@@ -42,7 +42,7 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
   angle_h = M_PI/2.0;
   angle_v = M_PI/2.0;
 
-  light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0; light_position[3] = 0.0;
+  light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0;
 
   radius = 4.0;
 
@@ -66,16 +66,26 @@ void Camera::initLight (void) {
   glEnable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
 
-  GLfloat ambientLight[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-  GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  ambient_light = Vector( 0.0, 0.0, 0.0 );
+  diffuse_light = Vector( 1.0, 1.0, 1.0 );
+  specular_light = Vector( 1.0, 1.0, 1.0 );
 
-  light_position[3] = 0.0;
+  GLfloat al[] = {ambient_light[0], ambient_light[1],
+		  ambient_light[2], 1.0};
 
-  glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  GLfloat dl[] = {diffuse_light[0], diffuse_light[1],
+		  diffuse_light[2], 1.0};
+
+  GLfloat sl[] = {specular_light[0], specular_light[1],
+		  specular_light[2], 1.0};
+
+  GLfloat pos[] = {light_position[0], light_position[1],
+		  light_position[2], 0.0};
+
+  glLightfv(GL_LIGHT0, GL_AMBIENT, al);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
+  glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
 

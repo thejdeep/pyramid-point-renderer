@@ -151,7 +151,7 @@ void Application::projectPoints ( void ) {
       int type = prim->getRendererType();
 
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	point_based_render->projectSamples( prim );	
+	  point_based_render->projectSamples( prim );	       
       }
     }
     glPopMatrix();
@@ -164,7 +164,7 @@ void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
-
+  
   // Computes per pixel color with deferred shading
   point_based_render->drawNormalsToBuffer(data, bw, bh);
 }
@@ -174,7 +174,7 @@ void Application::drawPointsBuffer( GLfloat* data, int bw, int bh ) {
   projectPoints();
 
   // Computes per pixel color with deferred shading
-  point_based_render->drawPointsToBuffer(data, bw, bh);
+  //  point_based_render->drawPointsToBuffer(data, bw, bh);
 }
 
 /// Display func
