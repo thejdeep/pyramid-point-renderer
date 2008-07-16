@@ -30,7 +30,7 @@
 
 #include "pyramid_point_render.h"
 #include "pyramid_point_render_nearest.h"
-#include "pyramid_point_render_color.h"
+#include "pyramid_point_renderer_color.h"
 #include "pyramid_point_render_lod.h"
 #include "pyramid_point_render_trees.h"
 #include "pyramid_point_render_er.h"

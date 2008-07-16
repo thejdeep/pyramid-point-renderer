@@ -174,7 +174,7 @@ void Application::drawPointsBuffer( GLfloat* data, int bw, int bh ) {
   projectPoints();
 
   // Computes per pixel color with deferred shading
-  //  point_based_render->drawPointsToBuffer(data, bw, bh);
+  // point_based_render->drawPointsToBuffer(data, bw, bh);
 }
 
 /// Display func
@@ -499,12 +499,11 @@ void Application::createPointRender( void ) {
   if (render_mode == NONE)
     return;
 
-
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
       (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)) {
     if (color_model)
-      point_based_render = new PyramidPointRenderColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
+      point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
     else
       point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
   }  

@@ -24,7 +24,7 @@
 
 typedef enum 
   {
-    TRIANGLES,
+    TRIANGLES = 0,
     LINES,
     PYRAMID_POINTS,
     PYRAMID_TRIANGLES,
@@ -34,13 +34,14 @@ typedef enum
     PYRAMID_POINTS_UPSAMPLING,
     PYRAMID_POINTS_JFA,
     PYRAMID_POINTS_ER,
-    RASTERIZE_ELLIPSES,
+    RASTERIZE_ELLIPSES = 10,
     JFA_SPLATTING,
     NONE,
     PYRAMID_POINTS_COLOR,
     EWA_SPLATTING,
     EWA_SPLATTING_INTERPOLATE_NORMALS,
-    PYRAMID_HYBRID_TEST
+    PYRAMID_HYBRID_TEST,
+    POINT_IDS = 17,
 
   } point_render_type_enum;
 
@@ -112,6 +113,7 @@ class Primitives
   void setPatchesArray ( void );
 
   void setPyramidPointsArrays( void );
+  void setPyramidPointIds( void );
   void setPyramidPointsArraysColor( void );
   void setPyramidPointsDisplayList( void );
   void setPyramidTrianglesDisplayList( void );

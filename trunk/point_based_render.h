@@ -1,13 +1,13 @@
 /*
-** point_based_render.h Point Based Render header.
+** point_based_renderer.h Point Based Render header.
 **
 **
 **   history:	created  02-Jul-07
 */
 
 
-#ifndef __POINT_BASED_RENDER_H__
-#define __POINT_BASED_RENDER_H__
+#ifndef __POINT_BASED_RENDERER_H__
+#define __POINT_BASED_RENDERER_H__
 
 #include "glslKernel/glslKernel.h"
 #include "surfels.h"
@@ -15,24 +15,24 @@
 #include "materials.h"
 #include "object.h"
 
-class PointBasedRender
+class PointBasedRenderer
 {
  private:
 
  public:
-  PointBasedRender() : window_width(1024), window_height(1024),
+  PointBasedRenderer() : window_width(1024), window_height(1024),
     canvas_width(1024), canvas_height(1024),
     material_id(0), depth_test(1), elliptical_weight(1),
     reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0), color_per_lod(0)
     {}
 
-  PointBasedRender(int w, int h) : window_width(w), window_height(h),
+  PointBasedRenderer(int w, int h) : window_width(w), window_height(h),
     canvas_width(h), canvas_height(h),
     material_id(0), depth_test(1), elliptical_weight(1),
     reconstruction_filter_size(1.0), prefilter_size(1.0), use_lod(0), color_per_lod(0)
     {}
 
-   virtual ~PointBasedRender() {};
+   virtual ~PointBasedRenderer() {};
 
    virtual void draw( ) {}
    virtual void draw(int) {}
