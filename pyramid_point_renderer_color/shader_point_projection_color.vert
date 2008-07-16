@@ -12,8 +12,7 @@ varying vec3 normal_vec;
 varying vec3 radius_depth_w;
 
 void main(void)
-{
-  
+{  
   vec3 e = (gl_ModelViewProjectionMatrixInverse * vec4(eye, 1.0)).xyz;
   float material = 0.0;
 

@@ -5,17 +5,17 @@
 **   history:	created  02-Jul-07
 */
 
-#ifndef __PYRAMID_POINT_RENDER_COLOR_H__
-#define __PYRAMID_POINT_RENDER_COLOR_H__
+#ifndef __PYRAMID_POINT_RENDERER_COLOR_H__
+#define __PYRAMID_POINT_RENDERER_COLOR_H__
 
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
 #define FBO_BUFFERS_COUNT_6 6
 
-class PyramidPointRenderColor : public PointBasedRender
+class PyramidPointRendererColor : public PointBasedRenderer
 {
  private:
 
@@ -41,9 +41,9 @@ class PyramidPointRenderColor : public PointBasedRender
   double computeHalfPixelSize( void );
 
  public:
-  PyramidPointRenderColor();
-  PyramidPointRenderColor(int w, int h);
-  ~PyramidPointRenderColor();
+  PyramidPointRendererColor();
+  PyramidPointRendererColor(int w, int h);
+  ~PyramidPointRendererColor();
 
   void draw();
   void drawNormalsToBuffer ( GLfloat* data, int w, int h );
