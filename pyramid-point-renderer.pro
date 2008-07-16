@@ -25,12 +25,11 @@ HEADERS += application.h \
            object.h \
            openGLWidget.h \
            ply.h \
-           point_based_render.h \
+           point_based_renderer.h \
            pprMainWindow.h \
            primitives.h \
            pyramid_point_renderer/pyramid_point_render.h \
-           pyramid_point_render_nearest.h \
-           pyramid_point_renderer_color/pyramid_point_render_color.h \
+           pyramid_point_renderer_color/pyramid_point_renderer_color.h \
            pyramid_templates/pyramid_point_render_er.h \
            pyramid_lod/pyramid_point_render_lod.h \
            pyramid_trees/pyramid_point_render_trees.h \
@@ -53,12 +52,11 @@ SOURCES += application.cc \
            modelsTreeWidget.cpp \
            object.cc \
            ply.c \
-           point_based_render.cc \
+           point_based_renderer.cc \
            pprMainWindow.cpp \
            primitives.cc \
            pyramid_point_renderer/pyramid_point_render.cc \
-           pyramid_point_render_nearest.cc \
-           pyramid_point_renderer_color/pyramid_point_render_color.cc \
+           pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
            pyramid_templates/pyramid_point_render_er.cc \
            pyramid_lod/pyramid_point_render_lod.cc \
            pyramid_trees/pyramid_point_render_trees.cc \
