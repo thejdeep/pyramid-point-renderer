@@ -28,12 +28,11 @@
 
 //#include "ewa_surface_splatting.h"
 
-#include "pyramid_point_render.h"
-#include "pyramid_point_render_nearest.h"
+#include "pyramid_point_renderer.h"
 #include "pyramid_point_renderer_color.h"
-#include "pyramid_point_render_lod.h"
-#include "pyramid_point_render_trees.h"
-#include "pyramid_point_render_er.h"
+#include "pyramid_point_renderer_lod.h"
+#include "pyramid_point_renderer_trees.h"
+#include "pyramid_point_renderer_er.h"
 #include "pyramid_triangle_renderer.h"
 #include "ellipse_rasterization.h"
 #include "jfa_splatting.h"
