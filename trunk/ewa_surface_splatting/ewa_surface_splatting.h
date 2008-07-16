@@ -12,7 +12,7 @@
 #include <cmath>
 #include <vector>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
 #define EPS 0.00000001
 
@@ -27,7 +27,7 @@ struct zBufferPixel {
   double w;
 };
 
-class EWASurfaceSplatting : public PointBasedRender
+class EWASurfaceSplatting : public PointBasedRenderer
 {
  private:
 

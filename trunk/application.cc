@@ -489,12 +489,12 @@ void Application::changeRendererType( int type ) {
   if ((render_mode != PYRAMID_LINES) && (type != PYRAMID_LINES))  {
     changePrimitivesRendererType ( (point_render_type_enum)type );
     render_mode = type;
-    createPointRender( );
+    createPointRenderer( );
   }
 
 }
 
-void Application::createPointRender( void ) {
+void Application::createPointRenderer( void ) {
 
   if (render_mode == NONE)
     return;
@@ -505,18 +505,20 @@ void Application::createPointRender( void ) {
     if (color_model)
       point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
     else
-      point_based_render = new PyramidPointRender(CANVAS_WIDTH, CANVAS_HEIGHT);
+      point_based_render = new PyramidPointRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);
   }  
   else if (render_mode == PYRAMID_POINTS_ER)
-    point_based_render = new PyramidPointRenderER(CANVAS_WIDTH, CANVAS_HEIGHT);
+    point_based_render = new PyramidPointRendererER(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == PYRAMID_LINES) 
-    point_based_render = new PyramidPointRenderTrees(CANVAS_WIDTH, CANVAS_HEIGHT); 
+    point_based_render = new PyramidPointRendererTrees(CANVAS_WIDTH, CANVAS_HEIGHT); 
   else if (render_mode == RASTERIZE_ELLIPSES)
     point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == JFA_SPLATTING)
     point_based_render = new JFASplatting(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if ((render_mode == TRIANGLES) || (render_mode == LINES))
     point_based_render = new TriangleRenderer();
+  else if (render_mode == POINT_IDS)
+    point_based_render = new PointIds();
 
   assert (point_based_render);
   
@@ -549,7 +551,7 @@ int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
 
     render_mode = PYRAMID_POINTS;
 
-    createPointRender( );
+    createPointRenderer( );
 
     return num_objs;
   }
@@ -576,7 +578,7 @@ int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
 
     render_mode = PYRAMID_LINES;
 
-    createPointRender( );
+    createPointRenderer( );
 
     return num_objs;
   }
@@ -620,7 +622,7 @@ int Application::readFile ( const char * filename ) {
   render_mode = PYRAMID_POINTS;
 
   //  if (!point_based_render)
-  createPointRender( );
+  createPointRenderer( );
 
   return id;
 }
@@ -661,7 +663,7 @@ int Application::readNormalsFile ( const char * filename ) {
   render_mode = PYRAMID_POINTS_ER;
 
   //  if (!point_based_render)
-  createPointRender( );
+  createPointRenderer( );
  
   return id;
 }
@@ -730,7 +732,7 @@ int Application::readLodFile ( const char * filename ) {
   
   render_mode = PYRAMID_POINTS_LOD;
 
-  createPointRender( );
+  createPointRenderer( );
 
   return id;
 }

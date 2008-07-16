@@ -1,21 +1,21 @@
 /*
-** pyramid_point_render.h Pyramid Point Based Rendering header.
+** pyramid_point_renderer.h Pyramid Point Based Rendering header.
 **
 **
 **   history:	created  24-Apr-08
 */
 
-#ifndef __PYRAMID_POINT_RENDER_ER_H__
-#define __PYRAMID_POINT_RENDER_ER_H__
+#ifndef __PYRAMID_POINT_RENDERER_ER_H__
+#define __PYRAMID_POINT_RENDERER_ER_H__
 
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
 #define FBO_BUFFERS_COUNT_6 6
 
-class PyramidPointRenderER : public PointBasedRender
+class PyramidPointRendererER : public PointBasedRenderer
 {
  private:
 
@@ -43,9 +43,9 @@ class PyramidPointRenderER : public PointBasedRender
   void getDataProjectedPixels ( int* data );
 
  public:
-  PyramidPointRenderER();
-  PyramidPointRenderER(int w, int h);
-  ~PyramidPointRenderER();
+  PyramidPointRendererER();
+  PyramidPointRendererER(int w, int h);
+  ~PyramidPointRendererER();
 
   void draw();
   void drawNormalsToBuffer ( GLfloat* data, int w, int h );

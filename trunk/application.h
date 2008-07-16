@@ -28,6 +28,7 @@
 
 //#include "ewa_surface_splatting.h"
 
+#include "point_ids.h"
 #include "pyramid_point_renderer.h"
 #include "pyramid_point_renderer_color.h"
 #include "pyramid_point_renderer_lod.h"
@@ -56,7 +57,7 @@ class Application
 {
  private :
 
-  void createPointRender( void );
+  void createPointRenderer( void );
   void glVertex ( const Surfeld * s );
   void glVertex ( surfelVectorIter it );
   void glVertex ( Point p );
@@ -151,7 +152,7 @@ class Application
 
   unsigned int number_surfels;
 
-  PointBasedRender *point_based_render;
+  PointBasedRenderer *point_based_render;
 
   Camera *camera;
 

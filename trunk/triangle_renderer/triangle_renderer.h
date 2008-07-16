@@ -9,9 +9,9 @@
 #ifndef __TRIANGLE_RENDERER_H__
 #define __TRIANGLE_RENDERER_H__
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
-class TriangleRenderer : public PointBasedRender
+class TriangleRenderer : public PointBasedRenderer
 {
  private:
 

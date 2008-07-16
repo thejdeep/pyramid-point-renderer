@@ -1,26 +1,20 @@
 /*
-** pyramid_point_render.h Pyramid Point Based Rendering header.
+** pyramid_point_renderer.h Pyramid Point Based Rendering header.
 **
 **
 **   history:	created  02-Jul-07
 */
 
 
-#ifndef __PYRAMID_POINT_RENDER_H__
-#define __PYRAMID_POINT_RENDER_H__
-
-/* #define GL_GLEXT_PROTOTYPES */
-
-/* extern "C" { */
-/* #include "timer.h" */
-/* } */
+#ifndef __PYRAMID_POINT_RENDERER_H__
+#define __PYRAMID_POINT_RENDERER_H__
 
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
-class PyramidPointRender : public PointBasedRender
+class PyramidPointRenderer : public PointBasedRenderer
 {
  private:
 
@@ -46,9 +40,9 @@ class PyramidPointRender : public PointBasedRender
   double computeHalfPixelSize( void );
 
  public:
-  PyramidPointRender();
-  PyramidPointRender(int w, int h);
-  ~PyramidPointRender();
+  PyramidPointRenderer();
+  PyramidPointRenderer(int w, int h);
+  ~PyramidPointRenderer();
 
   void draw();
   

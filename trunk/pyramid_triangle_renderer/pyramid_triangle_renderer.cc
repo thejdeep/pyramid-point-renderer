@@ -10,7 +10,7 @@
 /**
  * Default constructor.
  **/
-PyramidTriangleRenderer::PyramidTriangleRenderer() : PointBasedRender(),
+PyramidTriangleRenderer::PyramidTriangleRenderer() : PointBasedRenderer(),
 					   fbo_width(1800),
 					   fbo_height(1200),
 					   fbo_buffers_count(4),
@@ -22,7 +22,7 @@ PyramidTriangleRenderer::PyramidTriangleRenderer() : PointBasedRender(),
   levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
-PyramidTriangleRenderer::PyramidTriangleRenderer(int w, int h) : PointBasedRender(w, h),
+PyramidTriangleRenderer::PyramidTriangleRenderer(int w, int h) : PointBasedRenderer(w, h),
 					   fbo_width(1800),
 					   fbo_height(1200),
 					   fbo_buffers_count(4),

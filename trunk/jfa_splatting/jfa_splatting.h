@@ -12,9 +12,9 @@
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
-class JFASplatting : public PointBasedRender
+class JFASplatting : public PointBasedRenderer
 {
  private:
 

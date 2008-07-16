@@ -11,7 +11,7 @@
 /**
  * Default constructor.
  **/
-JFASplatting::JFASplatting() : PointBasedRender(),
+JFASplatting::JFASplatting() : PointBasedRenderer(),
 			       canvas_border_width(32),
 			       canvas_border_height(32),
 			       dist_type(0){
@@ -22,7 +22,7 @@ JFASplatting::JFASplatting() : PointBasedRender(),
 /**
  * Constructor with screen size.
  **/
-JFASplatting::JFASplatting(int w, int h) : PointBasedRender(w, h),
+JFASplatting::JFASplatting(int w, int h) : PointBasedRenderer(w, h),
 					   canvas_border_width(w/32),
 					   canvas_border_height(h/32),
 					   dist_type(0){
