@@ -13,9 +13,9 @@
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
-class EllipseRasterization : public PointBasedRender
+class EllipseRasterization : public PointBasedRenderer
 {
  private:
 

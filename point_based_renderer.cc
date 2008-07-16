@@ -5,4 +5,4 @@
 **   history:	created  02-Jul-07
 */
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"

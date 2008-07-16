@@ -1,16 +1,16 @@
 /*
-** pyramid_point_render.cc Pyramid Point Based Rendering.
+** pyramid_point_renderer.cc Pyramid Point Based Rendering.
 **
 **
 **   history:	created  02-Jul-07
 */
 
-#include "pyramid_point_render_lod.h"
+#include "pyramid_point_renderer_lod.h"
 
 /**
  * Default constructor.
  **/
-PyramidPointRenderLod::PyramidPointRenderLod() : PointBasedRender(),
+PyramidPointRendererLod::PyramidPointRendererLod() : PointBasedRenderer(),
 					   fbo_width(1800),
 					   fbo_height(1200),
 					   fbo_buffers_count(4),
@@ -22,7 +22,7 @@ PyramidPointRenderLod::PyramidPointRenderLod() : PointBasedRender(),
   levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
-PyramidPointRenderLod::PyramidPointRenderLod(int w, int h) : PointBasedRender(w, h),
+PyramidPointRendererLod::PyramidPointRendererLod(int w, int h) : PointBasedRenderer(w, h),
 					   fbo_width(1800),
 					   fbo_height(1200),
 					   fbo_buffers_count(4),
@@ -35,7 +35,7 @@ PyramidPointRenderLod::PyramidPointRenderLod(int w, int h) : PointBasedRender(w,
 }
 
 
-PyramidPointRenderLod::~PyramidPointRenderLod() {
+PyramidPointRendererLod::~PyramidPointRendererLod() {
   delete shader_analysis;
   delete shader_copy;
   delete shader_synthesis;
@@ -58,7 +58,7 @@ PyramidPointRenderLod::~PyramidPointRenderLod() {
 
 
 
-GLuint PyramidPointRenderLod::getTextureOfBuffer(GLuint buffer)
+GLuint PyramidPointRendererLod::getTextureOfBuffer(GLuint buffer)
      /* returns the OpenGL texture name of a color attachment buffer (GL_COLOR_ATTACHMENTx_EXT) 
       * of the global framebuffer object or 0 if the color attachment buffer is not bound
       */
@@ -83,7 +83,7 @@ GLuint PyramidPointRenderLod::getTextureOfBuffer(GLuint buffer)
     }
 }
 
-void PyramidPointRenderLod::rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1,
+void PyramidPointRendererLod::rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1,
 		     int phase)
      /* binds buffers and rasterizes quad; calls callbackfunc to set the fragment program */
 {
@@ -273,7 +273,7 @@ void PyramidPointRenderLod::rasterizePixels(pixels_struct dest, pixels_struct sr
   }
 }
 
-pixels_struct PyramidPointRenderLod::generatePixels(int level, 
+pixels_struct PyramidPointRendererLod::generatePixels(int level, 
 			     GLuint curr_fbo, int buffersCount, GLuint buffer0, GLuint buffer1)
      /* returns an pixels_struct specifying the pixels of the specified level in the
       * specified fbo (0 or g.fbo) and one or two of its buffers (GL_BACK or g.fbo_buffers[i])
@@ -338,7 +338,7 @@ pixels_struct PyramidPointRenderLod::generatePixels(int level,
 }
 
 
-int PyramidPointRenderLod::projectionCallbackFunc( void )
+int PyramidPointRendererLod::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
@@ -351,7 +351,7 @@ int PyramidPointRenderLod::projectionCallbackFunc( void )
 }
 
 /// Project point sized samples to screen space
-void PyramidPointRenderLod::projectSurfels( Primitives* prim )
+void PyramidPointRendererLod::projectSurfels( Primitives* prim )
 {
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
@@ -375,7 +375,7 @@ void PyramidPointRenderLod::projectSurfels( Primitives* prim )
 
 }
 
-double PyramidPointRenderLod::computeHalfPixelSize( void ) {
+double PyramidPointRendererLod::computeHalfPixelSize( void ) {
 
   double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
   d *= 0.5;
@@ -383,7 +383,7 @@ double PyramidPointRenderLod::computeHalfPixelSize( void ) {
   return d;
 }
 
-int PyramidPointRenderLod::analysisCallbackFunc( void )
+int PyramidPointRendererLod::analysisCallbackFunc( void )
 {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
@@ -402,7 +402,7 @@ int PyramidPointRenderLod::analysisCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRenderLod::rasterizeAnalysisPyramid( void )
+void PyramidPointRendererLod::rasterizeAnalysisPyramid( void )
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
   int level;
@@ -428,7 +428,7 @@ void PyramidPointRenderLod::rasterizeAnalysisPyramid( void )
     }
 }
 
-int PyramidPointRenderLod::copyCallbackFunc( void )
+int PyramidPointRendererLod::copyCallbackFunc( void )
 {
   shader_copy->use();
   shader_copy->set_uniform("textureA", 0);
@@ -437,7 +437,7 @@ int PyramidPointRenderLod::copyCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRenderLod::copyAnalysisPyramid()
+void PyramidPointRendererLod::copyAnalysisPyramid()
      /* copies odd levels from color attachment pair 1-3 to buffer pair 0-2 and 
       * even levels from 0-2 to 1-3.
       */
@@ -462,7 +462,7 @@ void PyramidPointRenderLod::copyAnalysisPyramid()
     }
 }
 
-int PyramidPointRenderLod::synthesisCallbackFunc( void )
+int PyramidPointRendererLod::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
   shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
@@ -481,7 +481,7 @@ int PyramidPointRenderLod::synthesisCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRenderLod::rasterizeSynthesisPyramid()
+void PyramidPointRendererLod::rasterizeSynthesisPyramid()
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
   int level;
@@ -509,7 +509,7 @@ void PyramidPointRenderLod::rasterizeSynthesisPyramid()
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidPointRenderLod::phongShadingCallbackFunc( void )
+int PyramidPointRendererLod::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
@@ -522,7 +522,7 @@ int PyramidPointRenderLod::phongShadingCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRenderLod::rasterizePhongShading(int bufferIndex)
+void PyramidPointRendererLod::rasterizePhongShading(int bufferIndex)
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
   int level = 0;
@@ -546,7 +546,7 @@ void PyramidPointRenderLod::rasterizePhongShading(int bufferIndex)
 
 /* rasterize level 0 of pyramid with per pixel shading */
 
-int PyramidPointRenderLod::showCallbackFunc( void )
+int PyramidPointRendererLod::showCallbackFunc( void )
 {
   shader_show->use();
   shader_show->set_uniform("tex", 0);
@@ -555,7 +555,7 @@ int PyramidPointRenderLod::showCallbackFunc( void )
 }
 
 /* show buffer */
-void PyramidPointRenderLod::showPixels(int bufferIndex)
+void PyramidPointRendererLod::showPixels(int bufferIndex)
 {
   int level = 0;
   pixels_struct nullPixels;
@@ -581,7 +581,7 @@ void PyramidPointRenderLod::showPixels(int bufferIndex)
 /**
  * Clear all framebuffers and screen buffer.
  **/
-void PyramidPointRenderLod::clearBuffers() {
+void PyramidPointRendererLod::clearBuffers() {
   int i;
 
   glEnable(FBO_TYPE);
@@ -614,7 +614,7 @@ void PyramidPointRenderLod::clearBuffers() {
 /**
  * Reconstructs the surface for visualization.
  **/
-void PyramidPointRenderLod::projectSamples( Primitives* prim ) {
+void PyramidPointRendererLod::projectSamples( Primitives* prim ) {
   // Project points to framebuffer with depth test on.
 
   projectSurfels( prim );
@@ -626,7 +626,7 @@ void PyramidPointRenderLod::projectSamples( Primitives* prim ) {
  * Interpolate projected samples using pyramid interpolation
  * algorithm.
  **/
-void PyramidPointRenderLod::interpolate() {
+void PyramidPointRendererLod::interpolate() {
   framebuffer_state = FBS_UNDEFINED;
 
   glDisable(GL_DEPTH_TEST);
@@ -642,7 +642,7 @@ void PyramidPointRenderLod::interpolate() {
  * Renders reconstructed model on screen with
  * per pixel shading.
  **/
-void PyramidPointRenderLod::draw( void ) {
+void PyramidPointRendererLod::draw( void ) {
 
   // Deffered shading of the final image containing normal map
   rasterizePhongShading(0);
@@ -660,7 +660,7 @@ void PyramidPointRenderLod::draw( void ) {
 /**
  * Initialize OpenGL state variables.
  **/
-void PyramidPointRenderLod::createFBO() {
+void PyramidPointRendererLod::createFBO() {
   int i;
   GLenum framebuffer_status;
   GLenum attachments[16] = {
@@ -760,7 +760,7 @@ void PyramidPointRenderLod::createFBO() {
 /**
  * Installs the shaders using the GLSL Kernel class.
  **/
-void PyramidPointRenderLod::createShaders ( void ) {
+void PyramidPointRendererLod::createShaders ( void ) {
 
   bool shader_inst_debug = 1;
 

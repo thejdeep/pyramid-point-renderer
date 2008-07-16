@@ -7,7 +7,7 @@ TARGET = pyramid-point-renderer
 DEPENDPATH += .
 INCLUDEPATH += $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
   ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees ./triangle_renderer \
-  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting
+  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting ./point_ids
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl
@@ -28,19 +28,19 @@ HEADERS += application.h \
            point_based_renderer.h \
            pprMainWindow.h \
            primitives.h \
-           pyramid_point_renderer/pyramid_point_render.h \
+           point_ids/point_ids.h \
+           pyramid_point_renderer/pyramid_point_renderer.h \
            pyramid_point_renderer_color/pyramid_point_renderer_color.h \
-           pyramid_templates/pyramid_point_render_er.h \
-           pyramid_lod/pyramid_point_render_lod.h \
-           pyramid_trees/pyramid_point_render_trees.h \
+           pyramid_templates/pyramid_point_renderer_er.h \
+           pyramid_lod/pyramid_point_renderer_lod.h \
+           pyramid_trees/pyramid_point_renderer_trees.h \
            pyramid_triangle_renderer/pyramid_triangle_renderer.h \
            pyramid_types.h \
            quat.h \
            surfel.hpp \         
            surfels.h \      
            timer.h \
-           triangle_renderer/triangle_renderer.h \
-           matrix.cc
+           triangle_renderer/triangle_renderer.h
 FORMS += interface.ui
 SOURCES += application.cc \
            camera.cc \
@@ -55,11 +55,12 @@ SOURCES += application.cc \
            point_based_renderer.cc \
            pprMainWindow.cpp \
            primitives.cc \
-           pyramid_point_renderer/pyramid_point_render.cc \
+           point_ids/point_ids.cc \
+           pyramid_point_renderer/pyramid_point_renderer.cc \
            pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
-           pyramid_templates/pyramid_point_render_er.cc \
-           pyramid_lod/pyramid_point_render_lod.cc \
-           pyramid_trees/pyramid_point_render_trees.cc \
+           pyramid_templates/pyramid_point_renderer_er.cc \
+           pyramid_lod/pyramid_point_renderer_lod.cc \
+           pyramid_trees/pyramid_point_renderer_trees.cc \
            pyramid_triangle_renderer/pyramid_triangle_renderer.cc \
            surfels.cc \
            timer.c \

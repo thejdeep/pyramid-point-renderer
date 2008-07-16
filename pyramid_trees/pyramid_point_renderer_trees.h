@@ -1,12 +1,12 @@
 /*
-** pyramid_point_render.h Pyramid Point Based Rendering header.
+** pyramid_point_renderer.h Pyramid Point Based Rendering header.
 **
 **
 **   history:	created  02-Jul-07
 */
 
-#ifndef __PYRAMID_POINT_RENDER_TREES_H__
-#define __PYRAMID_POINT_RENDER_TREES_H__
+#ifndef __PYRAMID_POINT_RENDERER_TREES_H__
+#define __PYRAMID_POINT_RENDERER_TREES_H__
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -17,11 +17,11 @@ extern "C" {
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
 #define FBO_BUFFERS_COUNT_6 6
 
-class PyramidPointRenderTrees : public PointBasedRender
+class PyramidPointRendererTrees : public PointBasedRenderer
 {
  private:
 
@@ -47,9 +47,9 @@ class PyramidPointRenderTrees : public PointBasedRender
   double computeHalfPixelSize( void );
 
  public:
-  PyramidPointRenderTrees();
-  PyramidPointRenderTrees(int w, int h);
-  ~PyramidPointRenderTrees();
+  PyramidPointRendererTrees();
+  PyramidPointRendererTrees(int w, int h);
+  ~PyramidPointRendererTrees();
 
   void draw();
   

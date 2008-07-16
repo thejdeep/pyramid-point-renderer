@@ -18,10 +18,10 @@ extern "C" {
 #include <cmath>
 #include <cassert>
 
-#include "point_based_render.h"
+#include "point_based_renderer.h"
 
 
-class PyramidTriangleRenderer : public PointBasedRender
+class PyramidTriangleRenderer : public PointBasedRenderer
 {
  private:
 

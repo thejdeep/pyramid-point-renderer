@@ -11,7 +11,7 @@
 /**
  * Default constructor.
  **/
-EllipseRasterization::EllipseRasterization() : PointBasedRender(),
+EllipseRasterization::EllipseRasterization() : PointBasedRenderer(),
 					       canvas_border_width(32),
 					       canvas_border_height(32),
 					       cpu_mask_size(1),
@@ -24,7 +24,7 @@ EllipseRasterization::EllipseRasterization() : PointBasedRender(),
 /**
  * Constructor with screen size.
  **/
-EllipseRasterization::EllipseRasterization(int w, int h) : PointBasedRender(w, h),
+EllipseRasterization::EllipseRasterization(int w, int h) : PointBasedRenderer(w, h),
 							   canvas_border_width(w/32),
 							   canvas_border_height(h/32),
 							   cpu_mask_size(1),

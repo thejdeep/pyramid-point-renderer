@@ -20,12 +20,12 @@
 /**
  * Default constructor.
  **/
-EWASurfaceSplatting::EWASurfaceSplatting() : PointBasedRender() {
+EWASurfaceSplatting::EWASurfaceSplatting() : PointBasedRenderer() {
   fb = new GLfloat[canvas_width * canvas_height * 3];
   interpolate_normals = 0;
 }
 
-EWASurfaceSplatting::EWASurfaceSplatting(int w, int h, bool interp) : PointBasedRender(w, h) {
+EWASurfaceSplatting::EWASurfaceSplatting(int w, int h, bool interp) : PointBasedRenderer(w, h) {
   fb = new GLfloat[canvas_width * canvas_height * 3];
   interpolate_normals = interp;
 }
