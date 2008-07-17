@@ -47,18 +47,8 @@ void PointIds::prepareBuffer( void )
 {
   /* bind framebuffer and renderbuffers */
 
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-  glDrawBuffer(fbo);
-
-  glViewport(0, 0, canvas_width + 2*canvas_border_width, 
-	     canvas_height + 2*canvas_border_height);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluOrtho2D(0.0, canvas_width + 2*canvas_border_width, 
-	     0.0, canvas_height + 2*canvas_border_height);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(FBO_TYPE, fbo_texture);
@@ -116,6 +106,9 @@ void PointIds::clearBuffers() {
 void PointIds::projectSamples(Primitives* prim) {
   projectSurfels( prim );
 
+  // keep size to renormalize after retrieving buffer
+  number_points = prim->numberPoints();
+
   CHECK_FOR_OGL_ERROR();
 }
 
@@ -124,8 +117,20 @@ void PointIds::projectSamples(Primitives* prim) {
  **/
 void PointIds::drawPointIdsBuffer ( GLfloat* data, int w, int h ){
 
+  GLfloat *buffer_data = new GLfloat[w*h*4];
+
   glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-  glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
+  glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &buffer_data[0]);
+
+  // id is retrieved normalized [0, 1], rescale to [0, number_points]
+  for (int i = 0; i < w*h; ++i) {
+    if (buffer_data[i*4 + 1] == 1.0)
+      data[i] = floor(buffer_data[i*4] * number_points + 0.5);    
+    else
+      data[i] = -1.0;
+  }
+
+  delete buffer_data;
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
@@ -208,11 +213,10 @@ void PointIds::createFBO() {
  **/
 void PointIds::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("point_ids/shader_point_projection.vert");
   shader_projection->fragment_source("point_ids/shader_point_projection.frag");
   shader_projection->install( shader_inst_debug );
-
 }

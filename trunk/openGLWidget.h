@@ -48,6 +48,7 @@ class openGLWidget: public QGLWidget {
       static int fps_loop = 0;      
 
       timer.restart(); 
+
       application->draw();
 
       elapsed_millisecs += timer.elapsed();
@@ -97,11 +98,27 @@ class openGLWidget: public QGLWidget {
     
       if (event->buttons() == Qt::LeftButton)     
 	application->mouseLeftButton(event->x(), event->y());
-      else if (event->buttons() == Qt::MidButton)
+      else if (event->buttons() == Qt::MidButton) {
 	application->mouseMiddleButton(event->x(), event->y());
-      else if (event->buttons() == Qt::RightButton)
+
+      }
+      else if (event->buttons() == Qt::RightButton) {
 	application->mouseRightButton(event->x(), event->y());
 
+/* 	int size = 816; */
+
+/* 	GLfloat *data = new GLfloat[size*size]; */
+
+/* 	application->drawPointIdsBuffer(data, size, size); */
+
+/* 	delete data; */
+
+/* 	int cnt = 0; */
+/* 	for (int i = 0; i < size*size; ++i) */
+/* 	  if (data[i*4 + 1] == 1.0) { */
+/* 	    cnt ++ ; */
+/* 	cout << " total : " << cnt << endl; */
+      }
     }
 
     Application *application;

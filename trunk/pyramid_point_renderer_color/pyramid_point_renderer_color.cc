@@ -831,7 +831,7 @@ void PyramidPointRendererColor::createFBO() {
  **/
 void PyramidPointRendererColor::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_projection_no_lod = new glslKernel();
   shader_projection_no_lod->vertex_source("pyramid_point_renderer_color/shader_point_projection_color.vert");

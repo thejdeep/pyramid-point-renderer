@@ -83,7 +83,7 @@ class Application
   void drawPoints ( void );
   void draw ( void );
   void drawNormalBuffer( GLfloat* data, int bw, int bh );
-  void drawPointsBuffer( GLfloat* data, int bw, int bh );
+  void drawPointIdsBuffer( GLfloat* data, int bw, int bh );
   void projectPoints ( void );
   void reshape ( int w, int h );
 
@@ -97,7 +97,7 @@ class Application
   double getReconstructionFilter ( void ) const { return reconstruction_filter_size; }
   double getPrefilter ( void ) const { return prefilter_size; }
   int getMaterial ( void ) const { return material_id; }
-  Camera* getCamera ( void ) const { return camera; }
+  Camera* getCamera ( void ) { return camera; }
 
   void resetMaxValues ( void );
 

@@ -151,7 +151,7 @@ void Application::projectPoints ( void ) {
       int type = prim->getRendererType();
 
       if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	  point_based_render->projectSamples( prim );	       
+	  point_based_render->projectSamples( prim );
       }
     }
     glPopMatrix();
@@ -169,12 +169,25 @@ void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
   point_based_render->drawNormalsToBuffer(data, bw, bh);
 }
 
-void Application::drawPointsBuffer( GLfloat* data, int bw, int bh ) {
+void Application::drawPointIdsBuffer( GLfloat* data, int bw, int bh ) {
 
-  projectPoints();
+  GLint curr_render_mode = render_mode;
 
-  // Computes per pixel color with deferred shading
-  // point_based_render->drawPointsToBuffer(data, bw, bh);
+  for (unsigned int i = 0; i < objects.size(); ++i) {
+
+    render_mode = POINT_IDS;
+
+    changeRendererType(POINT_IDS);
+
+    projectPoints();
+
+    // Computes per pixel color with deferred shading
+    point_based_render->drawPointIdsBuffer(data, bw, bh);
+
+    render_mode = curr_render_mode;
+
+    changeRendererType(render_mode);
+  }
 }
 
 /// Display func
@@ -199,8 +212,8 @@ void Application::draw(void) {
 
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
-//   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-//     int i = *it;
+    // for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
+    // int i = *it;
 
     if (camera->runningFrames()) {
       point_based_render->setReconstructionFilterSize(camera->getKeyFrameReconstructionFilter());
@@ -491,13 +504,14 @@ void Application::changeRendererType( int type ) {
     render_mode = type;
     createPointRenderer( );
   }
-
 }
 
 void Application::createPointRenderer( void ) {
 
   if (render_mode == NONE)
     return;
+
+  delete point_based_render;
 
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||

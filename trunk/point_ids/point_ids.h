@@ -53,6 +53,9 @@ class PointIds : public PointBasedRenderer
 
   /// Textures bound to the framebuffer object; 
   GLuint fbo_texture;
+  
+  /// total number of points to be projected (for normalization purposes)
+  int number_points;
 
 };
 
