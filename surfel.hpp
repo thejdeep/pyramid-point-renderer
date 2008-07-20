@@ -13,7 +13,6 @@
 #include <cmath>
 
 #include <GL/gl.h>
-#include <GL/glu.h>
 
 #include "lal/Point3.hpp"
 #include "lal/Vector3.hpp"
@@ -160,9 +159,7 @@ public:
     this->mCenter 		= position;
 	         
   };
-	
-    
-	   
+	    	   
   ~Surfel() {};
 	
   const Point3 Center () const 
