@@ -445,7 +445,6 @@ void Application::renderLODColorBars( void ) {
   for (char *s = &text[4][0]; *s; ++s)
     glutBitmapCharacter(font, *s);
 
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
@@ -481,6 +480,14 @@ void Application::changeMaterial(void) {
 void Application::changeMaterial( int mat ) {
   material_id = mat;
   changeMaterial();
+}
+
+vector<Surfeld>* Application::getSurfelsList ( void ) {
+  if (selected_objs.size() > 0)
+    return NULL;
+
+  vector< int >* prims = objects[*selected_objs.begin()].getPrimitivesList();
+  return primitives[*prims->begin()].getSurfels();
 }
 
 void Application::changePrimitivesRendererType( point_render_type_enum type ) {

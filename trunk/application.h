@@ -98,6 +98,7 @@ class Application
   double getPrefilter ( void ) const { return prefilter_size; }
   int getMaterial ( void ) const { return material_id; }
   Camera* getCamera ( void ) { return camera; }
+  vector<Surfeld>* getSurfelsList ( void );
 
   void resetMaxValues ( void );
 
