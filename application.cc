@@ -483,7 +483,8 @@ void Application::changeMaterial( int mat ) {
 }
 
 vector<Surfeld>* Application::getSurfelsList ( void ) {
-  if (selected_objs.size() > 0)
+
+  if (selected_objs.size() == 0)
     return NULL;
 
   vector< int >* prims = objects[*selected_objs.begin()].getPrimitivesList();
@@ -633,7 +634,7 @@ int Application::readFile ( const char * filename ) {
   primitives.back().setRendererType( PYRAMID_POINTS );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
-  //  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+  //primitives.back().setRendererType( PYRAMID_POINTS_ER );
 
   num_objects = objects.size();
 
