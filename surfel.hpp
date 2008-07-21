@@ -12,6 +12,9 @@
 #include <vector>
 #include <cmath>
 
+#include "GL/gl.h"
+#include "GL/glu.h"
+
 #include "lal/Point3.hpp"
 #include "lal/Vector3.hpp"
 #include "lal/Color.hpp"
