@@ -164,11 +164,6 @@ class Application
   vector<Object> objects;
   vector<Primitives> primitives;
 
-  // Vector of point samples
-  //std::vector<Surfel> surfels;
-  // Vector of triangles with indices to surfels
-  //std::vector<Triangle> triangles;
-
   // Determines which rendering class to use (Pyramid points, pyramid lines for tree rendering, ellipse rasterization ...)
   // see primitives.h for the complete list (point_render_type_enum).
   GLint render_mode;
@@ -190,7 +185,7 @@ class Application
   bool rotating;
   bool color_model;
 
-  // Frames per sencond and Surfels per second
+  /***** Frames per second and Surfels per second vars ******/
   double sps, fps;
   int fps_loop;
   double start_time, end_time;

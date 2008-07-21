@@ -43,12 +43,10 @@ struct Box
 
 };
 
-
 struct Triangle {
   int verts[3];
   int id;
 };
-
 
 static const Point default_color (0.8, 0.4, 0.2);
 static const Point bg_color (1.0, 1.0, 1.0);

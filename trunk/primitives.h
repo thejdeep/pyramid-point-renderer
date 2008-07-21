@@ -9,13 +9,10 @@
 #ifndef __PRIMITIVES_H__
 #define __PRIMITIVES_H__
 
-//#define GL_GLEXT_PROTOTYPES
-
-#include "surfels.h"
 #include "quat.h"
 #include "kd-tree.h"
 
-#include "GL/glu.h"
+//#include "GL/glu.h"
 
 #include <cfloat>
 
