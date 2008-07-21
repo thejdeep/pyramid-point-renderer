@@ -38,8 +38,8 @@ typedef enum
     EWA_SPLATTING,
     EWA_SPLATTING_INTERPOLATE_NORMALS,
     PYRAMID_HYBRID_TEST,
-    POINT_IDS = 17,
-
+    POINT_IDS,
+    PYRAMID_POINTS_TEXTURE = 18
   } point_render_type_enum;
 
 using namespace std;
