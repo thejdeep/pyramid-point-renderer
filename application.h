@@ -67,7 +67,7 @@ class Application
 
  public :
 
-  Application();
+  Application( GLint default_mode = PYRAMID_POINTS );
   ~Application();
 
   void setColorBars ( bool c );

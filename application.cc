@@ -17,13 +17,13 @@
 /**
  * Initialize opengl and application state variables.
  **/
-Application::Application( void ) {
+Application::Application( GLint default_mode ) {
 
   // Initialize camera
   camera = new Camera(CANVAS_WIDTH + CANVAS_WIDTH/16,
 		      CANVAS_HEIGHT + CANVAS_HEIGHT/16);
 
-  render_mode = 0;
+  render_mode = default_mode;
 
   max_surfs_per_level[0] = max_surfs_per_level[1] = 
     max_surfs_per_level[2] = max_surfs_per_level[3] = 0;
@@ -631,7 +631,7 @@ int Application::readFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( PYRAMID_POINTS );
+  primitives.back().setRendererType( render_mode );
   //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
   //primitives.back().setRendererType( JFA_SPLATTING );
   //primitives.back().setRendererType( PYRAMID_POINTS_ER );
@@ -640,8 +640,6 @@ int Application::readFile ( const char * filename ) {
 
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
-  
-  render_mode = PYRAMID_POINTS;
 
   //  if (!point_based_render)
   createPointRenderer( );

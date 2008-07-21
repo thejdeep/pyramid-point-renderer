@@ -24,9 +24,7 @@ extern "C"
 #include <stdio.h>
 
 #include <strings.h>
-
 }
-
 
 //#define PI 3.1415926535897932384626433832795
 
