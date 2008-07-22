@@ -45,6 +45,7 @@ class PointBasedRenderer
 
    virtual void setPrefilterSize(double s) { prefilter_size = s; }
    virtual void setReconstructionFilterSize(double s) { reconstruction_filter_size = s; }
+   virtual void setRenderTexture(GLuint) {}
 
    virtual void getDataProjectedPixels ( int* ) {}
 

@@ -33,13 +33,13 @@ typedef enum
     PYRAMID_POINTS_ER,
     RASTERIZE_ELLIPSES = 10,
     JFA_SPLATTING,
+    PYRAMID_POINTS_TEXTURE,
     NONE,
     PYRAMID_POINTS_COLOR,
     EWA_SPLATTING,
     EWA_SPLATTING_INTERPOLATE_NORMALS,
     PYRAMID_HYBRID_TEST,
-    POINT_IDS,
-    PYRAMID_POINTS_TEXTURE = 18
+    POINT_IDS = 18
   } point_render_type_enum;
 
 using namespace std;
@@ -112,6 +112,7 @@ class Primitives
   void setPyramidPointsArrays( void );
   void setPyramidPointIds( void );
   void setPyramidPointsArraysColor( void );
+  void setPyramidPointsArraysTexture ( void );
   void setPyramidPointsDisplayList( void );
   void setPyramidTrianglesDisplayList( void );
   void setPyramidTrianglesArrays( void );
