@@ -123,7 +123,7 @@ class Application
 
   void clearSelectedObjects ( void );
   void setSelectedObject ( int id );
-
+  
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
   void mouseRightButton(int x, int y);
