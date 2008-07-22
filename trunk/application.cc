@@ -514,12 +514,33 @@ void Application::changeRendererType( int type ) {
     render_mode = type;
     createPointRenderer( );
   }
+
+//   if (type == PYRAMID_POINTS_TEXTURE) {
+//     GLuint tex;
+//     glGenTextures(1, &tex);
+//     GLfloat* tex_data = new GLfloat[512*512*4];
+//     for (int i = 0; i < 512*512; ++i) {
+//       tex_data[i*4 + 0] = 0.1;
+//       tex_data[i*4 + 1] = 0.2;
+//       tex_data[i*4 + 2] = 0.3;
+//       tex_data[i*4 + 3] = 1.0;
+//     }
+//     glBindTexture(GL_TEXTURE_2D, tex);
+//     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+// 		 512, 512, 0, GL_RGBA, GL_FLOAT, tex_data);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+//     delete tex_data;
+//     point_based_render->setRenderTexture(tex);
+//   }
+
 }
 
 void Application::setRenderTexture( GLuint tex ) {
-  //  render_mode = PYRAMID_POINTS_TEXTURE;
-  //  createPointRenderer();
-  point_based_render->setRenderTexture(tex);
+  if (render_mode == PYRAMID_POINTS_TEXTURE)
+    point_based_render->setRenderTexture(tex);
 }
 
 void Application::createPointRenderer( void ) {

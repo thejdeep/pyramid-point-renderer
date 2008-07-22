@@ -221,9 +221,11 @@ void PyramidPointRendererTexture::rasterizePixels(pixels_struct dest, pixels_str
 	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	glActiveTexture(GL_TEXTURE0 + render_texture);
-	glBindTexture(FBO_TYPE, render_texture);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	if (render_texture > 0) {
+	  glActiveTexture(GL_TEXTURE0 + render_texture);
+	  glBindTexture(FBO_TYPE, render_texture);
+	  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	}
 	ret = phongShadingCallbackFunc();
 	break;
       }
@@ -689,25 +691,6 @@ void PyramidPointRendererTexture::createFBO() {
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
   }
-
-  glGenTextures(1, &render_texture);
-  GLfloat* tex_data = new GLfloat[512*512*4];
-  for (int i = 0; i < 512*512; ++i) {
-    tex_data[i*4 + 0] = 0.0;
-    tex_data[i*4 + 1] = 1.0;
-    tex_data[i*4 + 2] = 0.0;
-    tex_data[i*4 + 3] = 1.0;
-  }
-  glBindTexture(FBO_TYPE, render_texture);
-  glTexImage2D(FBO_TYPE, 0, FBO_FORMAT,
-	       512, 512, 0, GL_RGBA, GL_FLOAT, tex_data);
-  glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  delete tex_data;
-
-  cout << "render tex : " << render_texture << endl;
 
   //for creating and binding a depth buffer:
   glGenTextures(1, &fbo_depth);
