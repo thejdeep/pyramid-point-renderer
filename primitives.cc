@@ -452,10 +452,7 @@ void Primitives::setPyramidPointsArraysTexture ( void ) {
 
     color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
     color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
-    if (pos > number_points*0.5)
-      color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
-    else
-      color_array[pos*4 + 2] = (GLfloat)1.0;
+    color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     color_array[pos*4 + 3] = 1.0;
 
     ++pos;
