@@ -221,7 +221,7 @@ void PyramidPointRendererTexture::rasterizePixels(pixels_struct dest, pixels_str
 	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	if (render_texture > 0) {
+	if (render_texture > src0.buffersCount+src1.buffersCount) {
 	  glActiveTexture(GL_TEXTURE0 + render_texture);
 	  glBindTexture(FBO_TYPE, render_texture);
 	  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
