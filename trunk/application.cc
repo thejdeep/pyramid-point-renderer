@@ -516,6 +516,12 @@ void Application::changeRendererType( int type ) {
   }
 }
 
+void Application::setRenderTexture( GLuint tex ) {
+  render_mode = PYRAMID_POINTS_TEXTURE;
+  createPointRenderer();
+  point_based_render->setRenderTexture(tex);
+}
+
 void Application::createPointRenderer( void ) {
 
   if (render_mode == NONE)
