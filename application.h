@@ -119,6 +119,8 @@ class Application
   void setPrefilter ( double s );
   void setDepthTest ( bool b );
 
+  void setRenderTexture( GLuint tex );
+
   void clearSelectedObjects ( void );
   void setSelectedObject ( int id );
 
