@@ -221,7 +221,7 @@ void PyramidPointRendererTexture::rasterizePixels(pixels_struct dest, pixels_str
 	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	if (render_texture > src0.buffersCount+src1.buffersCount) {
+	if (render_texture > (GLuint)(src0.buffersCount+src1.buffersCount)) {
 	  glActiveTexture(GL_TEXTURE0 + render_texture);
 	  glBindTexture(FBO_TYPE, render_texture);
 	  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -690,6 +690,7 @@ void PyramidPointRendererTexture::createFBO() {
     glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    cout << "texture " << i << " = " << fbo_textures[i] << endl;
   }
 
   //for creating and binding a depth buffer:
