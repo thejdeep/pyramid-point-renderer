@@ -77,9 +77,6 @@ void Primitives::render ( void ) {
 
     glDrawArrays(GL_POINTS, 0, numPatches);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
   }
   else if (renderer_type == POINT_IDS) {
 
@@ -99,6 +96,22 @@ void Primitives::render ( void ) {
 //     glDisableClientState(GL_VERTEX_ARRAY);
 
   }
+  else if (renderer_type == PYRAMID_POINTS_TEXTURE) {
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glVertexPointer(4, GL_FLOAT, 0, NULL); 
+    
+    glEnableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+    glColorPointer(4, GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+    glNormalPointer(GL_FLOAT, 0, NULL); 
+    
+    glDrawArrays(GL_POINTS, 0, number_points);
+  }
   else if (renderer_type == PYRAMID_LINES) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -115,9 +128,6 @@ void Primitives::render ( void ) {
     
     glDrawElements(GL_LINES, number_triangles*2, GL_UNSIGNED_INT, &indices[0]);
 
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
 
   }
   else if (renderer_type == PYRAMID_TRIANGLES) {
@@ -139,9 +149,6 @@ void Primitives::render ( void ) {
     
     glDrawElements(GL_TRIANGLES, number_triangles*3, GL_UNSIGNED_INT, &indices[0]);
 
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
   }
   else if ( (renderer_type == PYRAMID_HYBRID)
 	    || (renderer_type == PYRAMID_HYBRID_TEST)) {
@@ -213,6 +220,11 @@ void Primitives::render ( void ) {
     glDisable(GL_CULL_FACE);
     glShadeModel(GL_FLAT);
   }
+
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_COLOR_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 /**
@@ -247,6 +259,8 @@ void Primitives::setRendererType ( int rtype ) {
     setPyramidPointsArraysColor();
   else if (renderer_type == POINT_IDS)
     setPyramidPointIds();
+  else if (renderer_type == PYRAMID_POINTS_TEXTURE)
+    setPyramidPointsArraysTexture();
   else if (renderer_type == PYRAMID_POINTS_UPSAMPLING)
     setPyramidPointsArraysColor();
   else if (renderer_type == PYRAMID_POINTS_LOD) {
@@ -411,6 +425,69 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glNormalPointer(GL_FLOAT, 0, NULL); 
 }
+
+
+/**
+ * Create arrays and VBO for pyramid point renderer color class.
+ **/
+void Primitives::setPyramidPointsArraysTexture ( void ) {
+
+  GLfloat *vertex_array, *normal_array, *color_array;
+  number_points = surfels[0].size();
+  vertex_array = new GLfloat[number_points * 4];
+  normal_array = new GLfloat[number_points * 3];
+  color_array = new GLfloat[number_points * 4];
+
+  int pos = 0;
+  for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
+
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x());
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y());
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z());
+    vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
+    
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x());
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y());
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z());
+
+    color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+    color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
+    color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
+    color_array[pos*4 + 3] = 1.0;
+
+    ++pos;
+  }
+  
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)vertex_array, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &color_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)color_array, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &normal_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)normal_array, GL_STATIC_DRAW);
+
+  delete(vertex_array);
+  delete(normal_array);
+  delete(color_array);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glVertexPointer(4, GL_FLOAT, 0, NULL); 
+
+  glEnableClientState(GL_COLOR_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+  glColorPointer(4, GL_FLOAT, 0, NULL); 
+
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glNormalPointer(GL_FLOAT, 0, NULL);
+
+}
+
 
 /**
  * Create arrays and VBO for projecting buffer with vertices ids only.

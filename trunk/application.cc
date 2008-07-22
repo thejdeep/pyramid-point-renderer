@@ -236,6 +236,8 @@ void Application::draw(void) {
     // camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
     // point_based_render->setEye(eye);
  
+  if (render_mode == PYRAMID_POINTS_TEXTURE)
+
     point_based_render->setEye( camera->positionVector() );
 
     // Projects to image plane surfels of all primitives for this object
@@ -528,7 +530,9 @@ void Application::createPointRenderer( void ) {
       point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
     else
       point_based_render = new PyramidPointRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);
-  }  
+  }
+  else if (render_mode == PYRAMID_POINTS_TEXTURE)
+    point_based_render = new PyramidPointRendererTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == PYRAMID_POINTS_ER)
     point_based_render = new PyramidPointRendererER(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == PYRAMID_LINES) 
@@ -541,6 +545,8 @@ void Application::createPointRenderer( void ) {
     point_based_render = new TriangleRenderer();
   else if (render_mode == POINT_IDS)
     point_based_render = new PointIds();
+
+
 
   assert (point_based_render);
   
@@ -670,17 +676,13 @@ int Application::readNormalsFile ( const char * filename ) {
   // connect new object to new primitive
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
-  ;;primitives.back().setRendererType( PYRAMID_POINTS );
-  //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
-  //primitives.back().setRendererType( JFA_SPLATTING );
-  //  primitives.back().setRendererType( PYRAMID_POINTS_ER );
+  ;;primitives.back().setRendererType( render_mode );
 
   num_objects = objects.size();
 
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
   
-  render_mode = PYRAMID_POINTS_ER;
 
   //  if (!point_based_render)
   createPointRenderer( );

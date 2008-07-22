@@ -263,6 +263,11 @@
     </item>
     <item>
      <property name="text" >
+      <string>Pyramid Points Texture</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
       <string>None</string>
      </property>
     </item>

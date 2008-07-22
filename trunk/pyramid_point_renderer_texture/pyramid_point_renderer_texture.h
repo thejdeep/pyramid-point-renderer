@@ -5,8 +5,8 @@
 **   history:	created  02-Jul-07
 */
 
-#ifndef __PYRAMID_POINT_RENDERER_COLOR_H__
-#define __PYRAMID_POINT_RENDERER_COLOR_H__
+#ifndef __PYRAMID_POINT_RENDERER_TEXTURE_H__
+#define __PYRAMID_POINT_RENDERER_TEXTURE_H__
 
 #include <cmath>
 #include <cassert>
@@ -15,14 +15,12 @@
 
 #define FBO_BUFFERS_COUNT_6 6
 
-class PyramidPointRendererColor : public PointBasedRenderer
+class PyramidPointRendererTexture : public PointBasedRenderer
 {
  private:
 
   void createFBO( void );
   void createShaders ( void );
-  int showCallbackFunc( void );
-  void showPixels(int bufferIndex);
   void rasterizePhongShading(int bufferIndex);
   int phongShadingCallbackFunc( void );
   void rasterizeSynthesisPyramid();
@@ -41,26 +39,17 @@ class PyramidPointRendererColor : public PointBasedRenderer
   double computeHalfPixelSize( void );
 
  public:
-  PyramidPointRendererColor();
-  PyramidPointRendererColor(int w, int h);
-  ~PyramidPointRendererColor();
+  PyramidPointRendererTexture();
+  PyramidPointRendererTexture(int w, int h);
+  ~PyramidPointRendererTexture();
 
   void draw();
-  void drawNormalsToBuffer ( GLfloat* data, int w, int h );
   
   void clearBuffers (void);
   void projectSamples ( Primitives* prim );
   void interpolate ( void );
 
-  void useLOD( int l ) {
-    use_lod = l;
-    if (l == 2)
-      shader_projection = shader_projection_upsampling;
-    else if (l == 1)
-      shader_projection = shader_projection_lod;
-    else
-      shader_projection = shader_projection_no_lod;
-  }
+  void setRenderTexture(GLuint tex) {render_texture = tex;}
 
  private:
   /// Frame buffer object width.
@@ -76,12 +65,6 @@ class PyramidPointRendererColor : public PointBasedRenderer
 
   /// Pointer to the projection shader being used (no_lod or lod)
   glslKernel *shader_projection;
-  /// Projection shader without LOD rendering
-  glslKernel *shader_projection_no_lod;
-  /// Projection shader with upsampling rendering
-  glslKernel *shader_projection_upsampling;
-  /// Projection shader with LOD rendering
-  glslKernel *shader_projection_lod;
   /// Pyramid copy phase shader.
   glslKernel *shader_copy;
   /// Pyramid analysis phase shader.
@@ -90,8 +73,6 @@ class PyramidPointRendererColor : public PointBasedRenderer
   glslKernel *shader_synthesis;
   /// Phong shading shader.
   glslKernel *shader_phong;
-  /// Pixel shader.
-  glslKernel *shader_show;
 
   /// The application-created framebuffer object.
   GLuint fbo;
@@ -109,7 +90,7 @@ class PyramidPointRendererColor : public PointBasedRenderer
    * use getTextureOfBuffer to find the texture name of a buffer
    **/
   GLuint fbo_textures[FBO_BUFFERS_COUNT_6];
-  
+
   /// Number of pyramid levels.
   int levels_count;
 
@@ -125,13 +106,11 @@ class PyramidPointRendererColor : public PointBasedRenderer
   /// Num of primitives to be passed to the geom shader when using LOD
   int num_primitives;
 
-  /// Flag for rendering normal buffer
-  bool normal_buffer;
-
   /// Flag for rendering point ids buffer
   bool point_ids_buffer;
 
-
+  /// Render texture
+  GLuint render_texture;
 };
 
 #endif

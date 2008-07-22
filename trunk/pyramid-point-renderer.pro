@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = pyramid-point-renderer
 DEPENDPATH += .
-INCLUDEPATH += $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color \
+INCLUDEPATH += $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color ./pyramid_point_renderer_texture \
   ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees ./triangle_renderer \
   ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting ./point_ids
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
@@ -31,6 +31,7 @@ HEADERS += application.h \
            point_ids/point_ids.h \
            pyramid_point_renderer/pyramid_point_renderer.h \
            pyramid_point_renderer_color/pyramid_point_renderer_color.h \
+           pyramid_point_renderer_texture/pyramid_point_renderer_texture.h \
            pyramid_templates/pyramid_point_renderer_er.h \
            pyramid_lod/pyramid_point_renderer_lod.h \
            pyramid_trees/pyramid_point_renderer_trees.h \
@@ -58,6 +59,7 @@ SOURCES += application.cc \
            point_ids/point_ids.cc \
            pyramid_point_renderer/pyramid_point_renderer.cc \
            pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
+           pyramid_point_renderer_texture/pyramid_point_renderer_texture.cc \
            pyramid_templates/pyramid_point_renderer_er.cc \
            pyramid_lod/pyramid_point_renderer_lod.cc \
            pyramid_trees/pyramid_point_renderer_trees.cc \

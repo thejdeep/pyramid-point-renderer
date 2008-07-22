@@ -31,6 +31,7 @@
 #include "point_ids.h"
 #include "pyramid_point_renderer.h"
 #include "pyramid_point_renderer_color.h"
+#include "pyramid_point_renderer_texture.h"
 #include "pyramid_point_renderer_lod.h"
 #include "pyramid_point_renderer_trees.h"
 #include "pyramid_point_renderer_er.h"

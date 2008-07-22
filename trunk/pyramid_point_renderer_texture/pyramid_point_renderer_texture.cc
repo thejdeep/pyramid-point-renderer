@@ -1,46 +1,48 @@
 /*
-** pyramid_point_renderer.cc Pyramid Point Based Rendering.
+** pyramid_point_renderer_texture.cc Pyramid Point Based Rendering.
 **
 **
-**   history:	created  02-Jul-07
+**   history:	created  21-07-08
 */
 
-#include "pyramid_point_renderer_color.h"
+#include "pyramid_point_renderer_texture.h"
 
 /**
  * Default constructor.
  **/
-PyramidPointRendererColor::PyramidPointRendererColor() : PointBasedRenderer(),
-						     fbo_width(1800),
-						     fbo_height(1200),
-						     fbo_buffers_count(6),
-						     canvas_border_width(32),
-						     canvas_border_height(32),
-						     render_state(RS_BUFFER0) {
+PyramidPointRendererTexture::PyramidPointRendererTexture() : PointBasedRenderer(),
+							     fbo_width(1800),
+							     fbo_height(1200),
+							     fbo_buffers_count(6),
+							     canvas_border_width(32),
+							     canvas_border_height(32),
+							     render_state(RS_BUFFER0),
+							     render_texture(0) {
+
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
-PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PointBasedRenderer(w, h),
-								 fbo_width(1800),
-								 fbo_height(1200),
-								 fbo_buffers_count(6),
-								 canvas_border_width(w/32),
-								 canvas_border_height(h/32),
-								 render_state(RS_BUFFER0) {
+PyramidPointRendererTexture::PyramidPointRendererTexture(int w, int h) : PointBasedRenderer(w, h),
+									 fbo_width(1800),
+									 fbo_height(1200),
+									 fbo_buffers_count(6),
+									 canvas_border_width(w/32),
+									 canvas_border_height(h/32),
+									 render_state(RS_BUFFER0),
+									 render_texture(0) {
   createFBO();
   createShaders();
   levels_count = MAX((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
 }
 
-PyramidPointRendererColor::~PyramidPointRendererColor() {
+PyramidPointRendererTexture::~PyramidPointRendererTexture() {
   delete shader_projection;
   delete shader_analysis;
   delete shader_copy;
   delete shader_synthesis;
   delete shader_phong;
-  delete shader_show;
 
   glDeleteTextures(FBO_BUFFERS_COUNT_6, fbo_textures);
   for (int i = 0; i < FBO_BUFFERS_COUNT_6; ++i) {
@@ -49,12 +51,17 @@ PyramidPointRendererColor::~PyramidPointRendererColor() {
     glDisable(FBO_TYPE);
   }
 
+  glDeleteTextures(1, &render_texture);
+  glActiveTexture(GL_TEXTURE0 + 6);
+  glBindTexture(FBO_TYPE, 0);
+  glDisable(FBO_TYPE);
+
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
 }
 
 
-GLuint PyramidPointRendererColor::getTextureOfBuffer(GLuint buffer)
+GLuint PyramidPointRendererTexture::getTextureOfBuffer(GLuint buffer)
      /* returns the OpenGL texture name of a color attachment buffer (GL_COLOR_ATTACHMENTx_EXT) 
       * of the global framebuffer object or 0 if the color attachment buffer is not bound
       */
@@ -79,7 +86,7 @@ GLuint PyramidPointRendererColor::getTextureOfBuffer(GLuint buffer)
     }
 }
 
-void PyramidPointRendererColor::rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1,
+void PyramidPointRendererTexture::rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1,
 		     int phase)
      /* binds buffers and rasterizes quad; calls callbackfunc to set the fragment program */
 {
@@ -214,10 +221,10 @@ void PyramidPointRendererColor::rasterizePixels(pixels_struct dest, pixels_struc
 	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
+	glActiveTexture(GL_TEXTURE0 + render_texture);
+	glBindTexture(FBO_TYPE, render_texture);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	ret = phongShadingCallbackFunc();
-	break;
-      case SHOW:
-	ret = showCallbackFunc();
 	break;
       }
       if (FALSE != ret)
@@ -289,7 +296,7 @@ void PyramidPointRendererColor::rasterizePixels(pixels_struct dest, pixels_struc
   }
 }
 
-pixels_struct PyramidPointRendererColor::generatePixels(int level, 
+pixels_struct PyramidPointRendererTexture::generatePixels(int level, 
 			     GLuint curr_fbo, int buffersCount, GLuint buffer0, GLuint buffer1, GLuint buffer2)
      /* returns an pixels_struct specifying the pixels of the specified level in the
       * specified fbo (0 or g.fbo) and one or two of its buffers (GL_BACK or g.fbo_buffers[i])
@@ -355,33 +362,22 @@ pixels_struct PyramidPointRendererColor::generatePixels(int level,
 }
 
 
-int PyramidPointRendererColor::projectionCallbackFunc( void )
+int PyramidPointRendererTexture::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
 
-  if (use_lod == 1) { //lod
-    shader_projection->set_uniform("vertex_buffer", 6);
-    shader_projection->set_uniform("normal_buffer", 7);
-    shader_projection->set_uniform("color_per_lod", (GLint)color_per_lod);
-  }
-  else if (use_lod == 2) { //upsampling
-    GLfloat max_radius = 2.0/(GLfloat)canvas_width;
-    shader_projection->set_uniform("max_radius", max_radius);
-  }
 
   return TRUE;
 }
 
 /// Project point sized samples to screen space
-void PyramidPointRendererColor::projectSurfels( Primitives* prim )
+void PyramidPointRendererTexture::projectSurfels( Primitives* prim )
 {
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
 
-  if (use_lod)
-    num_primitives = prim->numPrimitivesLOD();
 
   nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
 
@@ -399,7 +395,7 @@ void PyramidPointRendererColor::projectSurfels( Primitives* prim )
 }
 
 
-double PyramidPointRendererColor::computeHalfPixelSize( void ) {
+double PyramidPointRendererTexture::computeHalfPixelSize( void ) {
 
   double d = pow(2.0, (double)cur_level) / (double)(canvas_width);
   d *= 0.5;
@@ -407,7 +403,7 @@ double PyramidPointRendererColor::computeHalfPixelSize( void ) {
   return d;
 }
 
-int PyramidPointRendererColor::analysisCallbackFunc( void )
+int PyramidPointRendererTexture::analysisCallbackFunc( void )
 {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
@@ -425,7 +421,7 @@ int PyramidPointRendererColor::analysisCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRendererColor::rasterizeAnalysisPyramid( void )
+void PyramidPointRendererTexture::rasterizeAnalysisPyramid( void )
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
   int level;
@@ -451,7 +447,7 @@ void PyramidPointRendererColor::rasterizeAnalysisPyramid( void )
     }
 }
 
-int PyramidPointRendererColor::copyCallbackFunc( void )
+int PyramidPointRendererTexture::copyCallbackFunc( void )
 {
   shader_copy->use();
   shader_copy->set_uniform("textureA", 0);
@@ -461,7 +457,7 @@ int PyramidPointRendererColor::copyCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRendererColor::copyAnalysisPyramid()
+void PyramidPointRendererTexture::copyAnalysisPyramid()
      /* copies odd levels from color attachment pair 1-3 to buffer pair 0-2 and 
       * even levels from 0-2 to 1-3.
       */
@@ -488,7 +484,7 @@ void PyramidPointRendererColor::copyAnalysisPyramid()
     }
 }
 
-int PyramidPointRendererColor::synthesisCallbackFunc( void )
+int PyramidPointRendererTexture::synthesisCallbackFunc( void )
 {
   shader_synthesis->use();
   shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
@@ -508,8 +504,8 @@ int PyramidPointRendererColor::synthesisCallbackFunc( void )
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRendererColor::rasterizeSynthesisPyramid()
-     /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
+void PyramidPointRendererTexture::rasterizeSynthesisPyramid()
+/* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
   int level;
   pixels_struct source0Pixels; /* same level as destination */
@@ -538,23 +534,17 @@ void PyramidPointRendererColor::rasterizeSynthesisPyramid()
 }
 
 /* rasterize level 0 of pyramid with per pixel shading */
-
-int PyramidPointRendererColor::phongShadingCallbackFunc( void )
+int PyramidPointRendererTexture::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
   shader_phong->set_uniform("textureC", 1);
-  shader_phong->set_uniform("normalBuffer", normal_buffer);
-
-//   if (use_lod)
-//     shader_phong->set_uniform("color_per_lod", (GLint)color_per_lod);
-//   else
-//     shader_phong->set_uniform("color_per_lod", (GLint)0);
+  shader_phong->set_uniform("renderTexture", (GLint)render_texture);
 
   return FALSE; /* not done, rasterize quad */
 }
 
-void PyramidPointRendererColor::rasterizePhongShading(int bufferIndex)
+void PyramidPointRendererTexture::rasterizePhongShading(int bufferIndex)
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
   int level = 0;
@@ -568,7 +558,6 @@ void PyramidPointRendererColor::rasterizePhongShading(int bufferIndex)
   shader_analysis->use(0);
   shader_copy->use(0);
   shader_synthesis->use(0);
-  shader_show->use(0);
 
   sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[bufferIndex], fbo_buffers[bufferIndex + 4], 0);  
   destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0, 0);
@@ -577,45 +566,10 @@ void PyramidPointRendererColor::rasterizePhongShading(int bufferIndex)
   shader_phong->use(0);
 }
 
-/* rasterize level 0 of pyramid with per pixel shading */
-
-int PyramidPointRendererColor::showCallbackFunc( void )
-{
-  shader_show->use();
-  shader_show->set_uniform("tex", 0);
-
-  return FALSE; /* not done, rasterize quad */
-}
-
-/* show buffer */
-void PyramidPointRendererColor::showPixels(int bufferIndex)
-{
-  int level = 0;
-  pixels_struct nullPixels;
-  pixels_struct sourcePixels;
-  pixels_struct destinationPixels;
-
-  nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
-
-  shader_projection->use(0);
-  shader_analysis->use(0);
-  shader_copy->use(0);
-  shader_synthesis->use(0);
-  shader_phong->use(0);
-
-  for (level = 0; level < levels_count; level++)
-    {
-      sourcePixels = generatePixels(level, fbo, 1, fbo_buffers[bufferIndex], 0, 0);
-      destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0, 0);
-      rasterizePixels(destinationPixels, sourcePixels, nullPixels, SHOW);
-      shader_show->use(0);
-    }
-}
-
 /**
  * Clear all framebuffers and screen buffer.
  **/
-void PyramidPointRendererColor::clearBuffers() {
+void PyramidPointRendererTexture::clearBuffers() {
   int i;
 
   glEnable(FBO_TYPE);
@@ -648,7 +602,7 @@ void PyramidPointRendererColor::clearBuffers() {
 /**
  * Reconstructs the surface for visualization.
  **/
-void PyramidPointRendererColor::projectSamples(Primitives* prim) {
+void PyramidPointRendererTexture::projectSamples(Primitives* prim) {
   // Project points to framebuffer with depth test on.
 
   projectSurfels( prim );
@@ -661,7 +615,7 @@ void PyramidPointRendererColor::projectSamples(Primitives* prim) {
  * Interpolate projected samples using pyramid interpolation
  * algorithm.
  **/
-void PyramidPointRendererColor::interpolate() {
+void PyramidPointRendererTexture::interpolate() {
   framebuffer_state = FBS_UNDEFINED;
 
   glDisable(GL_DEPTH_TEST);
@@ -676,50 +630,15 @@ void PyramidPointRendererColor::interpolate() {
   rasterizeSynthesisPyramid();
 }
 
-/**
- * Render final image with normal map to a given buffer instead of screen.
- * @param data Given buffer to write data to.
- * @param w Width of buffer.
- * @param h Height of buffer.
- **/
-void PyramidPointRendererColor::drawNormalsToBuffer ( GLfloat* data, int w, int h ) {
-  int level = 0;
-  pixels_struct nullPixels;
-  pixels_struct sourcePixels;
-  pixels_struct destinationPixels;
-
-  nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
-
-  shader_projection->use(0);
-  shader_analysis->use(0);
-  shader_copy->use(0);
-  shader_synthesis->use(0);
-  shader_show->use(0);
-  normal_buffer = 1;
-
-  sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[0], fbo_buffers[4], 0);
-  destinationPixels = generatePixels(level, fbo, 1, fbo_buffers[1], 0, 0);
-  rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
-
-  shader_phong->use(0);
-
-  glReadBuffer(fbo_buffers[1]);
-  glReadPixels(0, 0, w, h, GL_RGBA, GL_FLOAT, &data[0]);
-
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-  glDrawBuffer(GL_BACK);
-}
 
 /**
  * Renders reconstructed model on screen with
  * per pixel shading.
  **/
-void PyramidPointRendererColor::draw( void ) {
+void PyramidPointRendererTexture::draw( void ) {
 
   // Deffered shading of the final image containing normal map
-  normal_buffer = 0;
   rasterizePhongShading(0);
-  //showPixels(1);
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glDrawBuffer(GL_BACK);
@@ -733,7 +652,7 @@ void PyramidPointRendererColor::draw( void ) {
 /**
  * Initialize OpenGL state variables.
  **/
-void PyramidPointRendererColor::createFBO() {
+void PyramidPointRendererTexture::createFBO() {
   int i;
   GLenum framebuffer_status;
   GLenum attachments[16] = {
@@ -770,6 +689,25 @@ void PyramidPointRendererColor::createFBO() {
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
   }
+
+//   glGenTextures(1, &render_texture);
+//   GLfloat* tex_data = new GLfloat[512*512*4];
+//   for (int i = 0; i < 512*512; ++i) {
+//     tex_data[i*4 + 0] = 0.1;
+//     tex_data[i*4 + 1] = 1.0;
+//     tex_data[i*4 + 2] = 0.2;
+//     tex_data[i*4 + 3] = 1.0;
+//   }
+//   glBindTexture(FBO_TYPE, render_texture);
+//   glTexImage2D(FBO_TYPE, 0, FBO_FORMAT,
+// 	       512, 512, 0, GL_RGBA, GL_FLOAT, tex_data);
+//   glTexParameteri(FBO_TYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//   glTexParameteri(FBO_TYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//   glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_S, GL_CLAMP);
+//   glTexParameteri(FBO_TYPE, GL_TEXTURE_WRAP_T, GL_CLAMP);
+//   delete tex_data;
+
+//   cout << "render tex : " << render_texture << endl;
 
   //for creating and binding a depth buffer:
   glGenTextures(1, &fbo_depth);
@@ -829,59 +767,34 @@ void PyramidPointRendererColor::createFBO() {
 /**
  * Installs the shaders using the GLSL Kernel class.
  **/
-void PyramidPointRendererColor::createShaders ( void ) {
+void PyramidPointRendererTexture::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
+  bool shader_inst_debug = 1;
 
-  shader_projection_no_lod = new glslKernel();
-  shader_projection_no_lod->vertex_source("pyramid_point_renderer_color/shader_point_projection_color.vert");
-  shader_projection_no_lod->fragment_source("pyramid_point_renderer_color/shader_point_projection_color.frag");
-  shader_projection_no_lod->install( shader_inst_debug );
-
-  shader_projection_upsampling = new glslKernel();
-  shader_projection_upsampling->vertex_source("pyramid_point_renderer_color/shader_point_projection_upsampling.vert");
-  shader_projection_upsampling->geometry_source("pyramid_point_renderer_color/shader_point_projection_upsampling.geom");
-  shader_projection_upsampling->set_geom_max_output_vertices( 9 );
-  shader_projection_upsampling->set_geom_input_type(GL_POINTS);
-  shader_projection_upsampling->set_geom_output_type(GL_POINTS);
-  shader_projection_upsampling->fragment_source("pyramid_point_renderer_color/shader_point_projection_upsampling.frag");
-  shader_projection_upsampling->install( shader_inst_debug );
-
-  shader_projection_lod = new glslKernel();
-  shader_projection_lod->vertex_source("pyramid_point_renderer_color/shader_point_projection_lod.vert");
-  shader_projection_lod->geometry_source("pyramid_point_renderer_color/shader_point_projection_lod.geom");
-  shader_projection_lod->set_geom_max_output_vertices( (int)pow((double)MAX_LEAF_SURFELS, (double)LOD_LEVELS-1) );
-  shader_projection_lod->set_geom_input_type(GL_POINTS);
-  shader_projection_lod->set_geom_output_type(GL_POINTS);
-  shader_projection_lod->fragment_source("pyramid_point_renderer_color/shader_point_projection_color.frag");
-  shader_projection_lod->install( shader_inst_debug );  
-
-  shader_projection = shader_projection_no_lod;
+  shader_projection = new glslKernel();
+  shader_projection->vertex_source("pyramid_point_renderer_texture/shader_point_projection_texture.vert");
+  shader_projection->fragment_source("pyramid_point_renderer_texture/shader_point_projection_texture.frag");
+  shader_projection->install( shader_inst_debug );
 
   shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("pyramid_point_renderer_color/shader_analysis_color.vert");
-  shader_analysis->fragment_source("pyramid_point_renderer_color/shader_analysis_color.frag");
+  shader_analysis->vertex_source("pyramid_point_renderer_texture/shader_analysis_texture.vert");
+  shader_analysis->fragment_source("pyramid_point_renderer_texture/shader_analysis_texture.frag");
   shader_analysis->install( shader_inst_debug );
 
   shader_copy = new glslKernel();
-  shader_copy->vertex_source("pyramid_point_renderer_color/shader_copy_color.vert");
-  shader_copy->fragment_source("pyramid_point_renderer_color/shader_copy_color.frag");
+  shader_copy->vertex_source("pyramid_point_renderer_texture/shader_copy_texture.vert");
+  shader_copy->fragment_source("pyramid_point_renderer_texture/shader_copy_texture.frag");
   shader_copy->install( shader_inst_debug );
 
   shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("pyramid_point_renderer_color/shader_synthesis_color.vert");
-  shader_synthesis->fragment_source("pyramid_point_renderer_color/shader_synthesis_color.frag");
+  shader_synthesis->vertex_source("pyramid_point_renderer_texture/shader_synthesis_texture.vert");
+  shader_synthesis->fragment_source("pyramid_point_renderer_texture/shader_synthesis_texture.frag");
   shader_synthesis->install( shader_inst_debug );
 
   shader_phong = new glslKernel();
-  shader_phong->vertex_source("pyramid_point_renderer_color/shader_phong_color.vert");
-  shader_phong->fragment_source("pyramid_point_renderer_color/shader_phong_color.frag");
+  shader_phong->vertex_source("pyramid_point_renderer_texture/shader_phong_texture.vert");
+  shader_phong->fragment_source("pyramid_point_renderer_texture/shader_phong_texture.frag");
   shader_phong->install( shader_inst_debug );
-
-  shader_show = new glslKernel();
-  shader_show->vertex_source("pyramid_point_renderer_color/shader_show.vert");
-  shader_show->fragment_source("pyramid_point_renderer_color/shader_show.frag");
-  shader_show->install( shader_inst_debug );
 }
 
 

@@ -23,7 +23,7 @@ int main(int argc, char * argv []) {
 
   form->widget->makeCurrent();
 
-  application = new Application();
+  application = new Application(PYRAMID_POINTS);
 
   form->application = application;
   form->widget->application = application;
