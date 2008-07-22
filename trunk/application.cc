@@ -504,6 +504,7 @@ void Application::changePrimitivesRendererType( point_render_type_enum type ) {
   changeMaterial();
 }
 
+
 void Application::changeRendererType( int type ) {
 
   if (selected_objs.size() == 0)
@@ -516,11 +517,10 @@ void Application::changeRendererType( int type ) {
   }
 
 //   if (type == PYRAMID_POINTS_TEXTURE) {
-//     GLuint tex;
 //     glGenTextures(1, &tex);
 //     GLfloat* tex_data = new GLfloat[512*512*4];
 //     for (int i = 0; i < 512*512; ++i) {
-//       tex_data[i*4 + 0] = 0.1;
+//       tex_data[i*4 + 0] = 0.8;
 //       tex_data[i*4 + 1] = 0.2;
 //       tex_data[i*4 + 2] = 0.3;
 //       tex_data[i*4 + 3] = 1.0;
@@ -534,8 +534,8 @@ void Application::changeRendererType( int type ) {
 //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 //     delete tex_data;
 //     point_based_render->setRenderTexture(tex);
+//     cout << "tex : " << tex << endl;
 //   }
-
 }
 
 void Application::setRenderTexture( GLuint tex ) {

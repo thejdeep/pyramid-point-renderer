@@ -199,6 +199,8 @@ class Application
 
   /*************************************/
 
+  GLuint tex;
+
 };
 
 #endif
