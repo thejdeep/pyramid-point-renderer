@@ -221,7 +221,7 @@ void PyramidPointRendererTexture::rasterizePixels(pixels_struct dest, pixels_str
 	ret = synthesisCallbackFunc();
 	break;
       case PHONG:
-	glActiveTexture(GL_TEXTURE0 + render_texture);
+	glActiveTexture(GL_TEXTURE0 + 9);
 	glBindTexture(FBO_TYPE, render_texture);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	ret = phongShadingCallbackFunc();
@@ -539,7 +539,7 @@ int PyramidPointRendererTexture::phongShadingCallbackFunc( void )
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
   shader_phong->set_uniform("textureC", 1);
-  shader_phong->set_uniform("renderTexture", (GLint)render_texture);
+  shader_phong->set_uniform("renderTexture", 9);//(GLint)render_texture);
 
   return FALSE; /* not done, rasterize quad */
 }

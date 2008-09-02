@@ -401,7 +401,6 @@ int PyramidPointRendererER::projectionCallbackFunc( void )
   shader_projection->set_uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
 
   shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
-//
 
   if (use_lod == 1) { //lod
     shader_projection->set_uniform("vertex_buffer", 6);
@@ -572,16 +571,15 @@ void PyramidPointRendererER::rasterizeSynthesisPyramid( void )
   pixels_struct destinationPixels;
 
   //  for (level = levels_count - 2; level >= 0; level--)
-  //  for (level = 0; level <= levels_count - 1; level++)
-  //  for (int i = 0; i < 5; ++i)
-    for (level = 0; level <= levels_count - 1; level++)
+  //  for (level = 0; level <= 10; level++)
+  for (level = 0; level < levels_count; level++)
       {
 	cur_level = level;
 	
-	source0Pixels = generatePixels(0, fbo, 3,
+	source0Pixels = generatePixels(0, fbo, 2,
 				       fbo_buffers[0 + ((level + 1) % 2)],
-				       fbo_buffers[2 + ((level + 1) % 2)],
-				       fbo_buffers[4 + ((level + 1) % 2)] );
+				       fbo_buffers[2 + ((level + 1) % 2)], 0);
+	//				       fbo_buffers[4 + ((level + 1) % 2)] );
 	source1Pixels = generatePixels(level, fbo, 3,
 				       fbo_buffers[0 + ((level + 1) % 2)],
 				       fbo_buffers[2 + ((level + 1) % 2)],
