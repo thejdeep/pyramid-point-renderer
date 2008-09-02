@@ -248,8 +248,7 @@ void main (void) {
   float zmax = -10000.0;
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
-    // radius > 0
-/*     if (pixelC[i].y > 0.0) { */
+    // Valid pixel : radius > 0
     if (pixelB[i].y > 0.0) {
 
       //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
@@ -257,27 +256,27 @@ void main (void) {
       dist_test = 1.0;
 
       // radius small enough to fit in lower level entirely, no need to propagate further
-      // the sign of the unprojected radius determines if it is the correct level (positive) or not (negative)
-      if (pixelB[i].x > 0.0)
+      // the sign of the unprojected radius determines if it has reached the correct level (positive) or not (negative)
+      if (pixelB[i].x >= 0.0)
  	dist_test = -1.0;
       else {
 	float mask = float(mask_size*2 + 1);
 	int pixel_level;
 
 	// compute level
-	float log_level = log2( ( pixelB[i].y * reconstruction_filter_size * 2.0 * canvas_width ) / mask );
-	
-	// if negative log2 -> level = 0
+	float log_level = log2( ( 2.0 * pixelB[i].y * reconstruction_filter_size * canvas_width ) / mask );
+
+	// if negative log2 : level = 0
 	if (log_level <= 0.0)
 	  pixel_level = 1;
 	else
-	  pixel_level = int(ceil(log_level));
+	  pixel_level = int( ceil(log_level) );
 
-	// found correct level, turn unprojected radius positive to mark it
+	// found correct level, turn unprojected radius positive to mark it, or leave negative to continue propagation
 	if ((level == pixel_level))
-	  pixelB[i].x = max (pixelB[i].x, -pixelB[i].x);
+	  pixelB[i].x = abs(pixelB[i].x);
  	else
-	  pixelB[i].x = min (pixelB[i].x, -pixelB[i].x);
+	  pixelB[i].x = abs(pixelB[i].x) * -1.0;
       }
 
       if  (dist_test != -1.0)
@@ -286,11 +285,11 @@ void main (void) {
 	  if (pixelA[i].w <= zmin) {
 	    zmin = pixelA[i].w;
 	    zmax = pixelB[i].x;
-	    obj_id = pixelC[i].w; //only if using color buffer
+	    obj_id = pixelC[i].w; //only necessary if using color buffer
 	  }
 	}
       else {
-	// if the ellipse does not reach the center ignore it in the averaging
+	// if ellipse not in correct level ignore it during average
 	pixelB[i].y = -1.0;
       }
     }
@@ -315,8 +314,7 @@ void main (void) {
 	      bufferA.xyz += pixelA[i].xyz * w;
 
 	      // radius computation
-	      //vec2 dist = (bufferB.zw - pixelB[i].zw)* fbo_size * oo_canvas_size;
-	      bufferB.x += max(bufferB.x, pixelB[i].x);
+	      bufferB.x = max(abs(bufferB.x), abs(pixelB[i].x));
 	      bufferB.y = max(bufferB.y, pixelB[i].y);
 
 	      // average depth
@@ -324,8 +322,6 @@ void main (void) {
 
 	      // average tex coords
 	      bufferB.zw += pixelB[i].zw * w;
-	      	     
-	      //	      bufferB.y += pixelB[i].y * w;
 	      
 	      valid_pixels += w;
 	    }
@@ -341,6 +337,12 @@ void main (void) {
       bufferB.zw /= valid_pixels;
       //bufferC.x /= valid_pixels;
       bufferC.w = obj_id;
+
+      float log_level = log2( ( 2.0 * bufferB.y * reconstruction_filter_size * canvas_width ) / float(mask_size*2 + 1) );
+      if (level == int( ceil(log_level) ))
+	bufferB.x = abs(bufferB.x);
+      else
+	bufferB.x = abs(bufferB.x) * -1.0;
     }
 
   // first buffer = (n.x, n.y, n.z, radius)

@@ -234,9 +234,9 @@ void Application::draw(void) {
 
     // Compute the rotated eye (opposite direction) of the camera + object center position
     // camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
-    // point_based_render->setEye(eye);
+    //point_based_render->setEye(eye);
  
-  if (render_mode == PYRAMID_POINTS_TEXTURE)
+    //if (render_mode == PYRAMID_POINTS_TEXTURE)
 
     point_based_render->setEye( camera->positionVector() );
 
@@ -516,26 +516,30 @@ void Application::changeRendererType( int type ) {
     createPointRenderer( );
   }
 
-//   if (type == PYRAMID_POINTS_TEXTURE) {
-//     glGenTextures(1, &tex);
-//     GLfloat* tex_data = new GLfloat[512*512*4];
-//     for (int i = 0; i < 512*512; ++i) {
-//       tex_data[i*4 + 0] = 0.8;
-//       tex_data[i*4 + 1] = 0.2;
-//       tex_data[i*4 + 2] = 0.3;
-//       tex_data[i*4 + 3] = 1.0;
-//     }
-//     glBindTexture(GL_TEXTURE_2D, tex);
-//     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-// 		 512, 512, 0, GL_RGBA, GL_FLOAT, tex_data);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-//     delete tex_data;
-//     point_based_render->setRenderTexture(tex);
-//     cout << "tex : " << tex << endl;
-//   }
+  if (type == PYRAMID_POINTS_TEXTURE) {
+    glGenTextures(1, &tex);
+    int tw = 200, th = 345;
+    GLfloat* tex_data = new GLfloat[tw*th*4];
+    for (int i = 0; i < tw*th; ++i) {
+//       tex_data[i*4 + 0] = 0.3*((float)i/(float)(tw*th));
+//       tex_data[i*4 + 1] = 0.3*((float)i/(float)(tw*th));
+//       tex_data[i*4 + 2] = 0.3*((float)i/(float)(tw*th));
+      tex_data[i*4 + 0] = rand()/(float)RAND_MAX;
+      tex_data[i*4 + 1] = rand()/(float)RAND_MAX;
+      tex_data[i*4 + 2] = rand()/(float)RAND_MAX;
+      tex_data[i*4 + 3] = 1.0;
+    }
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+		 tw, th, 0, GL_RGBA, GL_FLOAT, tex_data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    delete tex_data;
+    point_based_render->setRenderTexture(tex);
+    cout << "tex : " << tex << endl;
+  }
 }
 
 void Application::setRenderTexture( GLuint tex ) {
@@ -548,7 +552,9 @@ void Application::createPointRenderer( void ) {
   if (render_mode == NONE)
     return;
 
-  delete point_based_render;
+  /// Removed since it resulted in Seg Fault sometimes (strange bug) -- RM 01-09-08
+//   if (point_based_render)
+//     delete point_based_render;
 
   if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
       (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
@@ -572,8 +578,6 @@ void Application::createPointRenderer( void ) {
     point_based_render = new TriangleRenderer();
   else if (render_mode == POINT_IDS)
     point_based_render = new PointIds();
-
-
 
   assert (point_based_render);
   

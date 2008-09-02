@@ -118,7 +118,7 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
       buffer0 = vec4(normal * weight, weight);
       buffer1 = vec4(ellipseZ * weight, 0.0, 0.0, color);
     }
-    //else
+    else
       {
 	if ( (!depth_test) ||
 	     ((abs(ellipseZ - pixelZ) <= 1.0*unprojected_radius) && (color == buffer1.w)) ) {
@@ -170,9 +170,6 @@ void main (void) {
 				
 		// displacement from current pixel and ellipse center in pixel dimension
 		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
-
-/* 		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse2.y,  */
-/* 			     ellipse1.x, ellipse2.x, ellipse1.w, local_pixel_displacement); */
 
 		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse1.y, 
 			     ellipse0.w, ellipse1.x, ellipse2.w, local_pixel_displacement);
