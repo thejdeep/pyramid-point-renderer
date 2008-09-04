@@ -121,7 +121,7 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
     else
       {
 	if ( (!depth_test) ||
-	     ((abs(ellipseZ - pixelZ) <= 1.0*unprojected_radius) && (color == buffer1.w)) ) {
+	     ((abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius) && (color == buffer1.w)) ) {
 	  {
 	    buffer0 += vec4(normal * weight, weight);
 	    buffer1 += vec4(ellipseZ * weight, 0.0, 0.0, 0.0);
@@ -158,7 +158,6 @@ void main (void) {
 	{
 	  local_displacement = vec2(i, j) * oo_fbo_size.st;
 	  ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-	  //	  ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
 	  // if pixel is set as in current level and radius > 0
 	  if ((ellipse1.y > 0.0) && (ellipse1.x > 0.0)) {
@@ -180,7 +179,7 @@ void main (void) {
     }
   }
 
-  // make sure weight is not clamped if greater than 1.0
+  // to make sure weight is not clamped if greater than 1.0
   buffer0.w *= 0.1;
 
   gl_FragData[0] = buffer0;
