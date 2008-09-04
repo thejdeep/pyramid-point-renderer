@@ -576,10 +576,10 @@ void PyramidPointRendererER::rasterizeSynthesisPyramid( void )
       {
 	cur_level = level;
 	
-	source0Pixels = generatePixels(0, fbo, 2,
+	source0Pixels = generatePixels(0, fbo, 3,
 				       fbo_buffers[0 + ((level + 1) % 2)],
-				       fbo_buffers[2 + ((level + 1) % 2)], 0);
-	//				       fbo_buffers[4 + ((level + 1) % 2)] );
+				       fbo_buffers[2 + ((level + 1) % 2)], 
+				       fbo_buffers[4 + ((level + 1) % 2)] );
 	source1Pixels = generatePixels(level, fbo, 3,
 				       fbo_buffers[0 + ((level + 1) % 2)],
 				       fbo_buffers[2 + ((level + 1) % 2)],
@@ -601,8 +601,8 @@ int PyramidPointRendererER::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
-  //shader_phong->set_uniform("textureB", 1);
-  shader_phong->set_uniform("textureC", 2);
+  shader_phong->set_uniform("textureB", 1);
+  //shader_phong->set_uniform("textureC", 2);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -623,7 +623,9 @@ void PyramidPointRendererER::rasterizePhongShading(int bufferIndex)
   shader_synthesis->use(0);
   shader_show->use(0);
 
-  sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[bufferIndex], fbo_buffers[bufferIndex + 4], 0);
+  sourcePixels = generatePixels(level, fbo, 2, fbo_buffers[bufferIndex], 
+				fbo_buffers[bufferIndex + 2], 
+				0);
   destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0, 0);
   rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
 
@@ -881,7 +883,7 @@ void PyramidPointRendererER::createFBO() {
  **/
 void PyramidPointRendererER::createShaders ( void ) {
 
-  bool shader_inst_debug = 1;
+  bool shader_inst_debug = 0;
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("pyramid_templates/shader_point_projection_color_er.vert");                                    

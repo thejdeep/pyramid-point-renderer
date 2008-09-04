@@ -1,6 +1,6 @@
 uniform sampler2D textureA;
-//uniform sampler2D textureB;
-uniform sampler2D textureC;
+uniform sampler2D textureB;
+//uniform sampler2D textureC;
 
 //uniform int color_per_lod;
 
@@ -42,7 +42,7 @@ float shininess[num_materials] = float[num_materials] (125.0000,
 void main (void) {
 
   vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;
-  vec4 color = texture2D (textureC, gl_TexCoord[0].st).xyzw;
+  vec4 color = texture2D (textureB, gl_TexCoord[0].st).xyzw;
   //vec4 color = vec4(0.0);
 
   if (normal.a != 0.0) {

@@ -335,7 +335,6 @@ void main (void) {
     {
       bufferA /= valid_pixels;
       bufferB.zw /= valid_pixels;
-      //bufferC.x /= valid_pixels;
       bufferC.w = obj_id;
 
       float log_level = log2( ( 2.0 * bufferB.y * reconstruction_filter_size * canvas_width ) / float(mask_size*2 + 1) );
