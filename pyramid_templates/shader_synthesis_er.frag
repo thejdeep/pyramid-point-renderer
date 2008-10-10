@@ -1,9 +1,9 @@
 /* Synthesis step */
 
 //#extension GL_ARB_draw_buffers : enable
-#extension GL_EXT_gpu_shader4 : enable
-
 #version 120
+
+#extension GL_EXT_gpu_shader4 : enable
 
 const float pi = 3.1416;
 

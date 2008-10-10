@@ -1,6 +1,7 @@
 /// GLSL CODE
 
 /// Vertex Shader -- Analysis Shader
+#version 120
 
 void main(void)
 {

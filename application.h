@@ -26,7 +26,7 @@
 #include <list>
 #include <vector>
 
-//#include "ewa_surface_splatting.h"
+#include "ewa_surface_splatting.h"
 
 #include "point_ids.h"
 #include "pyramid_point_renderer.h"
