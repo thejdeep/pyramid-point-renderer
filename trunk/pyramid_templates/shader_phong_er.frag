@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D textureA;
 uniform sampler2D textureB;
 //uniform sampler2D textureC;

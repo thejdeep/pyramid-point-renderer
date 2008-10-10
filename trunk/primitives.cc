@@ -506,14 +506,13 @@ void Primitives::setPyramidPointIds ( void ) {
 
   glNewList(triangleDisplayList, GL_COMPILE);
 
-  int pos = 0;
   GLfloat one_over_size = (GLfloat)1.0 / ((GLfloat)number_points);
   glBegin(GL_POINTS);
 
   for (surfelVectorIter it = surfels[0].begin(); it != surfels[0].end(); ++it) {
     glNormal3f(it->Normal().x(), it->Normal().y(), it->Normal().z());
-    glVertex4f(it->Center().x(), it->Center().y(), it->Center().z(), (GLfloat)pos * one_over_size);
-    ++pos;
+    //    glVertex4f(it->Center().x(), it->Center().y(), it->Center().z(), (GLfloat)pos * one_over_size);
+    glVertex4f(it->Center().x(), it->Center().y(), it->Center().z(), (GLfloat)it->ID() * one_over_size);
   }
   glEnd();
 

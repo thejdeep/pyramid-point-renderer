@@ -7,7 +7,7 @@ TARGET = pyramid-point-renderer
 DEPENDPATH += .
 INCLUDEPATH += $(HOME)/lcgtk/ ./pyramid_point_renderer ./pyramid_point_renderer_color ./pyramid_point_renderer_texture \
   ./pyramid_triangle_renderer ./pyramid_templates ./pyramid_lod ./pyramid_trees ./triangle_renderer \
-  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting ./point_ids
+  ./ellipse_rasterization ./ewa_surface_splatting ./jfa_splatting ./point_ids ./ewa_surface_splatting
 LIBS += -L$(HOME)/lcgtk/glslKernel/ -lglslKernel -lglut
 
 QT += opengl

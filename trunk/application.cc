@@ -321,6 +321,7 @@ void Application::draw(void) {
 
   // necessary to compute correct fps
   glFinish();
+
 }
 
 
@@ -578,6 +579,10 @@ void Application::createPointRenderer( void ) {
     point_based_render = new TriangleRenderer();
   else if (render_mode == POINT_IDS)
     point_based_render = new PointIds();
+  else if (render_mode == EWA_SPLATTING) {
+    point_based_render = new EWASurfaceSplatting();
+    //    point_based_render->setVertices(primitives.back().getSurfels());
+  }
 
   assert (point_based_render);
   
@@ -589,6 +594,8 @@ void Application::createPointRenderer( void ) {
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
   point_based_render->setDepthTest(depth_culling);
+
+  cout << " type : " << render_mode << endl;
 }
 
 int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
