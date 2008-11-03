@@ -96,10 +96,10 @@ public:
 				   mID(id)
   {
     mColor = Color(0.0,0.0,0.0); 
-    mNormal.normalize();
+    mNormal.Normalize();
     Vector3 lV = Perpendicular(mNormal);
     Vector3 lU = mNormal ^ lV;
-    lU.normalize();
+    lU.Normalize();
     mMinorAxis = std::make_pair(mSplatRadius,lV);
     mMajorAxis = std::make_pair(mSplatRadius,lU);
   };	
@@ -116,10 +116,10 @@ public:
 				mPerpendicularError(0),
 				mID(id)
   {
-    mNormal.normalize();
+    mNormal.Normalize();
     Vector3 lV = Perpendicular(mNormal);
     Vector3 lU = mNormal ^ lV;
-    lU.normalize();
+    lU.Normalize();
     mMinorAxis = std::make_pair(mSplatRadius,lV);
     mMajorAxis = std::make_pair(mSplatRadius,lU);
   };
@@ -134,10 +134,10 @@ public:
 				mID(id)
   {
     mColor = Color(0.0,0.0,0.0);
-    mNormal.normalize();
+    mNormal.Normalize();
     Vector3 lV = Perpendicular(mNormal);
     Vector3 lU = mNormal ^ lV;
-    lU.normalize();
+    lU.Normalize();
     mMinorAxis = std::make_pair(mSplatRadius,lV);
     mMajorAxis = std::make_pair(mSplatRadius,lU);
   };
@@ -251,10 +251,10 @@ public:
   /// I/O operator - output
   inline friend std::ostream& operator << (std::ostream& out, const Surfel &s) 
   {
-    out << s.perpendicularError() << " " << s.Center.x() << " " 
-	<< s.Center.y() 	<< " " << s.Center.z() << " " 
-	<< s.radius() 		<< " " << s.Normal.x() << " " 
-	<< s.Normal.y() 	<< " " << s.Normal.z();
+    out << s.perpendicularError() << " " << s.Center[0] << " " 
+	<< s.Center[1] 	<< " " << s.Center[2] << " " 
+	<< s.radius() 		<< " " << s.Normal[0] << " " 
+	<< s.Normal[1] 	<< " " << s.Normal[2];
 	    
     return out;
   };
@@ -271,37 +271,37 @@ public:
     //select the shortest of projections of axes on v
     //(the closest to perpendicular to v),
     //and project it to the plane defined by v
-    if ( fabs( pVector.x()) < fabs( pVector.y()) ) // x < y 
+    if ( fabs( pVector[0]) < fabs( pVector[1]) ) // x < y 
       {
 
-	if ( fabs( pVector.x()) < fabs( pVector.z()) )
+	if ( fabs( pVector[0]) < fabs( pVector[2]) )
 	  {  // x < y && x < z
-	    Vector3 lPerpendicularX (1.0 - (pVector.x() * pVector.x()),
-				     -pVector.x() * pVector.y(),
-				     -pVector.x() * pVector.z() );
+	    Vector3 lPerpendicularX (1.0 - (pVector[0] * pVector[0]),
+				     -pVector[0] * pVector[1],
+				     -pVector[0] * pVector[2] );
 				 
-	    return lPerpendicularX.norm();
+	    return lPerpendicularX.Norm();
 	  }
       }  
     else
       { //y <= x
 
-	if (fabs(pVector.y()) < fabs(pVector.z()) )
+	if (fabs(pVector[1]) < fabs(pVector[2]) )
 	  {  // y <= x && y < z
-	    Vector3 lPerpendicularY( -pVector.y() * pVector.x(), 
-				     1.0 - (pVector.y() * pVector.y()), 
-				     -pVector.y() * pVector.z() );
+	    Vector3 lPerpendicularY( -pVector[1] * pVector[0], 
+				     1.0 - (pVector[1] * pVector[1]), 
+				     -pVector[1] * pVector[2] );
 				 
-	    return lPerpendicularY.norm();
+	    return lPerpendicularY.Norm();
 
 	  }
       }
     // z <= x && z <= y
-    Vector3 lPerpendicularZ(-pVector.z() * pVector.x(), 
-			    -pVector.z() * pVector.y(), 
-			    1.0 - (pVector.z() * pVector.z()));
+    Vector3 lPerpendicularZ(-pVector[2] * pVector[0], 
+			    -pVector[2] * pVector[1], 
+			    1.0 - (pVector[2] * pVector[2]));
 		 
-    return lPerpendicularZ.norm();
+    return lPerpendicularZ.Norm();
 
   }	   
 	   	 

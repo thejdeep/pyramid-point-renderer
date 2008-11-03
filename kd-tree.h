@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <map>
+#include <cmath>
 #include "surfels.h"
 
 using namespace std;
@@ -269,20 +270,20 @@ public:
 
     Point cls = p; //closest point on box to p
 
-    if (p.x() <= world.xmin())
-      cls = Point(world.xmin(), cls.y(), cls.z());
-    else if (p.x() >= world.xmax())
-      cls = Point(world.xmax(), cls.y(), cls.z());
+    if (p[0] <= world.xmin())
+      cls = Point(world.xmin(), cls[1], cls[2]);
+    else if (p[0] >= world.xmax())
+      cls = Point(world.xmax(), cls[1], cls[2]);
 
-    if (p.y() <= world.ymin())
-      cls = Point(cls.x(), world.ymin(), cls.z());
-    else if (p.y() >= world.ymax())
-      cls = Point(cls.x(), world.ymax(), cls.z());
+    if (p[1] <= world.ymin())
+      cls = Point(cls[0], world.ymin(), cls[2]);
+    else if (p[1] >= world.ymax())
+      cls = Point(cls[0], world.ymax(), cls[2]);
 
-    if (p.z() <= world.zmin())
-      cls = Point(cls.x(), cls.y(), world.zmin());
-    else if (p.z() >= world.zmax())
-      cls = Point(cls.x(), cls.y(), world.zmax());
+    if (p[2] <= world.zmin())
+      cls = Point(cls[0], cls[1], world.zmin());
+    else if (p[2] >= world.zmax())
+      cls = Point(cls[0], cls[1], world.zmax());
 
     return p.SquaredDistance(cls);
   }
@@ -311,7 +312,7 @@ public:
     int comps = 0;
     double minDist;
     if (k_nearest.empty())
-      minDist = HUGE; // empty set of nearest points
+      minDist = HUGE_VAL; // empty set of nearest points
     else
       minDist = k_nearest.begin()->first; // greatest distance of all points in map
 
@@ -378,8 +379,8 @@ public:
       if (Refine::split (PtrList, &mergedItems)) {
 
 	/// Check largest box dimension for subdivision
-	split_dim = (world.max().x() - world.min().x() > world.max().y() - world.min().y()) ? 0 : 1;
-	split_dim = (world.max()[split_dim] - world.min()[split_dim] > world.max().z() - world.min().z()) ? split_dim : 2;
+	split_dim = (world.max()[0] - world.min()[0] > world.max()[1] - world.min()[1]) ? 0 : 1;
+	split_dim = (world.max()[split_dim] - world.min()[split_dim] > world.max()[2] - world.min()[2]) ? split_dim : 2;
 
 	/// Search for point closest to the center of split_dim
 	//double center = 0.5 * (world.max().pos(split_dim) + world.min().pos(split_dim));
@@ -564,9 +565,9 @@ public:
   virtual void insert (const ItemPtr item) {
     Point p = item->Center();
     // Check if point is inside kd-tree world before inserting
-    if ( (p.x() >= root->getBox().xmin()) && (p.x() <= root->getBox().xmax()) &&
-	 (p.y() >= root->getBox().ymin()) && (p.y() <= root->getBox().ymax()) &&
-	 (p.z() >= root->getBox().zmin()) && (p.z() <= root->getBox().zmax()))
+    if ( (p[0] >= root->getBox().xmin()) && (p[0] <= root->getBox().xmax()) &&
+	 (p[1] >= root->getBox().ymin()) && (p[1] <= root->getBox().ymax()) &&
+	 (p[2] >= root->getBox().zmin()) && (p[2] <= root->getBox().zmax()))
       root->insert (0, item);
   }
 

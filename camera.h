@@ -51,7 +51,7 @@ typedef struct _keyframe {
   /// I/O operator - output
   inline friend ostream& operator << (ostream& out, const struct _keyframe& k) {
     out << k.rot.x << " " << k.rot.y << " " << k.rot.z << " " << k.rot.a << " "
-	<< k.pos.x() << " " << k.pos.y() << " " << k.pos.z() << " " << k.light_pos[0]
+	<< k.pos[0] << " " << k.pos[1] << " " << k.pos[2] << " " << k.light_pos[0]
 	<< " " << k.light_pos[1] << " " << k.light_pos[2] << " " << k.light_pos[3] 
 	<< " " << k.reconstruction_filter << " " << k.prefilter;
     return out;
@@ -176,7 +176,7 @@ public:
   const double fieldOfVision ( void ) const { return fov; }
 
   //void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
-  void positionVec ( double e[] ) const { e[0] = position.x(); e[1] = position.y(); e[2] = -position.z(); }
+  void positionVec ( double e[] ) const { e[0] = position.x; e[1] = position.y; e[2] = -position.z; }
 
   void createKeyFrame( double reconstruction_filter, double prefilter ) {
     keyframe k( position, q_rot, light_position, reconstruction_filter, prefilter );

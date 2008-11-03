@@ -854,8 +854,8 @@ void PyramidTriangleRenderer::setTriangles( vector<Triangle> *t ) {
 
     glBegin(GL_TRIANGLES);  
     for (int i = 0; i < 3; ++i) {
-      glNormal3f(n[i].x(), n[i].y(), n[i].z());
-      glVertex4f(p[i].x(), p[i].y(), p[i].z(), 0.001);
+      glNormal3f(n[i][0], n[i][1], n[i][2]);
+      glVertex4f(p[i][0], p[i][1], p[i][2], 0.001);
     }
     glEnd();
   }
