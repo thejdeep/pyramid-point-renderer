@@ -1,0 +1,21 @@
+.SUFFIXES: .cc .c
+
+# flags for C++ compiler:
+MODE = final
+
+# compiler names
+CC = gcc
+CXX = g++
+
+INCLUDEDIRS = -I$(HOME)/lcgtk/ -I./ -I../ -I./ewa_surface_splatting/ \
+	-I./point_ids/ -I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ \
+	-I./pyramid_point_renderer_texture/ -I./pyramid_lod -I./jfa_splatting/ \
+	-I./pyramid_trees/ -I./pyramid_templates/ -I./triangle_renderer/ \
+	-I./pyramid_triangle_renderer/ -I./ellipse_rasterization/
+
+OBJDIR = objs
+
+#CXXFLAGS = -g -O3 -Wall -Wno-deprecated -Wl,--no-undefined
+CXXFLAGS = -Wl,--no-undefined
+
+CCFLAGS = -g -O3 -Wall
