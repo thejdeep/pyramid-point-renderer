@@ -40,21 +40,21 @@ Vector EWASurfaceSplatting::perpendicular( const Vector &v ) {
   // (the closest to perpendicular to v),
   // and project it to the plane defined by v
 
-  if( fabs(v.x()) < fabs(v.y()) ) { // x < y
-    if( fabs(v.x()) < fabs(v.z()) ) { // x < y && x < z
-      t = Vector (1.0f - v.x() * v.x(), -v.x() * v.y(), -v.x() * v.z());
+  if( fabs(v[0]) < fabs(v[1]) ) { // x < y
+    if( fabs(v[0]) < fabs(v[2]) ) { // x < y && x < z
+      t = Vector (1.0f - v[0] * v[0], -v[0] * v[1], -v[0] * v[2]);
       return t;
     }
   }
   else { // y <= x
-    if( fabs(v.y()) < fabs(v.z()) ) { // y <= x && y < z
-      t = Vector( -v.y() * v.x(), 1.0f - v.y() * v.y(), -v.y() * v.z());
+    if( fabs(v[1]) < fabs(v[2]) ) { // y <= x && y < z
+      t = Vector( -v[1] * v[0], 1.0f - v[1] * v[1], -v[1] * v[2]);
       return t;
     }
   }
 
   // z <= x && z <= y
-  t = Vector(-v.z() * v.x(), -v.z() * v.y(), 1.0f - v.z() * v.z());
+  t = Vector(-v[2] * v[0], -v[2] * v[1], 1.0f - v[2] * v[2]);
   return t;
 }
 
@@ -100,7 +100,7 @@ void EWASurfaceSplatting::splatShader ( surfelVectorIter s, double mv[][4], doub
   Vector sn = s->Normal();
 
   // Using arrays instead of cgal vector just to make it faster - RM - 02-02-07
-  double n[3] = { sn.x(), sn.y(), sn.z() };
+  double n[3] = { sn[0], sn[1], sn[2] };
 
   // Multiply normal by modelview matrix, current orientation on object space
   double n_mv[3] = {n[0]*mv[0][0] + n[1]*mv[1][0] + n[2]*mv[2][0],
@@ -142,12 +142,12 @@ void EWASurfaceSplatting::setVertices( vector<Surfeld> *s ) {
   zbuffer.resize( canvas_width * canvas_height );
 
   zBufferPixel pixel;
-  pixel.r = bg_color.x();
-  pixel.g = bg_color.y();
-  pixel.b = bg_color.z();
+  pixel.r = bg_color[0];
+  pixel.g = bg_color[1];
+  pixel.b = bg_color[2];
   pixel.weight = 0.0;
-  pixel.z = -HUGE;
-  pixel.zmax = HUGE;
+  pixel.z = -HUGE_VAL;
+  pixel.zmax = HUGE_VAL;
   pixel.radius = 0.0;
   pixel.dx = 0.0;
   pixel.dy = 0.0;
@@ -193,10 +193,10 @@ void EWASurfaceSplatting::draw ( void ) {
   // Set up the accumulation buffer
   for (int i = 0; i < canvas_width * canvas_height; ++i) {
     zbuffer[i].weight = 1.0;
-    zbuffer[i].z = HUGE;
-    zbuffer[i].r = bg_color.x();
-    zbuffer[i].g = bg_color.y();
-    zbuffer[i].b = bg_color.z();
+    zbuffer[i].z = HUGE_VAL;
+    zbuffer[i].r = bg_color[0];
+    zbuffer[i].g = bg_color[1];
+    zbuffer[i].b = bg_color[2];
   }
 
 #ifdef DEBUG
@@ -298,33 +298,33 @@ void EWASurfaceSplatting::draw ( void ) {
 
     // Tangent plane in object space
     Vector tu (perpendicular(n));
-    tu.normalize();
+    tu.Normalize();
     Vector tv = n ^ tu;
-    tv.normalize();
+    tv.Normalize();
 
     // Transform the tangent vectors and the splat center to screen-space
-    Vector tuh ( tu.x() * object_to_screen[0][0] + tu.y() * object_to_screen[1][0] + tu.z() * object_to_screen[2][0],
-		 tu.x() * object_to_screen[0][1] + tu.y() * object_to_screen[1][1] + tu.z() * object_to_screen[2][1],
-		 tu.x() * object_to_screen[0][2] + tu.y() * object_to_screen[1][2] + tu.z() * object_to_screen[2][2]);
+    Vector tuh ( tu[0] * object_to_screen[0][0] + tu[1] * object_to_screen[1][0] + tu[2] * object_to_screen[2][0],
+		 tu[0] * object_to_screen[0][1] + tu[1] * object_to_screen[1][1] + tu[2] * object_to_screen[2][1],
+		 tu[0] * object_to_screen[0][2] + tu[1] * object_to_screen[1][2] + tu[2] * object_to_screen[2][2]);
     
-    Vector tvh ( tv.x() * object_to_screen[0][0] + tv.y() * object_to_screen[1][0] + tv.z() * object_to_screen[2][0],
-		 tv.x() * object_to_screen[0][1] + tv.y() * object_to_screen[1][1] + tv.z() * object_to_screen[2][1],
-		 tv.x() * object_to_screen[0][2] + tv.y() * object_to_screen[1][2] + tv.z() * object_to_screen[2][2]);
+    Vector tvh ( tv[0] * object_to_screen[0][0] + tv[1] * object_to_screen[1][0] + tv[2] * object_to_screen[2][0],
+		 tv[0] * object_to_screen[0][1] + tv[1] * object_to_screen[1][1] + tv[2] * object_to_screen[2][1],
+		 tv[0] * object_to_screen[0][2] + tv[1] * object_to_screen[1][2] + tv[2] * object_to_screen[2][2]);
 
-    Point p0h ( p0.x() * object_to_screen[0][0] + p0.y() * object_to_screen[1][0] + p0.z() * object_to_screen[2][0] + object_to_screen[3][0],
-		p0.x() * object_to_screen[0][1] + p0.y() * object_to_screen[1][1] + p0.z() * object_to_screen[2][1] + object_to_screen[3][1],
-		p0.x() * object_to_screen[0][2] + p0.y() * object_to_screen[1][2] + p0.z() * object_to_screen[2][2] + object_to_screen[3][2]);
+    Point p0h ( p0[0] * object_to_screen[0][0] + p0[1] * object_to_screen[1][0] + p0[2] * object_to_screen[2][0] + object_to_screen[3][0],
+		p0[0] * object_to_screen[0][1] + p0[1] * object_to_screen[1][1] + p0[2] * object_to_screen[2][1] + object_to_screen[3][1],
+		p0[0] * object_to_screen[0][2] + p0[1] * object_to_screen[1][2] + p0[2] * object_to_screen[2][2] + object_to_screen[3][2]);
 
-    double tuh_w = tu.x() * object_to_screen[0][3] + tu.y() * object_to_screen[1][3] + tu.z() * object_to_screen[2][3];
-    double tvh_w = tv.x() * object_to_screen[0][3] + tv.y() * object_to_screen[1][3] + tv.z() * object_to_screen[2][3];
-    double p0h_w = p0.x() * object_to_screen[0][3] + p0.y() * object_to_screen[1][3] + p0.z() * object_to_screen[2][3] + object_to_screen[3][3];
+    double tuh_w = tu[0] * object_to_screen[0][3] + tu[1] * object_to_screen[1][3] + tu[2] * object_to_screen[2][3];
+    double tvh_w = tv[0] * object_to_screen[0][3] + tv[1] * object_to_screen[1][3] + tv[2] * object_to_screen[2][3];
+    double p0h_w = p0[0] * object_to_screen[0][3] + p0[1] * object_to_screen[1][3] + p0[2] * object_to_screen[2][3] + object_to_screen[3][3];
       
 
     // View-frustum culling, skip splats that are totally outside the view frustum
     double r = it->Radius();
-    if ((p0h.x() + r < -p0h_w) || (p0.x() - r > p0h_w) ||
-	(p0h.y() + r < -p0h_w) || (p0.y() - r > p0h_w) ||
-	(p0h.z() + r < -p0h_w) || (p0.z() - r > p0h_w)) {
+    if ((p0h[0] + r < -p0h_w) || (p0[0] - r > p0h_w) ||
+	(p0h[1] + r < -p0h_w) || (p0[1] - r > p0h_w) ||
+	(p0h[2] + r < -p0h_w) || (p0[2] - r > p0h_w)) {
       ++clipped_surfs;
       continue;	
     }
@@ -332,9 +332,9 @@ void EWASurfaceSplatting::draw ( void ) {
     // Mapping from splat coodinate system to screen space
     // See page 21 : 3.1.3 Rational Linear Interpolant
     // equation (3.14) shows u and v on splat space, and here tu and tv are on screen space
-     double M[4][4] = {{tuh.x(), tuh.y(), tuh_w, 0.0},
-		       {tvh.x(), tvh.y(), tvh_w, 0.0},
-		       {p0h.x(), p0h.y(), p0h_w, 0.0},
+     double M[4][4] = {{tuh[0], tuh[1], tuh_w, 0.0},
+		       {tvh[0], tvh[1], tvh_w, 0.0},
+		       {p0h[0], p0h[1], p0h_w, 0.0},
 		       {0.0, 0.0, 0.0, 1.0}};
 
 
@@ -496,28 +496,28 @@ void EWASurfaceSplatting::draw ( void ) {
     
     // Depth Interpolation setup
     // -- page 47 : 3.6.4 Depth Values of the Resampling Filter
-    double zmin = p0h.z();
-    double zmax = p0h.z();
+    double zmin = p0h[2];
+    double zmax = p0h[2];
     double zx = 0.0, zy = 0.0;
-    double zt = p0h.z();
+    double zt = p0h[2];
 
     // -- page 49 (3.99)
     // since D = E = 0
     // l = sqrt ( F / (A*tuhz^2 + 2B*tuhz*tvhz + C*tvhz^2) )
     // compute divisor first and check if it is not zero
-    double l = Q[0][0]*tuh.z()*tuh.z() + 2.0*Q[0][1]*tuh.z()*tvh.z() + Q[1][1]*tvh.z()*tvh.z();
+    double l = Q[0][0]*tuh[2]*tuh[2] + 2.0*Q[0][1]*tuh[2]*tvh[2] + Q[1][1]*tvh[2]*tvh[2];
 
     if ( l != 0.0 ) {
       // calculate zmin and zmax
       l = sqrt ( max (0.0, F/l) );
-      zmin = p0h.z() - l * (tuh.z()*tuh.z() + tvh.z()*tvh.z()); 
-      zmax = p0h.z() + l * (tuh.z()*tuh.z() + tvh.z()*tvh.z()); 
+      zmin = p0h[2] - l * (tuh[2]*tuh[2] + tvh[2]*tvh[2]); 
+      zmax = p0h[2] + l * (tuh[2]*tuh[2] + tvh[2]*tvh[2]); 
       // z coordinate at center of the conic, linear interpolationn -- page 48
       zt = (zmin + zmax) * 0.5;
 
       // Calculate the depth gradient, needed for surface reconstruction using z
-      zx = -tvh.z() * M[0][1] + tuh.z() * M[1][1];
-      zy =  tvh.z() * M[0][0] - tuh.z() * M[1][0];
+      zx = -tvh[2] * M[0][1] + tuh[2] * M[1][1];
+      zy =  tvh[2] * M[0][0] - tuh[2] * M[1][0];
       double dz = F*(zy*zy*Qrho[0][0] - 2*zy*zx*Qrho[0][1] + zx*zx*Qrho[1][1]);
       if ( dz != 0.0)
 	dz = (zmax - zt) * sqrt (max(0.0, delta / dz));
@@ -538,9 +538,9 @@ void EWASurfaceSplatting::draw ( void ) {
       Vector rot_n (  n[0]*modelview[0][0] + n[1]*modelview[1][0] + n[2]*modelview[2][0],
 		      n[0]*modelview[0][1] + n[1]*modelview[1][1] + n[2]*modelview[2][1],
 		      n[0]*modelview[0][2] + n[1]*modelview[1][2] + n[2]*modelview[2][2]);
-      color[0] = rot_n.x();
-      color[1] = rot_n.y(); 
-      color[2] = rot_n.z();
+      color[0] = rot_n[0];
+      color[1] = rot_n[1]; 
+      color[2] = rot_n[2];
     }
     else {
       splatShader(it, modelview, color);
@@ -632,7 +632,7 @@ void EWASurfaceSplatting::draw ( void ) {
       double w = 1.0/zbuffer[i].weight;
       
       double n[3] = {zbuffer[i].r * w, zbuffer[i].g * w, zbuffer[i].b * w};
-      if (zbuffer[i].z != HUGE)
+      if (zbuffer[i].z != HUGE_VAL)
 	phongShader(n, color);
       else
 	color[0] = color[1] = color[2] = 1.0;

@@ -75,7 +75,7 @@ void normalize (vector<Surfeld> * surfels) {
 
   double max = 0, min = 0;
   Point p = surfels->begin()->Center();
-  double xMax=p.x(), yMax=p.y(), zMax=p.z(), xMin=p.x(), yMin=p.y(), zMin=p.z();
+  double xMax=p[0], yMax=p[1], zMax=p[2], xMin=p[0], yMin=p[1], zMin=p[2];
 
   //compute min and max values for x and y coordinates
   for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
@@ -129,7 +129,7 @@ void normalize (vector<Surfeld> * surfels) {
 	       (((p[1] - yMin) / (max - min))) * 2.0 - 1.0 + compY,
 	       (((p[2] - zMin) / (max - min))) * 2.0 - 1.0 + compZ);
     n = it->Normal();
-    n.normalize();
+    n.Normalize();
     ((Surfeld*)&(*it))->SetCenter( (Point) p );
     ((Surfeld*)&(*it))->SetNormal( (Vector) n );
 
@@ -320,17 +320,17 @@ void readPlyHighRes (const char *filename, vector<Surfeld> *surfels) {
 	s[1] = temp_surfels[ f.verts[1] ];
 	s[2] = temp_surfels[ f.verts[2] ];
 
-	Point p = Point( (s[0].Center().x() + s[1].Center().x() + s[2].Center().x()) / 3.0,
-			 (s[0].Center().y() + s[1].Center().y() + s[2].Center().y()) / 3.0,
-			 (s[0].Center().z() + s[1].Center().z() + s[2].Center().z()) / 3.0);
+	Point p = Point( (s[0].Center()[0] + s[1].Center()[0] + s[2].Center()[0]) / 3.0,
+			 (s[0].Center()[1] + s[1].Center()[1] + s[2].Center()[1]) / 3.0,
+			 (s[0].Center()[2] + s[1].Center()[2] + s[2].Center()[2]) / 3.0);
 
-	Vector n = Vector( (s[0].Normal().x() + s[1].Normal().x() + s[2].Normal().x()) / 3.0,
-			   (s[0].Normal().y() + s[1].Normal().y() + s[2].Normal().y()) / 3.0,
-			   (s[0].Normal().z() + s[1].Normal().z() + s[2].Normal().z()) / 3.0);
+	Vector n = Vector( (s[0].Normal()[0] + s[1].Normal()[0] + s[2].Normal()[0]) / 3.0,
+			   (s[0].Normal()[1] + s[1].Normal()[1] + s[2].Normal()[1]) / 3.0,
+			   (s[0].Normal()[2] + s[1].Normal()[2] + s[2].Normal()[2]) / 3.0);
 
 	double max_dist = 0.0;
 	for (int k = 0; k < 3; ++k) {
-	  double length = (p - s[k].Center()).length();
+	  double length = (p - s[k].Center()).Length();
 	  if (max_dist < length)
 	    max_dist = length;
 	}

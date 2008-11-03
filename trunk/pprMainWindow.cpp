@@ -305,7 +305,7 @@ void pprMainWindow::on_actionLoadKeyFrames_triggered( bool ) {
   QStringList name_split2 = name_split.back().split("."); 
 
   QString filetype = name_split2.back();
-  if ( !sfile.isEmpty() ) {  
+  if ( !sfile.isEmpty() ) {
     if (filetype.compare("frames") == 0)
       application->loadKeyFrames( filename );
     else

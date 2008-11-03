@@ -87,20 +87,20 @@ Application::~Application( void ) {
 /// @param s Pointer to surfel
 void Application::glVertex(const Surfeld * s) {
   Point p = s->Center();
-  glVertex3f(p.x(), p.y(), p.z());
+  glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
 void Application::glVertex(surfelVectorIter it) {
   Point p = it->Center();
-  glVertex3f(p.x(), p.y(), p.z());
+  glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Renders a vertex
 /// @param p Given vertex position
 void Application::glVertex(Point p) {
-  glVertex3f(p.x(), p.y(), p.z());
+  glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Render all points 
@@ -811,12 +811,12 @@ int Application::writeSceneFile ( void ) {
   }
  
   for (unsigned int i = 0; i < objects.size(); ++i) {
-    out << i << " " << objects[i].getCenter()->x() << " " << objects[i].getCenter()->y() << " " << objects[i].getCenter()->z() << " " <<
+    out << i << " " << (*objects[i].getCenter())[0] << " " << (*objects[i].getCenter())[1] << " " << (*objects[i].getCenter())[2] << " " <<
       objects[i].getRotationQuat()->x << " " << objects[i].getRotationQuat()->y << " " << objects[i].getRotationQuat()->z << " " <<
       objects[i].getRotationQuat()->a  << " 1 " << i << endl;
   }
 
-  out << camera->positionVector().x() << " " << camera->positionVector().y() << " " << camera->positionVector().z() << " " <<
+  out << camera->positionVector()[0] << " " << camera->positionVector()[1] << " " << camera->positionVector()[2] << " " <<
     camera->rotationQuat().x << " " << camera->rotationQuat().y << " " << camera->rotationQuat().z << " " << camera->rotationQuat().a << endl;
   
   out << camera->lightVector()[0] << " " << camera->lightVector()[1] << " " << camera->lightVector()[2] << endl;

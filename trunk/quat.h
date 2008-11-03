@@ -51,12 +51,12 @@ public:
 
   // Rotate a vector using this quaternion
   Vector rotate(Vector vec) {
-    double len = vec.length();
+    double len = vec.Length();
 
 /*     if (len == 0.0) */
 /*       return; */
 
-    Quat v(vec.x(), vec.y(), vec.z(), 1.0);
+    Quat v(vec.x, vec.y, vec.z, 1.0);
     Quat qbar(-x, -y, -z, a); // complement
     Quat qtmp;
  

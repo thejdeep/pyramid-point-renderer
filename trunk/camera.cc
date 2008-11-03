@@ -154,9 +154,9 @@ void Camera::setView (void) {
   if ( runningFrames() )
     computeKeyFrame();
 
-  gluLookAt(position.x()*radius, position.y()*radius, position.z()*radius,
-	    target.x(), target.y(), target.z(),
-	    up.x(), up.y(), up.z());
+  gluLookAt(position[0]*radius, position[1]*radius, position[2]*radius,
+	    target[0], target[1], target[2],
+	    up[0], up[1], up[2]);
 }
 
 /**
@@ -280,13 +280,13 @@ void Camera::normalizeCoordinates(Point& p)
   double w = screen_width;
   double h = screen_height;
 
-  p[0] = 2.0 * p.x() / w  - 1.0;
-  if (p.x() < -1.0) p[0] = -1.0;
-  if (p.x() >  1.0) p[0] =  1.0;
+  p[0] = 2.0 * p[0] / w  - 1.0;
+  if (p[0] < -1.0) p[0] = -1.0;
+  if (p[0] >  1.0) p[0] =  1.0;
 
-  p[1] = -(2.0 * p.y() / h - 1.0);
-  if (p.y() < -1.0) p[1] = -1.0;
-  if (p.y() >  1.0) p[1] =  1.0;
+  p[1] = -(2.0 * p[1] / h - 1.0);
+  if (p[1] < -1.0) p[1] = -1.0;
+  if (p[1] >  1.0) p[1] =  1.0;
 }
 
 /**
@@ -344,8 +344,8 @@ void Camera::rotate(int x, int y) {
   mapToSphere(d_start, 1.0);
   mapToSphere(d_curr, 1.0);
 
-  Quat q0 (d_start.x(), d_start.y(), d_start.z(), 0.0);
-  Quat q1 (d_curr.x(), d_curr.y(), d_curr.z(), 0.0);
+  Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
+  Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
 
 //   Quat inc = q1*q0;
 //   q_rot = (q_lookAt*inc*q_lookAt.inverse())*q_last;
@@ -400,8 +400,8 @@ void Camera::rotateQuat(int x, int y, Quat *q, Point* obj_center) {
   mapToSphere(d_start, 1.0);
   mapToSphere(d_curr, 1.0);
 
-  Quat q0 (d_start.x(), d_start.y(), d_start.z(), 0.0);
-  Quat q1 (d_curr.x(), d_curr.y(), d_curr.z(), 0.0);
+  Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
+  Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
 
   Quat inc = q1*q0;
 
@@ -471,7 +471,7 @@ void Camera::translate (int x, int y) {
 //   Point start =  projectToWorld(mouse_start);
 //   Point current =  projectToWorld(mouse_curr);
 
-//   //  radius += 0.01*(current.y() - start.y());
+//   //  radius += 0.01*(current[1] - start[1]);
 
 //   mouse_start = mouse_curr;
 
@@ -489,8 +489,8 @@ void Camera::translate (int x, int y) {
   mapToSphere(d_start, 1.0);
   mapToSphere(d_curr, 1.0);
 
-  Quat q0 (d_start.x(), d_start.y(), d_start.z(), 0.0);
-  Quat q1 (d_curr.x(), d_curr.y(), d_curr.z(), 0.0);
+  Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
+  Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
 
   Quat inc = q1*q0;
   q_rot = (q_lookAt*inc*q_lookAt.conjugate())*q_last;
@@ -540,9 +540,9 @@ void Camera::zoomingVec (int x, int y, Point* center) {
   Point current =  projectToWorld(mouse_curr);
 
   Vector view = (position*radius) - *center;
-  view.normalize();
+  view.Normalize();
 
-  (*center) -= view*(current.y() - start.y())*0.1;
+  (*center) -= view*(current[1] - start[1])*0.1;
 
   //  mouse_start = mouse_curr;
 }
@@ -697,7 +697,7 @@ void Camera::projectToScreen(Point* p, Point& screen_pos) {
   glGetIntegerv(GL_VIEWPORT, viewport);
 
   // get 2D coordinates based on 3D coordinates
-  gluProject(p->x(), p->y(), p->z(),
+  gluProject((*p)[0], (*p)[1], (*p)[2],
 	     model_view, projection, viewport,
 	     &pos_x, &pos_y, &pos_z);
 
@@ -726,7 +726,7 @@ Point Camera::projectToWorld(const Point& p) {
   glGetDoublev(GL_PROJECTION_MATRIX, projection);
   glGetIntegerv(GL_VIEWPORT, viewport);
 
-  gluUnProject(p.x(), viewport[3] - p.y(), p.z(), model_view, projection, viewport, &xo, &yo, &zo);
+  gluUnProject(p[0], viewport[3] - p[1], p[2], model_view, projection, viewport, &xo, &yo, &zo);
 
   glPopMatrix();
 

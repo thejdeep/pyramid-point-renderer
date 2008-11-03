@@ -8,7 +8,7 @@ const double rad_to_deg = 180.0/M_PI;
  **/
 void Object::render ( void ) {
 
-  glTranslatef(center.x(), center.y(), center.z());
+  glTranslatef(center[0], center[1], center[2]);
 
     // Convert from quaternion to angle+axis
   double s = 1.0 / sqrt(1 - q_rot.a*q_rot.a);
@@ -37,16 +37,16 @@ void Object::rotate ( void ) {
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 }
 void Object::translate ( void ) {
-  glTranslatef(center.x(), center.y(), center.z());
+  glTranslatef(center[0], center[1], center[2]);
 }
 
 void Object::render ( Point camera_pos ) {
 
-  Point c = Point (center.x() + camera_pos.x(),
-		   center.y() + camera_pos.y(),
-		   center.z() + camera_pos.z());
+  Point c = Point (center[0] + camera_pos[0],
+		   center[1] + camera_pos[1],
+		   center[2] + camera_pos[2]);
 
-  glTranslatef(c.x(), c.y(), c.z());
+  glTranslatef(c[0], c[1], c[2]);
 
   rotate();
 

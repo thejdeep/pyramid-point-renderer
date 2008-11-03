@@ -32,12 +32,12 @@ struct Box
   const Point min ( void ) const { return _min; }
   const Point max ( void ) const { return _max; }
 
-  const double xmin ( void ) const { return _min.x(); }
-  const double ymin ( void ) const { return _min.y(); }
-  const double zmin ( void ) const { return _min.z(); }
-  const double xmax ( void ) const { return _max.x(); }
-  const double ymax ( void ) const { return _max.y(); }
-  const double zmax ( void ) const { return _max.z(); }
+  const double xmin ( void ) const { return _min.x; }
+  const double ymin ( void ) const { return _min.y; }
+  const double zmin ( void ) const { return _min.z; }
+  const double xmax ( void ) const { return _max.x; }
+  const double ymax ( void ) const { return _max.y; }
+  const double zmax ( void ) const { return _max.z; }
 
   Point _min, _max;
 
