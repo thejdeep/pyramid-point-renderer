@@ -10,18 +10,9 @@ OBJECTS = application.o \
 	surfels.o \
 	timer.o
 
-SUBDIRS = ellipse_rasterization \
-	ewa_surface_splatting \
-	jfa_splatting \
-	point_ids \
-	pyramid_point_renderer \
+SUBDIRS = pyramid_point_renderer \
 	pyramid_point_renderer_color \
-	pyramid_point_renderer_texture \
-	pyramid_templates \
-	pyramid_lod \
-	pyramid_trees \
-	pyramid_triangle_renderer \
-	triangle_renderer
+	pyramid_templates
 
 OBJS =	application.o \
 	camera.o \
@@ -32,18 +23,22 @@ OBJS =	application.o \
 	primitives.o \
 	surfels.o \
 	timer.o \
-	ellipse_rasterization.o \
-	ewa_surface_splatting.o \
-	jfa_splatting.o \
-	point_ids.o \
 	pyramid_point_renderer.o \
 	pyramid_point_renderer_color.o \
-	pyramid_point_renderer_texture.o \
-	pyramid_point_renderer_er.o \
-	pyramid_point_renderer_lod.o \
-	pyramid_point_renderer_trees.o \
-	pyramid_triangle_renderer.o \
-	triangle_renderer.o 
+	pyramid_point_renderer_er.o
+
+CODES =	application.cc \
+	camera.cc \
+	main.cc \
+	object.cc \
+	ply.c \
+	point_based_renderer.cc \
+	primitives.cc \
+	surfels.cc \
+	timer.c \
+	pyramid_point_renderer/pyramid_point_renderer.cc \
+	pyramid_point_renderer_color/pyramid_point_renderer_color.o \
+	pyramid_templates/pyramid_point_renderer_er.o
 
 include Makefile.in
 
@@ -73,7 +68,7 @@ $(OBJDIR)/%.o: %.c
 	@echo "Compiling C code : $@"
 	$(CC) -c -o $@ $< $(INCLUDEDIRS) $(CCFLAGS)
 
-pyramid-point-renderer: $(OBJ)
+ppr: $(OBJ)
 	for dir in ${SUBDIRS} ; do ( cd $$dir ; ${MAKE} ) ; done
 	@echo
 	@echo "Linking :  $@"
@@ -81,48 +76,9 @@ pyramid-point-renderer: $(OBJ)
 
 clean:
 	for dir in ${SUBDIRS} ; do ( cd $$dir ; ${MAKE} clean ) ; done
-	rm -f *.o $(OBJDIR)/*.o *~ core $(INCDIR)/*~ 
+	rm -f *.o $(OBJDIR)/*.o *~ core $(INCDIR)/*~ ppr
 
-# IDIR =../include
-# CC=gcc
-# CFLAGS=-I$(IDIR)
+depend: $(CODES)
+	makedepend $(INCLUDEDIRS) $(CODES)
 
-# ODIR=obj
-# LDIR =../lib
-
-# LIBS=-lm
-
-# _DEPS = hellomake.h
-# DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-
-# _OBJ = hellomake.o hellofunc.o 
-# OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
-
-# $(ODIR)/%.o: %.c $(DEPS)
-# 	gcc -c -o $@ $< $(CFLAGS)
-
-# hellomake: $(OBJ)
-# 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
-
-# .PHONY: clean
-
-# depend:
-# 	$(CC) $(CXXFLAGS) -M *.cc > .depend
-
-# clean:	
-# 	rm ./objs/*.o point_render *~
-
-# #all: clean depend point_render
-
-# ifeq (.depend,$(wildcard .depend))
-# include .depend
-# endif
-
-
-# g++ -Wl,--no-undefined -o pyramid-point-renderer application.o camera.o ellipse_rasterization.o ewa_surface_splatting.o jfa_splatting.o main.o object.o ply.o point_based_renderer.o primitives.o point_ids.o pyramid_point_renderer.o pyramid_point_renderer_color.o pyramid_point_renderer_texture.o pyramid_point_renderer_er.o pyramid_point_renderer_lod.o pyramid_point_renderer_trees.o pyramid_triangle_renderer.o surfels.o timer.o triangle_renderer.o -L/usr/lib -L/usr/X11R6/lib -L/home/ricardo/lcgtk/glslKernel/ -glslKernel -lglut -lQtOpenGL -lQtGui -lQtCore -lGLU -lGL -lpthread  
-
-# g++ -Wl,--no-undefined -o pyramid-point-renderer application.o camera.o ellipse_rasterization.o ewa_surface_splatting.o jfa_splatting.o main.o object.o ply.o point_based_renderer.o primitives.o point_ids.o pyramid_point_renderer.o pyramid_point_renderer_color.o pyramid_point_renderer_texture.o pyramid_point_renderer_er.o pyramid_point_renderer_lod.o pyramid_point_renderer_trees.o pyramid_triangle_renderer.o surfels.o timer.o triangle_renderer.o -L/usr/lib -L/usr/X11R6/lib -L/home/ricardo/lcgtk/glslKernel/ -lglslKernel -lglut -lQtOpenGL -lQtGui -lQtCore -lGLU -lGL -lpthread
-
-# g++ -Wl,--no-undefined -o pyramid-point-renderer application.o camera.o ellipse_rasterization.o ewa_surface_splatting.o jfa_splatting.o main.o object.o ply.o point_based_renderer.o primitives.o point_ids.o pyramid_point_renderer.o pyramid_point_renderer_color.o pyramid_point_renderer_texture.o pyramid_point_renderer_er.o pyramid_point_renderer_lod.o pyramid_point_renderer_trees.o pyramid_triangle_renderer.o surfels.o timer.o triangle_renderer.o -L/usr/lib -L/usr/X11R6/lib -L/home/ricardo/lcgtk/glslKernel/ -lglslKernel -lglut -lQtOpenGL -lQtGui -lQtCore -lGLU -lGL -lpthread
-
-# g++ -Wl,--no-undefined -o pyramid-point-renderer application.o camera.o ellipse_rasterization.o ewa_surface_splatting.o jfa_splatting.o main.o object.o ply.o point_based_renderer.o primitives.o point_ids.o pyramid_point_renderer.o pyramid_point_renderer_color.o pyramid_point_renderer_texture.o pyramid_point_renderer_er.o pyramid_point_renderer_lod.o pyramid_point_renderer_trees.o pyramid_triangle_renderer.o surfels.o timer.o triangle_renderer.o -L/usr/lib -L/usr/X11R6/lib -L/home/ricardo/lcgtk/glslKernel/ -glslKernel -lglut -lQtOpenGL -lQtGui -lQtCore -lGLU -lGL -lpthread  
+# DO NOT DELETE

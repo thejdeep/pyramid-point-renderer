@@ -1,32 +1,37 @@
 
 uniform sampler2D textureA;
-
+uniform vec4 color_ambient;
+uniform vec4 color_diffuse;
+uniform vec4 color_specular;
+uniform float shininess;
 
 void main (void) {
 
-  vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;
-  
+  vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;  
   vec4 color = vec4(1.0);
 
   if (normal.a != 0.0) {
 
-    vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
+    normal = normalize(normal);
 
-    normal.xyz = normalize(normal.xyz);
+     vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
+     
+      color = color_ambient * (gl_LightSource[0].ambient + gl_LightModel.ambient);
 
-    color = vec4 (0.0, 0.0, 0.0, 1.0);
+      float NdotL = max(dot(normal.xyz, lightDir.xyz), 0.0);
+
+      //color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
+
+      if (NdotL > 0.0) {
+	color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
+	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
+	color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
+      }
     
-    //color = gl_FrontMaterial.ambient * gl_LightSource[0].ambient + gl_LightModel.ambient;
-
-    float NdotL = max(dot(normal.xyz, lightDir),0.0);    
-    //float NdotL = abs(dot(normal.xyz, lightDir));
-
-    color += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * NdotL;
-
-    if (NdotL > 0.0) {
-      float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
-      color += gl_FrontMaterial.specular * gl_LightSource[0].specular * pow(NdotHV, gl_FrontMaterial.shininess);
-    }
+    color.a = 1.0;
   }
-  gl_FragColor = vec4(color.rgb, 1.0);
+  else
+    color = vec4(1.0, 1.0, 1.0, 0.0);
+  
+  gl_FragColor = color;
 }

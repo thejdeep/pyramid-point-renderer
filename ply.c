@@ -3155,7 +3155,7 @@ void *get_new_props_ply(PlyFile *ply)
   }
 
   /* in case we need a random choice */
-  random_pick = (int) floor (rules->nprops * drand48());
+  random_pick = (int) floor (rules->nprops * rand());
 
   /* calculate the combination for each "other" property of the element */
 

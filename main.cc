@@ -45,6 +45,19 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case 'Q' :
     exit(0);
     break;
+  case '0' :
+    application->changeSelectedObjsMaterial ( 0 );
+    break;
+  case '1' :
+    application->changeSelectedObjsMaterial ( 1 );
+    break;
+  case '2' :
+    application->changeSelectedObjsMaterial ( 2 );
+    break;
+  case '3' :
+    application->changeSelectedObjsMaterial ( 3 );
+    break;
+
   }
 
   glutPostRedisplay();
@@ -85,7 +98,6 @@ void mouse(int button, int state, int x, int y) {
   glutPostRedisplay();
 }
 
-
 /// Mouse movement func
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
@@ -114,12 +126,6 @@ void mouseMotion(int x, int y) {
 /// Main Program
 int main(int argc, char * argv []) {
  
-  //QApplication app(argc, argv);
-  //app.setQuitOnLastWindowClosed(true);
-  
-  //pprMainWindow * form = new pprMainWindow; 
-
-  //form->widget->makeCurrent();
 
   // GLUT Window Initialization:
   glutInit (&argc, argv);
@@ -132,7 +138,7 @@ int main(int argc, char * argv []) {
   //  application->readFile( "../plys/dragon.ply" );
 
   if (argc < 2) {
-    cerr << "    Usage :" << endl << "  pyramid-point-renderer <ply_file>" << endl;
+    cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
     exit(0);
   }
 
@@ -145,13 +151,6 @@ int main(int argc, char * argv []) {
   glutMouseFunc(mouse);
   glutMotionFunc(mouseMotion);
   glutKeyboardFunc(keyboard);
-
-//   form->application = application;
-//   form->widget->application = application;
-//   form->init();
-
-//   form->show();
-//  return app.exec();
 
   glutMainLoop();
 
