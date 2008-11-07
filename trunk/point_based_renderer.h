@@ -108,6 +108,13 @@ class PointBasedRenderer
      color_per_lod = c;
    }
 
+   void check_for_ogl_error() {
+     GLenum err = glGetError();
+     if (err != GL_NO_ERROR) {
+       fprintf(stderr, "%s(%d) glError: %s\n", __FILE__, __LINE__, gluErrorString(err));
+     }
+   }
+
  protected:
    /// Window width.
    GLuint window_width;

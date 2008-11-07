@@ -26,19 +26,9 @@
 #include <list>
 #include <vector>
 
-#include "ewa_surface_splatting.h"
-
-#include "point_ids.h"
 #include "pyramid_point_renderer.h"
 #include "pyramid_point_renderer_color.h"
-#include "pyramid_point_renderer_texture.h"
-#include "pyramid_point_renderer_lod.h"
-#include "pyramid_point_renderer_trees.h"
 #include "pyramid_point_renderer_er.h"
-#include "pyramid_triangle_renderer.h"
-#include "ellipse_rasterization.h"
-#include "jfa_splatting.h"
-#include "triangle_renderer.h"
 
 #include "camera.h"
 
@@ -71,16 +61,8 @@ class Application
   Application( GLint default_mode = PYRAMID_POINTS );
   ~Application();
 
-  void setColorBars ( bool c );
-  void renderLODColorBars( void );
-
-  int writeLodFile ( void );
-  int writeSceneFile ( void );
   int readFile ( const char * filename );
   int readNormalsFile ( const char * filename );
-  int readLodFile ( const char * filename );
-  int readPolFile (const char * filename, vector<int> * ids);
-  int readSceneFile (const char * filename, vector<int> *objs_ids);
   void drawPoints ( void );
   void draw ( void );
   void drawNormalBuffer( GLfloat* data, int bw, int bh );
@@ -92,7 +74,6 @@ class Application
   void changeMaterial( int mat );
   void changeSelectedObjsMaterial( int mat );
 
-  int getRendererType ( int object_id );
   int getNumberPoints ( int object_id );
   int getNumberTriangles ( int object_id );
   double getReconstructionFilter ( void ) const { return reconstruction_filter_size; }
@@ -101,16 +82,11 @@ class Application
   Camera* getCamera ( void ) { return camera; }
   vector<Surfeld>* getSurfelsList ( void );
 
-  void resetMaxValues ( void );
-
   void setCpuMask ( int m );
   void setGpuMask ( int m );
-  void setSampleSubdivision ( int s );
   void setPerVertexColor ( bool b, int object_id );
   void setAutoRotate ( bool r );
-  void useLOD( int l );
-  void setLodColors( bool l );
-  void switchLodsPerc ( void );
+
   void setDistanceType ( int n );
   void setBackFaceCulling ( bool b );
   void setEllipticalWeight ( bool b );
@@ -118,11 +94,6 @@ class Application
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
   void setDepthTest ( bool b );
-
-  void setRenderTexture( GLuint tex );
-
-  void clearSelectedObjects ( void );
-  void setSelectedObject ( int id );
   
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
@@ -161,7 +132,7 @@ class Application
   Camera *camera;
 
   int material_id;
-  vector< int > selected_objs;
+
   int num_objects;
 
   vector<Object> objects;
@@ -172,16 +143,12 @@ class Application
   GLint render_mode;
 
   /*****Visual interface global vars*****/
-  surfelVectorIter selected_surfel;
-  int selected_point_id;
 
   double reconstruction_filter_size;
   double prefilter_size;
 
   bool show_points;
-  bool show_color_bars;
   int show_splats;
-  bool lods_perc;
 
   bool elliptical_weight;
   bool depth_culling;
@@ -194,12 +161,7 @@ class Application
   double start_time, end_time;
   int timing_profile;
 
-  int surfs_per_level[5];
-  int max_surfs_per_level[4];
-
   /*************************************/
-
-  GLuint tex;
 
 };
 

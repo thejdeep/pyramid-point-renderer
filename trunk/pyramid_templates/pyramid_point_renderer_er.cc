@@ -421,9 +421,6 @@ void PyramidPointRendererER::projectSurfels( Primitives* prim )
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
 
-  if (use_lod)
-    num_primitives = prim->numPrimitivesLOD();
-
   nullPixels = generatePixels(0, 0, 0, 0, 0, 0);
 
   framebuffer_state = FBS_APPLICATION_CREATED;

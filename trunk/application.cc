@@ -25,28 +25,21 @@ Application::Application( GLint default_mode ) {
 
   render_mode = default_mode;
 
-  max_surfs_per_level[0] = max_surfs_per_level[1] = 
-    max_surfs_per_level[2] = max_surfs_per_level[3] = 0;
-
   point_based_render = NULL;
 
   number_surfels = 0;
   fps_loop = 0;
 
-  lods_perc = true;
-
-  color_model = true;
+  color_model = false;
   elliptical_weight = true;
   depth_culling = true;
   rotating = 0;
 
   show_points = false;
-  show_color_bars = false;
   show_splats = 1;
 
   timing_profile = 0;
   material_id = 0;
-  selected_objs.clear();
 
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
@@ -111,12 +104,9 @@ void Application::drawPoints(void)
 
   glBegin(GL_POINTS);
   
-  for (int i = 0; i < num_objects; ++i) {
-    vector< int > *prims = objects[i].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-      for (surfelVectorIter it = primitives[*prim_it].getSurfels()->begin(); it != primitives[*prim_it].getSurfels()->end(); ++it)
-	glVertex(it);
-  }
+  for (surfelVectorIter it = primitives[0].getSurfels()->begin(); it != primitives[0].getSurfels()->end(); ++it)
+    glVertex(it);
+
   glEnd();
 }
 
@@ -147,46 +137,10 @@ void Application::projectPoints ( void ) {
     // Projects to image plane surfels of all primitives for this object
     vector< int >* prims = objects[i].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      Primitives * prim = &(primitives[*prim_it]);
-      int type = prim->getRendererType();
-
-      if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	  point_based_render->projectSamples( prim );
-      }
+      Primitives * prim = &(primitives[*prim_it]);      
+      point_based_render->projectSamples( prim );
     }
     glPopMatrix();
-  }
-}
-
-void Application::drawNormalBuffer( GLfloat* data, int bw, int bh ) {
-
-  projectPoints();
-
-  // Interpolates projected surfels using pyramid algorithm
-  point_based_render->interpolate();
-  
-  // Computes per pixel color with deferred shading
-  point_based_render->drawNormalsToBuffer(data, bw, bh);
-}
-
-void Application::drawPointIdsBuffer( GLfloat* data, int bw, int bh ) {
-
-  GLint curr_render_mode = render_mode;
-
-  for (unsigned int i = 0; i < objects.size(); ++i) {
-
-    render_mode = POINT_IDS;
-
-    changeRendererType(POINT_IDS);
-
-    projectPoints();
-
-    // Computes per pixel color with deferred shading
-    point_based_render->drawPointIdsBuffer(data, bw, bh);
-
-    render_mode = curr_render_mode;
-
-    changeRendererType(render_mode);
   }
 }
 
@@ -195,9 +149,6 @@ void Application::draw(void) {
 
   if (primitives.size() == 0)
     return;
-
-  for (int i = 0; i < 5; ++i)
-    surfs_per_level[i] = 0;
 
   // Clear all buffers including pyramid algorithm buffers
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -212,13 +163,6 @@ void Application::draw(void) {
 
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
-    // for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    // int i = *it;
-
-    if (camera->runningFrames()) {
-      point_based_render->setReconstructionFilterSize(camera->getKeyFrameReconstructionFilter());
-      point_based_render->setPrefilterSize(camera->getKeyFramePrefilter());
-    }
 
     // Compute rotated eye position for this object for back face culling   
     Point eye = *(objects[i].getCenter());
@@ -236,44 +180,13 @@ void Application::draw(void) {
     // camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
     //point_based_render->setEye(eye);
  
-    //if (render_mode == PYRAMID_POINTS_TEXTURE)
-
     point_based_render->setEye( camera->positionVector() );
 
     // Projects to image plane surfels of all primitives for this object
     vector< int >* prims = objects[i].getPrimitivesList();
     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
       Primitives * prim = &(primitives[*prim_it]);
-      int type = prim->getRendererType();
-
-      if ((type != TRIANGLES) && (type != LINES) && (type != NONE)) {
-	if (type == PYRAMID_POINTS_UPSAMPLING)
-	  point_based_render->useLOD( 2 );
-	else if (type == PYRAMID_POINTS_LOD)
-	  point_based_render->useLOD( 1 );
-	else
-	  point_based_render->useLOD( 0 );
-
-	if (type == PYRAMID_POINTS_LOD) {
-	  //prim->eye = Point(eye[0], eye[1], eye[2]);	 
-	  prim->countNumVertsLOD(&surfs_per_level[0]);
-	}
-
-	point_based_render->projectSamples( prim );
-
-	if ((show_color_bars) && ((type == RASTERIZE_ELLIPSES) || (type == JFA_SPLATTING)))
-	{
-	  point_based_render->getDataProjectedPixels( &surfs_per_level[0] );
-	  if (surfs_per_level[0] > max_surfs_per_level[0])
-	    max_surfs_per_level[0] = surfs_per_level[0];
-
-	  if (surfs_per_level[1] > max_surfs_per_level[1])
-	    max_surfs_per_level[1] = surfs_per_level[1];
-
-	  surfs_per_level[2] = max_surfs_per_level[0];
-	  surfs_per_level[3] = max_surfs_per_level[1];
-	}
-      }
+      point_based_render->projectSamples( prim );
     }
     glPopMatrix();
   }
@@ -283,28 +196,6 @@ void Application::draw(void) {
 
   // Computes per pixel color with deferred shading
   point_based_render->draw();
-
-  // Only render objects without algorithm pyramid, i.e. opengl triangles and lines
-//   for (unsigned int i = 0; i < objects.size(); ++i) {
-// //   for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-// //     int i = *it;
-//     // Reset camera position and direction
-//     camera->setView();
-//     camera->setTranslation();
-//     camera->setRotation();
-
-//     // Translate and rotate object
-//     objects[i].render();
-
-//     // Render primitives using opengl triangles or lines
-//     vector< int >* prims = objects[i].getPrimitivesList();
-//     for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-//       Primitives * prim = &(primitives[*prim_it]);
-//       int type = prim->getRendererType();
-//       if ((type != NONE) && ((type == TRIANGLES) || (type == LINES)))
-// 	prim->render();
-//     }
-//   }
   
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
@@ -312,9 +203,6 @@ void Application::draw(void) {
 
   if (show_points)
     drawPoints();
-
-  if (show_color_bars)
-    renderLODColorBars();
 
   if (rotating)
     camera->rotate();
@@ -324,139 +212,6 @@ void Application::draw(void) {
 
 }
 
-
-/// Screen text with commands info
-void Application::renderLODColorBars( void ) {
-
-  int w = 400;
-  int h = 200;
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  glViewport(24, 24, w+24, h+24);
-
-  gluOrtho2D(0.0, 1.5, 0.0, 1.0);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  int total = surfs_per_level[4];;
-  if (lods_perc) {
-    if (render_mode == PYRAMID_POINTS_LOD)
-      total = surfs_per_level[0] + surfs_per_level[1] + surfs_per_level[2] + surfs_per_level[3];
-    else if (render_mode == RASTERIZE_ELLIPSES)
-      total = surfs_per_level[0] + surfs_per_level[1];
-    }
-  else
-    total = surfs_per_level[4];
-
-  double x_max = 0.0;
-
-  // BACKGROUND
-//   glColor4f(0.0, 0.0, 0.0, 1.0);
-//   glBegin (GL_POLYGON);
-//   glVertex2f (0.0, 0.0);
-//   glVertex2f (1.5, 0.0);
-//   glVertex2f (1.5, 1.0);
-//   glVertex2f (0.0, 1.0);
-//   glEnd();
-
-  // SILVER
-  x_max = (double)surfs_per_level[3] / (double)total;
-  glColor4f(0.507540+0.192250, 0.507540+0.192250, 0.507540+0.192250, 1.000000);
-  glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.0);
-  glVertex2f (x_max, 0.0);
-  glVertex2f (x_max, 0.1);
-  glVertex2f (0.0, 0.1);
-  glEnd();
-
-  // GOLD
-  x_max = (double)surfs_per_level[2] / (double)total;
-  glColor4f(0.751640+0.247250, 0.606480+0.199500, 0.226480+0.074500, 1.000000);
-  glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.15);
-  glVertex2f (x_max, 0.15);
-  glVertex2f (x_max, 0.25);
-  glVertex2f (0.0, 0.25);
-  glEnd();
-
-  // TURQUOISE
-  x_max = (double)surfs_per_level[1] / (double)total;
-  glColor4f(0.396000+0.100000, 0.741510+0.187250, 0.691020+0.174500, 1.000000);
-  glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.3);
-  glVertex2f (x_max, 0.3);
-  glVertex2f (x_max, 0.4);
-  glVertex2f (0.0, 0.4);
-  glEnd();
-
-  // RUBY
-  x_max = (double)surfs_per_level[0] / (double)total;
-  glColor4f(0.614240+0.174500, 0.041360+0.011750, 0.041360+0.011750, 1.000000);
-  glBegin (GL_POLYGON);
-  glVertex2f (0.0, 0.45);
-  glVertex2f (x_max, 0.45);
-  glVertex2f (x_max, 0.55);
-  glVertex2f (0.0, 0.55);
-  glEnd();
-  /****/
-
-  //  glColor3f(1.0, 1.0, 1.0);
-  glColor3f(0.0, 0.0, 0.0);
-
-  char text[5][20];
-  if (lods_perc) {
-    sprintf(text[0], "%.1f", (surfs_per_level[0] / (double)total) * 100.0);
-    strcat(text[0], "%");
-    sprintf(text[1], "%.1f", (surfs_per_level[1] / (double)total) * 100.0);
-    strcat(text[1], "%");
-    sprintf(text[2], "%.1f", (surfs_per_level[2] / (double)total) * 100.0);
-    strcat(text[2], "%");
-    sprintf(text[3], "%.1f", (surfs_per_level[3] / (double)total) * 100.0);
-    strcat(text[3], "%");
-    sprintf(text[4], "Total points rendered : %d", total);
-  }
-  else {
-    sprintf(text[0], "%d", surfs_per_level[0]);
-    sprintf(text[1], "%d", surfs_per_level[1]);
-    sprintf(text[2], "%d", surfs_per_level[2]);
-    sprintf(text[3], "%d", surfs_per_level[3]);
-    sprintf(text[4], "Total points in all levels : %d", surfs_per_level[4]);
-  }
-  
-  void* font = GLUT_BITMAP_HELVETICA_18;
-
-
-  glRasterPos2d(((double)surfs_per_level[3] / (double)total) + 0.01, 0.0);
-  for (char *s = &text[3][0]; *s; ++s)
-    glutBitmapCharacter(font, *s);
-
-  glRasterPos2d(((double)surfs_per_level[2] / (double)total) + 0.01, 0.15);
-  for (char *s = &text[2][0]; *s; ++s)
-    glutBitmapCharacter(font, *s);
-
-  glRasterPos2d(((double)surfs_per_level[1] / (double)total) + 0.01, 0.30);
-  for (char *s = &text[1][0]; *s; ++s)
-    glutBitmapCharacter(font, *s);
-
-  glRasterPos2d(((double)surfs_per_level[0] / (double)total) + 0.01, 0.45);
-  for (char *s = &text[0][0]; *s; ++s)
-    glutBitmapCharacter(font, *s);
-
-  glRasterPos2d(0.0, 0.6);
-  for (char *s = &text[4][0]; *s; ++s)
-    glutBitmapCharacter(font, *s);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  camera->setView ();
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-}
-
 /// Reshape func
 /// @param w New window width
 /// @param h New window height
@@ -464,43 +219,13 @@ void Application::reshape(int w, int h) {
   camera->reshape(w, h);
 }
 
-/**
- * Change material properties.
- **/
-void Application::changeMaterial(void) {
-
-  GLfloat material_ambient[4] = {Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]};  
-  GLfloat material_diffuse[4] = {Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]};  
-  GLfloat material_specular[4] = {Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]};
-  GLfloat material_shininess = Mats[material_id][12];
-
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material_ambient);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material_diffuse);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
-  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, material_shininess);
-}
-
-void Application::changeMaterial( int mat ) {
-  material_id = mat;
-  changeMaterial();
-}
-
 vector<Surfeld>* Application::getSurfelsList ( void ) {
-
-  if (selected_objs.size() == 0)
-    return NULL;
-
-  vector< int >* prims = objects[*selected_objs.begin()].getPrimitivesList();
+  vector< int >* prims = objects[0].getPrimitivesList();
   return primitives[*prims->begin()].getSurfels();
 }
 
 void Application::changePrimitivesRendererType( point_render_type_enum type ) {
-  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    vector< int >* prims = objects[*it].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-      if ((type != PYRAMID_POINTS_LOD) || (primitives[*prim_it].hasLod()))
-	primitives[*prim_it].setRendererType(type);
-  }
+  primitives[0].setRendererType(type);
   // Resets the color material
   changeMaterial();
 }
@@ -508,44 +233,9 @@ void Application::changePrimitivesRendererType( point_render_type_enum type ) {
 
 void Application::changeRendererType( int type ) {
 
-  if (selected_objs.size() == 0)
-    return;
-
-  if ((render_mode != PYRAMID_LINES) && (type != PYRAMID_LINES))  {
-    changePrimitivesRendererType ( (point_render_type_enum)type );
-    render_mode = type;
-    createPointRenderer( );
-  }
-
-  if (type == PYRAMID_POINTS_TEXTURE) {
-    glGenTextures(1, &tex);
-    int tw = 200, th = 345;
-    GLfloat* tex_data = new GLfloat[tw*th*4];
-    for (int i = 0; i < tw*th; ++i) {
-//       tex_data[i*4 + 0] = 0.3*((float)i/(float)(tw*th));
-//       tex_data[i*4 + 1] = 0.3*((float)i/(float)(tw*th));
-//       tex_data[i*4 + 2] = 0.3*((float)i/(float)(tw*th));
-      tex_data[i*4 + 0] = rand()/(float)RAND_MAX;
-      tex_data[i*4 + 1] = rand()/(float)RAND_MAX;
-      tex_data[i*4 + 2] = rand()/(float)RAND_MAX;
-      tex_data[i*4 + 3] = 1.0;
-    }
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-		 tw, th, 0, GL_RGBA, GL_FLOAT, tex_data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    delete tex_data;
-    point_based_render->setRenderTexture(tex);
-    cout << "tex : " << tex << endl;
-  }
-}
-
-void Application::setRenderTexture( GLuint tex ) {
-  if (render_mode == PYRAMID_POINTS_TEXTURE)
-    point_based_render->setRenderTexture(tex);
+  changePrimitivesRendererType ( (point_render_type_enum)type );
+  render_mode = type;
+  createPointRenderer( );
 }
 
 void Application::createPointRenderer( void ) {
@@ -553,108 +243,30 @@ void Application::createPointRenderer( void ) {
   if (render_mode == NONE)
     return;
 
-  /// Removed since it resulted in Seg Fault sometimes (strange bug) -- RM 01-09-08
-//   if (point_based_render)
-//     delete point_based_render;
-
-  if ((render_mode == PYRAMID_POINTS) || (render_mode == PYRAMID_POINTS_LOD) ||
-      (render_mode == PYRAMID_POINTS_UPSAMPLING) || (render_mode == PYRAMID_POINTS_JFA) ||
-      (render_mode == PYRAMID_HYBRID) || (render_mode == PYRAMID_TRIANGLES)) {
+  if (render_mode == PYRAMID_POINTS) {
     if (color_model)
       point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
     else
       point_based_render = new PyramidPointRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);
   }
-  else if (render_mode == PYRAMID_POINTS_TEXTURE)
-    point_based_render = new PyramidPointRendererTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
   else if (render_mode == PYRAMID_POINTS_ER)
     point_based_render = new PyramidPointRendererER(CANVAS_WIDTH, CANVAS_HEIGHT);
-  else if (render_mode == PYRAMID_LINES) 
-    point_based_render = new PyramidPointRendererTrees(CANVAS_WIDTH, CANVAS_HEIGHT); 
-  else if (render_mode == RASTERIZE_ELLIPSES)
-    point_based_render = new EllipseRasterization(CANVAS_WIDTH, CANVAS_HEIGHT);
-  else if (render_mode == JFA_SPLATTING)
-    point_based_render = new JFASplatting(CANVAS_WIDTH, CANVAS_HEIGHT);
-  else if ((render_mode == TRIANGLES) || (render_mode == LINES))
-    point_based_render = new TriangleRenderer();
-  else if (render_mode == POINT_IDS)
-    point_based_render = new PointIds();
-  else if (render_mode == EWA_SPLATTING) {
-    point_based_render = new EWASurfaceSplatting();
     //    point_based_render->setVertices(primitives.back().getSurfels());
-  }
 
   assert (point_based_render);
-  
-  if ((render_mode == PYRAMID_TRIANGLES) || (render_mode == PYRAMID_HYBRID))
-    point_based_render->setBackFaceCulling(0);
-  else
-    point_based_render->setBackFaceCulling(1);
 
+  point_based_render->setBackFaceCulling(1);
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
   point_based_render->setDepthTest(depth_culling);
-
-  cout << " type : " << render_mode << endl;
-}
-
-int Application::readSceneFile (const char * filename, vector<int> *objs_ids) {
-  // Create a new primitive from given file
-  
-  int num_objs = readObjsFiles (filename, &primitives, &objects, objs_ids, camera);
-
-  if ( num_objs > 0  ) {
-
-    num_objects = objects.size();
-
-    // Count total number of points being rendered
-    for (vector<int>::iterator it = objs_ids->begin(); it < objs_ids->end(); ++it) {
-      vector< int >* prims = objects[*it].getPrimitivesList();
-      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-	number_surfels += primitives[*prim_it].getSurfels()->size();
-      }
-    }
-
-    render_mode = PYRAMID_POINTS;
-
-    createPointRenderer( );
-
-    return num_objs;
-  }
-
-  return -1;
-}
-
-int Application::readPolFile (const char * filename, vector<int> *objs_ids) {
-  // Create a new primitive from given file
-
-  int num_objs = readTreeFiles (filename, &primitives, &objects, objs_ids);
-
-  if ( num_objs > 0  ) {
-
-    num_objects = objects.size();
-
-    // Count total number of points being rendered
-    for (vector<int>::iterator it = objs_ids->begin(); it < objs_ids->end(); ++it) {
-      vector< int >* prims = objects[*it].getPrimitivesList();
-      for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-	number_surfels += primitives[*prim_it].getSurfels()->size();
-      }
-    }
-
-    render_mode = PYRAMID_LINES;
-
-    createPointRenderer( );
-
-    return num_objs;
-  }
-
-  return -1;
 }
 
 /**
  * Reads a ply file, creates an object and
  * loads the vertices and triangles in the associated primitive.
+ * It is possible to load multiple objects and multiple primitives
+ * per object, but for this simple example only one primitive associate
+ * to one object is considered
  * @param filename Given file name.
  * @return Id number of created object.
  **/
@@ -665,22 +277,17 @@ int Application::readFile ( const char * filename ) {
 
   primitives.back().setPerVertexColor(0);
 
-  // Create a new object
-  int id = objects.size();
-  objects.push_back( Object( id ) );
+  // Create a new object with id 0
+  objects.push_back( Object( 0 ) );
   objects.back().setFilename( filename );
 
   readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
   // connect new object to new primitive
-  objects.back().addPrimitives( primitives.back().getId() );
-  primitives.back().setType( 1.0 );
-  primitives.back().setRendererType( render_mode );
-  //primitives.back().setRendererType( RASTERIZE_ELLIPSES );
-  //primitives.back().setRendererType( JFA_SPLATTING );
-  //primitives.back().setRendererType( PYRAMID_POINTS_ER );
-
-  num_objects = objects.size();
+  objects[0].addPrimitives( primitives.back().getId() );
+  primitives[0].setType( 1.0 );
+  // Sets the default rendering algorithm
+  primitives[0].setRendererType( render_mode );
 
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
@@ -688,7 +295,7 @@ int Application::readFile ( const char * filename ) {
   //  if (!point_based_render)
   createPointRenderer( );
 
-  return id;
+  return 0;
 }
 
 /**
@@ -716,8 +323,6 @@ int Application::readNormalsFile ( const char * filename ) {
   primitives.back().setType( 1.0 );
   ;;primitives.back().setRendererType( render_mode );
 
-  num_objects = objects.size();
-
   // Count total number of points being rendered
   number_surfels += primitives.back().getSurfels()->size();
   
@@ -728,137 +333,12 @@ int Application::readNormalsFile ( const char * filename ) {
   return id;
 }
 
-int Application::readLodFile ( const char * filename ) {
-
-  char lodFilename[200];
-  strcpy(lodFilename, filename);
-  char* ptr = strstr(filename, ".lod");
-  strncpy (ptr, "", 4);
-
-  int id = objects.size();
-  //  for (vector<Primitives>::iterator it = primitives.begin(); it != primitives.end(); ++it, ++id) {
-
-  // Create a new object and connect to new primitive
-  objects.push_back( Object( id ) );
-  objects.back().setFilename( lodFilename );
-
-  primitives.push_back( Primitives( primitives.size() ) );
-  
-  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
-
-  primitives.back().readFileLOD(lodFilename);
-  primitives.back().setLodStructure(1);
-  
-//   } else {
-
-//     cout << "reading " << filename << " ..." << flush;
-
-//     // Create a new primitive from given file
-//     readPlyTriangles (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
-//     //    readPlyTriangles (filename, (primitives.back()).getSurfels());
-
-//     cout << " readed! " << endl;
-
-//     primitives.back().createLOD();
-
-//     cout << "writting in file " << str << flush;
-
-//     primitives.back().writeFileLOD(str.c_str());
-
-//     cout << " written! " << endl;
-
-    primitives.back().setType( 1.0 );
-    primitives.back().setRendererType( PYRAMID_POINTS_LOD );
-
-//   }
-
-  cout << endl
-       << "### Number of PATCHES in ###" << endl
-       << "Lowest Resolution : " << primitives.back().numPrimitivesIn()  << endl
-       << "All Resolutions   : " << primitives.back().numPrimitivesLOD() << endl
-       << "Level 0   : " << primitives.back().numPrimitivesInLevel(0) << endl
-       << endl;
-
-  objects.back().addPrimitives( primitives.back().getId() );
-
-  num_objects = objects.size();
-
-  // Count total number of points being rendered
-  number_surfels += primitives.back().getSurfels()->size();
-
-  cout << "objects : " << num_objects << endl;
-  cout << "primitives : " << primitives.size() << endl;
-  cout << "number of surfels : " << number_surfels << endl;
-  
-  render_mode = PYRAMID_POINTS_LOD;
-
-  createPointRenderer( );
-
-  return id;
-}
-
-int Application::writeSceneFile ( void ) {
-  const char * fn = "../plys/scene.scn";
-  ofstream out(fn, ios::trunc);
-
-  out << "#Scene file : type;renderType;material id -- id;x;y;z;q.x;q.y;q.z;q.a;n" << endl;
-  out << "PRIMITIVES " << primitives.size() << endl;
-  out << "OBJECTS " << objects.size() << endl;
-
-  for (unsigned int i = 0; i < primitives.size(); ++i) {
-    out << i << " " << objects[i].filename() << " " << 1.0 << " " << primitives[i].getRendererType() << " " <<
-      primitives[i].getMaterial() << endl;
-  }
- 
-  for (unsigned int i = 0; i < objects.size(); ++i) {
-    out << i << " " << (*objects[i].getCenter())[0] << " " << (*objects[i].getCenter())[1] << " " << (*objects[i].getCenter())[2] << " " <<
-      objects[i].getRotationQuat()->x << " " << objects[i].getRotationQuat()->y << " " << objects[i].getRotationQuat()->z << " " <<
-      objects[i].getRotationQuat()->a  << " 1 " << i << endl;
-  }
-
-  out << camera->positionVector()[0] << " " << camera->positionVector()[1] << " " << camera->positionVector()[2] << " " <<
-    camera->rotationQuat().x << " " << camera->rotationQuat().y << " " << camera->rotationQuat().z << " " << camera->rotationQuat().a << endl;
-  
-  out << camera->lightVector()[0] << " " << camera->lightVector()[1] << " " << camera->lightVector()[2] << endl;
-
-  cout << "Wrote scene : scene.scn" << endl;
-  
-  return 1;
-}
-
-int Application::writeLodFile ( void ) {
-  if (selected_objs.empty())
-    return -1;
-
-  Object *obj = &objects[selected_objs.front()];
-
-  Primitives *prim = &primitives[obj->getPrimitivesList()->front()];
-
-  prim->createLOD();
-
-  char lodFilename[200];
-  strcpy (lodFilename, obj->filename());
-  strcat (lodFilename, ".lod");
-
-  cout << "writting in file " << lodFilename << flush;
-
-  prim->writeFileLOD( lodFilename );
-  
-  cout << " written! " << endl;
-  return 1;
-}
-
 /// Mouse Left Button Function, starts rotation
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
-void Application::mouseLeftButton(int x, int y) {
-  
-  if (selected_objs.empty())
-    camera->startRotation(x, y);
-  else {
-    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->startQuatRotation(x, y, objects[*it].getRotationQuat());
-  }
+void Application::mouseLeftButton(int x, int y) {  
+  camera->startRotation(x, y);
+  //camera->startQuatRotation(x, y, objects[*it].getRotationQuat());
 }
 
 /// Mouse Middle Button Function, zoom
@@ -884,41 +364,26 @@ void Application::mouseReleaseButton( void ) {
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseLeftMotion(int x, int y) {
-
-  if (selected_objs.empty())
-    camera->rotate(x, y);
-  else {
-    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->rotateQuat(x, y, objects[*it].getRotationQuat(), objects[*it].getCenter());
-  }
+  camera->rotate(x, y);
+  //camera->rotateQuat(x, y, objects[*it].getRotationQuat(), objects[*it].getCenter());
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotion(int x, int y) {
-
-  if (selected_objs.empty())
-    camera->zooming (x, y);
-  else {
-    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->zoomingVec(x, y, objects[*it].getCenter());
-    camera->updateMouse();
-  }
+  camera->zooming (x, y);
+  //camera->zoomingVec(x, y, objects[*it].getCenter());
+  camera->updateMouse();
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotionShift(int x, int y) {
-
-  if (selected_objs.empty())
-    camera->translate(x, y);
-  else {
-    for (vector< int >::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it)
-      camera->translateVec(x, y, objects[*it].getCenter());
-    camera->updateMouse();
-  }
+  camera->translate(x, y);
+  //camera->translateVec(x, y, objects[*it].getCenter());
+  camera->updateMouse();  
 }
 
 /// Mouse right movement func, light translation
@@ -928,48 +393,12 @@ void Application::mouseRightMotion(int x, int y) {
   camera->lightTranslate(x, y);
 }
 
-void Application::clearSelectedObjects ( void ) {
-  selected_objs.clear();
-}
-
-void Application::setSelectedObject ( int id ) {    
-  selected_objs.push_back( id );
-}
-
-int Application::getRendererType ( int object_id ) {
-
-  if ((object_id < 0) || (object_id >= (int)objects.size()))
-    return -1;
-
-    // Projects to image plane surfels of all primitives for this object
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  Primitives * prim = &(primitives[prims->front()]);
-  return (int)prim->getRendererType();
-}
-
 int Application::getNumberPoints ( int object_id ) {
-
-  int num = 0;
-  // Projects to image plane surfels of all primitives for this object
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-    Primitives * prim = &(primitives[*prim_it]);
-    num += prim->numberPoints();
-  }
-
-  return num;
+  return primitives[0].numberPoints();
 }
 
 int Application::getNumberTriangles ( int object_id ) {
-
-  int num = 0;
-  // Projects to image plane surfels of all primitives for this object
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-    Primitives * prim = &(primitives[*prim_it]);
-    num += prim->numberTriangles();
-  }
-  return num;
+  return primitives[0].numberTriangles();
 }
 
 void Application::setReconstructionFilter ( double s ) { 
@@ -992,22 +421,10 @@ void Application::setGpuMask ( int m ) {
   point_based_render->setGpuMaskSize( m );
 }
 
-void Application::setSampleSubdivision ( int s ) {
-  point_based_render->setNumSampleSubdivisions( s );
-}
-
 void Application::setPerVertexColor ( bool b, int object_id ) {
-  vector< int >* prims = objects[object_id].getPrimitivesList();
-  for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-    primitives[*prim_it].setPerVertexColor(b);
-    // Reset renderer type to load per vertex color or default color in vertex array
-    primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
-  }
-}
-
-void Application::resetMaxValues ( void ) {
-  max_surfs_per_level[0] = max_surfs_per_level[1] = 
-    max_surfs_per_level[2] = max_surfs_per_level[3] = 0;
+  primitives[0].setPerVertexColor(b);
+  // Reset renderer type to load per vertex color or default color in vertex array
+  primitives[0].setRendererType( primitives[0].getRendererType() );
 }
 
 void Application::setAutoRotate ( bool r ) {
@@ -1020,41 +437,32 @@ void Application::setDepthTest ( bool d ) {
     point_based_render->setDepthTest(depth_culling);
 }
 
-void Application::useLOD ( int lod ) {
-  int type = PYRAMID_POINTS;
-  if ( lod == 1)
-    type = PYRAMID_POINTS_LOD;
-  else if ( lod == 2)
-    type = PYRAMID_POINTS_UPSAMPLING;
+/**
+ * Change material properties.
+ **/
+void Application::changeMaterial(void) {
 
-  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    vector< int >* prims = objects[*it].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it)
-      primitives[*prim_it].setRendererType( type );
-  }
+  GLfloat material_ambient[4] = {Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]};  
+  GLfloat material_diffuse[4] = {Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]};  
+  GLfloat material_specular[4] = {Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]};
+  GLfloat material_shininess = Mats[material_id][12];
+
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material_ambient);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material_diffuse);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
+  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, material_shininess);
 }
 
-void Application::changeSelectedObjsMaterial( int mat ) {
-  for (vector<int>::iterator it = selected_objs.begin(); it != selected_objs.end(); ++it) {
-    vector< int >* prims = objects[*it].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      primitives[*prim_it].setMaterial( mat );
-      primitives[*prim_it].setRendererType( primitives[*prim_it].getRendererType() );
-    }
-  }
+void Application::changeMaterial( int mat ) {
+  material_id = mat;
+  changeMaterial();
+}
+
+void Application::changeSelectedObjsMaterial( int mat ) {  
+  primitives[0].setMaterial( mat );
+  primitives[0].setRendererType( primitives[0].getRendererType() );
+  point_based_render->setMaterial( mat );
   changeMaterial(mat);
-}
-
-void Application::setLodColors ( bool c ) {
-  point_based_render->useColorPerLOD( c );
-}
-
-void Application::switchLodsPerc ( void ) {
-  lods_perc = !lods_perc;
-}
-
-void Application::setColorBars ( bool c ) {
-  show_color_bars = c;
 }
 
 void Application::setDistanceType ( int n ) {

@@ -42,11 +42,15 @@ PyramidPointRenderer::~PyramidPointRenderer() {
   delete shader_phong;
   delete shader_show;
 
+  delete fbo_buffers;
+  delete fbo_textures;
+  delete shader_texture_names;
+
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
 
-  glDeleteTextures(FBO_BUFFERS_COUNT, fbo_textures);
-  for (int i = 0; i < FBO_BUFFERS_COUNT; ++i) {
+  glDeleteTextures(fbo_buffers_count, fbo_textures);
+  for (int i = 0; i < fbo_buffers_count; ++i) {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(FBO_TYPE, 0);
     glDisable(FBO_TYPE);
@@ -56,8 +60,6 @@ PyramidPointRenderer::~PyramidPointRenderer() {
   glDrawBuffer(GL_BACK);
 }
 
-
-
 GLuint PyramidPointRenderer::getTextureOfBuffer(GLuint buffer)
      /* returns the OpenGL texture name of a color attachment buffer (GL_COLOR_ATTACHMENTx_EXT) 
       * of the global framebuffer object or 0 if the color attachment buffer is not bound
@@ -65,22 +67,13 @@ GLuint PyramidPointRenderer::getTextureOfBuffer(GLuint buffer)
 {
   int i;
 
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++)
-    {
-
-      if (fbo_buffers[i] == buffer)
-	{
+  for (i = 0; i < fbo_buffers_count; i++)
+    if (fbo_buffers[i] == buffer)
 	  break;
-	}
-    }
-  if (i < FBO_BUFFERS_COUNT)
-    {
-      return fbo_textures[i];
-    }
+  if (i < fbo_buffers_count)
+    return fbo_textures[i];
   else
-    {
-      return (GLuint)0;
-    }
+    return (GLuint)0;
 }
 
 void PyramidPointRenderer::rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1,
@@ -127,53 +120,27 @@ void PyramidPointRenderer::rasterizePixels(pixels_struct dest, pixels_struct src
     }
 
   /* bind textures: src0 is bound as 0th and 1st texture, src1 as 2nd and 3rd texture */
-  {
-    if (src0.buffersCount > 0)
-      {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(FBO_TYPE, src0.textures[0]);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-      }
+  /* and so on for more than two buffers*/
+
+  for (int i = 0; i < fbo_buffers_count / 2; ++i) {
+    glActiveTexture(GL_TEXTURE0 + i);
+    if (src0.buffersCount > i) {	
+      glBindTexture(FBO_TYPE, src0.textures[i]);
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    }
+    else 
+      glBindTexture(FBO_TYPE, (GLuint)0);
+    
+    glActiveTexture(GL_TEXTURE0 + (fbo_buffers_count/2) + i);      
+    if (src1.buffersCount > i) {
+      glBindTexture(FBO_TYPE, src1.textures[i]);
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    }
     else
-      {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(FBO_TYPE, (GLuint)0);
-      }
-    if (src0.buffersCount > 1)
-      {
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(FBO_TYPE, src0.textures[1]);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-      }
-    else
-      {
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(FBO_TYPE, (GLuint)0);
-      }
-    if (src1.buffersCount > 0)
-      {
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(FBO_TYPE, src1.textures[0]);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-      }
-    else
-      {
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(FBO_TYPE, (GLuint)0);
-      }
-    if (src1.buffersCount > 1)
-      {
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(FBO_TYPE, src1.textures[1]);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-      }
-    else
-      {
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(FBO_TYPE, (GLuint)0);
-      }
+      glBindTexture(FBO_TYPE, (GLuint)0);      	
   }
 
+  /* Calls the corresponding function depending on the current phase*/
   if (EMPTY != phase)
     {
       bool ret = TRUE;
@@ -250,29 +217,25 @@ void PyramidPointRenderer::rasterizePixels(pixels_struct dest, pixels_struct src
     texcoors1[3][1] = (src1.y) / (GLfloat)fbo_height;
 
 
-    /* send quad */
-    
+    /* send quad */    
     glBegin(GL_QUADS);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     
-    for(i = 0; i < 4; i++) 
-      {	
-	if (src0.buffersCount > 0)
-	  glMultiTexCoord2fARB(GL_TEXTURE0, texcoors0[i][0], texcoors0[i][1]);
-	if (src0.buffersCount > 1)
-	  glMultiTexCoord2fARB(GL_TEXTURE1, texcoors0[i][0], texcoors0[i][1]);
-	if (src1.buffersCount > 0)
-	  glMultiTexCoord2fARB(GL_TEXTURE2, texcoors1[i][0], texcoors1[i][1]);
-	if (src1.buffersCount > 1)
-	  glMultiTexCoord2fARB(GL_TEXTURE3, texcoors1[i][0], texcoors1[i][1]);
-	glVertex2f(vertices[i][0], vertices[i][1]);
+    for(i = 0; i < 4; i++) {	
+      for (int buf = 0; buf < fbo_buffers_count / 2; ++buf) {
+	if (src0.buffersCount > buf)
+	  glMultiTexCoord2fARB(GL_TEXTURE0 + buf, texcoors0[i][0], texcoors0[i][1]);
+	if (src1.buffersCount > buf)
+	  glMultiTexCoord2fARB(GL_TEXTURE0 + (fbo_buffers_count/2) + buf, texcoors1[i][0], texcoors1[i][1]);
       }
+      glVertex2f(vertices[i][0], vertices[i][1]);
+    }
     glEnd();
   }
 }
 
 pixels_struct PyramidPointRenderer::generatePixels(int level, 
-			     GLuint curr_fbo, int buffersCount, GLuint buffer0, GLuint buffer1)
+						   GLuint curr_fbo, int buffersCount, GLuint* buffers)
      /* returns an pixels_struct specifying the pixels of the specified level in the
       * specified fbo (0 or g.fbo) and one or two of its buffers (GL_BACK or g.fbo_buffers[i])
       */
@@ -327,10 +290,10 @@ pixels_struct PyramidPointRenderer::generatePixels(int level,
 
   result.fbo = curr_fbo;
   result.buffersCount = buffersCount;
-  result.buffers[0] = buffer0;
-  result.textures[0] = getTextureOfBuffer(buffer0);
-  result.buffers[1] = buffer1;
-  result.textures[1] = getTextureOfBuffer(buffer1);
+  for (int i = 0; i < buffersCount; ++i) {
+    result.buffers[i] = buffers[i];
+    result.textures[i] = getTextureOfBuffer(buffers[i]);
+  }
 
   return result;
 }
@@ -340,6 +303,7 @@ int PyramidPointRenderer::projectionCallbackFunc( void )
 {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+  shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
 
   return TRUE;
 }
@@ -350,11 +314,15 @@ void PyramidPointRenderer::projectSurfels ( Primitives* prim )
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0, 0);
+  nullPixels = generatePixels(0, 0, 0, 0);
 
   framebuffer_state = FBS_APPLICATION_CREATED;
 
-  destinationPixels = generatePixels(0, fbo, 2, fbo_buffers[0], fbo_buffers[2]);
+  GLuint buffers[fbo_buffers_count/2];
+  for (int i = 0; i < fbo_buffers_count/2; ++i)
+    buffers[i] = fbo_buffers[i*2];
+
+  destinationPixels = generatePixels(0, fbo, 2, &buffers[0]);
   rasterizePixels(destinationPixels, nullPixels, nullPixels, PROJECTION);
 
   // Render vertices using the vertex buffer object.
@@ -384,10 +352,9 @@ int PyramidPointRenderer::analysisCallbackFunc( void )
   shader_analysis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
 
   shader_analysis->set_uniform("depth_test", depth_test);
-
-
-  shader_analysis->set_uniform("textureA", 0);
-  shader_analysis->set_uniform("textureB", 1);
+  
+  for (int i = 0; i < fbo_buffers_count/2; ++i)
+    shader_analysis->set_uniform(shader_texture_names[i].c_str(), i);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -400,18 +367,21 @@ void PyramidPointRenderer::rasterizeAnalysisPyramid( void )
   pixels_struct sourcePixels;
   pixels_struct destinationPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0, 0);
+  nullPixels = generatePixels(0, 0, 0, 0);
+
+  GLuint buffers[fbo_buffers_count/2];
 
   for (level = 1; level < levels_count; level++)
     {
       cur_level = level-1;
 
-      sourcePixels = generatePixels(level - 1, fbo, 2, 
-				    fbo_buffers[0 + ((level - 1) % 2)], 
-				    fbo_buffers[2 + ((level - 1) % 2)]);
-      destinationPixels = generatePixels(level, fbo, 2, 
-					 fbo_buffers[0 + (level % 2)], 
-					 fbo_buffers[2 + (level % 2)]);
+      for (int i = 0; i < fbo_buffers_count/2; ++i)
+	buffers[i] = fbo_buffers[i*2 + ((level - 1) % 2)];
+      sourcePixels = generatePixels(level - 1, fbo, fbo_buffers_count/2, &buffers[0]);
+      
+      for (int i = 0; i < fbo_buffers_count/2; ++i)
+	buffers[i] = fbo_buffers[i*2 + ((level) % 2)];
+      destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
       
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, ANALYSIS);
       shader_analysis->use(0);
@@ -420,9 +390,10 @@ void PyramidPointRenderer::rasterizeAnalysisPyramid( void )
 
 int PyramidPointRenderer::copyCallbackFunc( void )
 {
+
   shader_copy->use();
-  shader_copy->set_uniform("textureA", 0);
-  shader_copy->set_uniform("textureB", 1);
+  for (int i = 0; i < fbo_buffers_count/2; ++i)
+    shader_copy->set_uniform(shader_texture_names[i].c_str(), i);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -437,16 +408,19 @@ void PyramidPointRenderer::copyAnalysisPyramid()
   pixels_struct sourcePixels;
   pixels_struct destinationPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0, 0);
+  nullPixels = generatePixels(0, 0, 0, 0);
+  GLuint buffers[fbo_buffers_count/2];
 
   for (level = 0; level < levels_count; level++)
     {
-      sourcePixels = generatePixels(level, fbo, 2, 
-				    fbo_buffers[0 + (level % 2)], 
-				    fbo_buffers[2 + (level % 2)]);
-      destinationPixels = generatePixels(level, fbo, 2, 
-					 fbo_buffers[0 + ((level + 1) % 2)], 
-					 fbo_buffers[2 + ((level + 1) % 2)]);
+      for (int i = 0; i < fbo_buffers_count/2; ++i)
+	buffers[i] = fbo_buffers[i*2 + ((level) % 2)];
+      sourcePixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
+
+      for (int i = 0; i < fbo_buffers_count/2; ++i)
+	buffers[i] = fbo_buffers[i*2 + ((level + 1) % 2)];
+      destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]); 
+
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, COPY);
       shader_copy->use(0);
     }
@@ -465,8 +439,8 @@ int PyramidPointRenderer::synthesisCallbackFunc( void )
   shader_synthesis->set_uniform("depth_test", depth_test);
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
 
-  shader_synthesis->set_uniform("textureA", 0);
-  shader_synthesis->set_uniform("textureB", 1);
+  for (int i = 0; i < fbo_buffers_count/2; ++i)
+    shader_synthesis->set_uniform(shader_texture_names[i].c_str(), i);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -479,18 +453,19 @@ void PyramidPointRenderer::rasterizeSynthesisPyramid()
   pixels_struct source1Pixels; /* coarser level than destination */
   pixels_struct destinationPixels;
 
+  GLuint buffers[fbo_buffers_count/2];
+
   for (level = levels_count - 2; level >= 0; level--)
     {
       cur_level = level;
-      source0Pixels = generatePixels(level, fbo, 2, 
-				     fbo_buffers[0 + ((level + 1) % 2)], 
-				     fbo_buffers[2 + ((level + 1) % 2)]);
-      source1Pixels = generatePixels(level + 1, fbo, 2, 
-				     fbo_buffers[0 + ((level + 1) % 2)], 
-				     fbo_buffers[2 + ((level + 1) % 2)]);
-      destinationPixels = generatePixels(level, fbo, 2, 
-					 fbo_buffers[0 + (level % 2)], 
-					 fbo_buffers[2 + (level % 2)]);
+      for (int i = 0; i < fbo_buffers_count/2; ++i)
+	buffers[i] = fbo_buffers[i*2 + ((level+1) % 2)];
+      source0Pixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
+      source1Pixels = generatePixels(level + 1, fbo, fbo_buffers_count/2, &buffers[0]);
+
+      for (int i = 0; i < fbo_buffers_count/2; ++i)
+	buffers[i] = fbo_buffers[i*2 + ((level) % 2)];
+      destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
 
       rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
       shader_synthesis->use(0);
@@ -502,12 +477,15 @@ void PyramidPointRenderer::rasterizeSynthesisPyramid()
 int PyramidPointRenderer::phongShadingCallbackFunc( void )
 {
   shader_phong->use();
-  shader_phong->set_uniform("textureA", 0);
 
- //  shader_phong->set_uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
-//   shader_phong->set_uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
-//   shader_phong->set_uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
-//   shader_phong->set_uniform("shininess", Mats[material_id][12]);
+  shader_phong->set_uniform(shader_texture_names[0].c_str(), 0);
+  for (int i = 2; i < fbo_buffers_count/2; ++i)
+    shader_phong->set_uniform(shader_texture_names[i+1].c_str(), i);
+
+  shader_phong->set_uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
+  shader_phong->set_uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
+  shader_phong->set_uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
+  shader_phong->set_uniform("shininess", Mats[material_id][12]);
 
   return FALSE; /* not done, rasterize quad */
 }
@@ -520,7 +498,7 @@ void PyramidPointRenderer::rasterizePhongShading(int bufferIndex)
   pixels_struct sourcePixels;
   pixels_struct destinationPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0, 0);
+  nullPixels = generatePixels(0, 0, 0, 0);
 
   shader_projection->use(0);
   shader_analysis->use(0);
@@ -528,8 +506,16 @@ void PyramidPointRenderer::rasterizePhongShading(int bufferIndex)
   shader_synthesis->use(0);
   shader_show->use(0);
 
-  sourcePixels = generatePixels(level, fbo, 1, fbo_buffers[bufferIndex], 0);
-  destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0);
+  GLuint buffers[fbo_buffers_count/2 - 1];
+
+  buffers[0] = fbo_buffers[bufferIndex];
+
+  for (int i = 1; i < fbo_buffers_count/2; ++i)
+    buffers[i] = fbo_buffers[bufferIndex + i*2 + 2];
+  sourcePixels = generatePixels(level, fbo, fbo_buffers_count/2 - 1, &buffers[0]);
+
+  GLuint back[1] = {GL_BACK};
+  destinationPixels = generatePixels(level, 0, 1, &back[0]);
   rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
 
   shader_phong->use(0);
@@ -553,7 +539,7 @@ void PyramidPointRenderer::showPixels(int bufferIndex)
   pixels_struct sourcePixels;
   pixels_struct destinationPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0, 0);
+  nullPixels = generatePixels(0, 0, 0, 0);
 
   shader_projection->use(0);
   shader_analysis->use(0);
@@ -561,13 +547,13 @@ void PyramidPointRenderer::showPixels(int bufferIndex)
   shader_synthesis->use(0);
   shader_phong->use(0);
 
-  for (level = 0; level < levels_count; level++)
-    {
-      sourcePixels = generatePixels(level, fbo, 1, fbo_buffers[bufferIndex], 0);
-      destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0);
-      rasterizePixels(destinationPixels, sourcePixels, nullPixels, SHOW);
-      shader_show->use(0);
-    }
+//   for (level = 0; level < levels_count; level++)
+//     {
+//       sourcePixels = generatePixels(level, fbo, 1, fbo_buffers[bufferIndex], 0);
+//       destinationPixels = generatePixels(level, 0, 1, GL_BACK, 0);
+//       rasterizePixels(destinationPixels, sourcePixels, nullPixels, SHOW);
+//       shader_show->use(0);
+//     }
 }
 
 /**
@@ -588,7 +574,7 @@ void PyramidPointRenderer::clearBuffers() {
   // Clear all buffers, including the render buffer
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
+  for (i = 0; i < fbo_buffers_count; i++) {
     glDrawBuffer(fbo_buffers[i]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
@@ -600,7 +586,7 @@ void PyramidPointRenderer::clearBuffers() {
 
   framebuffer_state = FBS_UNDEFINED;
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 /**
@@ -608,10 +594,9 @@ void PyramidPointRenderer::clearBuffers() {
  **/
 void PyramidPointRenderer::projectSamples(Primitives* prim) {
   // Project points to framebuffer with depth test on.
-
   projectSurfels( prim );
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 /**
@@ -625,8 +610,11 @@ void PyramidPointRenderer::interpolate() {
   glDepthMask(GL_FALSE);
 
   // Interpolate scattered data using pyramid algorithm
+
   rasterizeAnalysisPyramid();
+
   copyAnalysisPyramid();
+
   rasterizeSynthesisPyramid();
 }
 
@@ -645,7 +633,7 @@ void PyramidPointRenderer::draw( void ) {
 
   glDisable(FBO_TYPE);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 
@@ -676,10 +664,13 @@ void PyramidPointRenderer::createFBO() {
 
   /* initialize fbos */
 
-  assert(FBO_BUFFERS_COUNT <= 16);
+  assert(fbo_buffers_count <= 16);
 
-  glGenTextures(FBO_BUFFERS_COUNT, fbo_textures);
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) {
+  fbo_buffers = new GLuint[fbo_buffers_count];
+  fbo_textures = new GLuint[fbo_buffers_count];
+
+  glGenTextures(fbo_buffers_count, fbo_textures);
+  for (i = 0; i < fbo_buffers_count; i++) {
     fbo_buffers[i] = attachments[i];
     glBindTexture(FBO_TYPE, fbo_textures[i]);
     glTexImage2D(FBO_TYPE, 0, FBO_FORMAT,
@@ -696,26 +687,26 @@ void PyramidPointRenderer::createFBO() {
   glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, fbo_width,
 			   fbo_height);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   glGenFramebuffersEXT(1, &fbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
-  for (i = 0; i < FBO_BUFFERS_COUNT; i++) 
+  for (i = 0; i < fbo_buffers_count; i++) 
     {
       //fprintf(stderr, "bind fbo buffer %i\n", i);
       glBindTexture(FBO_TYPE, fbo_textures[i]);
       glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				fbo_buffers[i], FBO_TYPE, fbo_textures[i], 0);
-      CHECK_FOR_OGL_ERROR();
+      check_for_ogl_error();
     }
 
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
 			       GL_RENDERBUFFER_EXT, fbo_depth);
  
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   framebuffer_status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
   switch(framebuffer_status) 
@@ -743,7 +734,7 @@ void PyramidPointRenderer::createFBO() {
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &i);
   //  fprintf(stderr, "max color attachments %i\n", i);
@@ -755,6 +746,10 @@ void PyramidPointRenderer::createFBO() {
 void PyramidPointRenderer::createShaders ( void ) {
 
   bool shader_inst_debug = 0;
+
+  shader_texture_names = new string[fbo_buffers_count/2];
+  shader_texture_names[0] = "textureA";
+  shader_texture_names[1] = "textureB";
 
   shader_projection = new glslKernel();
   shader_projection->vertex_source("pyramid_point_renderer/shader_point_projection.vert");
