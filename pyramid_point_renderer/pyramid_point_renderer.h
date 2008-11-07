@@ -20,24 +20,22 @@ class PyramidPointRenderer : public PointBasedRenderer
 
   void createFBO( void );
   void createShaders ( void );
-  int showCallbackFunc( void );
-  void showPixels(int bufferIndex);
   void rasterizePhongShading(int bufferIndex);
-  int phongShadingCallbackFunc( void );
+  const int phongShadingCallbackFunc( void ) const;
   void rasterizeSynthesisPyramid();
-  int synthesisCallbackFunc( void );
+  const int synthesisCallbackFunc( void ) const;
   void copyAnalysisPyramid();
-  int copyCallbackFunc( void );
+  const int copyCallbackFunc( void ) const;
   void rasterizeAnalysisPyramid( void );
-  int analysisCallbackFunc( void );
-  int projectionCallbackFunc( void );
-  void projectSurfels( Primitives * );
+  const int analysisCallbackFunc( void ) const;
+  const int projectionCallbackFunc( void ) const;
+  void projectSurfels( const Primitives * const );
 
-  pixels_struct generatePixels(int level, GLuint fbo, int buffersCount, GLuint* buffers);
-  void rasterizePixels(pixels_struct dest, pixels_struct src0, pixels_struct src1, int phase);
-  GLuint getTextureOfBuffer(GLuint buffer);
+  const pixels_struct generatePixels(const int level, const GLuint fbo, const int buffersCount, const GLuint* buffers) const;
+  const void rasterizePixels(const pixels_struct dest, const pixels_struct src0, const pixels_struct src1, const int phase);
+  const GLuint getTextureOfBuffer(const GLuint buffer) const;
 
-  double computeHalfPixelSize( void );
+  const double computeHalfPixelSize( void ) const;
 
  public:
   PyramidPointRenderer();
@@ -47,7 +45,7 @@ class PyramidPointRenderer : public PointBasedRenderer
   void draw();
   
   void clearBuffers (void);
-  void projectSamples ( Primitives* prim );
+  void projectSamples (Primitives* const prim );
   void interpolate ( void );
 
  private:
@@ -73,8 +71,6 @@ class PyramidPointRenderer : public PointBasedRenderer
   glslKernel *shader_synthesis;
   /// Phong shading shader.
   glslKernel *shader_phong;
-  /// Pixel shader.
-  glslKernel *shader_show;
 
   /// Textures names to pass as uniform to shaders
   string *shader_texture_names;
@@ -82,12 +78,12 @@ class PyramidPointRenderer : public PointBasedRenderer
   /// The application-created framebuffer object.
   GLuint fbo;
 
+  /// Framebuffer for depth test.
   GLuint fbo_depth;
 
   /// usually fboBuffers[i] == GL_COLOR_ATTACHMENT0_EXT + i, 
   /// but we don't rely on this assumption
   GLuint *fbo_buffers;
-
 
   /** Textures bound to the framebuffer object; 
    * the ping-pong rendering switches between pairs 0-2 and 1-3

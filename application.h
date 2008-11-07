@@ -32,11 +32,6 @@
 
 #include "camera.h"
 
-//#define PI 3.14159265
-#define HALF_PI 1.570796325
-#define QUARTER_PI 0.785398163
-#define E 2.71828183
-
 /* #define CANVAS_WIDTH  1024 */
 /* #define CANVAS_HEIGHT 1024 */
 #define CANVAS_WIDTH  768
@@ -49,12 +44,14 @@ class Application
  private :
 
   void createPointRenderer( void );
-  void glVertex ( const Surfeld * s );
-  void glVertex ( surfelVectorIter it );
-  void glVertex ( Point p );
+  void glVertex ( const Surfeld * s ) const;
+  void glVertex ( const surfelVectorIter it ) const;
+  void glVertex ( const Point p ) const;
 
-  void changeMaterial ( void );
   void changePrimitivesRendererType ( point_render_type_enum type );
+
+  void projectPoints ( void );
+  void drawPoints ( void );
 
  public :
 
@@ -63,31 +60,22 @@ class Application
 
   int readFile ( const char * filename );
   int readNormalsFile ( const char * filename );
-  void drawPoints ( void );
   void draw ( void );
-  void drawNormalBuffer( GLfloat* data, int bw, int bh );
-  void drawPointIdsBuffer( GLfloat* data, int bw, int bh );
-  void projectPoints ( void );
   void reshape ( int w, int h );
 
   void changeRendererType ( int type );
   void changeMaterial( int mat );
-  void changeSelectedObjsMaterial( int mat );
 
-  int getNumberPoints ( int object_id );
-  int getNumberTriangles ( int object_id );
+  int getNumberPoints ( void );
   double getReconstructionFilter ( void ) const { return reconstruction_filter_size; }
   double getPrefilter ( void ) const { return prefilter_size; }
-  int getMaterial ( void ) const { return material_id; }
   Camera* getCamera ( void ) { return camera; }
   vector<Surfeld>* getSurfelsList ( void );
 
-  void setCpuMask ( int m );
   void setGpuMask ( int m );
-  void setPerVertexColor ( bool b, int object_id );
+  void setPerVertexColor ( bool b );
   void setAutoRotate ( bool r );
 
-  void setDistanceType ( int n );
   void setBackFaceCulling ( bool b );
   void setEllipticalWeight ( bool b );
 
@@ -104,37 +92,16 @@ class Application
   void mouseMiddleMotionShift( int x, int y );
   void mouseRightMotion( int x, int y );
 
-  void createKeyFrame( void ) {
-    if (camera) camera->createKeyFrame(reconstruction_filter_size, prefilter_size);
-  }
-  void clearFrames( void ) {
-    if (camera) camera->clearFrames();
-  }
-  void writeKeyFrames( void ) {
-    if (camera) camera->writeKeyFrames("camera.frames");
-  }
-  void loadKeyFrames( const char* filename ) {
-    if (camera) camera->loadKeyFrames(filename);
-  }
-  void runFrames( void ) {
-    if (camera) camera->runFrames();
-  }
-  bool runningFrames( void ) {
-    return (camera) ? camera->runningFrames() : false;
-  }
-
  private :
 
-  unsigned int number_surfels;
-
+  // Generic class, is instanced as one of the inherited classes (rendering algorithms)
   PointBasedRenderer *point_based_render;
 
+  // Camera class
   Camera *camera;
 
-  int material_id;
-
-  int num_objects;
-
+  // Lists of objects and primitives
+  // In this simple application only one object associated to one primitive is used.
   vector<Object> objects;
   vector<Primitives> primitives;
 
@@ -142,14 +109,13 @@ class Application
   // see primitives.h for the complete list (point_render_type_enum).
   GLint render_mode;
 
-  /*****Visual interface global vars*****/
+  /*****Visual interface vars*****/
 
   double reconstruction_filter_size;
   double prefilter_size;
 
+  // Flags on/off
   bool show_points;
-  int show_splats;
-
   bool elliptical_weight;
   bool depth_culling;
   bool rotating;

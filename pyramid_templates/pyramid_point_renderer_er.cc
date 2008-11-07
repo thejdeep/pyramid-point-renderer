@@ -20,7 +20,7 @@ PyramidPointRendererER::PyramidPointRendererER() : PointBasedRenderer(),
 					       gpu_mask_size(1){
   createFBO();
   createShaders();
-  levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
+  levels_count = max((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
 PyramidPointRendererER::PyramidPointRendererER(int w, int h) : PointBasedRenderer(w, h),
@@ -33,7 +33,7 @@ PyramidPointRendererER::PyramidPointRendererER(int w, int h) : PointBasedRendere
 							   gpu_mask_size(1) {
   createFBO();
   createShaders();
-  levels_count = MAX((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
+  levels_count = max((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
 }
 
 PyramidPointRendererER::~PyramidPointRendererER() {
@@ -202,7 +202,7 @@ void PyramidPointRendererER::rasterizePixels(pixels_struct dest, pixels_struct s
 
   if (EMPTY != phase)
     {
-      bool ret = TRUE;
+      bool ret = true;
       switch(phase) {
       case PROJECTION:
 	ret = projectionCallbackFunc();	
@@ -223,7 +223,7 @@ void PyramidPointRendererER::rasterizePixels(pixels_struct dest, pixels_struct s
 	ret = showCallbackFunc();
 	break;
       }
-      if (FALSE != ret)
+      if (false != ret)
 	{
 	  return; /* callback function has done the rendering */
 	}
@@ -412,7 +412,7 @@ int PyramidPointRendererER::projectionCallbackFunc( void )
     shader_projection->set_uniform("max_radius", max_radius);
   }
 
-  return TRUE;
+  return true;
 }
 
 /// Project point sized samples to screen space
@@ -469,7 +469,7 @@ int PyramidPointRendererER::analysisCallbackFunc( void )
   shader_analysis->set_uniform("textureB", 1);
   shader_analysis->set_uniform("textureC", 2);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererER::rasterizeAnalysisPyramid( void )
@@ -505,7 +505,7 @@ int PyramidPointRendererER::copyCallbackFunc( void )
   shader_copy->set_uniform("textureB", 1);
   shader_copy->set_uniform("textureC", 2);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererER::copyAnalysisPyramid()
@@ -556,7 +556,7 @@ int PyramidPointRendererER::synthesisCallbackFunc( void )
   shader_synthesis->set_uniform("textureB", 1);
   shader_synthesis->set_uniform("textureC", 2);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererER::rasterizeSynthesisPyramid( void )
@@ -601,7 +601,7 @@ int PyramidPointRendererER::phongShadingCallbackFunc( void )
   shader_phong->set_uniform("textureB", 1);
   //shader_phong->set_uniform("textureC", 2);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererER::rasterizePhongShading(int bufferIndex)
@@ -668,7 +668,7 @@ int PyramidPointRendererER::showCallbackFunc( void )
   shader_show->use();
   shader_show->set_uniform("tex", 0);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 /* show buffer */
@@ -726,7 +726,7 @@ void PyramidPointRendererER::clearBuffers() {
   //glClear(GL_COLOR_BUFFER_BIT); 
   framebuffer_state = FBS_UNDEFINED;
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 /**
@@ -737,7 +737,7 @@ void PyramidPointRendererER::projectSamples(Primitives* prim) {
 
   projectSurfels( prim );
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 /**
@@ -775,7 +775,7 @@ void PyramidPointRendererER::draw( void ) {
 
   glDisable(FBO_TYPE);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 
@@ -826,12 +826,12 @@ void PyramidPointRendererER::createFBO() {
   glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, fbo_width,
 			   fbo_height);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   glGenFramebuffersEXT(1, &fbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   for (i = 0; i < FBO_BUFFERS_COUNT_6; i++) 
     {
@@ -839,13 +839,13 @@ void PyramidPointRendererER::createFBO() {
       glBindTexture(FBO_TYPE, fbo_textures[i]);
       glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				fbo_buffers[i], FBO_TYPE, fbo_textures[i], 0);
-      CHECK_FOR_OGL_ERROR();
+      check_for_ogl_error();
     }
 
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
 			       GL_RENDERBUFFER_EXT, fbo_depth);
  
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   framebuffer_status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
   switch(framebuffer_status) 
@@ -869,7 +869,7 @@ void PyramidPointRendererER::createFBO() {
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &i);
   //  fprintf(stderr, "max color attachments %i\n", i);

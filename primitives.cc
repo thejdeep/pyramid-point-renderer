@@ -21,7 +21,7 @@ GLfloat obj_colors[8][4] = {{0.0, 1.0, 0.0, 1.0},
 /**
  * Render object using designed rendering system.
  **/
-void Primitives::render ( void ) {
+void Primitives::render ( void ) const {
 
   if ((renderer_type == PYRAMID_POINTS) ||
       (renderer_type == PYRAMID_POINTS_ER)) {

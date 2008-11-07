@@ -49,13 +49,8 @@ class PointBasedRenderer
 
    virtual void getDataProjectedPixels ( int* ) {}
 
-   /** For Ellipse Rasterization **/
-   virtual void setCpuMaskSize ( int ) {}
+   /** For Templates rendering  **/
    virtual void setGpuMaskSize ( int ) {}
-   virtual void setNumSampleSubdivisions ( int ) {}
-
-   /** For JFA Splatting **/
-   virtual void setDistanceType ( int ) {}
 
    void setEye (Point e) {
      eye = e;
@@ -108,13 +103,6 @@ class PointBasedRenderer
      color_per_lod = c;
    }
 
-   void check_for_ogl_error() {
-     GLenum err = glGetError();
-     if (err != GL_NO_ERROR) {
-       fprintf(stderr, "%s(%d) glError: %s\n", __FILE__, __LINE__, gluErrorString(err));
-     }
-   }
-
  protected:
    /// Window width.
    GLuint window_width;
@@ -155,35 +143,12 @@ class PointBasedRenderer
    bool color_per_lod;
 };
 
-#define CHECK_FOR_OGL_ERROR()	  									 \
-	do {															 \
-		GLenum err;													 \
-		err = glGetError();											 \
-		if (err != GL_NO_ERROR)										 \
-		{															 \
-			fprintf(stderr, "%s(%d) glError: %s\n",					 \
-					__FILE__, __LINE__, gluErrorString(err));		 \
-		}															 \
-	} while(0)
-
-#if !defined NULL
-#	define NULL 0
-#endif
-
-#if !defined TRUE
-#	define TRUE 1
-#endif
-
-#if !defined FALSE
-#	define FALSE 0
-#endif
-
-
- /* macros */
-
-#if !defined MAX
-#	define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
+   inline void check_for_ogl_error() {
+     GLenum err = glGetError();
+     if (err != GL_NO_ERROR) {
+       fprintf(stderr, "%s(%d) glError: %s\n", __FILE__, __LINE__, gluErrorString(err));
+     }
+   }
 
 
 #endif

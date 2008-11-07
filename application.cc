@@ -27,7 +27,6 @@ Application::Application( GLint default_mode ) {
 
   point_based_render = NULL;
 
-  number_surfels = 0;
   fps_loop = 0;
 
   color_model = false;
@@ -36,10 +35,6 @@ Application::Application( GLint default_mode ) {
   rotating = 0;
 
   show_points = false;
-  show_splats = 1;
-
-  timing_profile = 0;
-  material_id = 0;
 
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
@@ -62,10 +57,8 @@ Application::Application( GLint default_mode ) {
 
   camera->initLight();
 
-  changeMaterial();
-
   glEnable(GL_NORMALIZE);
-  CHECK_FOR_OGL_ERROR()	;
+  check_for_ogl_error();
 
 }
 
@@ -78,27 +71,26 @@ Application::~Application( void ) {
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
-void Application::glVertex(const Surfeld * s) {
+void Application::glVertex(const Surfeld * s) const {
   Point p = s->Center();
   glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
-void Application::glVertex(surfelVectorIter it) {
+void Application::glVertex(const surfelVectorIter it) const {
   Point p = it->Center();
   glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Renders a vertex
 /// @param p Given vertex position
-void Application::glVertex(Point p) {
+void Application::glVertex(const Point p) const {
   glVertex3f(p[0], p[1], p[2]);
 }
 
-/// Render all points 
-void Application::drawPoints(void)
-{
+/// Render all points with OpenGL
+void Application::drawPoints(void) {
   glPointSize(1.0);
   glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -110,6 +102,9 @@ void Application::drawPoints(void)
   glEnd();
 }
 
+/**
+ * Project surfels to screen space.
+ **/
 void Application::projectPoints ( void ) {
   
   if (primitives.size() == 0)
@@ -144,8 +139,10 @@ void Application::projectPoints ( void ) {
   }
 }
 
-/// Display func
-void Application::draw(void) {
+/** 
+ * Display method to render the models.
+ **/
+void Application::draw( void ) {
 
   if (primitives.size() == 0)
     return;
@@ -158,13 +155,11 @@ void Application::draw(void) {
 
   // Reset camera position and direction
   camera->setView();
-  //camera->setTranslation();
-  //camera->setRotation();
 
   // Render objects primitives with pyramid algorithm
   for (unsigned int i = 0; i < objects.size(); ++i) {
 
-    // Compute rotated eye position for this object for back face culling   
+    // Compute rotated eye position for this object (for back face culling)
     Point eye = *(objects[i].getCenter());
 
     glPushMatrix();
@@ -209,7 +204,6 @@ void Application::draw(void) {
 
   // necessary to compute correct fps
   glFinish();
-
 }
 
 /// Reshape func
@@ -226,18 +220,23 @@ vector<Surfeld>* Application::getSurfelsList ( void ) {
 
 void Application::changePrimitivesRendererType( point_render_type_enum type ) {
   primitives[0].setRendererType(type);
-  // Resets the color material
-  changeMaterial();
 }
 
-
+/**
+ * Changes the rendering algorithm.
+ * @param type Rendering mode.
+ **/
 void Application::changeRendererType( int type ) {
-
   changePrimitivesRendererType ( (point_render_type_enum)type );
   render_mode = type;
   createPointRenderer( );
 }
 
+/**
+ * Defines the rendering algorithm.
+ * point_based_render is of generic type, depending on
+ * the choice one of the inherited classes is instanced.
+ **/
 void Application::createPointRenderer( void ) {
 
   if (render_mode == NONE)
@@ -289,9 +288,6 @@ int Application::readFile ( const char * filename ) {
   // Sets the default rendering algorithm
   primitives[0].setRendererType( render_mode );
 
-  // Count total number of points being rendered
-  number_surfels += primitives.back().getSurfels()->size();
-
   //  if (!point_based_render)
   createPointRenderer( );
 
@@ -322,10 +318,6 @@ int Application::readNormalsFile ( const char * filename ) {
   objects.back().addPrimitives( primitives.back().getId() );
   primitives.back().setType( 1.0 );
   ;;primitives.back().setRendererType( render_mode );
-
-  // Count total number of points being rendered
-  number_surfels += primitives.back().getSurfels()->size();
-  
 
   //  if (!point_based_render)
   createPointRenderer( );
@@ -393,44 +385,67 @@ void Application::mouseRightMotion(int x, int y) {
   camera->lightTranslate(x, y);
 }
 
-int Application::getNumberPoints ( int object_id ) {
+/**
+ * Returns the model's number of points.
+ * @return Number of points.
+ **/
+int Application::getNumberPoints ( void ) {
   return primitives[0].numberPoints();
 }
 
-int Application::getNumberTriangles ( int object_id ) {
-  return primitives[0].numberTriangles();
-}
-
+/**
+ * Sets the reconstruction filter size.
+ * Multiplicator of the radius size.
+ * @param s Reconstruction filter size.
+ **/
 void Application::setReconstructionFilter ( double s ) { 
   reconstruction_filter_size = s;
   if (point_based_render)
     point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
 }
 
+/**
+ * Sets the prefilter size.
+ * @param s Prefilter size.
+ **/
 void Application::setPrefilter ( double s ) { 
   prefilter_size = s;
   if (point_based_render)
     point_based_render->setPrefilterSize(prefilter_size);
 }
 
-void Application::setCpuMask ( int m ) {
-  point_based_render->setCpuMaskSize( m );
-}
-
+/**
+ * Sets the kernel size for the template rendering algorithm only.
+ * @param m Kernel size mxm.
+ **/
 void Application::setGpuMask ( int m ) {
   point_based_render->setGpuMaskSize( m );
 }
 
-void Application::setPerVertexColor ( bool b, int object_id ) {
-  primitives[0].setPerVertexColor(b);
+/**
+ * Sets per-vertex color on/off if the model has
+ * color information per point.
+ * @param c Per-vertex color state.
+ **/
+void Application::setPerVertexColor ( bool c ) {
+  primitives[0].setPerVertexColor(c);
   // Reset renderer type to load per vertex color or default color in vertex array
   primitives[0].setRendererType( primitives[0].getRendererType() );
 }
 
+/**
+ * Turns auto-rotate on/off.
+ * Auto-rotate turns the model continuously.
+ * @param r Auto-rotate state.
+ **/
 void Application::setAutoRotate ( bool r ) {
   rotating = r;
 }
 
+/**
+ * Turns depth test on/off.
+ * @param d Depth test state.
+ **/
 void Application::setDepthTest ( bool d ) {
   depth_culling = d;
   if (point_based_render)
@@ -438,41 +453,27 @@ void Application::setDepthTest ( bool d ) {
 }
 
 /**
- * Change material properties.
+ * Change model material properties.
+ * @param mat Id of material (see materials.h for list)
  **/
-void Application::changeMaterial(void) {
-
-  GLfloat material_ambient[4] = {Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]};  
-  GLfloat material_diffuse[4] = {Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]};  
-  GLfloat material_specular[4] = {Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]};
-  GLfloat material_shininess = Mats[material_id][12];
-
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material_ambient);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material_diffuse);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
-  glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, material_shininess);
-}
-
-void Application::changeMaterial( int mat ) {
-  material_id = mat;
-  changeMaterial();
-}
-
-void Application::changeSelectedObjsMaterial( int mat ) {  
+void Application::changeMaterial( int mat ) {  
   primitives[0].setMaterial( mat );
   primitives[0].setRendererType( primitives[0].getRendererType() );
   point_based_render->setMaterial( mat );
-  changeMaterial(mat);
 }
 
-void Application::setDistanceType ( int n ) {
-  point_based_render->setDistanceType(n);
-}
-
+/**
+ * Turns backface culling on/off.
+ * @param b Backface culling state.
+ **/
 void Application::setBackFaceCulling ( bool b ) {
   point_based_render->setBackFaceCulling(b);
 }
 
+/**
+ * Turns elliptical weights on/off.
+ * @param b Elliptical weight state.
+ **/
 void Application::setEllipticalWeight ( bool b ) {
   point_based_render->setEllipticalWeight(b);
 }

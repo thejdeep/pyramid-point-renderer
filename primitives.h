@@ -49,7 +49,7 @@ class Primitives
       
   ~Primitives() {}
 
-  void render ( void );
+  void render ( void ) const;
 
   vector<Surfeld> * getSurfels ( void ) { return &surfels; }
   vector<Triangle> * getTriangles( void ) { return &triangles; }
