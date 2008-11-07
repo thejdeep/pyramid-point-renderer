@@ -1,0 +1,50 @@
+#summary Basic How-To build a simple application to use the rendering system.
+
+= Introduction =
+
+This How-To explains a very simple application class to use the rendering system.
+It only loads one model at a time, and can only use three different
+rendering algorithms:
+
+  * The original Pyramid Point Rendering algorithm *PYRAMID_POINTS*.
+
+  * Pyramid Point Rendering with color per vertex *PYRAMID_POINTS_COLOR*.
+
+  * Pyramid with templates algorithm *PYRAMID_TEMPLATES*.
+
+= Objects and Primitives =
+
+An application with multiples objects composed of multiple parts can be built, and
+each part can be rendered with a different algorithm.
+
+Basically, the object class defines its state (position, rotation, etc), while the
+primitives class holds the objects primitives, surfels in this case. An object
+is associated to one or primitives, in such a way that it can be composed of
+multiple parts, such as a tree model is composed of three files : leaves, branches and trunk.
+More often, it is one to one relation, each object defines the state of one set of primitives.
+
+The primitives class defines how the surfels are loaded on vertex arrays depending on the
+rendering mode selected. This class also holds the method to draw the vertex arrays.
+
+= Rendering Modes =
+
+Each rendering algorithm is in a directory of its own, containing the code, a header file, and
+shaders (GLSL). They all inherit the *point_based_render* class.
+
+== main.c ==
+
+This file contains the GLut callbacks (display, keyboard, mouse, etc) and an instance
+of the application class. The application class is instanced passing the default
+renderer type, the default is the original algorithm : &ldquo;PYRAMID_POINTS&rdquo;.
+
+The *readFile* method of the application class takes as input the name
+of a *ply* file with normal and radius per vertex.
+
+== application ==
+
+The application class is the bridge between an interface (GLut, Qt) and the algorithm.
+It contains implementation of mouse methods and calls to attribution methods (flags).
+It also contains the primitives and objects declarations, although in this simple example
+there is only one of each, it is still treated as a list for the simplicity of
+extensions.
+
