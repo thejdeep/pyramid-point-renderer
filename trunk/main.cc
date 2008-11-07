@@ -46,16 +46,16 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     exit(0);
     break;
   case '0' :
-    application->changeSelectedObjsMaterial ( 0 );
+    application->changeMaterial ( 0 );
     break;
   case '1' :
-    application->changeSelectedObjsMaterial ( 1 );
+    application->changeMaterial ( 1 );
     break;
   case '2' :
-    application->changeSelectedObjsMaterial ( 2 );
+    application->changeMaterial ( 2 );
     break;
   case '3' :
-    application->changeSelectedObjsMaterial ( 3 );
+    application->changeMaterial ( 3 );
     break;
 
   }
@@ -125,7 +125,6 @@ void mouseMotion(int x, int y) {
 
 /// Main Program
 int main(int argc, char * argv []) {
- 
 
   // GLUT Window Initialization:
   glutInit (&argc, argv);

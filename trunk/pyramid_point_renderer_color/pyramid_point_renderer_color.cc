@@ -19,7 +19,7 @@ PyramidPointRendererColor::PyramidPointRendererColor() : PointBasedRenderer(),
 					   render_state(RS_BUFFER0) {
   createFBO();
   createShaders();
-  levels_count = MAX((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
+  levels_count = max((int)(log(fbo_width)/log(2.0)), (int)(log(fbo_height)/log(2.0)));
 }
 
 PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PointBasedRenderer(w, h),
@@ -31,7 +31,7 @@ PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PointBasedR
 					   render_state(RS_BUFFER0) {
   createFBO();
   createShaders();
-  levels_count = MAX((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
+  levels_count = max((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
 }
 
 PyramidPointRendererColor::~PyramidPointRendererColor() {
@@ -143,7 +143,7 @@ void PyramidPointRendererColor::rasterizePixels(pixels_struct dest, pixels_struc
   /* Calls the corresponding function depending on the current phase*/
   if (EMPTY != phase)
     {
-      bool ret = TRUE;
+      bool ret = true;
       switch(phase) {
       case PROJECTION:
 	ret = projectionCallbackFunc();	
@@ -164,7 +164,7 @@ void PyramidPointRendererColor::rasterizePixels(pixels_struct dest, pixels_struc
 	ret = showCallbackFunc();
 	break;
       }
-      if (FALSE != ret)
+      if (false != ret)
 	{
 	  return; /* callback function has done the rendering */
 	}
@@ -305,7 +305,7 @@ int PyramidPointRendererColor::projectionCallbackFunc( void )
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
 
-  return TRUE;
+  return true;
 }
 
 /// Project point sized samples to screen space
@@ -356,7 +356,7 @@ int PyramidPointRendererColor::analysisCallbackFunc( void )
   for (int i = 0; i < fbo_buffers_count/2; ++i)
     shader_analysis->set_uniform(shader_texture_names[i].c_str(), i);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererColor::rasterizeAnalysisPyramid( void )
@@ -395,7 +395,7 @@ int PyramidPointRendererColor::copyCallbackFunc( void )
   for (int i = 0; i < fbo_buffers_count/2; ++i)
     shader_copy->set_uniform(shader_texture_names[i].c_str(), i);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererColor::copyAnalysisPyramid()
@@ -442,7 +442,7 @@ int PyramidPointRendererColor::synthesisCallbackFunc( void )
   for (int i = 0; i < fbo_buffers_count/2; ++i)
     shader_synthesis->set_uniform(shader_texture_names[i].c_str(), i);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererColor::rasterizeSynthesisPyramid()
@@ -487,7 +487,7 @@ int PyramidPointRendererColor::phongShadingCallbackFunc( void )
 //   shader_phong->set_uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
 //   shader_phong->set_uniform("shininess", Mats[material_id][12]);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererColor::rasterizePhongShading(int bufferIndex)
@@ -528,7 +528,7 @@ int PyramidPointRendererColor::showCallbackFunc( void )
   shader_show->use();
   shader_show->set_uniform("tex", 0);
 
-  return FALSE; /* not done, rasterize quad */
+  return false; /* not done, rasterize quad */
 }
 
 /* show buffer */
@@ -586,7 +586,7 @@ void PyramidPointRendererColor::clearBuffers() {
 
   framebuffer_state = FBS_UNDEFINED;
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 /**
@@ -596,7 +596,7 @@ void PyramidPointRendererColor::projectSamples(Primitives* prim) {
   // Project points to framebuffer with depth test on.
   projectSurfels( prim );
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 /**
@@ -633,7 +633,7 @@ void PyramidPointRendererColor::draw( void ) {
 
   glDisable(FBO_TYPE);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 }
 
 
@@ -687,12 +687,12 @@ void PyramidPointRendererColor::createFBO() {
   glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT32, fbo_width,
 			   fbo_height);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   glGenFramebuffersEXT(1, &fbo);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   for (i = 0; i < fbo_buffers_count; i++) 
     {
@@ -700,13 +700,13 @@ void PyramidPointRendererColor::createFBO() {
       glBindTexture(FBO_TYPE, fbo_textures[i]);
       glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 				fbo_buffers[i], FBO_TYPE, fbo_textures[i], 0);
-      CHECK_FOR_OGL_ERROR();
+      check_for_ogl_error();
     }
 
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
 			       GL_RENDERBUFFER_EXT, fbo_depth);
  
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   framebuffer_status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
   switch(framebuffer_status) 
@@ -734,7 +734,7 @@ void PyramidPointRendererColor::createFBO() {
   glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
-  CHECK_FOR_OGL_ERROR();
+  check_for_ogl_error();
 
   glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &i);
   //  fprintf(stderr, "max color attachments %i\n", i);
