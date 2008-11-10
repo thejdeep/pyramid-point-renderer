@@ -23,8 +23,7 @@ GLfloat obj_colors[8][4] = {{0.0, 1.0, 0.0, 1.0},
  **/
 void Primitives::render ( void ) const {
 
-  if ((renderer_type == PYRAMID_POINTS) ||
-      (renderer_type == PYRAMID_POINTS_ER)) {
+  if (renderer_type == PYRAMID_POINTS) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -36,7 +35,8 @@ void Primitives::render ( void ) const {
     
     glDrawArrays(GL_POINTS, 0, number_points);   
   }
-  else if ((renderer_type == PYRAMID_POINTS_COLOR)) {
+  else if ((renderer_type == PYRAMID_POINTS_COLOR) ||
+      (renderer_type == PYRAMID_TEMPLATES)) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -60,17 +60,14 @@ void Primitives::render ( void ) const {
 
 /**
  * Changes the renderer type.
+ * @param rtype Given renderer type.
  **/
-//void Primitives::setRendererType ( point_render_type_enum type ) {
 void Primitives::setRendererType ( int rtype ) {
 
   number_points = surfels.size();
   number_triangles = triangles.size();
 
   renderer_type = rtype;
-
-  if (renderer_type == NONE)
-    return;
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
@@ -84,7 +81,7 @@ void Primitives::setRendererType ( int rtype ) {
     setPyramidPointsArrays();
   else if (renderer_type == PYRAMID_POINTS_COLOR)
     setPyramidPointsArraysColor();
-  else if (renderer_type == PYRAMID_POINTS_ER)
+  else if (renderer_type == PYRAMID_TEMPLATES)
     setPyramidPointsArraysColor();
 }
 
@@ -144,6 +141,8 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   normal_array = new GLfloat[number_points * 3];
   color_array = new GLfloat[number_points * 4];
 
+  material = 1;
+
   int pos = 0;
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
@@ -152,16 +151,17 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z);
     vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
     
-    if (color_model) {
+    //    if (color_model) 
+{
       color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
       color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
       color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
-    else {
-      color_array[pos*4 + 0] = obj_colors[id][0];
-      color_array[pos*4 + 1] = obj_colors[id][1];
-      color_array[pos*4 + 2] = obj_colors[id][2];
-    }
+//     else {
+//       color_array[pos*4 + 0] = obj_colors[id][0];
+//       color_array[pos*4 + 1] = obj_colors[id][1];
+//       color_array[pos*4 + 2] = obj_colors[id][2];
+//     }
     //color_array[pos*4 + 3] = type;
     color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
 

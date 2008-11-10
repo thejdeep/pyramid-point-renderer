@@ -14,14 +14,23 @@
 
 #include "point_based_renderer.h"
 
+/**
+ * Pyramid point renderer algorithm as described in: <br>
+ * Efficient Point-Based Rendering Using Image Reconstruction. <br>
+ * Ricardo Marroquim, Martin Kraus, Paulo Roma Cavalcanti <br>
+ * IEEE/Eurographics Symposium on Point-Based Graphics (PBG), Sep-2007
+ **/
 class PyramidPointRenderer : public PointBasedRenderer
 {
  private:
 
+  virtual void createShaders ( void );
+
+ protected:
+
   void createFBO( void );
-  void createShaders ( void );
-  void rasterizePhongShading(int bufferIndex);
   const int phongShadingCallbackFunc( void ) const;
+  void rasterizePhongShading(int bufferIndex);
   void rasterizeSynthesisPyramid();
   const int synthesisCallbackFunc( void ) const;
   void copyAnalysisPyramid();
@@ -33,6 +42,7 @@ class PyramidPointRenderer : public PointBasedRenderer
 
   const pixels_struct generatePixels(const int level, const GLuint fbo, const int buffersCount, const GLuint* buffers) const;
   const void rasterizePixels(const pixels_struct dest, const pixels_struct src0, const pixels_struct src1, const int phase);
+
   const GLuint getTextureOfBuffer(const GLuint buffer) const;
 
   const double computeHalfPixelSize( void ) const;
@@ -40,15 +50,15 @@ class PyramidPointRenderer : public PointBasedRenderer
  public:
   PyramidPointRenderer();
   PyramidPointRenderer(int w, int h);
+  PyramidPointRenderer(int w, int h, int fbos);
   ~PyramidPointRenderer();
-
-  void draw();
   
+  void draw();  
   void clearBuffers (void);
   void projectSamples (Primitives* const prim );
   void interpolate ( void );
 
- private:
+ protected:
   /// Frame buffer object width.
   int fbo_width;
   /// Frame buffer object height.
@@ -62,7 +72,6 @@ class PyramidPointRenderer : public PointBasedRenderer
 
   /// Projection shader.
   glslKernel *shader_projection;
-
   /// Pyramid copy phase shader.
   glslKernel *shader_copy;
   /// Pyramid analysis phase shader.

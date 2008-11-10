@@ -34,6 +34,18 @@ PyramidPointRenderer::PyramidPointRenderer(int w, int h) : PointBasedRenderer(w,
   levels_count = max((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
 }
 
+PyramidPointRenderer::PyramidPointRenderer(int w, int h, int fbos) : PointBasedRenderer(w, h),
+					   fbo_width(1800),
+					   fbo_height(1200),
+					   fbo_buffers_count(fbos),
+					   canvas_border_width(w/32),
+					   canvas_border_height(h/32),
+					   render_state(RS_BUFFER0) {
+  createFBO();
+  createShaders();
+  levels_count = max((int)(log(canvas_width)/log(2.0)), (int)(log(canvas_height)/log(2.0)));
+}
+
 PyramidPointRenderer::~PyramidPointRenderer() {
   delete shader_projection;
   delete shader_analysis;
@@ -59,7 +71,8 @@ PyramidPointRenderer::~PyramidPointRenderer() {
   glDrawBuffer(GL_BACK);
 }
 
-/** returns the OpenGL texture name of a color attachment buffer (GL_COLOR_ATTACHMENTx_EXT) 
+/** 
+ * Returns the OpenGL texture name of a color attachment buffer (GL_COLOR_ATTACHMENTx_EXT) 
  * of the global framebuffer object or 0 if the color attachment buffer is not bound
  * @param buffer Given buffer to associate texture number.
  * @return Texture id associted to given buffer.
@@ -511,15 +524,16 @@ void PyramidPointRenderer::rasterizeSynthesisPyramid( void )
     }
 }
 
-/* rasterize level 0 of pyramid with per pixel shading */
-
+/**
+ * Rasterize level 0 of pyramid with per pixel shading.
+ **/
 const int PyramidPointRenderer::phongShadingCallbackFunc( void ) const
 {
   shader_phong->use();
 
   shader_phong->set_uniform(shader_texture_names[0].c_str(), 0);
-  for (int i = 2; i < fbo_buffers_count/2; ++i)
-    shader_phong->set_uniform(shader_texture_names[i+1].c_str(), i);
+  for (int i = 2; i < fbo_buffers_count/2; ++i) 
+    shader_phong->set_uniform(shader_texture_names[i].c_str(), i-1);
 
   shader_phong->set_uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
   shader_phong->set_uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
@@ -741,6 +755,7 @@ void PyramidPointRenderer::createFBO() {
 
   glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &i);
   //  fprintf(stderr, "max color attachments %i\n", i);
+
 }		
 
 /**
