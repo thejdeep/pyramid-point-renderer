@@ -237,18 +237,13 @@ void Application::changeRendererType( int type ) {
  * point_based_render is of generic type, depending on
  * the choice one of the inherited classes is instanced.
  **/
-void Application::createPointRenderer( void ) {
+void Application::createPointRenderer( void ) {  
 
-  if (render_mode == NONE)
-    return;
-
-  if (render_mode == PYRAMID_POINTS) {
-    if (color_model)
-      point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);   
-    else
-      point_based_render = new PyramidPointRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
-  else if (render_mode == PYRAMID_POINTS_ER)
+  if (render_mode == PYRAMID_POINTS)
+      point_based_render = new PyramidPointRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);   
+  else if (render_mode == PYRAMID_POINTS_COLOR)
+      point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+  else if (render_mode == PYRAMID_TEMPLATES)
     point_based_render = new PyramidPointRendererER(CANVAS_WIDTH, CANVAS_HEIGHT);
     //    point_based_render->setVertices(primitives.back().getSurfels());
 

@@ -63,6 +63,27 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   glutPostRedisplay();
 }
 
+/// Keyboard keys function
+/// @param key Pressed key
+/// @param x X coordinate of mouse pointer
+/// @param y Y coordinate of mouse pointer
+void keyboardSpecial(int key_pressed, int x, int y) {
+  switch (key_pressed) {
+  case GLUT_KEY_F1 :
+    application->changeRendererType ( 0 );
+    break;
+  case GLUT_KEY_F2 :
+    application->changeRendererType ( 1 );
+    break;
+  case GLUT_KEY_F3 :
+    application->changeRendererType ( 2 );
+    break;
+  }
+
+  glutPostRedisplay();
+}
+
+
 /// Mouse click function
 /// @param button Clicked button
 /// @param state Button state (clicked or released)
@@ -134,14 +155,13 @@ int main(int argc, char * argv []) {
   glutCreateWindow ("Point Based Rendering");
 
   application = new Application(PYRAMID_POINTS);
-  //  application->readFile( "../plys/dragon.ply" );
+  application->readFile( "../plys/dragon.ply" );
 
-  if (argc < 2) {
-    cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
-    exit(0);
-  }
-
-  application->readFile( argv[1] );
+//   if (argc < 2) {
+//     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
+//     exit(0);
+//   }
+//  application->readFile( argv[1] );
 
   //GLUT callback functions
   glutDisplayFunc(display);
@@ -150,6 +170,7 @@ int main(int argc, char * argv []) {
   glutMouseFunc(mouse);
   glutMotionFunc(mouseMotion);
   glutKeyboardFunc(keyboard);
+  glutSpecialFunc(keyboardSpecial);
 
   glutMainLoop();
 

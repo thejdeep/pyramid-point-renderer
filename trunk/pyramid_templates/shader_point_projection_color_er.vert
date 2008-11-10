@@ -17,11 +17,9 @@ void main(void)
   vec3 e = (gl_ModelViewProjectionMatrixInverse * vec4(eye, 1.0)).xyz;
   float material = 0.0;
 
-  gl_TexCoord[0] = gl_MultiTexCoord0;
-  vec3 unprojected_normal = cross(normalize(gl_TexCoord[0].xyz), normalize(gl_Normal.xyz));
 
   //if ( (back_face_culling == 1) && (dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < 0.0 )) {
-  if ( (back_face_culling == 1) && (dot(normalize(e - gl_Vertex.xyz), unprojected_normal) < 0.0 )) {
+  if ( (back_face_culling == 1) && (dot(normalize(e - gl_Vertex.xyz), gl_Normal) < 0.0 )) {
 
     radius_depth_w.x = 0.0;
     
@@ -36,7 +34,7 @@ void main(void)
       
       material = gl_TexCoord[0].w;
 
-      normal_vec = normalize(gl_NormalMatrix * unprojected_normal);
+      normal_vec = normalize(gl_NormalMatrix * gl_Normal);
       float radius = gl_Vertex.w;
 
       radius_depth_w = vec3(radius, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);

@@ -402,16 +402,6 @@ int PyramidPointRendererER::projectionCallbackFunc( void )
 
   shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
 
-  if (use_lod == 1) { //lod
-    shader_projection->set_uniform("vertex_buffer", 6);
-    shader_projection->set_uniform("normal_buffer", 7);
-    shader_projection->set_uniform("color_per_lod", (GLint)color_per_lod);
-  }
-  else if (use_lod == 2) { //upsampling
-    GLfloat max_radius = 2.0/(GLfloat)canvas_width;
-    shader_projection->set_uniform("max_radius", max_radius);
-  }
-
   return true;
 }
 
