@@ -8,7 +8,7 @@
 #extension GL_EXT_gpu_shader4 : enable
 
 uniform vec2 oo_fbo_size;
-uniform vec2 canvas_border;
+//uniform vec2 canvas_border;
 uniform float min_size;
 
 varying vec3 normal_vec;

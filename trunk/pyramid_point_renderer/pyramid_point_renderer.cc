@@ -380,8 +380,7 @@ const double PyramidPointRenderer::computeHalfPixelSize( void ) const {
  * @return True if done with rasterization, False if still needs to
  * render textures.
  **/
-const int PyramidPointRenderer::analysisCallbackFunc( void ) const
-{
+const int PyramidPointRenderer::analysisCallbackFunc( void ) const {
   shader_analysis->use();
   shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));  
   shader_analysis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
@@ -476,6 +475,7 @@ void PyramidPointRenderer::copyAnalysisPyramid( void ) {
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, COPY);
       shader_copy->use(0);
     }
+
 }
 
 const int PyramidPointRenderer::synthesisCallbackFunc( void ) const
