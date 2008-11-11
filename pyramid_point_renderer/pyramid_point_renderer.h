@@ -25,19 +25,19 @@ class PyramidPointRenderer : public PointBasedRenderer
  private:
 
   virtual void createShaders ( void );
+  virtual const int analysisCallbackFunc( void ) const;
+  virtual const int projectionCallbackFunc( void ) const;
+  virtual const int synthesisCallbackFunc( void ) const;
+  virtual const int phongShadingCallbackFunc( void ) const;
+  virtual void rasterizeAnalysisPyramid( void );
+  virtual void rasterizeSynthesisPyramid( void );
+  virtual void rasterizePhongShading(int bufferIndex);
 
  protected:
 
   void createFBO( void );
-  const int phongShadingCallbackFunc( void ) const;
-  void rasterizePhongShading(int bufferIndex);
-  void rasterizeSynthesisPyramid();
-  const int synthesisCallbackFunc( void ) const;
   void copyAnalysisPyramid();
   const int copyCallbackFunc( void ) const;
-  void rasterizeAnalysisPyramid( void );
-  const int analysisCallbackFunc( void ) const;
-  const int projectionCallbackFunc( void ) const;
   void projectSurfels( const Primitives * const );
 
   const pixels_struct generatePixels(const int level, const GLuint fbo, const int buffersCount, const GLuint* buffers) const;

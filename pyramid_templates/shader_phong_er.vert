@@ -1,5 +1,4 @@
 /// GLSL CODE
-
 #version 120
 
 /// Vertex Shader -- Phong Shader

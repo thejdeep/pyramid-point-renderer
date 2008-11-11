@@ -155,13 +155,13 @@ int main(int argc, char * argv []) {
   glutCreateWindow ("Point Based Rendering");
 
   application = new Application(PYRAMID_POINTS);
-  application->readFile( "../plys/dragon.ply" );
+  //  application->readFile( "../plys/dragon.ply" );
 
-//   if (argc < 2) {
-//     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
-//     exit(0);
-//   }
-//  application->readFile( argv[1] );
+  if (argc < 2) {
+    cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
+    exit(0);
+  }
+ application->readFile( argv[1] );
 
   //GLUT callback functions
   glutDisplayFunc(display);
