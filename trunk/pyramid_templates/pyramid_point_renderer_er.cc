@@ -9,18 +9,15 @@
 
 
 PyramidPointRendererER::PyramidPointRendererER(int w, int h) : PyramidPointRenderer(w, h, 6),
-							       gpu_mask_size(2) {
+							       gpu_mask_size(1) {
   createShaders();
 }
-
 
 const int PyramidPointRendererER::projectionCallbackFunc( void ) const {
   shader_projection->use();
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
-//   shader_projection->set_uniform("canvas_border",
-// 				 (GLfloat)(canvas_border_width)/(GLfloat)fbo_width, 
-// 				 (GLfloat)(canvas_border_height)/(GLfloat)fbo_height);
+
   shader_projection->set_uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
 
   shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
@@ -61,7 +58,8 @@ const int PyramidPointRendererER::synthesisCallbackFunc( void ) const {
   shader_synthesis->set_uniform("level", cur_level);
 
   shader_synthesis->set_uniform("mask_size", gpu_mask_size);
-  shader_synthesis->set_uniform("depth_test", depth_test);
+  shader_synthesis->set_uniform("depth_test", depth_test);  
+
 
 
   // Loads the textures ids as uniforms for shader access
@@ -120,7 +118,6 @@ const int PyramidPointRendererER::phongShadingCallbackFunc( void ) const
 void PyramidPointRendererER::rasterizePhongShading(int bufferIndex)
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
-  int level = 0;
   pixels_struct nullPixels;
   pixels_struct sourcePixels;
   pixels_struct destinationPixels;
@@ -139,10 +136,10 @@ void PyramidPointRendererER::rasterizePhongShading(int bufferIndex)
 //   sourcePixels = generatePixels(level, fbo, (fbo_buffers_count/2) - 1, &buffers[0]);
 
   GLuint buffers[1] = {fbo_buffers[0]};
-  sourcePixels = generatePixels(level, fbo, 1, &buffers[0]);
+  sourcePixels = generatePixels(0, fbo, 1, &buffers[0]);
 
-  GLuint back[1] = {GL_BACK};
-  destinationPixels = generatePixels(level, 0, 1, &back[0]);
+  buffers[0] = GL_BACK;
+  destinationPixels = generatePixels(0, 0, 1, &buffers[0]);
   rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
 
   shader_phong->use(0);

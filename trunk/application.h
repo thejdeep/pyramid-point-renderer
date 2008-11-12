@@ -76,12 +76,12 @@ class Application
   void setPerVertexColor ( bool b );
   void setAutoRotate ( bool r );
 
-  void setBackFaceCulling ( bool b );
+  void toogleBackFaceCulling ( void );
   void setEllipticalWeight ( bool b );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
-  void setDepthTest ( bool b );
+  void toogleDepthTest ( void );
   
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
@@ -113,11 +113,13 @@ class Application
 
   double reconstruction_filter_size;
   double prefilter_size;
+  int mask_size;
 
   // Flags on/off
   bool show_points;
   bool elliptical_weight;
   bool depth_culling;
+  bool back_face_culling;
   bool rotating;
   bool color_model;
 
