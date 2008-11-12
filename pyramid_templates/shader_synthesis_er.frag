@@ -121,11 +121,9 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
     else
       {
 	if ( (!depth_test) ||
-	     ((abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius) && (color == buffer1.w)) ) {
-	  {
-	    buffer0 += vec4(normal * weight, weight);
-	    buffer1 += vec4(ellipseZ * weight, 0.0, 0.0, 0.0);
-	  }
+	     ((abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius)) && (color == buffer1.w) ) {	  
+	  buffer0 += vec4(normal * weight, weight);
+	  buffer1 += vec4(ellipseZ * weight, 0.0, 0.0, 0.0);	  
 	}
 	// overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
 	else if (ellipseZ < pixelZ) {

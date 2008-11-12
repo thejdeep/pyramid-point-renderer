@@ -273,10 +273,10 @@ void main (void) {
 	  pixel_level = int( ceil(log_level) );
 
 	// found correct level, turn unprojected radius positive to mark it, or leave negative to continue propagation
-	if ((level == pixel_level))
-	  pixelB[i].x = abs(pixelB[i].x);
- 	else
-	  pixelB[i].x = abs(pixelB[i].x) * -1.0;
+/* 	if ((level == pixel_level)) */
+/* 	  pixelB[i].x = abs(pixelB[i].x); */
+/*  	else */
+/* 	  pixelB[i].x = abs(pixelB[i].x) * -1.0; */
       }
 
       if  (dist_test != -1.0)
@@ -338,7 +338,7 @@ void main (void) {
       bufferC.w = obj_id;
 
       float log_level = log2( ( 2.0 * bufferB.y * reconstruction_filter_size * canvas_width ) / float(mask_size*2 + 1) );
-      if (level == int( ceil(log_level) ))
+      if (level == int( floor(log_level) ))
 	bufferB.x = abs(bufferB.x);
       else
 	bufferB.x = abs(bufferB.x) * -1.0;

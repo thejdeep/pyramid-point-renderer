@@ -32,12 +32,14 @@ Application::Application( GLint default_mode ) {
   color_model = false;
   elliptical_weight = true;
   depth_culling = true;
+  back_face_culling = true;
   rotating = 0;
 
   show_points = false;
 
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
+  mask_size = 1.0;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
@@ -249,10 +251,10 @@ void Application::createPointRenderer( void ) {
 
   assert (point_based_render);
 
-  point_based_render->setBackFaceCulling(1);
   point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
   point_based_render->setPrefilterSize(prefilter_size);
   point_based_render->setDepthTest(depth_culling);
+  point_based_render->setBackFaceCulling(back_face_culling);
 }
 
 /**
@@ -415,6 +417,7 @@ void Application::setPrefilter ( double s ) {
  **/
 void Application::setGpuMask ( int m ) {
   point_based_render->setGpuMaskSize( m );
+  cout << "Mask size : " << m << endl;
 }
 
 /**
@@ -441,8 +444,8 @@ void Application::setAutoRotate ( bool r ) {
  * Turns depth test on/off.
  * @param d Depth test state.
  **/
-void Application::setDepthTest ( bool d ) {
-  depth_culling = d;
+void Application::toogleDepthTest ( void ) {
+  depth_culling = !depth_culling;
   if (point_based_render)
     point_based_render->setDepthTest(depth_culling);
 }
@@ -461,8 +464,10 @@ void Application::changeMaterial( int mat ) {
  * Turns backface culling on/off.
  * @param b Backface culling state.
  **/
-void Application::setBackFaceCulling ( bool b ) {
-  point_based_render->setBackFaceCulling(b);
+void Application::toogleBackFaceCulling ( void ) {
+  back_face_culling = !back_face_culling;
+if (point_based_render)
+  point_based_render->setBackFaceCulling(back_face_culling);
 }
 
 /**
