@@ -49,5 +49,3 @@ void PyramidPointRendererColor::createShaders ( void ) {
   shader_phong->install( shader_inst_debug );
 
 }
-
-

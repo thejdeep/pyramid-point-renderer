@@ -45,17 +45,12 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
   light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0;
 
   radius = 4.0;
-
-  frame_video = -1.0;
-
-  keyFrameInterpolation = 0;
 }
 
 /**
  * Destructor.
  **/
 Camera::~Camera() {
-  clearFrames();
 }
 
 /**
@@ -92,47 +87,6 @@ void Camera::initLight (void) {
   glShadeModel(GL_SMOOTH);
 }
 
-/** 
- * Computes camera properties while interpolating key frame.
- **/
-void Camera::computeKeyFrame( void ) {
-  unsigned int frame = (unsigned int)frame_video;
-  double step = frame_video - frame;
-
-  if ( keyFrames.size() - 2 == frame ) {
-    frame_video = -1.0;
-  }
-  else {
-    position[0] = keyFrames[frame].pos[0] + (keyFrames[frame+1].pos[0]-keyFrames[frame].pos[0])*(step);
-    position[1] = keyFrames[frame].pos[1] + (keyFrames[frame+1].pos[1]-keyFrames[frame].pos[1])*(step);
-    position[2] = keyFrames[frame].pos[2] + (keyFrames[frame+1].pos[2]-keyFrames[frame].pos[2])*(step);
-    light_position[0] = keyFrames[frame].light_pos[0] + 
-      (keyFrames[frame+1].light_pos[0]-keyFrames[frame].light_pos[0])*(step);
-    light_position[1] = keyFrames[frame].light_pos[1] + 
-      (keyFrames[frame+1].light_pos[1]-keyFrames[frame].light_pos[1])*(step);
-    light_position[2] = keyFrames[frame].light_pos[2] + 
-      (keyFrames[frame+1].light_pos[2]-keyFrames[frame].light_pos[2])*(step);
-
-    frame_reconstruction_filter = keyFrames[frame].reconstruction_filter + 
-      (keyFrames[frame+1].reconstruction_filter-keyFrames[frame].reconstruction_filter)*(step);
-    frame_prefilter = keyFrames[frame].prefilter + 
-      (keyFrames[frame+1].prefilter-keyFrames[frame].prefilter)*(step);
-
-    if (!keyFrameInterpolation)
-      q_rot = slerp(keyFrames[frame].rot, keyFrames[frame+1].rot, step);
-    else {
-      if (frame > 1)
-	q_rot = cubicInterpolation(keyFrames[frame-1].rot, keyFrames[frame].rot, 
-				   keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
-      else
-	q_rot = cubicInterpolation(keyFrames[frame].rot, keyFrames[frame].rot, 
-				   keyFrames[frame+1].rot, keyFrames[frame+2].rot, step);
-    }
-
-    frame_video += 0.01;
-  }
-}
-
 /**
  * Sets OpenGL camera.
  * Initialize viewport and resets projection and modelview matrices.
@@ -150,9 +104,6 @@ void Camera::setView (void) {
   glLoadIdentity();
 
   initLight();
-
-  if ( runningFrames() )
-    computeKeyFrame();
 
   gluLookAt(position[0]*radius, position[1]*radius, position[2]*radius,
 	    target[0], target[1], target[2],

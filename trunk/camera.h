@@ -27,52 +27,6 @@ enum renderMode {ORTHOGRAPHIC, PERSPECTIVE};
 
 using namespace std;
 
-// Key Frame type
-typedef struct _keyframe {
-  /// Constructor - void
-  _keyframe(void) : rot() {
-    pos[0] = pos[1] = pos[2] = 0.0;
-    light_pos[0] = light_pos[1] = light_pos[2] = light_pos[3] = 0.0;
-    reconstruction_filter = prefilter = 0.0;
-  }
-  /// Constructor
-  _keyframe(Point _p, Quat _r) : rot(_r) {
-    pos[0] = _p[0]; pos[1] = _p[1]; pos[2] = _p[2];
-    light_pos[0] = light_pos[1] = light_pos[2] = light_pos[3] = 0.0;
-    reconstruction_filter = prefilter = 0.0;
-  }
-  /// Constructor
-  _keyframe(Point _p, Quat _r, Point _lp, double& _rf, double& _pf) : rot(_r) {
-    pos[0] = _p[0]; pos[1] = _p[1]; pos[2] = _p[2];
-    light_pos[0] = _lp[0]; light_pos[1] = _lp[1]; light_pos[2] = _lp[2]; light_pos[3] = _lp[3];
-    reconstruction_filter = _rf;
-    prefilter = _pf;
-  }
-  /// I/O operator - output
-  inline friend ostream& operator << (ostream& out, const struct _keyframe& k) {
-    out << k.rot.x << " " << k.rot.y << " " << k.rot.z << " " << k.rot.a << " "
-	<< k.pos[0] << " " << k.pos[1] << " " << k.pos[2] << " " << k.light_pos[0]
-	<< " " << k.light_pos[1] << " " << k.light_pos[2] << " " << k.light_pos[3] 
-	<< " " << k.reconstruction_filter << " " << k.prefilter;
-    return out;
-  }
-  /// I/O operator - input
-  inline friend istream& operator >> (istream& in, struct _keyframe& k) {
-    in >> k.rot.x >> k.rot.y >> k.rot.z >> k.rot.a
-       >> k.pos[0] >> k.pos[1] >> k.pos[2] >> k.light_pos[0] >>  k.light_pos[1] >>
-      k.light_pos[2] >> k.light_pos[3] >> k.reconstruction_filter >> k.prefilter;
-    return in;
-  }
-
-  /// Data
-  Quat rot;
-  Point pos;
-  GLfloat light_pos[4];
-  double reconstruction_filter;
-  double prefilter;
-
-} keyframe;
-
 /// Camera class
 /// Controls manipulation in 3D using a trackball with quaternions.
 /// Also keeps light sources and perspective/orthographic view informations.
@@ -178,63 +132,9 @@ public:
   //void lightVec ( double l[] ) const { l[0] = light_position[0]; l[1] = light_position[1]; l[2] = light_position[2]; }
   void positionVec ( double e[] ) const { e[0] = position.x; e[1] = position.y; e[2] = -position.z; }
 
-  void createKeyFrame( double reconstruction_filter, double prefilter ) {
-    keyframe k( position, q_rot, light_position, reconstruction_filter, prefilter );
-    keyFrames.push_back( k );
-    cout << "Key frame recorded." << endl;
-  }
-
-  void writeKeyFrames( const char* fn ) {
-    ofstream out(fn);
-    if (out.fail()) return;
-    if (keyFrames.size() == 0) return;
-    out << keyFrames.size() << endl;
-    for (uint i=0; i<keyFrames.size(); i++)
-      out << keyFrames[i] << endl;
-  }
-
-  void loadKeyFrames( const char* fn ) {
-    ifstream in(fn);
-    if (in.fail()) return;
-    keyFrames.clear();
-    uint numFrames;
-    in >> numFrames;
-    keyframe k;
-    for (uint i=0; i<numFrames; i++) {
-      in >> k;
-      keyFrames.push_back( k );
-    }
-    frame_video = -1.0;
-  }
-
-  void runFrames( void ) { frame_video = 0.0; }
-
-  void clearFrames( void ) { 
-    frame_video = -1.0; 
-    keyFrames.clear();
-  }
-
-  bool runningFrames( void ) {
-    return ( (frame_video >= 0.0) && (keyFrames.size() > 0) );
-  }
-
-  double getKeyFrameReconstructionFilter ( void ) {
-    return frame_reconstruction_filter;
-    //return keyFrames[(unsigned int)frame_video].reconstruction_filter;
-  }
-
-  double getKeyFramePrefilter ( void ) {
-    return frame_prefilter;
-    //return keyFrames[(unsigned int)frame_video].prefilter;
-  }
-
-  void switchKeyFrameInterpolationMode ( void ) {
-    keyFrameInterpolation = !keyFrameInterpolation;      
-  }
+  const double getRadius ( void ) const { return radius; }
 
 private:
-
-  void computeKeyFrame ( void );
 
   // Screen size
   int screen_width, screen_height;
@@ -294,19 +194,6 @@ private:
 
   double angle_h, angle_v;
   Point target;
-
-  // Array with key frames
-  vector< keyframe > keyFrames;
-
-  double frame_video;
-
-  bool keyFrameInterpolation;
-
-  /*********************************************************/
-  // Specific application variables to record on a key frame
-  double frame_reconstruction_filter;
-  double frame_prefilter;
-  /*********************************************************/
 
   double squaredDistance(const double [3], const double [3]) const;
 

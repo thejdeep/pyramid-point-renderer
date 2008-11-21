@@ -8,8 +8,6 @@ uniform vec4 color_diffuse;
 uniform vec4 color_specular;
 uniform float shininess;
 
-
-
 void main (void) {
 
   vec4 normal = texture2D (textureA, gl_TexCoord[0].st).xyzw;

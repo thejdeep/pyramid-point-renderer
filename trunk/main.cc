@@ -16,6 +16,7 @@ static int g_Height = 816;                         // Initial window height
 int button_pressed;
 bool active_shift;
 int mask_size;
+double reconstruction_filter_size;
 
 Application *application;
 
@@ -57,11 +58,17 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case '3' :
     application->changeMaterial ( 3 );
     break;
+  case '4' :
+    application->changeMaterial ( 4 );
+    break;
+  case '5' :
+    application->changeMaterial ( 5 );
+    break;
   case 'd' :
-    application->toogleDepthTest ( );
+    application->toggleDepthTest ( );
     break;
   case 'b' :
-    application->toogleBackFaceCulling ( );
+    application->toggleBackFaceCulling ( );
     break;
   case '+' :
     mask_size ++;
@@ -72,7 +79,20 @@ void keyboard(unsigned char key_pressed, int x, int y) {
       mask_size --;
     application->setGpuMask ( mask_size );
     break;
-
+  case ']' :
+    if (reconstruction_filter_size < 0.1)
+      reconstruction_filter_size += 0.01;
+    else
+      reconstruction_filter_size += 0.1;
+    application->setReconstructionFilter ( reconstruction_filter_size );
+    break;
+  case '[' :
+    if (reconstruction_filter_size > 0.1)
+      reconstruction_filter_size -= 0.1;
+    else if (reconstruction_filter_size > 0.0)
+      reconstruction_filter_size -= 0.01;
+    application->setReconstructionFilter ( reconstruction_filter_size );
+    break;
   }
 
   glutPostRedisplay();
@@ -170,6 +190,7 @@ int main(int argc, char * argv []) {
   glutCreateWindow ("Point Based Rendering");
 
   mask_size = 1;
+  reconstruction_filter_size = 1.0;
 
   application = new Application(PYRAMID_POINTS);
   //  application->readFile( "../plys/dragon.ply" );

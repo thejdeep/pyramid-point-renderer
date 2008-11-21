@@ -94,7 +94,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
 void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
 		  in vec3 normal, in float r, in float ellipseZ, in float unprojected_radius, 
-		  in float color, in vec2 local_displacement) {
+		  in vec3 color, in vec2 local_displacement) {
   // if pixel from displacement position is a projected surfel, check if current
   // pixel is inside its radius
   float dist_test = pointInEllipse(local_displacement.xy, r, normal);
@@ -114,21 +114,24 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
 
     // sum contribution to current values if pixel near current surface (elipse)
     /*if ((buffer1.y != 0.0) && (ellipseZ > pixelZ) &&  { */
+
+    // if the weight is zero this pixel is empty, attribute the ellipse values
     if (buffer0.w == 0.0) {
       buffer0 = vec4(normal * weight, weight);
-      buffer1 = vec4(ellipseZ * weight, 0.0, 0.0, color);
+      buffer1 = vec4(ellipseZ * weight, color.rgb * weight);
     }
     else
       {
+	// add ellipses values to current buffer if they belong to same surface
 	if ( (!depth_test) ||
-	     ((abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius)) && (color == buffer1.w) ) {	  
+	     ((abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius)) ) {	  
 	  buffer0 += vec4(normal * weight, weight);
-	  buffer1 += vec4(ellipseZ * weight, 0.0, 0.0, 0.0);	  
+	  buffer1 += vec4(ellipseZ * weight, color.rgb * weight);	  
 	}
 	// overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
 	else if (ellipseZ < pixelZ) {
 	  buffer0 = vec4(normal * weight, weight);
-	  buffer1 = vec4(ellipseZ * weight, 0.0, 0.0, color);
+	  buffer1 = vec4(ellipseZ * weight, color.rgb * weight);
 	}
       }
   }
@@ -169,7 +172,7 @@ void main (void) {
 		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
 
 		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse1.y, 
-			     ellipse0.w, ellipse1.x, ellipse2.w, local_pixel_displacement);
+			     ellipse0.w, ellipse1.x, ellipse2.rgb, local_pixel_displacement);
 	      }
 	    }
 	}

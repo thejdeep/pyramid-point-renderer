@@ -16,7 +16,7 @@ void main(void)
   vec3 e = (gl_ModelViewProjectionMatrixInverse * vec4(eye, 1.0)).xyz;
  
   //if ( (back_face_culling == 1) && (dot(normalize(gl_Vertex.xyz - eye), gl_Normal) < 0.0 )) {
-  if ( (back_face_culling == 1) && (dot(normalize(e - gl_Vertex.xyz), gl_Normal.xyz) < 0.0 )) {
+  if ( (back_face_culling == 1) && (normalize(dot((e - gl_Vertex.xyz), gl_Normal.xyz)) < 0.1 )) {
 
     radius_depth_w.x = 0.0;
     

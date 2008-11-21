@@ -17,23 +17,19 @@ uniform vec2 oo_canvas_size;
 uniform int mask_size;
 
 // size of half a pixel
-//uniform float half_pixel_size;
 uniform float canvas_width;
 uniform int level;
 
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
-///const float reconstruction_filter_size = 1.0;
-//const float prefilter_size = 1.0;
-
 uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
 
 /* vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size), */
-/* 				      vec2(half_pixel_size, -half_pixel_size),  */
-/* 				      vec2(-half_pixel_size, half_pixel_size),  */
+/* 				      vec2(half_pixel_size, -half_pixel_size), */
+/* 				      vec2(-half_pixel_size, half_pixel_size), */
 /* 				      vec2(half_pixel_size, half_pixel_size)); */
 
 // tests if a point is inside a circle.
@@ -251,43 +247,16 @@ void main (void) {
     // Valid pixel : radius > 0
     if (pixelB[i].y > 0.0) {
 
-      //dist_test = pointInEllipse(pixelB[i].zw + gather_pixel_desloc[i], pixelA[i].w, pixelA[i].xyz);
-
-      dist_test = 1.0;
-
-      // radius small enough to fit in lower level entirely, no need to propagate further
+      // this ellipse has stop propagating, it lies on the finer level
       // the sign of the unprojected radius determines if it has reached the correct level (positive) or not (negative)
-      if (pixelB[i].x >= 0.0)
- 	dist_test = -1.0;
-      else {
-	float mask = float(mask_size*2 + 1);
-	int pixel_level;
-
-	// compute level
-	float log_level = log2( ( 2.0 * pixelB[i].y * reconstruction_filter_size * canvas_width ) / mask );
-
-	// if negative log2 : level = 0
-	if (log_level <= 0.0)
-	  pixel_level = 1;
-	else
-	  pixel_level = int( ceil(log_level) );
-
-	// found correct level, turn unprojected radius positive to mark it, or leave negative to continue propagation
-/* 	if ((level == pixel_level)) */
-/* 	  pixelB[i].x = abs(pixelB[i].x); */
-/*  	else */
-/* 	  pixelB[i].x = abs(pixelB[i].x) * -1.0; */
-      }
-
-      if  (dist_test != -1.0)
-	{
-	  // test for minimum depth coordinate of valid ellipses
-	  if (pixelA[i].w <= zmin) {
-	    zmin = pixelA[i].w;
-	    zmax = pixelB[i].x;
-	    obj_id = pixelC[i].w; //only necessary if using color buffer
-	  }
+      if (pixelB[i].x < 0.0) {
+	// test for minimum depth coordinate of valid ellipses
+	if (pixelA[i].w <= zmin) {
+	  zmin = pixelA[i].w;
+	  zmax = pixelB[i].x;
+	  obj_id = pixelC[i].w; //only necessary if using color buffer
 	}
+      }
       else {
 	// if ellipse not in correct level ignore it during average
 	pixelB[i].y = -1.0;
@@ -322,6 +291,9 @@ void main (void) {
 
 	      // average tex coords
 	      bufferB.zw += pixelB[i].zw * w;
+
+	      // average tex coords
+	      bufferC += pixelC[i] * w;
 	      
 	      valid_pixels += w;
 	    }
@@ -336,7 +308,10 @@ void main (void) {
       bufferA /= valid_pixels;
       bufferB.zw /= valid_pixels;
       bufferC.w = obj_id;
+      bufferC.rgb /= valid_pixels;
 
+      // If this ellipse is on the correct pyramid level stop its propagation
+      // i.e., it will not be used in the average of the next coarser level
       float log_level = log2( ( 2.0 * bufferB.y * reconstruction_filter_size * canvas_width ) / float(mask_size*2 + 1) );
       if (level == int( floor(log_level) ))
 	bufferB.x = abs(bufferB.x);

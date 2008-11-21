@@ -20,7 +20,10 @@ const int PyramidPointRendererER::projectionCallbackFunc( void ) const {
 
   shader_projection->set_uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
 
-  shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
+  //  shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
+  shader_projection->set_uniform("canvas_width", (GLfloat)canvas_width);
+  shader_projection->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+  shader_projection->set_uniform("mask_size", gpu_mask_size);
 
   return true;
 }
@@ -31,7 +34,6 @@ const int PyramidPointRendererER::analysisCallbackFunc( void ) const {
 
   shader_analysis->set_uniform("level", cur_level);
   shader_analysis->set_uniform("canvas_width", (GLfloat)canvas_width);
-
   shader_analysis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
  
   shader_analysis->set_uniform("depth_test", depth_test);
@@ -105,7 +107,7 @@ const int PyramidPointRendererER::phongShadingCallbackFunc( void ) const
 {
   shader_phong->use();
   shader_phong->set_uniform("textureA", 0);
-  //  shader_phong->set_uniform("textureB", 1);
+  shader_phong->set_uniform("textureB", 1);
 
   shader_phong->set_uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
   shader_phong->set_uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
@@ -135,8 +137,8 @@ void PyramidPointRendererER::rasterizePhongShading(int bufferIndex)
 //     buffers[i] = fbo_buffers[bufferIndex + i*2];
 //   sourcePixels = generatePixels(level, fbo, (fbo_buffers_count/2) - 1, &buffers[0]);
 
-  GLuint buffers[1] = {fbo_buffers[0]};
-  sourcePixels = generatePixels(0, fbo, 1, &buffers[0]);
+  GLuint buffers[2] = {fbo_buffers[0], fbo_buffers[2]};
+  sourcePixels = generatePixels(0, fbo, 2, &buffers[0]);
 
   buffers[0] = GL_BACK;
   destinationPixels = generatePixels(0, 0, 1, &buffers[0]);
