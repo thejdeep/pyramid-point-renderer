@@ -50,7 +50,6 @@ class Application
 
   void changePrimitivesRendererType ( point_render_type_enum type );
 
-  void projectPoints ( void );
   void drawPoints ( void );
 
  public :
@@ -76,12 +75,12 @@ class Application
   void setPerVertexColor ( bool b );
   void setAutoRotate ( bool r );
 
-  void toogleBackFaceCulling ( void );
+  void toggleBackFaceCulling ( void );
   void setEllipticalWeight ( bool b );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
-  void toogleDepthTest ( void );
+  void toggleDepthTest ( void );
   
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
@@ -115,13 +114,14 @@ class Application
   double prefilter_size;
   int mask_size;
 
+  int material;
+
   // Flags on/off
   bool show_points;
   bool elliptical_weight;
   bool depth_culling;
   bool back_face_culling;
   bool rotating;
-  bool color_model;
 
   /***** Frames per second and Surfels per second vars ******/
   double sps, fps;

@@ -29,11 +29,11 @@ Application::Application( GLint default_mode ) {
 
   fps_loop = 0;
 
-  color_model = false;
   elliptical_weight = true;
   depth_culling = true;
   back_face_culling = true;
   rotating = 0;
+  material = 0;
 
   show_points = false;
 
@@ -104,43 +104,6 @@ void Application::drawPoints(void) {
   glEnd();
 }
 
-/**
- * Project surfels to screen space.
- **/
-void Application::projectPoints ( void ) {
-  
-  if (primitives.size() == 0)
-    return;
-
-  // Clear all buffers including pyramid algorithm buffers
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  point_based_render->clearBuffers();
-  camera->setView();
-
-  // Render objects primitives with pyramid algorithm
-  for (unsigned int i = 0; i < objects.size(); ++i) {
-
-    // Compute rotated eye position for this object for back face culling   
-    Point eye = *(objects[i].getCenter());
-
-    glPushMatrix();
-
-    // Translate and rotate object
-    objects[i].translate();
-    objects[i].rotate();
-    point_based_render->setEye( camera->positionVector() );
-
-    // Projects to image plane surfels of all primitives for this object
-    vector< int >* prims = objects[i].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      Primitives * prim = &(primitives[*prim_it]);      
-      point_based_render->projectSamples( prim );
-    }
-    glPopMatrix();
-  }
-}
-
 /** 
  * Display method to render the models.
  **/
@@ -152,41 +115,16 @@ void Application::draw( void ) {
   // Clear all buffers including pyramid algorithm buffers
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   point_based_render->clearBuffers();
 
   // Reset camera position and direction
   camera->setView();
 
-  // Render objects primitives with pyramid algorithm
-  for (unsigned int i = 0; i < objects.size(); ++i) {
+  // Set eye for back face culling in vertex shader
+  point_based_render->setEye( camera->positionVector() );
 
-    // Compute rotated eye position for this object (for back face culling)
-    Point eye = *(objects[i].getCenter());
-
-    glPushMatrix();
-
-    // Translate and rotate object
-    objects[i].translate();
-    objects[i].rotate();
-
-    // objects[i].render( );
-    // objects[i].render( camera->positionVector() );
-
-    // Compute the rotated eye (opposite direction) of the camera + object center position
-    // camera->computeEyePosition(*(objects[i].getRotationQuat()), &eye);
-    //point_based_render->setEye(eye);
- 
-    point_based_render->setEye( camera->positionVector() );
-
-    // Projects to image plane surfels of all primitives for this object
-    vector< int >* prims = objects[i].getPrimitivesList();
-    for (vector< int >::iterator prim_it = prims->begin(); prim_it != prims->end(); ++prim_it) {
-      Primitives * prim = &(primitives[*prim_it]);
-      point_based_render->projectSamples( prim );
-    }
-    glPopMatrix();
-  }
+  // Project samples to screen space
+  point_based_render->projectSamples( &primitives[0] );
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
@@ -232,6 +170,7 @@ void Application::changeRendererType( int type ) {
   changePrimitivesRendererType ( (point_render_type_enum)type );
   render_mode = type;
   createPointRenderer( );
+  changeMaterial(material);
 }
 
 /**
@@ -444,7 +383,7 @@ void Application::setAutoRotate ( bool r ) {
  * Turns depth test on/off.
  * @param d Depth test state.
  **/
-void Application::toogleDepthTest ( void ) {
+void Application::toggleDepthTest ( void ) {
   depth_culling = !depth_culling;
   if (point_based_render)
     point_based_render->setDepthTest(depth_culling);
@@ -455,6 +394,7 @@ void Application::toogleDepthTest ( void ) {
  * @param mat Id of material (see materials.h for list)
  **/
 void Application::changeMaterial( int mat ) {  
+  material = mat;
   primitives[0].setMaterial( mat );
   primitives[0].setRendererType( primitives[0].getRendererType() );
   point_based_render->setMaterial( mat );
@@ -464,7 +404,7 @@ void Application::changeMaterial( int mat ) {
  * Turns backface culling on/off.
  * @param b Backface culling state.
  **/
-void Application::toogleBackFaceCulling ( void ) {
+void Application::toggleBackFaceCulling ( void ) {
   back_face_culling = !back_face_culling;
 if (point_based_render)
   point_based_render->setBackFaceCulling(back_face_culling);
