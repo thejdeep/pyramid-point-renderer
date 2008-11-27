@@ -15,6 +15,7 @@ void main (void) {
 
   if (normal.a != 0.0) {
 
+    // *10.0 is for the weight correction during synthesis to avoid clamping values greater than 1.0
     color.rgb /= normal.a * 10.0;
 
     normal = normalize(normal);

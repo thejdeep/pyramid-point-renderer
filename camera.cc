@@ -19,7 +19,7 @@ const double rad_to_deg = 180.0/M_PI;
  **/
 Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				   zoom_factor(1.0), fov(1.0),
-				   z_near(0.001), z_far(100.0) {
+				   z_near(0.001), z_far(1000.0) {
   view_mode = PERSPECTIVE;
 
   static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -44,7 +44,7 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
 
   light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0;
 
-  radius = 4.0;
+  radius = 10.0;
 }
 
 /**
@@ -161,7 +161,7 @@ void Camera::resetViewMode ( void ) {
 
   if (view_mode == PERSPECTIVE)
     //  glFrustum(left, right, bottom, top, z_near, z_far);
-    gluPerspective( 65, (w/h), z_near, z_far );
+    gluPerspective( 60, (w/h), z_near, z_far );
   else
     glOrtho( -x, x, -y, y, z_near, z_far );
 }
@@ -443,9 +443,17 @@ void Camera::translate (int x, int y) {
   Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
   Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
 
-  Quat inc = q1*q0;
-  q_rot = (q_lookAt*inc*q_lookAt.conjugate())*q_last;
-  q_rot.normalize();
+//   Quat inc = q1*q0;
+//   q_rot = (q_lookAt*inc*q_lookAt.conjugate())*q_last;
+//   q_rot.normalize();
+
+//   Quat inc = q0*q1;
+//   q_lookAt = (q_last_lookAt*inc*q_last_lookAt.conjugate())*q_last_lookAt;
+//   q_lookAt.normalize();
+
+//   position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
+//   up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
+
 }
 
 /**

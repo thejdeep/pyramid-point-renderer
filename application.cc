@@ -33,13 +33,8 @@ Application::Application( GLint default_mode ) {
   depth_culling = true;
   back_face_culling = true;
   rotating = 0;
-  material = 0;
 
-  show_points = false;
-
-  reconstruction_filter_size = 1.0;
-  prefilter_size = 1.0;
-  mask_size = 1.0;
+  show_points = true;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
@@ -98,8 +93,12 @@ void Application::drawPoints(void) {
 
   glBegin(GL_POINTS);
   
-  for (surfelVectorIter it = primitives[0].getSurfels()->begin(); it != primitives[0].getSurfels()->end(); ++it)
-    glVertex(it);
+  for (surfelVectorIter it = primitives[0].getSurfels()->begin(); it != primitives[0].getSurfels()->end(); ++it) {
+	Color c = it->color();
+	glColor4f(c[0], c[1], c[2], 1.0f);  
+	glVertex(it);
+  }
+
 
   glEnd();
 }
@@ -123,8 +122,10 @@ void Application::draw( void ) {
   // Set eye for back face culling in vertex shader
   point_based_render->setEye( camera->positionVector() );
 
-  // Project samples to screen space
-  point_based_render->projectSamples( &primitives[0] );
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
+    // Project samples to screen space
+	point_based_render->projectSamples( &primitives[i] );
+  }
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
@@ -159,7 +160,8 @@ vector<Surfeld>* Application::getSurfelsList ( void ) {
 }
 
 void Application::changePrimitivesRendererType( point_render_type_enum type ) {
-  primitives[0].setRendererType(type);
+  for (unsigned int i = 0; i < primitives.size(); ++i)
+	primitives[i].setRendererType(type);
 }
 
 /**
@@ -170,7 +172,6 @@ void Application::changeRendererType( int type ) {
   changePrimitivesRendererType ( (point_render_type_enum)type );
   render_mode = type;
   createPointRenderer( );
-  changeMaterial(material);
 }
 
 /**
@@ -190,8 +191,6 @@ void Application::createPointRenderer( void ) {
 
   assert (point_based_render);
 
-  point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
-  point_based_render->setPrefilterSize(prefilter_size);
   point_based_render->setDepthTest(depth_culling);
   point_based_render->setBackFaceCulling(back_face_culling);
 }
@@ -209,14 +208,15 @@ int Application::readFile ( const char * filename ) {
 
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
-
   primitives.back().setPerVertexColor(0);
 
   // Create a new object with id 0
   objects.push_back( Object( 0 ) );
   objects.back().setFilename( filename );
 
-  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+  MYreadPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+
+  //  normalize((primitives.back()).getSurfels());
 
   // connect new object to new primitive
   objects[0].addPrimitives( primitives.back().getId() );
@@ -230,35 +230,47 @@ int Application::readFile ( const char * filename ) {
   return 0;
 }
 
-/**
- * Reads a ply file, creates an object and
- * loads the vertices and triangles in the associated primitive.
- * @param filename Given file name.
- * @return Id number of created object.
- **/
-int Application::readNormalsFile ( const char * filename ) {
+int Application::startFileReading ( void ) {
+
+
+  // Create a new object with id 0
+  objects.push_back( Object( 0 ) );
+
+  // connect new object to new primitive
+
+  return 0;
+}
+
+int Application::appendFile ( const char * filename ) { 
+
+  // Create a new primitive from given file
+//   primitives.push_back( Primitives( primitives.size() ) );
+//   primitives.back().setPerVertexColor(0);
 
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
+  objects[0].addPrimitives( primitives.back().getId() );
 
-  primitives.back().setPerVertexColor(0);
+  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
-  // Create a new object
-  int id = objects.size();
-  objects.push_back( Object( id ) );
-  objects.back().setFilename( filename );
+  return 0;
+}
 
-  readNormals (filename, (primitives.back()).getSurfels());
+int Application::finishFileReading ( void ) { 
 
-  // connect new object to new primitive
-  objects.back().addPrimitives( primitives.back().getId() );
-  primitives.back().setType( 1.0 );
-  ;;primitives.back().setRendererType( render_mode );
+  computeNormFactors((primitives.back()).getSurfels());
 
-  //  if (!point_based_render)
-  createPointRenderer( );
- 
-  return id;
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
+	normalize(primitives[i].getSurfels());
+	primitives[i].setType( 1.0 );
+	// Sets the default rendering algorithm
+	primitives[i].setRendererType( render_mode );
+	primitives[i].setPerVertexColor(0);
+  }
+
+  createPointRenderer();
+
+  return 0;
 }
 
 /// Mouse Left Button Function, starts rotation
@@ -326,7 +338,12 @@ void Application::mouseRightMotion(int x, int y) {
  * @return Number of points.
  **/
 int Application::getNumberPoints ( void ) {
-  return primitives[0].numberPoints();
+  
+  int num_pts = 0;
+  for (unsigned int i = 0; i < primitives.size(); ++i)
+	num_pts += primitives[i].numberPoints();
+
+  return num_pts;
 }
 
 /**
@@ -335,9 +352,8 @@ int Application::getNumberPoints ( void ) {
  * @param s Reconstruction filter size.
  **/
 void Application::setReconstructionFilter ( double s ) { 
-  reconstruction_filter_size = s;
   if (point_based_render)
-    point_based_render->setReconstructionFilterSize(reconstruction_filter_size);
+    point_based_render->setReconstructionFilterSize(s);
 }
 
 /**
@@ -345,9 +361,8 @@ void Application::setReconstructionFilter ( double s ) {
  * @param s Prefilter size.
  **/
 void Application::setPrefilter ( double s ) { 
-  prefilter_size = s;
   if (point_based_render)
-    point_based_render->setPrefilterSize(prefilter_size);
+    point_based_render->setPrefilterSize(s);
 }
 
 /**
@@ -356,7 +371,6 @@ void Application::setPrefilter ( double s ) {
  **/
 void Application::setGpuMask ( int m ) {
   point_based_render->setGpuMaskSize( m );
-  cout << "Mask size : " << m << endl;
 }
 
 /**
@@ -365,9 +379,11 @@ void Application::setGpuMask ( int m ) {
  * @param c Per-vertex color state.
  **/
 void Application::setPerVertexColor ( bool c ) {
-  primitives[0].setPerVertexColor(c);
-  // Reset renderer type to load per vertex color or default color in vertex array
-  primitives[0].setRendererType( primitives[0].getRendererType() );
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
+	primitives[i].setPerVertexColor(c);
+	// Reset renderer type to load per vertex color or default color in vertex array
+	primitives[i].setRendererType( primitives[i].getRendererType() );
+  }
 }
 
 /**
@@ -394,9 +410,10 @@ void Application::toggleDepthTest ( void ) {
  * @param mat Id of material (see materials.h for list)
  **/
 void Application::changeMaterial( int mat ) {  
-  material = mat;
-  primitives[0].setMaterial( mat );
-  primitives[0].setRendererType( primitives[0].getRendererType() );
+  for (unsigned int i = 0; i < primitives.size(); ++i) {
+	primitives[i].setMaterial( mat );
+	primitives[i].setRendererType( primitives[i].getRendererType() );
+  }
   point_based_render->setMaterial( mat );
 }
 

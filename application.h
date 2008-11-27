@@ -58,7 +58,11 @@ class Application
   ~Application();
 
   int readFile ( const char * filename );
-  int readNormalsFile ( const char * filename );
+  int appendFile ( const char * filename );
+
+  int startFileReading ( void );
+  int finishFileReading ( void );
+
   void draw ( void );
   void reshape ( int w, int h );
 
@@ -66,8 +70,6 @@ class Application
   void changeMaterial( int mat );
 
   int getNumberPoints ( void );
-  double getReconstructionFilter ( void ) const { return reconstruction_filter_size; }
-  double getPrefilter ( void ) const { return prefilter_size; }
   Camera* getCamera ( void ) { return camera; }
   vector<Surfeld>* getSurfelsList ( void );
 
@@ -107,14 +109,6 @@ class Application
   // Determines which rendering class to use (Pyramid points, pyramid lines for tree rendering, ellipse rasterization ...)
   // see primitives.h for the complete list (point_render_type_enum).
   GLint render_mode;
-
-  /*****Visual interface vars*****/
-
-  double reconstruction_filter_size;
-  double prefilter_size;
-  int mask_size;
-
-  int material;
 
   // Flags on/off
   bool show_points;

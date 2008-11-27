@@ -17,11 +17,19 @@ extern "C" {
 
 typedef struct Vertex {
   float x,y,z;
-  float r,g,b;
+  float r,g,b,a;
   float nx,ny,nz;
   float radius;
   void *other_props;       /* other properties */
 } Vertex;
+
+typedef struct Vertex_vcg {
+  float x,y,z;
+  float red,green,blue,alpha;
+  float nx,ny,nz;
+  float radius;
+  void *other_props;       /* other properties */
+} Vertex_vcg;
 
 typedef struct Face {
   unsigned char nverts;    /* number of vertex indices in list */
@@ -43,7 +51,7 @@ PlyProperty vert_props[] = { /* list of property information for a vertex */
   {"radius", Float32, Float32, offsetof(Vertex,radius), 0, 0, 0, 0},
 };
 
-PlyProperty vert_props_color[] = { /* list of property information for a vertex */
+PlyProperty vert_props_color2[] = { /* list of property information for a vertex */
   {"x", Float32, Float32, offsetof(Vertex,x), 0, 0, 0, 0},
   {"y", Float32, Float32, offsetof(Vertex,y), 0, 0, 0, 0},
   {"z", Float32, Float32, offsetof(Vertex,z), 0, 0, 0, 0},
@@ -56,6 +64,20 @@ PlyProperty vert_props_color[] = { /* list of property information for a vertex 
   {"radius", Float32, Float32, offsetof(Vertex,radius), 0, 0, 0, 0},
 };
 
+
+PlyProperty vert_props_color[] = { /* list of property information for a vertex */
+  {"x", Float32, Float32, offsetof(Vertex,x), 0, 0, 0, 0},
+  {"y", Float32, Float32, offsetof(Vertex,y), 0, 0, 0, 0},
+  {"z", Float32, Float32, offsetof(Vertex,z), 0, 0, 0, 0},
+  {"nx", Float32, Float32, offsetof(Vertex,nx), 0, 0, 0, 0},
+  {"ny", Float32, Float32, offsetof(Vertex,ny), 0, 0, 0, 0},
+  {"nz", Float32, Float32, offsetof(Vertex,nz), 0, 0, 0, 0},
+  {"red", Float32, Float32, offsetof(Vertex,r), 0, 0, 0, 0},
+  {"green", Float32, Float32, offsetof(Vertex,g), 0, 0, 0, 0},
+  {"blue", Float32, Float32, offsetof(Vertex,b), 0, 0, 0, 0},
+  {"alpha", Float32, Float32, offsetof(Vertex,a), 0, 0, 0, 0}
+};
+
 PlyProperty face_props[] = { /* list of property information for a face */
   {"vertex_indices", Int32, Int32, offsetof(Face,verts),
    1, Uint8, Uint8, offsetof(Face,nverts)},
@@ -64,187 +86,99 @@ PlyProperty face_props[] = { /* list of property information for a face */
 
 /*** the PLY object ***/
 
-static PlyFile *in_ply;
-static int nverts, nfaces;
-/* static Vertex **vlist; */
-/* static Face **flist; */
-static PlyOtherProp *vert_other, *face_other;
+/* static PlyFile *in_ply; */
+/* static int nverts, nfaces; */
+/* /\* static Vertex **vlist; *\/ */
+/* /\* static Face **flist; *\/ */
+/* static PlyOtherProp *vert_other, *face_other; */
 
-/// Normalize the input points in the range [-1, 1].
-void normalize (vector<Surfeld> * surfels) {
 
-  double max = 0, min = 0;
-  Point p = surfels->begin()->Center();
-  double xMax=p[0], yMax=p[1], zMax=p[2], xMin=p[0], yMin=p[1], zMin=p[2];
+//compensation factors for centralizing polygon (avoid deformation in smaller dimension)
+static double compX, compY, compZ;
+static double c_max, c_min;
+static Point p_max, p_min;
+Point p;
+
+void computeNormFactors (vector<Surfeld> * surfels) {
+
+  double center = 0.0;
+
+  p = surfels->begin()->Center();
+  c_max = c_min = 0;
+  p_max = p;
+  p_min = p;
 
   //compute min and max values for x and y coordinates
   for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
     p = it->Center();
-    if (p[0] > xMax) xMax = p[0];
-    if (p[0] < xMin) xMin = p[0];
-    if (p[1] > yMax) yMax = p[1];
-    if (p[1] < yMin) yMin = p[1];
-    if (p[2] > zMax) zMax = p[2];
-    if (p[2] < zMin) zMin = p[2];
+    if (p[0] > p_max[0]) p_max[0] = p[0];
+    if (p[0] < p_min[0]) p_min[0] = p[0];
+    if (p[1] > p_max[1]) p_max[1] = p[1];
+    if (p[1] < p_min[1]) p_min[1] = p[1];
+    if (p[2] > p_max[2]) p_max[2] = p[2];
+    if (p[2] < p_min[2]) p_min[2] = p[2];
   }
-
-  //compensation factors for centralizing polygon (avoid deformation in smaller dimension)
-  double compX, compY, compZ, center;
 
   //Max and min points for normalizing polygon points
-  if ((xMax - xMin > yMax - yMin) && (xMax - xMin > zMax - zMin)) {
-      max = xMax;
-      min = xMin;
-      compX = 0;
-      center = (yMax + yMin)*0.5;
-      compY = 0.0 - (((center - yMin) / (max - min)) * 2.0 - 1.0);
-      center = (zMax + zMin)*0.5;
-      compY = 0.0 - (((center - zMin) / (max - min)) * 2.0 - 1.0);
-    }
-  else if (yMax - yMin > zMax - zMin) {
-      max = yMax;
-      min = yMin;
-      center = (xMax + xMin)*0.5;
-      compX = 0.0 - (((center - xMin) / (max - min)) * 2.0 - 1.0);
-      compY = 0;
-      center = (zMax + zMin)*0.5;
-      compY = 0.0 - (((center - zMin) / (max - min)) * 2.0 - 1.0);
-    }
+  if ((p_max[0] - p_min[0] > p_max[1] - p_min[1]) && (p_max[0] - p_min[0] > p_max[2] - p_min[2])) {
+	c_max = p_max[0];
+	c_min = p_min[0];
+	compX = 0;
+	center = (p_max[1] + p_min[1])*0.5;
+	compY = 0.0 - (((center - p_min[1]) / (c_max - c_min)) * 2.0 - 1.0);
+	center = (p_max[2] + p_min[2])*0.5;
+	compY = 0.0 - (((center - p_min[2]) / (c_max - c_min)) * 2.0 - 1.0);
+  }
+  else if (p_max[1] - p_min[1] > p_max[2] - p_min[2]) {
+	c_max = p_max[1];
+	c_min = p_min[1];
+	center = (p_max[0] + p_min[0])*0.5;
+	compX = 0.0 - (((center - p_min[0]) / (c_max - c_min)) * 2.0 - 1.0);
+	compY = 0;
+	center = (p_max[2] + p_min[2])*0.5;
+	compY = 0.0 - (((center - p_min[2]) / (c_max - c_min)) * 2.0 - 1.0);
+  }
   else {
-      max = zMax;
-      min = zMin;
-      center = (xMax + xMin)*0.5;
-      compX = 0.0 - (((center - xMin) / (max - min)) * 2.0 - 1.0);
-      center = (yMax + yMin)*0.5;
-      compY = 0.0 - (((center - yMin) / (max - min)) * 2.0 - 1.0);
-      compZ = 0;
-    }
+	c_max = p_max[2];
+	c_min = p_min[2];
+	center = (p_max[0] + p_min[0])*0.5;
+	compX = 0.0 - (((center - p_min[0]) / (c_max - c_min)) * 2.0 - 1.0);
+	center = (p_max[1] + p_min[1])*0.5;
+	compY = 0.0 - (((center - p_min[1]) / (c_max - c_min)) * 2.0 - 1.0);
+	compZ = 0;
+  }
 
-  compX = compY = compZ = 0;
+  //compX = compY = compZ = 0.00;
+}
 
+/* /\* /// Normalize the input points in the range [-1, 1]. *\/ */
+void normalize (vector<Surfeld> * surfels) {
+ 
+/*   Point p; */
+  p = surfels->begin()->Center();
   Vector n;
   for (surfelVectorIter it = surfels->begin(); it != surfels->end(); ++it) {
-    p = it->Center();    
-    p = Point ((((p[0] - xMin) / (max - min))) * 2.0 - 1.0 + compX,
-	       (((p[1] - yMin) / (max - min))) * 2.0 - 1.0 + compY,
-	       (((p[2] - zMin) / (max - min))) * 2.0 - 1.0 + compZ);
+    p = it->Center();
+    Point c = Point ((((p[0] - p_min[0]) / (c_max - c_min))) * 2.0 - 1.0 + compX,
+			   (((p[1] - p_min[1]) / (c_max - c_min))) * 2.0 - 1.0 + compY,
+			   (((p[2] - p_min[2]) / (c_max - c_min))) * 2.0 - 1.0 + compZ);
     n = it->Normal();
     n.Normalize();
-    ((Surfeld*)&(*it))->SetCenter( (Point) p );
-    ((Surfeld*)&(*it))->SetNormal( (Vector) n );
-
-  }
-
-}
-
-
-/// Loads a sls 3d file and insert all points in the kd-tree
-/// @param filenam Given plg filename
-/// @return 1 if file read with success, 0 otherwise
-bool loadSls (const char * filename, vector<Surfeld> *surfels) {  
-  std::ifstream input (filename);
-
-  if(input.fail())
-    return false;
-
-  int number_points;
-  input >> number_points;
-
-  double x, y, z, cr, cg, cb, nx, ny, nz, r;
-  for (int i = 0; i < number_points; ++i) {
-    input >> x >> y >> z >> cr >> cg >> cb >> nx >> ny >> nz >> r;
-    Point p (x, y, z);
-    Vector n (nx, ny, nz);
-    surfels->push_back ( Surfeld (p, n, r, i) );
-  }
-
-  return true;
-}
-
-/// Read an normals file, contains positions, normals and splat radius for each point
-/// @param filename Given off filename
-/// @return 1 if file read with success, 0 otherwise
-bool readNormals (const char * filename, vector<Surfeld> *surfels) {  
-  std::ifstream input (filename);
-
-  if(input.fail())
-    return false;
-
-  int number_points;
-  input >> number_points;
-
-  double x, y, z, nx, ny, nz, r;
-  for (int i = 0; i < number_points; ++i)
-    {
-      input >> x >> y >> z >> nx >> ny >> nz >> r;
-      Point p (x, y, z);
-      Vector n (nx, ny, nz);
-      surfels->push_back ( Surfeld (p, n, r, i) );
-    }
-
-  return true;
-}
-
-void readPly (const char *filename, vector<Surfeld> *surfels) {
-
-  FILE *fp = fopen(filename, "r");
-  in_ply = read_ply(fp);
-
-  int i,j;
-  int elem_count;
-  const char *elem_name;
-  
-  for (i = 0; i < in_ply->num_elem_types; i++) {
-
-    /* prepare to read the i'th list of elements */
-    elem_name = setup_element_read_ply (in_ply, i, &elem_count);
-
-    if (equal_strings ("vertex", elem_name)) {
-
-      /* create a vertex vector to hold all the vertices */
-      //vlist = (Vertex **) malloc (sizeof (Vertex *) * elem_count);
-      nverts = elem_count;
-
-      /* set up for getting vertex elements */
-      setup_property_ply (in_ply, &vert_props[0]);
-      setup_property_ply (in_ply, &vert_props[1]);
-      setup_property_ply (in_ply, &vert_props[2]);
-
-      for (j = 0; j < in_ply->elems[i]->nprops; j++) {
-	PlyProperty *prop;
-	prop = in_ply->elems[i]->props[j];
-	if (equal_strings ("nx", prop->name))
-	  setup_property_ply (in_ply, &vert_props[3]);
-	if (equal_strings ("ny", prop->name))
-	  setup_property_ply (in_ply, &vert_props[4]);
-	if (equal_strings ("nz", prop->name))
-	  setup_property_ply (in_ply, &vert_props[5]);
-	if (equal_strings ("radius", prop->name))
-	  setup_property_ply (in_ply, &vert_props[6]);
-      }
-
-      vert_other = get_other_properties_ply (in_ply, 
-					     offsetof(Vertex,other_props));
-
-      Vertex v;
-      /* grab all the vertex elements */
-      for (j = 0; j < elem_count; j++) {
-
-        get_element_ply (in_ply, (void *) &v);
-
-	Point p (v.x, v.y, v.z);
-	Vector n (v.nx, v.ny, v.nz);
 	
-	surfels->push_back ( Surfeld (p, n, (double)v.radius, j) );
-      }
-    }
-
+	it->SetCenter( c );
+	it->SetNormal( n );
   }
-  close_ply(in_ply);
+
 }
+
+
 
 void readPlyTriangles (const char *filename, vector<Surfeld> *surfels,
-		       vector<Triangle> *triangles, Point rgb = Point()) {
+					   vector<Triangle> *triangles, Point rgb = Point()) {
+
+  PlyFile *in_ply;
+  int nverts, nfaces;
+  PlyOtherProp *vert_other=0, *face_other=0;
 
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
@@ -269,20 +203,20 @@ void readPlyTriangles (const char *filename, vector<Surfeld> *surfels,
       setup_property_ply (in_ply, &vert_props[2]);
 
       for (j = 0; j < in_ply->elems[i]->nprops; j++) {
-	PlyProperty *prop;
-	prop = in_ply->elems[i]->props[j];
-	if (equal_strings ("nx", prop->name))
-	  setup_property_ply (in_ply, &vert_props[3]);
-	if (equal_strings ("ny", prop->name))
-	  setup_property_ply (in_ply, &vert_props[4]);
-	if (equal_strings ("nz", prop->name))
-	  setup_property_ply (in_ply, &vert_props[5]);
-	if (equal_strings ("radius", prop->name))
-	  setup_property_ply (in_ply, &vert_props[6]);
+		PlyProperty *prop;
+		prop = in_ply->elems[i]->props[j];
+		if (equal_strings ("nx", prop->name))
+		  setup_property_ply (in_ply, &vert_props[3]);
+		if (equal_strings ("ny", prop->name))
+		  setup_property_ply (in_ply, &vert_props[4]);
+		if (equal_strings ("nz", prop->name))
+		  setup_property_ply (in_ply, &vert_props[5]);
+		if (equal_strings ("radius", prop->name))
+		  setup_property_ply (in_ply, &vert_props[6]);
       }
 
       vert_other = get_other_properties_ply (in_ply, 
-					     offsetof(Vertex,other_props));
+											 offsetof(Vertex,other_props));
 
       Vertex v;
       /* grab all the vertex elements */
@@ -290,10 +224,10 @@ void readPlyTriangles (const char *filename, vector<Surfeld> *surfels,
 
         get_element_ply (in_ply, (void *) &v);
 
-	Point p (v.x, v.y, v.z);
-	Vector n (v.nx, v.ny, v.nz);
+		Point p (v.x, v.y, v.z);
+		Vector n (v.nx, v.ny, v.nz);
 	
-	surfels->push_back ( Surfeld (p, n, rgb, (double)v.radius, j) );
+		surfels->push_back ( Surfeld (p, n, rgb, (double)v.radius, j) );
       }
     }
     else if (equal_strings ("face", elem_name)) {
@@ -304,28 +238,35 @@ void readPlyTriangles (const char *filename, vector<Surfeld> *surfels,
       /* set up for getting face elements */
       setup_property_ply (in_ply, &face_props[0]);
       face_other = get_other_properties_ply (in_ply,
-					     offsetof(Face,other_props));
+											 offsetof(Face,other_props));
       Face f;
       /* grab all the face elements */
       for (j = 0; j < elem_count; j++) {
-	get_element_ply (in_ply, (void *) &f);
-	Triangle t;
-	for (int k = 0; k < (int)f.nverts; ++k)
-	  t.verts[k] = f.verts[k];
-	if ((int)f.nverts == 2)
-	  t.verts[2] = f.verts[1];
-	t.id = j;
-	triangles->push_back( t );
+		get_element_ply (in_ply, (void *) &f);
+		Triangle t;
+		for (int k = 0; k < (int)f.nverts; ++k)
+		  t.verts[k] = f.verts[k];
+		if ((int)f.nverts == 2)
+		  t.verts[2] = f.verts[1];
+		t.id = j;
+		triangles->push_back( t );
       }      
     }
     else
       get_other_element_ply (in_ply);
   }
   close_ply(in_ply);
+  delete in_ply;
+  delete vert_other;
+  delete face_other;
 }
 
 void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
-		       vector<Triangle> *triangles) {
+							vector<Triangle> *triangles) {
+
+  PlyFile *in_ply;
+  int nverts, nfaces;
+  PlyOtherProp *vert_other=0, *face_other=0;
 
   FILE *fp = fopen(filename, "r");
   in_ply = read_ply(fp);
@@ -355,40 +296,42 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
       setup_property_ply (in_ply, &vert_props_color[2]);
 
       for (j = 0; j < in_ply->elems[i]->nprops; j++) {
-	PlyProperty *prop;
-	prop = in_ply->elems[i]->props[j];
-	if (equal_strings ("r", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[3]);
-	if (equal_strings ("g", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[4]);
-	if (equal_strings ("b", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[5]);
-	if (equal_strings ("nx", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[6]);
-	if (equal_strings ("ny", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[7]);
-	if (equal_strings ("nz", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[8]);
-	if (equal_strings ("radius", prop->name))
-	  setup_property_ply (in_ply, &vert_props_color[9]);
+		PlyProperty *prop;
+		prop = in_ply->elems[i]->props[j];
+		if (equal_strings ("nx", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[3]);
+		if (equal_strings ("ny", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[4]);
+		if (equal_strings ("nz", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[5]);
+		if (equal_strings ("red", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[6]);
+		if (equal_strings ("green", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[7]);
+		if (equal_strings ("blue", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[8]);
+		if (equal_strings ("alpha", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color[9]);
 
       }
 
       vert_other = get_other_properties_ply (in_ply, 
-					     offsetof(Vertex,other_props));
+											 offsetof(Vertex,other_props));
 
-      Vertex v;
+      Vertex_vcg v;
       /* grab all the vertex elements */
       for (j = 0; j < elem_count; j++) {
 
         get_element_ply (in_ply, (void *) &v);
 
-	Point p (v.x, v.y, v.z);
-	Vector n (v.nx, v.ny, v.nz);
-	Color c (v.r/255.0, v.g/255.0, v.b/255.0);
-	double r = v.radius;
+		Point p (v.x, v.y, v.z);
+		Vector n (v.nx, v.ny, v.nz);
+		Color c (v.red/255.0, v.green/255.0, v.blue/255.0);
+
+		//		double r = v.radius;
+		double r = 0.005;
       
-	surfels->push_back ( Surfeld (p, n, c, r, (unsigned int)j) );
+		surfels->push_back ( Surfeld (p, n, c, r, (unsigned int)j) );
       }
     }
     else if (equal_strings ("face", elem_name)) {
@@ -399,16 +342,16 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
       /* set up for getting face elements */
       setup_property_ply (in_ply, &face_props[0]);
       face_other = get_other_properties_ply (in_ply,
-					     offsetof(Face,other_props));
+											 offsetof(Face,other_props));
       Face f;
       /* grab all the face elements */
       for (j = 0; j < elem_count; j++) {
-	get_element_ply (in_ply, (void *) &f);
-	Triangle t;
-	for (int k = 0; k < f.nverts; ++k)
-	  t.verts[k] = f.verts[k];
-	t.id = j;
-	triangles->push_back( t );	
+		get_element_ply (in_ply, (void *) &f);
+		Triangle t;
+		for (int k = 0; k < f.nverts; ++k)
+		  t.verts[k] = f.verts[k];
+		t.id = j;
+		triangles->push_back( t );	
       }
     }
     else
@@ -416,68 +359,110 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
   }
   close_ply(in_ply);
 
-}
+  //normalize(surfels);
 
-int readModels (int argc, char **argv, vector<Primitives> *prims, vector<Object> *objs) {
-
-  for (int i = 1; i < argc; ++i) {
-    if (strstr(argv[i], ".normals") != NULL) { 
-      prims->push_back( Primitives(i-1) );
-      readNormals (argv[i], (prims->at(i-1)).getSurfels());
-    }
-    else if (strstr(argv[i], ".sls") != NULL) { 
-      prims->push_back( Primitives(i-1) );
-      loadSls (argv[i], (prims->at(i-1)).getSurfels());
-    }
-    else {
-      prims->push_back( Primitives(i-1) );
-      readPlyTriangles (argv[i], (prims->at(i-1)).getSurfels(), (prims->at(i-1)).getTriangles());
-    }
-  }
-
-  int i = 0;
-  for (vector<Primitives>::iterator it = prims->begin(); it != prims->end(); ++it, ++i) {
-    objs->push_back( Object(i) );
-    (objs->at(i)).addPrimitives( it->getId() );
-    it->setType( 1.0 );
-    it->setRendererType( PYRAMID_POINTS );
-  }
-
-  return true;
+  delete in_ply;
+  delete vert_other;
+  delete face_other;
 }
 
 
+void MYreadPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
+							vector<Triangle> *triangles) {
 
-int readPointsAndTriangles(int argc, char **argv, vector<Surfeld> *surfels,
-			   vector<Triangle> *triangles){
-    
-  for (int i = 1; i < argc; ++i)
-    readPlyTriangles (argv[i], surfels, triangles);
+  PlyFile *in_ply;
+  int nverts, nfaces;
+  PlyOtherProp *vert_other=0, *face_other=0;
 
-  return 1;
-}
+  FILE *fp = fopen(filename, "rb");
+  in_ply = read_ply(fp);
 
-/// Command line argument processor
-int readPoints(int argc, char **argv, vector<Surfeld> *surfels) {
+  int i,j;
+  int elem_count;
+  const char *elem_name;
 
-  // Use default file
-  if (argc < 2) {
-    if (loadSls ("mannequin.sls", surfels))
-      return 1;
+  if (!in_ply) {
+    cerr << "bad filename!" << endl;
+    return;
   }
 
-  readPly (argv[1], surfels);
+  for (i = 0; i < in_ply->num_elem_types; i++) {
 
-  cout << "ply ok!" << endl;
-  return 1;
+    /* prepare to read the i'th list of elements */
+    elem_name = setup_element_read_ply (in_ply, i, &elem_count);
 
-  if (readNormals (argv[1], surfels))
-    return 1;
+    if (equal_strings ("vertex", elem_name)) {
 
-  //  normalize(surfels);
+      /* create a vertex list to hold all the vertices */
+      nverts = elem_count;
 
+      /* set up for getting vertex elements */
+      setup_property_ply (in_ply, &vert_props_color2[0]);
+      setup_property_ply (in_ply, &vert_props_color2[1]);
+      setup_property_ply (in_ply, &vert_props_color2[2]);
 
-  std::cerr << "Could not read file : " << argv [2] << "\n";
-  std::cerr << "Usage: point_render <normals file>" << "\n";
-  return 0;
+      for (j = 0; j < in_ply->elems[i]->nprops; j++) {
+		PlyProperty *prop;
+		prop = in_ply->elems[i]->props[j];
+		if (equal_strings ("r", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[3]);
+		if (equal_strings ("g", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[4]);
+		if (equal_strings ("b", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[5]);
+		if (equal_strings ("nx", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[6]);
+		if (equal_strings ("ny", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[7]);
+		if (equal_strings ("nz", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[8]);
+		if (equal_strings ("radius", prop->name))
+		  setup_property_ply (in_ply, &vert_props_color2[9]);
+
+      }
+
+      vert_other = get_other_properties_ply (in_ply, 
+											 offsetof(Vertex,other_props));
+
+      Vertex v;
+      /* grab all the vertex elements */
+      for (j = 0; j < elem_count; j++) {
+
+        get_element_ply (in_ply, (void *) &v);
+
+		Point p (v.x, v.y, v.z);
+		Vector n (v.nx, v.ny, v.nz);
+		Color c (v.r/255.0, v.g/255.0, v.b/255.0);
+		double r = v.radius;
+      
+		surfels->push_back ( Surfeld (p, n, c, r, (unsigned int)j) );
+      }
+    }
+    else if (equal_strings ("face", elem_name)) {
+
+      /* create a list to hold all the face elements */
+      nfaces = elem_count;
+
+      /* set up for getting face elements */
+      setup_property_ply (in_ply, &face_props[0]);
+      face_other = get_other_properties_ply (in_ply,
+											 offsetof(Face,other_props));
+      Face f;
+      /* grab all the face elements */
+      for (j = 0; j < elem_count; j++) {
+		get_element_ply (in_ply, (void *) &f);
+		Triangle t;
+		for (int k = 0; k < f.nverts; ++k)
+		  t.verts[k] = f.verts[k];
+		t.id = j;
+		triangles->push_back( t );	
+      }
+    }
+    else
+      get_other_element_ply (in_ply);
+  }
+  close_ply(in_ply);
+  delete in_ply;
+  delete vert_other;
+  delete face_other;
 }
