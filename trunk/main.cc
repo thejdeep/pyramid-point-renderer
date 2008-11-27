@@ -17,6 +17,8 @@ int button_pressed;
 bool active_shift;
 int mask_size;
 double reconstruction_filter_size;
+double prefilter_size;
+int material;
 
 Application *application;
 
@@ -47,22 +49,22 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     exit(0);
     break;
   case '0' :
-    application->changeMaterial ( 0 );
+    material = 0;
     break;
   case '1' :
-    application->changeMaterial ( 1 );
+    material = 1;
     break;
   case '2' :
-    application->changeMaterial ( 2 );
+    material = 2;
     break;
   case '3' :
-    application->changeMaterial ( 3 );
+    material = 3;
     break;
   case '4' :
-    application->changeMaterial ( 4 );
+    material = 4;
     break;
   case '5' :
-    application->changeMaterial ( 5 );
+    material = 5;
     break;
   case 'd' :
     application->toggleDepthTest ( );
@@ -85,14 +87,27 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     else
       reconstruction_filter_size += 0.1;
     application->setReconstructionFilter ( reconstruction_filter_size );
+	cout << "filter size : " << reconstruction_filter_size << endl;
     break;
   case '[' :
-    if (reconstruction_filter_size > 0.1)
+    if (reconstruction_filter_size > 0.15)
       reconstruction_filter_size -= 0.1;
     else if (reconstruction_filter_size > 0.0)
       reconstruction_filter_size -= 0.01;
     application->setReconstructionFilter ( reconstruction_filter_size );
+	cout << "filter size : " << reconstruction_filter_size << endl;
     break;
+  }
+
+  // material change
+  switch (key_pressed) {
+  case '0' :
+  case '1' :
+  case '2' :
+  case '3' :
+  case '4' :
+  case '5' :
+    application->changeMaterial ( material );
   }
 
   glutPostRedisplay();
@@ -106,12 +121,30 @@ void keyboardSpecial(int key_pressed, int x, int y) {
   switch (key_pressed) {
   case GLUT_KEY_F1 :
     application->changeRendererType ( 0 );
+    application->setGpuMask ( mask_size );
+    application->changeMaterial ( material );
     break;
   case GLUT_KEY_F2 :
     application->changeRendererType ( 1 );
+    application->setGpuMask ( mask_size );
+    application->changeMaterial ( material );
     break;
   case GLUT_KEY_F3 :
     application->changeRendererType ( 2 );
+    application->setGpuMask ( mask_size );
+    application->changeMaterial ( material );
+    break;
+  }
+
+  // reset values
+  switch (key_pressed) {
+  case GLUT_KEY_F1 :
+  case GLUT_KEY_F2 :
+  case GLUT_KEY_F3 :
+    application->setGpuMask ( mask_size );
+    application->changeMaterial ( material );
+    application->setReconstructionFilter ( reconstruction_filter_size );
+    application->setPrefilter ( prefilter_size );
     break;
   }
 
@@ -191,15 +224,34 @@ int main(int argc, char * argv []) {
 
   mask_size = 1;
   reconstruction_filter_size = 1.0;
+  prefilter_size = 1.0;
+  material = 0;
 
-  application = new Application(PYRAMID_POINTS);
-  //  application->readFile( "../plys/dragon.ply" );
+  application = new Application(PYRAMID_POINTS_COLOR);
 
-  if (argc < 2) {
-    cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
-    exit(0);
+//   if (argc < 2) {
+//     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
+//     exit(0);
+//   }
+
+
+  if (strcmp (argv[1], "scan") == 0) 
+	{
+	application->startFileReading();
+// 	application->appendFile( "../plys/vcl/dom_mal19_w4-O.ply" );
+ 	application->appendFile( "../plys/vcl/dom_mal19_w4-W.ply" );
+	application->appendFile( "../plys/vcl/dom_mal19_w2_arc-D-1.ply" );
+	application->appendFile( "../plys/vcl/dom_mal19_w2_arc-D-2.ply" );
+	application->appendFile( "../plys/vcl/dom_mal19_w2_B-1.ply" );
+	application->appendFile( "../plys/vcl/dom_mal19_w2_B-2.ply" );
+	application->finishFileReading();
+	application->changeMaterial(5);
+	application->toggleBackFaceCulling ( );
   }
- application->readFile( argv[1] );
+  else
+	application->readFile( argv[1] );
+
+  cout << "Total points : " << application->getNumberPoints() << endl;
 
   //GLUT callback functions
   glutDisplayFunc(display);

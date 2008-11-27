@@ -6,17 +6,6 @@
 #include <fstream>
 #include <assert.h>
 
-#define NUM_MATERIALS 6
-
-GLfloat obj_colors[8][4] = {{0.0, 1.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0},
-			    {0.0, 0.0, 0.0, 1.0}};
-
 
 /**
  * Render object using designed rendering system.
@@ -152,18 +141,13 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
     
     //    if (color_model) 
-{
-      color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+	{
+	  color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
       color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
       color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
     }
-//     else {
-//       color_array[pos*4 + 0] = obj_colors[id][0];
-//       color_array[pos*4 + 1] = obj_colors[id][1];
-//       color_array[pos*4 + 2] = obj_colors[id][2];
-//     }
     //color_array[pos*4 + 3] = type;
-    color_array[pos*4 + 3] = material / (GLfloat)NUM_MATERIALS;
+	color_array[pos*4 + 3] = 1.0;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
     normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y);
