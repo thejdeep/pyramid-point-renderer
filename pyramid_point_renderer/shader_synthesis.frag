@@ -69,9 +69,9 @@ int intersectEllipseLine (in vec2 p, in float rx, in float ry, in vec2 a1, in ve
     float t_b = (-b + root) / a;
     if ( ((t_a < 0.0) || (1.0 < t_a)) && ((t_b < 0.0) || (1.0 < t_b)) ) {
       if ( ((t_a < 0.0) && (t_b < 0.0)) || ((t_a > 1.0) && (t_b > 1.0)) )
-	return 0;
+		return 0;
       else
-	return 2;
+		return 2;
     }
     else
       return 1;
@@ -130,16 +130,16 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 
   vec2 rot_box[4]; 
   rot_box[0] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
+					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
   rot_box[1] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
+					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
   rot_box[2] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
   
   rot_box[3] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
 
   // ellipse intersects the pixels box
   if (((intersectEllipseLine(center, a, b, rot_box[0], rot_box[1]) > 0) ||
@@ -174,7 +174,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
   // rotate point to ellipse coordinate system
   vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-			 -d.x*sin(angle) + d.y*cos(angle));
+						  -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
   float a = 2.0*radius;
@@ -218,7 +218,7 @@ void main (void) {
       vec4 up_pixelB = texture2D (textureB, gl_TexCoord[2].st).xyzw;
       
       if ( (up_pixelA.w != 0.0) && (bufferB.x > up_pixelB.x + up_pixelB.y) ) {
-	occluded = true;
+		occluded = true;
       }
     }
   }
@@ -275,48 +275,48 @@ void main (void) {
       int pixel_config[8];
       // closer pixel up-right
       if ((weights.x > weights.y) && (weights.x > weights.z) && (weights.x > weights.w))
-	{
-	pixel_config[0] = -3;
-	pixel_config[1] = -3;
-	pixel_config[2] =  1;
-	pixel_config[3] = -3;
-	pixel_config[4] = -3;
-	pixel_config[5] =  1;
-	pixel_config[6] =  1;
-	pixel_config[7] =  1;
-      }
-     // closer pixel up-left
+		{
+		  pixel_config[0] = -3;
+		  pixel_config[1] = -3;
+		  pixel_config[2] =  1;
+		  pixel_config[3] = -3;
+		  pixel_config[4] = -3;
+		  pixel_config[5] =  1;
+		  pixel_config[6] =  1;
+		  pixel_config[7] =  1;
+		}
+	  // closer pixel up-left
       else if ((weights.y > weights.z) && (weights.y > weights.w)) {
-	pixel_config[0] = -1;
-	pixel_config[1] = -3;
-	pixel_config[2] =  3;
-	pixel_config[3] = -3;
-	pixel_config[4] = -1;
-	pixel_config[5] =  1;
-	pixel_config[6] =  3;
-	pixel_config[7] =  1;
+		pixel_config[0] = -1;
+		pixel_config[1] = -3;
+		pixel_config[2] =  3;
+		pixel_config[3] = -3;
+		pixel_config[4] = -1;
+		pixel_config[5] =  1;
+		pixel_config[6] =  3;
+		pixel_config[7] =  1;
       }
       // closer pixel down-right
       else if (weights.z > weights.w) {
-	pixel_config[0] = -3;
-	pixel_config[1] = -1;
-	pixel_config[2] =  1;
-	pixel_config[3] = -1;
-	pixel_config[4] = -3;
-	pixel_config[5] =  3;
-	pixel_config[6] =  1;
-	pixel_config[7] =  3;
+		pixel_config[0] = -3;
+		pixel_config[1] = -1;
+		pixel_config[2] =  1;
+		pixel_config[3] = -1;
+		pixel_config[4] = -3;
+		pixel_config[5] =  3;
+		pixel_config[6] =  1;
+		pixel_config[7] =  3;
       }
       // closer pixel on down-left
       else {  
-	pixel_config[0] = -1;
-	pixel_config[1] = -1;
-	pixel_config[2] =  3;
-	pixel_config[3] = -1;
-	pixel_config[4] = -1;
-	pixel_config[5] =  3;
-	pixel_config[6] =  3;
-	pixel_config[7] =  3;
+		pixel_config[0] = -1;
+		pixel_config[1] = -1;
+		pixel_config[2] =  3;
+		pixel_config[3] = -1;
+		pixel_config[4] = -1;
+		pixel_config[5] =  3;
+		pixel_config[6] =  3;
+		pixel_config[7] =  3;
       }
 
       // invert order or invert everything above
@@ -331,76 +331,80 @@ void main (void) {
       for (int i = 0; i < 4; ++i) {
 
       	// distance from synthesized pixel to center of scatter pixel
-	vec2 dist_to_pixel = vec2(float(pixel_config[i*2]), float(pixel_config[i*2 + 1])) * half_pixel_size;
+		vec2 dist_to_pixel = vec2(float(pixel_config[i*2]), float(pixel_config[i*2 + 1])) * half_pixel_size;
 
-	// Add distance to center of ellipse
-	pixelB[i].zw += dist_to_pixel;
+		// Add distance to center of ellipse
+		pixelB[i].zw += dist_to_pixel;
 
-	// if specified scatter pixel test distance to center of ellipse
-	if (pixelA[i].w > 0.0)
-	  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
-	  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
-	else
-	  dist_test = -1.0;
+		// if specified scatter pixel test distance to center of ellipse
+		if (pixelA[i].w > 0.0)
+		  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+		//dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+		//dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+		else
+		  dist_test = -1.0;
  	
-	// if not specified or out of range dont use it
-	if ((pixelA[i].w == 0.0) || (dist_test == -1.0)) {
-	  weights[i] = 0.0;
-	}
-	else {
-	  if (elliptical_weight)
-	    weights[i] = exp(-0.5*dist_test);
-	  total_weight ++;
+		// if not specified or out of range dont use it
+		if ((pixelA[i].w == 0.0) || (dist_test == -1.0)) {
+		  weights[i] = 0.0;
+		}
+		else {
+		  if (elliptical_weight)
+			weights[i] = 1.0 - dist_test;
+		  else
+			weights[i] = exp(-0.5*dist_test);
 
-	  // depth test only for ellises in range
-	  if (pixelB[i].x < zmin) {
-	    zmin = pixelB[i].x;
-	    zmax = pixelB[i].y;
-	  }
-	}
+		  total_weight += 1.0;
+
+		  // depth test only for ellises in range
+		  if (pixelB[i].x < zmin) {
+			zmin = pixelB[i].x;
+			zmax = pixelB[i].y;
+		  }
+		}
       }
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
+	  // Usually means that pixel is in a back surface near an internal silhouette
       if (occluded) {
-	for (int i = 0; i < 4; ++i)
-	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
-	    occluded = false;
+		for (int i = 0; i < 4; ++i)
+		  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
+			occluded = false;
       }
 
       // If the pixel was set as occluded but there are no valid
       // pixels in range to synthesize, leave as it is
       if (occluded && (total_weight == 0.0))
-	occluded = false;
+		occluded = false;
 
       // synthesize pixel
       if ((bufferA.w == 0.0) || occluded) {
-	bufferA = vec4(0.0);
-	bufferB = vec4(0.0);
-	total_weight = 0.0;
+		bufferA = vec4(0.0);
+		bufferB = vec4(0.0);
+		total_weight = 0.0;
 	
-	for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 4; ++i) {
 
-	  // Ellipse in range
-	  if (weights[i] > 0.0)
-	    {
-	      // Depth test between ellipses in range
-	      //if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
-		if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax))
-		{
-		  total_weight += weights[i];	  
-		  bufferA += weights[i] * pixelA[i];
-		  bufferB += weights[i] * pixelB[i];
+		  // Ellipse in range
+		  if (weights[i] > 0.0)
+			{
+			  // Depth test between ellipses in range
+			  //if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
+			  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax))
+				{
+				  total_weight += weights[i];
+				  bufferA += weights[i] * pixelA[i];
+				  bufferB += weights[i] * pixelB[i];
+				}
+			}
 		}
-	    }
-	}
 
-	if (total_weight > 0.0) {
-	  bufferA /= total_weight;
-	  bufferA.xyz = normalize(bufferA.xyz);
-	  bufferB /= total_weight;
-	}
+		if (total_weight > 0.0) {
+		  bufferA /= total_weight;
+		  bufferA.xyz = normalize(bufferA.xyz);
+		  bufferB /= total_weight;
+		}
       }
     }
 

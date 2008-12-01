@@ -12,9 +12,9 @@
 #include <cassert>
 
 //#include "point_based_renderer.h"
-#include "../pyramid_point_renderer/pyramid_point_renderer.h"
+#include "../pyramid_point_renderer_base/pyramid_point_renderer_base.h"
 
-class PyramidPointRendererER : public PyramidPointRenderer
+class PyramidPointRendererER : public PyramidPointRendererBase
 {
  private:
 

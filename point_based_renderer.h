@@ -28,7 +28,7 @@ class PointBasedRenderer
    **/
   PointBasedRenderer() : window_width(1024), window_height(1024),
     canvas_width(1024), canvas_height(1024),
-    material_id(0), depth_test(1), elliptical_weight(1),
+    material_id(0), depth_test(1), elliptical_weight(0),
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
 
@@ -39,16 +39,18 @@ class PointBasedRenderer
    **/
   PointBasedRenderer(int w, int h) : window_width(w), window_height(h),
     canvas_width(h), canvas_height(h),
-    material_id(0), depth_test(1), elliptical_weight(1),
+    material_id(0), depth_test(1), elliptical_weight(0),
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
+  
+  virtual ~PointBasedRenderer() {}
 
-   virtual ~PointBasedRenderer() {};
+  virtual void init ( void ) {}
 
    /**
     * Render point based model using deferred shading (per pixel shading).
     **/
-   virtual void draw( void ) {}
+  virtual void draw( void ) {}
 
    /**
     * Intepolate samples in screen space using pyramid method.
@@ -92,16 +94,6 @@ class PointBasedRenderer
     **/
    void setEye (Point e) {
      eye = e;
-   }
-
-   /**
-    * Sets light vector for per vertex shading.
-    * @param l Given light vector.
-    **/
-   void setLight (double l[3]) {
-     light_dir[0] = l[0];
-     light_dir[1] = l[1];
-     light_dir[2] = l[2];
    }
 
    /**
@@ -164,8 +156,6 @@ class PointBasedRenderer
    /// Canvas height.
    int canvas_height;
 
-   /// Light direction vector.
-   double light_dir[3];
    /// Eye position.
    Point eye;
 

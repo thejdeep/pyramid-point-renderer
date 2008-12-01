@@ -26,18 +26,12 @@
 #include <list>
 #include <vector>
 
+#include "pyramid_point_renderer_base.h"
 #include "pyramid_point_renderer.h"
 #include "pyramid_point_renderer_color.h"
 #include "pyramid_point_renderer_er.h"
 
 #include "camera.h"
-
-/* #define CANVAS_WIDTH  1024 */
-/* #define CANVAS_HEIGHT 1024 */
-#define CANVAS_WIDTH  768
-#define CANVAS_HEIGHT 768
-/* #define CANVAS_WIDTH  512 */
-/* #define CANVAS_HEIGHT 512 */
 
 class Application
 {
@@ -77,12 +71,12 @@ class Application
   void setPerVertexColor ( bool b );
   void setAutoRotate ( bool r );
 
-  void toggleBackFaceCulling ( void );
+  void setBackFaceCulling ( bool c );
   void setEllipticalWeight ( bool b );
 
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
-  void toggleDepthTest ( void );
+  void setDepthTest ( bool d );
   
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
@@ -101,6 +95,8 @@ class Application
   // Camera class
   Camera *camera;
 
+  int canvas_width, canvas_height;
+
   // Lists of objects and primitives
   // In this simple application only one object associated to one primitive is used.
   vector<Object> objects;
@@ -112,9 +108,6 @@ class Application
 
   // Flags on/off
   bool show_points;
-  bool elliptical_weight;
-  bool depth_culling;
-  bool back_face_culling;
   bool rotating;
 
   /***** Frames per second and Surfels per second vars ******/

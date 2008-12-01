@@ -14,7 +14,11 @@ void main (void) {
 
     normal = normalize(normal);
 
-     vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
+	if (shininess == 99.0) {
+	  color.rgb = normal.rgb; 
+	}
+	else {
+	  vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
      
       color = color_ambient * (gl_LightSource[0].ambient + gl_LightModel.ambient);
 
@@ -23,11 +27,11 @@ void main (void) {
       //color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
 
       if (NdotL > 0.0) {
-	color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
-	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
-	color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
+		color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
+		float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
+		color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
       }
-    
+    }
     color.a = 1.0;
   }
   else

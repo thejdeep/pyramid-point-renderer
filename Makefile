@@ -10,7 +10,8 @@ OBJECTS = application.o \
 	surfels.o \
 	timer.o
 
-SUBDIRS = pyramid_point_renderer \
+SUBDIRS = pyramid_point_renderer_base \
+	pyramid_point_renderer \
 	pyramid_point_renderer_color \
 	pyramid_templates
 
@@ -23,6 +24,7 @@ OBJS =	application.o \
 	primitives.o \
 	surfels.o \
 	timer.o \
+	pyramid_point_renderer_base.o \
 	pyramid_point_renderer.o \
 	pyramid_point_renderer_color.o \
 	pyramid_point_renderer_er.o
@@ -36,6 +38,7 @@ CODES =	application.cc \
 	primitives.cc \
 	surfels.cc \
 	timer.c \
+	pyramid_point_renderer/pyramid_point_renderer_base.cc \
 	pyramid_point_renderer/pyramid_point_renderer.cc \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.o \
 	pyramid_templates/pyramid_point_renderer_er.o
@@ -54,7 +57,7 @@ GLLIBS     = -lGLU -lGL
 GLUTLIB    = -lGLee -lglslKernel -lglut 
 XLIBS      = -lXext -lX11 -lXi -lpthread
 
-LIBLIST =  $(GLUTLIB) $(GLLIBS) $(MATLIB)
+LIBLIST = $(GLUTLIB) $(GLLIBS) $(MATLIB)
 
 ###################################
 

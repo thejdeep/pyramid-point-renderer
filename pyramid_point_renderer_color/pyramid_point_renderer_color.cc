@@ -10,8 +10,7 @@
 /**
  * Default constructor.
  **/
-PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PyramidPointRenderer(w, h, 6) {
-  createShaders();
+PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PyramidPointRendererBase(w, h, 6) {
 }
 
 void PyramidPointRendererColor::createShaders ( void ) {
@@ -19,6 +18,7 @@ void PyramidPointRendererColor::createShaders ( void ) {
   bool shader_inst_debug = 0;
 
   shader_texture_names = new string[fbo_buffers_count/2];
+
   shader_texture_names[0] = "textureA";
   shader_texture_names[1] = "textureB";
   shader_texture_names[2] = "textureC";

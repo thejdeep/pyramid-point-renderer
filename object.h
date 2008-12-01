@@ -37,7 +37,11 @@ class Object
     q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
   }
 
-  ~Object() {}
+  ~Object() {
+	centers.clear();
+	rotations.clear();
+	primitives_ids_list.clear();
+  }
 
   void render ( void );
   void render ( Point camera_pos );
