@@ -23,9 +23,9 @@ uniform sampler2D textureB;
 uniform sampler2D textureC;
 
 vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size),
-				      vec2(half_pixel_size, -half_pixel_size),
-				      vec2(-half_pixel_size, half_pixel_size),
-				      vec2(half_pixel_size, half_pixel_size));
+									  vec2(half_pixel_size, -half_pixel_size),
+									  vec2(-half_pixel_size, half_pixel_size),
+									  vec2(half_pixel_size, half_pixel_size));
 
 // tests if a point is inside a circle.
 // Circle is centered at origin, and point is
@@ -78,9 +78,9 @@ int intersectEllipseLine (in vec2 p, in float rx, in float ry, in vec2 a1, in ve
     float t_b = (-b + root) / a;
     if ( ((t_a < 0.0) || (1.0 < t_a)) && ((t_b < 0.0) || (1.0 < t_b)) ) {
       if ( ((t_a < 0.0) && (t_b < 0.0)) || ((t_a > 1.0) && (t_b > 1.0)) )
-	return 0;
+		return 0;
       else
-	return 2;
+		return 2;
     }
     else
       return 1;
@@ -141,16 +141,16 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 
   vec2 rot_box[4]; 
   rot_box[0] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
+					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
   rot_box[1] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
+					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
   rot_box[2] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
   
   rot_box[3] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
 
   // ellipse intersects the pixels box
   if (((intersectEllipseLine(center, a, b, rot_box[0], rot_box[1]) > 0) ||
@@ -185,7 +185,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
   // rotate point to ellipse coordinate system
   vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle,
-			 -d.x*sin_angle + d.y*cos_angle);
+						  -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
   float a = 1.0*radius;
@@ -245,18 +245,18 @@ void main (void) {
       //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
       //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
 
-	if  (dist_test != -10.0)
-	{
-	  // test for minimum depth coordinate of valid ellipses
-	  if (pixelB[i].x <= zmin) {
-	    zmin = pixelB[i].x;
-	    zmax = zmin + pixelB[i].y;
-	    obj_id = pixelC[i].w;
-	  }
-	}
+	  if  (dist_test != -10.0)
+		{
+		  // test for minimum depth coordinate of valid ellipses
+		  if (pixelB[i].x <= zmin) {
+			zmin = pixelB[i].x;
+			zmax = zmin + pixelB[i].y;
+			obj_id = pixelC[i].w;
+		  }
+		}
       else {
-	// if the ellipse does not reach the center ignore it in the averaging
-	pixelA[i].w = -1.0;
+		// if the ellipse does not reach the center ignore it in the averaging
+		pixelA[i].w = -1.0;
       }
     }
   }
@@ -268,29 +268,29 @@ void main (void) {
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) 
-      {
+		{
 	  	
-	//if (abs(pixelC[i].w - obj_id) < 0.1 )
-	{
-	  // Depth test between valid in reach ellipses
-	  if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
-	    {
-	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
-	      float w = 1.0;
-	      bufferA += pixelA[i] * w;
+		  //if (abs(pixelC[i].w - obj_id) < 0.1 )
+		  {
+			// Depth test between valid in reach ellipses
+			if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
+			  {
+				//float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+				float w = 1.0;
+				bufferA += pixelA[i] * w;
 
-	      // Increment ellipse total path with distance from gather pixel to center
-	      bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
+				// Increment ellipse total path with distance from gather pixel to center
+				bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
 	      
-	      bufferC += pixelC[i] * w;
+				bufferC += pixelC[i] * w;
 	      
-	      // Take maximum depth range
-	      new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
+				// Take maximum depth range
+				new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
 	      
-	      valid_pixels += w;
-	  }
-	}
-      }
+				valid_pixels += w;
+			  }
+		  }
+		}
     }
 
   // average values if there are any valid ellipses

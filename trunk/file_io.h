@@ -284,7 +284,8 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
     /* prepare to read the i'th list of elements */
     elem_name = setup_element_read_ply (in_ply, i, &elem_count);
-
+	vert_other = get_other_properties_ply (in_ply, 
+										   offsetof(Vertex,other_props));
     if (equal_strings ("vertex", elem_name)) {
 
       /* create a vertex list to hold all the vertices */
@@ -315,9 +316,6 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
       }
 
-      vert_other = get_other_properties_ply (in_ply, 
-											 offsetof(Vertex,other_props));
-
       Vertex_vcg v;
       /* grab all the vertex elements */
       for (j = 0; j < elem_count; j++) {
@@ -329,7 +327,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 		Color c (v.red/255.0, v.green/255.0, v.blue/255.0);
 
 		//		double r = v.radius;
-		double r = 0.005;
+		double r = 0.001;
       
 		surfels->push_back ( Surfeld (p, n, c, r, (unsigned int)j) );
       }
@@ -341,7 +339,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
       /* set up for getting face elements */
       setup_property_ply (in_ply, &face_props[0]);
-      face_other = get_other_properties_ply (in_ply,
+	  face_other = get_other_properties_ply (in_ply,
 											 offsetof(Face,other_props));
       Face f;
       /* grab all the face elements */
@@ -358,9 +356,6 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
       get_other_element_ply (in_ply);
   }
   close_ply(in_ply);
-
-  //normalize(surfels);
-
   delete in_ply;
   delete vert_other;
   delete face_other;
@@ -372,7 +367,7 @@ void MYreadPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
   PlyFile *in_ply;
   int nverts, nfaces;
-  PlyOtherProp *vert_other=0, *face_other=0;
+  //  PlyOtherProp *vert_other=0, *face_other=0;
 
   FILE *fp = fopen(filename, "rb");
   in_ply = read_ply(fp);
@@ -421,9 +416,7 @@ void MYreadPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
       }
 
-      vert_other = get_other_properties_ply (in_ply, 
-											 offsetof(Vertex,other_props));
-
+	  //      vert_other = get_other_properties_ply (in_ply, offsetof(Vertex,other_props));
       Vertex v;
       /* grab all the vertex elements */
       for (j = 0; j < elem_count; j++) {
@@ -445,8 +438,7 @@ void MYreadPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
       /* set up for getting face elements */
       setup_property_ply (in_ply, &face_props[0]);
-      face_other = get_other_properties_ply (in_ply,
-											 offsetof(Face,other_props));
+	  //      face_other = get_other_properties_ply (in_ply, offsetof(Face,other_props));
       Face f;
       /* grab all the face elements */
       for (j = 0; j < elem_count; j++) {
@@ -462,7 +454,5 @@ void MYreadPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
       get_other_element_ply (in_ply);
   }
   close_ply(in_ply);
-  delete in_ply;
-  delete vert_other;
-  delete face_other;
+  free_ply(in_ply);
 }

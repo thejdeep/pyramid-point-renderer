@@ -7,7 +7,7 @@ MODE = final
 CC = gcc
 CXX = g++
 
-INCLUDEDIRS = -I$(HOME)/lcgtk/ -I./ -I../ -I./ewa_surface_splatting/ \
+INCLUDEDIRS = -I$(HOME)/lcgtk/ -I./ -I../ -I./ewa_surface_splatting/ -I./pyramid_point_renderer_base/ \
 	-I./point_ids/ -I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ \
 	-I./pyramid_point_renderer_texture/ -I./pyramid_lod -I./jfa_splatting/ \
 	-I./pyramid_trees/ -I./pyramid_templates/ -I./triangle_renderer/ \

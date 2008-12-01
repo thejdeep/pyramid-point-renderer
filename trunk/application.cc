@@ -19,9 +19,11 @@
  **/
 Application::Application( GLint default_mode ) {
 
+  canvas_width = canvas_height = 768;
+
   // Initialize camera
-  camera = new Camera(CANVAS_WIDTH + CANVAS_WIDTH/16,
-		      CANVAS_HEIGHT + CANVAS_HEIGHT/16);
+  camera = new Camera(canvas_width + canvas_width/16,
+		      canvas_height + canvas_height/16);
 
   render_mode = default_mode;
 
@@ -29,12 +31,8 @@ Application::Application( GLint default_mode ) {
 
   fps_loop = 0;
 
-  elliptical_weight = true;
-  depth_culling = true;
-  back_face_culling = true;
   rotating = 0;
-
-  show_points = true;
+  show_points = false;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
@@ -98,8 +96,6 @@ void Application::drawPoints(void) {
 	glColor4f(c[0], c[1], c[2], 1.0f);  
 	glVertex(it);
   }
-
-
   glEnd();
 }
 
@@ -169,7 +165,7 @@ void Application::changePrimitivesRendererType( point_render_type_enum type ) {
  * @param type Rendering mode.
  **/
 void Application::changeRendererType( int type ) {
-  changePrimitivesRendererType ( (point_render_type_enum)type );
+  changePrimitivesRendererType ( (point_render_type_enum) type );
   render_mode = type;
   createPointRenderer( );
 }
@@ -180,19 +176,20 @@ void Application::changeRendererType( int type ) {
  * the choice one of the inherited classes is instanced.
  **/
 void Application::createPointRenderer( void ) {  
+  
+  if (point_based_render)
+	delete point_based_render;
 
   if (render_mode == PYRAMID_POINTS)
-      point_based_render = new PyramidPointRenderer(CANVAS_WIDTH, CANVAS_HEIGHT);   
+	point_based_render = new PyramidPointRenderer(canvas_width, canvas_height);
   else if (render_mode == PYRAMID_POINTS_COLOR)
-      point_based_render = new PyramidPointRendererColor(CANVAS_WIDTH, CANVAS_HEIGHT);
+	point_based_render = new PyramidPointRendererColor(canvas_width, canvas_height);
   else if (render_mode == PYRAMID_TEMPLATES)
-    point_based_render = new PyramidPointRendererER(CANVAS_WIDTH, CANVAS_HEIGHT);
-    //    point_based_render->setVertices(primitives.back().getSurfels());
+    point_based_render = new PyramidPointRendererER(canvas_width, canvas_height);
 
   assert (point_based_render);
 
-  point_based_render->setDepthTest(depth_culling);
-  point_based_render->setBackFaceCulling(back_face_culling);
+  ((PyramidPointRendererBase*)point_based_render)->createShaders();
 }
 
 /**
@@ -208,7 +205,6 @@ int Application::readFile ( const char * filename ) {
 
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
-  primitives.back().setPerVertexColor(0);
 
   // Create a new object with id 0
   objects.push_back( Object( 0 ) );
@@ -216,11 +212,11 @@ int Application::readFile ( const char * filename ) {
 
   MYreadPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
-  //  normalize((primitives.back()).getSurfels());
+  computeNormFactors((primitives.back()).getSurfels());
+  normalize((primitives.back()).getSurfels());
 
   // connect new object to new primitive
   objects[0].addPrimitives( primitives.back().getId() );
-  primitives[0].setType( 1.0 );
   // Sets the default rendering algorithm
   primitives[0].setRendererType( render_mode );
 
@@ -231,23 +227,15 @@ int Application::readFile ( const char * filename ) {
 }
 
 int Application::startFileReading ( void ) {
-
-
   // Create a new object with id 0
-  objects.push_back( Object( 0 ) );
-
-  // connect new object to new primitive
+  objects.push_back( Object( 0 ) ); 
 
   return 0;
 }
 
 int Application::appendFile ( const char * filename ) { 
 
-  // Create a new primitive from given file
-//   primitives.push_back( Primitives( primitives.size() ) );
-//   primitives.back().setPerVertexColor(0);
-
-  // Create a new primitive from given file
+   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
   objects[0].addPrimitives( primitives.back().getId() );
 
@@ -259,13 +247,11 @@ int Application::appendFile ( const char * filename ) {
 int Application::finishFileReading ( void ) { 
 
   computeNormFactors((primitives.back()).getSurfels());
-
+  
   for (unsigned int i = 0; i < primitives.size(); ++i) {
 	normalize(primitives[i].getSurfels());
-	primitives[i].setType( 1.0 );
 	// Sets the default rendering algorithm
 	primitives[i].setRendererType( render_mode );
-	primitives[i].setPerVertexColor(0);
   }
 
   createPointRenderer();
@@ -380,7 +366,6 @@ void Application::setGpuMask ( int m ) {
  **/
 void Application::setPerVertexColor ( bool c ) {
   for (unsigned int i = 0; i < primitives.size(); ++i) {
-	primitives[i].setPerVertexColor(c);
 	// Reset renderer type to load per vertex color or default color in vertex array
 	primitives[i].setRendererType( primitives[i].getRendererType() );
   }
@@ -393,16 +378,17 @@ void Application::setPerVertexColor ( bool c ) {
  **/
 void Application::setAutoRotate ( bool r ) {
   rotating = r;
+  if (r == true)
+	camera->startRotation(canvas_width/2,canvas_height/2);
 }
 
 /**
  * Turns depth test on/off.
  * @param d Depth test state.
  **/
-void Application::toggleDepthTest ( void ) {
-  depth_culling = !depth_culling;
+void Application::setDepthTest ( bool d ) {
   if (point_based_render)
-    point_based_render->setDepthTest(depth_culling);
+    point_based_render->setDepthTest(d);
 }
 
 /**
@@ -410,10 +396,6 @@ void Application::toggleDepthTest ( void ) {
  * @param mat Id of material (see materials.h for list)
  **/
 void Application::changeMaterial( int mat ) {  
-  for (unsigned int i = 0; i < primitives.size(); ++i) {
-	primitives[i].setMaterial( mat );
-	primitives[i].setRendererType( primitives[i].getRendererType() );
-  }
   point_based_render->setMaterial( mat );
 }
 
@@ -421,10 +403,9 @@ void Application::changeMaterial( int mat ) {
  * Turns backface culling on/off.
  * @param b Backface culling state.
  **/
-void Application::toggleBackFaceCulling ( void ) {
-  back_face_culling = !back_face_culling;
-if (point_based_render)
-  point_based_render->setBackFaceCulling(back_face_culling);
+void Application::setBackFaceCulling ( bool c ) {
+  if (point_based_render)
+	point_based_render->setBackFaceCulling(c);
 }
 
 /**

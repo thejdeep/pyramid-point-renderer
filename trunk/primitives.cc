@@ -7,6 +7,16 @@
 #include <assert.h>
 
 
+Primitives::~Primitives() {
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_COLOR_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+
+  glDeleteBuffers(1, &vertex_buffer);
+  glDeleteBuffers(1, &color_buffer);
+  glDeleteBuffers(1, &normal_buffer);
+}
+
 /**
  * Render object using designed rendering system.
  **/
@@ -52,9 +62,6 @@ void Primitives::render ( void ) const {
  * @param rtype Given renderer type.
  **/
 void Primitives::setRendererType ( int rtype ) {
-
-  number_points = surfels.size();
-  number_triangles = triangles.size();
 
   renderer_type = rtype;
 
@@ -107,8 +114,8 @@ void Primitives::setPyramidPointsArrays ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)normal_array, GL_STATIC_DRAW);
 
-  delete(vertex_array);
-  delete(normal_array);
+  delete [] vertex_array;
+  delete [] normal_array;
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -130,8 +137,6 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   normal_array = new GLfloat[number_points * 3];
   color_array = new GLfloat[number_points * 4];
 
-  material = 1;
-
   int pos = 0;
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
@@ -140,13 +145,10 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z);
     vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
     
-    //    if (color_model) 
-	{
-	  color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
-      color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
-      color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
-    }
-    //color_array[pos*4 + 3] = type;
+	color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
+	color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
+	color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
+
 	color_array[pos*4 + 3] = 1.0;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
@@ -168,9 +170,9 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)normal_array, GL_STATIC_DRAW);
 
-  delete(vertex_array);
-  delete(normal_array);
-  delete(color_array);
+  delete [] vertex_array;
+  delete [] normal_array;
+  delete [] color_array;
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);

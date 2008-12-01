@@ -12,15 +12,15 @@
 #include <cmath>
 #include <cassert>
 
-#include "../pyramid_point_renderer/pyramid_point_renderer.h"
+#include "../pyramid_point_renderer_base/pyramid_point_renderer_base.h"
 
-class PyramidPointRendererColor : public PyramidPointRenderer
+class PyramidPointRendererColor : public PyramidPointRendererBase
 {
  private:
   
-  void createShaders ( void );
 
  public:
+  void createShaders ( void );
 
   PyramidPointRendererColor(int w, int h);
  

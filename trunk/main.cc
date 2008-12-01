@@ -13,22 +13,46 @@
 static int g_Width = 816;                          // Initial window width
 static int g_Height = 816;                         // Initial window height
 
+bool depth_test;
+bool back_face_culling;
 int button_pressed;
 bool active_shift;
 int mask_size;
 double reconstruction_filter_size;
 double prefilter_size;
 int material;
+bool auto_rotate;
+bool elliptical_weight;
 
 Application *application;
 
-void display(void)
+void display( void )
 {
-   application->draw();
 
-   // Make sure changes appear onscreen
-   glutSwapBuffers();
+//   static int frame = 0, time, timebase = 0, fps;
+
+//   frame++;
+//   time = glutGet(GLUT_ELAPSED_TIME);
+	
+//   if (time - timebase > 1000) {
+// 	fps = frame*1000.0/(time-timebase);
+// 	cout << fps << endl;
+// 	timebase = time;
+// 	frame = 0;
+//   }
+  
+  application->draw();
+
+  // Make sure changes appear onscreen
+  glutSwapBuffers();
 }
+
+void idle( void ) {
+
+  if (auto_rotate)
+	display();
+}
+
 
 void reshape(GLint width, GLint height)
 {
@@ -46,6 +70,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case 27 :
   case 'q' :
   case 'Q' :
+	delete application;
     exit(0);
     break;
   case '0' :
@@ -66,11 +91,25 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case '5' :
     material = 5;
     break;
+  case '6' :
+    material = 6;
+    break;
+  case 'r':
+	auto_rotate = !auto_rotate;
+	application->setAutoRotate( auto_rotate );
+	break;
+  case 'w':
+	elliptical_weight = !elliptical_weight;
+	application->setEllipticalWeight( elliptical_weight );
+	cout << "Elliptical weight : " << elliptical_weight << endl;
+	break;
   case 'd' :
-    application->toggleDepthTest ( );
+	depth_test = !depth_test;
+    application->setDepthTest ( depth_test );
     break;
   case 'b' :
-    application->toggleBackFaceCulling ( );
+	back_face_culling = !back_face_culling;
+    application->setBackFaceCulling ( back_face_culling );
     break;
   case '+' :
     mask_size ++;
@@ -107,6 +146,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case '3' :
   case '4' :
   case '5' :
+  case '6' :
     application->changeMaterial ( material );
   }
 
@@ -121,18 +161,15 @@ void keyboardSpecial(int key_pressed, int x, int y) {
   switch (key_pressed) {
   case GLUT_KEY_F1 :
     application->changeRendererType ( 0 );
-    application->setGpuMask ( mask_size );
-    application->changeMaterial ( material );
+	cout << "PYRAMID POINTS" << endl;
     break;
   case GLUT_KEY_F2 :
     application->changeRendererType ( 1 );
-    application->setGpuMask ( mask_size );
-    application->changeMaterial ( material );
+	cout << "PYRAMID POINTS WITH COLOR" << endl;
     break;
   case GLUT_KEY_F3 :
     application->changeRendererType ( 2 );
-    application->setGpuMask ( mask_size );
-    application->changeMaterial ( material );
+	cout << "PYRAMID TEMPLATES WITH COLOR" << endl;
     break;
   }
 
@@ -145,6 +182,8 @@ void keyboardSpecial(int key_pressed, int x, int y) {
     application->changeMaterial ( material );
     application->setReconstructionFilter ( reconstruction_filter_size );
     application->setPrefilter ( prefilter_size );
+	application->setDepthTest( depth_test );
+	application->setBackFaceCulling( back_face_culling );
     break;
   }
 
@@ -226,36 +265,41 @@ int main(int argc, char * argv []) {
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
   material = 0;
+  auto_rotate = false;
+  elliptical_weight = false;
+  depth_test = true;
+  back_face_culling = true;
 
   application = new Application(PYRAMID_POINTS_COLOR);
 
-//   if (argc < 2) {
-//     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
-//     exit(0);
-//   }
+  if (argc < 2) {
+    cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
+    exit(0);
+  }
 
-
-  if (strcmp (argv[1], "scan") == 0) 
-	{
+  if (strcmp (argv[1], "scan") == 0) {
 	application->startFileReading();
-// 	application->appendFile( "../plys/vcl/dom_mal19_w4-O.ply" );
- 	application->appendFile( "../plys/vcl/dom_mal19_w4-W.ply" );
+	// 	application->appendFile( "../plys/vcl/dom_mal19_w4-O.ply" );
+	// 	application->appendFile( "../plys/vcl/dom_mal19_w4-W.ply" );
 	application->appendFile( "../plys/vcl/dom_mal19_w2_arc-D-1.ply" );
 	application->appendFile( "../plys/vcl/dom_mal19_w2_arc-D-2.ply" );
 	application->appendFile( "../plys/vcl/dom_mal19_w2_B-1.ply" );
 	application->appendFile( "../plys/vcl/dom_mal19_w2_B-2.ply" );
 	application->finishFileReading();
 	application->changeMaterial(5);
-	application->toggleBackFaceCulling ( );
+	back_face_culling = false;
+	application->setBackFaceCulling ( back_face_culling );
   }
   else
 	application->readFile( argv[1] );
+
+  //  application->readFile( "../plys/dragon.ply" );
 
   cout << "Total points : " << application->getNumberPoints() << endl;
 
   //GLUT callback functions
   glutDisplayFunc(display);
-  //  glutIdleFunc(draw);
+  glutIdleFunc(idle);
   glutReshapeFunc(reshape);
   glutMouseFunc(mouse);
   glutMotionFunc(mouseMotion);

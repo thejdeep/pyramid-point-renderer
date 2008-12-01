@@ -8,7 +8,7 @@
 #include "pyramid_point_renderer_er.h"
 
 
-PyramidPointRendererER::PyramidPointRendererER(int w, int h) : PyramidPointRenderer(w, h, 6),
+PyramidPointRendererER::PyramidPointRendererER(int w, int h) : PyramidPointRendererBase(w, h, 6),
 							       gpu_mask_size(1) {
   createShaders();
 }

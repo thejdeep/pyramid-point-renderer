@@ -265,13 +265,28 @@ void Camera::endRotation( void ) {
  **/
 void Camera::rotate( void ) {
 
-  q_last = q_rot;
-  Quat new_rot (0.00, 0.001, 0.00003, 0.999);
-  
-  // Multiply local rotation by total rotation (order matters!)
-  q_rot = new_rot.composeWith(q_last);
-  q_rot.normalize();
-  q_last = q_rot;
+  mouse_curr[0] += 5;
+
+  Point d_curr = mouse_curr;
+  Point d_start = mouse_start;
+
+  normalizeCoordinates(d_curr);
+  normalizeCoordinates(d_start);
+
+  mapToSphere(d_start, 1.0);
+  mapToSphere(d_curr, 1.0);
+
+  Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
+  Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
+
+  Quat inc = q0*q1;
+
+  q_lookAt = (q_last_lookAt*inc*q_last_lookAt.conjugate())*q_last_lookAt;
+  q_lookAt.normalize();
+
+  position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
+  up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
+
 }
 
 /**
