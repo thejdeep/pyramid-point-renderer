@@ -19,7 +19,7 @@ const double rad_to_deg = 180.0/M_PI;
  **/
 Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				   zoom_factor(1.0), fov(1.0),
-				   z_near(0.001), z_far(1000.0) {
+				   z_near(0.001), z_far(10.0) {
   view_mode = PERSPECTIVE;
 
   static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};

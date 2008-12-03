@@ -177,9 +177,10 @@ class PointBasedRenderer
    double prefilter_size;
 };
 
-inline void check_for_ogl_error() {
+inline void check_for_ogl_error( char * from = 0) {
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
+	fprintf(stderr, "%s\n", from);
     fprintf(stderr, "%s(%d) glError: %s\n", __FILE__, __LINE__, gluErrorString(err));
   }
 }

@@ -54,56 +54,11 @@ public:
     mCenter = Point3();
     mNormal = Vector3();
     mSplatRadius = 0.0;
-    mMinorAxis = std::make_pair(0.0,Vector3());
-    mMajorAxis = std::make_pair(0.0,Vector3());
+
 		 
   }
-	 
-  Surfel (const Surfel<Real>& pSurfel)
-  {
-    mCenter             = pSurfel.Center();
-    mNormal             = pSurfel.Normal();
-    mMinorAxis          = pSurfel.MinorAxis();
-    mMajorAxis          = pSurfel.MajorAxis();
-    mColor              = pSurfel.color(); 
-    mSplatRadius        = pSurfel.Radius();
-    mPerpendicularError = pSurfel.perpendicularError();
-    mID                 = pSurfel.ID();
-  }
-	 
-  Surfel (const Point3& 	center, 
-	  const Vector3& normal,
-	  const std::pair<Real,Vector3>& pMinorAxis,
-	  const std::pair<Real,Vector3>& pMajorAxis,
-	  unsigned int 	id ) : mCenter(center),
-			       mNormal(normal),
-			       mMinorAxis(pMinorAxis),
-			       mMajorAxis(pMajorAxis),
-			       mID(id)
-  {
-    mColor = Color(1.0,0.0,0.0); 
 
-  };	
-	 
-  Surfel (const Point3& 	position, 
-	  const Vector3& normal, 
-	  const Real& 	radius, 
-	  unsigned int 	id, 
-	  const Real& 	pError ) : mCenter(position),
-				   mNormal(normal),
-				   mSplatRadius(radius),
-				   mPerpendicularError(pError),
-				   mID(id)
-  {
-    mColor = Color(0.0,0.0,0.0); 
-    mNormal.Normalize();
-    Vector3 lV = Perpendicular(mNormal);
-    Vector3 lU = mNormal ^ lV;
-    lU.Normalize();
-    mMinorAxis = std::make_pair(mSplatRadius,lV);
-    mMajorAxis = std::make_pair(mSplatRadius,lU);
-  };	
-	
+
 	
   Surfel (const Point3& position, 
 	  const Vector3& normal,
@@ -113,41 +68,17 @@ public:
 				mNormal(normal),
 				mColor(color),
 				mSplatRadius(radius),
-				mPerpendicularError(0),
 				mID(id)
   {
-    mNormal.Normalize();
-    Vector3 lV = Perpendicular(mNormal);
-    Vector3 lU = mNormal ^ lV;
-    lU.Normalize();
-    mMinorAxis = std::make_pair(mSplatRadius,lV);
-    mMajorAxis = std::make_pair(mSplatRadius,lU);
+
   };
 	  
-  Surfel (const Point3& position, 
-	  const Vector3& normal, 
-	  const Real& 	radius, 
-	  unsigned int 	id ) : 	mCenter(position),
-				mNormal(normal),
-				mSplatRadius(radius),
-				mPerpendicularError(0),
-				mID(id)
-  {
-    mColor = Color(0.0,0.0,0.0);
-    mNormal.Normalize();
-    Vector3 lV = Perpendicular(mNormal);
-    Vector3 lU = mNormal ^ lV;
-    lU.Normalize();
-    mMinorAxis = std::make_pair(mSplatRadius,lV);
-    mMajorAxis = std::make_pair(mSplatRadius,lU);
-  };
-		  
+	  
   inline const Surfel<Real>& operator= ( const Surfel<Real>& pSurfel)
   {
     this->mCenter    = pSurfel.Center();
     this->mNormal    = pSurfel.Normal();
-    this->mMinorAxis = pSurfel.MinorAxis();
-    this->mMajorAxis = pSurfel.MajorAxis();
+ 
     this->mColor     = pSurfel.color();
 		 
     return ( *this );
@@ -223,30 +154,6 @@ public:
     this->mColor = pColor; 
   };
 
-  Real perpendicularError () const 
-  { 
-    return ( this->mPerpendicularError ); 
-  };
-
-  void SetMinorAxis( const std::pair<Real,Vector3>& pMinorAxis)
-  {
-    this->mMinorAxis = pMinorAxis; 
-  }
-
-  void SetMajorAxis( const std::pair<Real,Vector3>& pMajorAxis)
-  {
-    this->mMajorAxis = pMajorAxis; 
-  }
-	 
-  std::pair<Real,Vector3> MinorAxis() const
-  {
-    return (this->mMinorAxis); 
-  }
-
-  std::pair<Real,Vector3> MajorAxis() const 
-  {
-    return (this->mMajorAxis); 
-  }
 	 
   /// I/O operator - output
   inline friend std::ostream& operator << (std::ostream& out, const Surfel &s) 
@@ -259,121 +166,6 @@ public:
     return out;
   };
 	 
-  Real Area() const
-  {
-    return (  (M_PI * mMinorAxis.first) * (M_PI * mMajorAxis.first) );
-  }
-	 
-	 
-	 
-  Vector3 Perpendicular( const Vector3& pVector)
-  {
-    //select the shortest of projections of axes on v
-    //(the closest to perpendicular to v),
-    //and project it to the plane defined by v
-    if ( fabs( pVector[0]) < fabs( pVector[1]) ) // x < y 
-      {
-
-	if ( fabs( pVector[0]) < fabs( pVector[2]) )
-	  {  // x < y && x < z
-	    Vector3 lPerpendicularX (1.0 - (pVector[0] * pVector[0]),
-				     -pVector[0] * pVector[1],
-				     -pVector[0] * pVector[2] );
-				 
-	    return lPerpendicularX.Norm();
-	  }
-      }  
-    else
-      { //y <= x
-
-	if (fabs(pVector[1]) < fabs(pVector[2]) )
-	  {  // y <= x && y < z
-	    Vector3 lPerpendicularY( -pVector[1] * pVector[0], 
-				     1.0 - (pVector[1] * pVector[1]), 
-				     -pVector[1] * pVector[2] );
-				 
-	    return lPerpendicularY.Norm();
-
-	  }
-      }
-    // z <= x && z <= y
-    Vector3 lPerpendicularZ(-pVector[2] * pVector[0], 
-			    -pVector[2] * pVector[1], 
-			    1.0 - (pVector[2] * pVector[2]));
-		 
-    return lPerpendicularZ.Norm();
-
-  }	   
-	   	 
-  std::list<Point3* > BoundariesSamples(unsigned int pSteps) const
-  { 
-
-    if (pSteps == 0)
-      {
-	pSteps = 4;
-      }
-		 	 
-    std::list<Point3* > lPoints;
-
-    Real lAlpha 			= 0.0;     
-    Real lSinAlpha 		= 0.0;
-    Real lCosAlpha 		= 0.0;
-
-    Real lX 				= 0.0;
-    Real lY 				= 0.0;
-    Real lFactor 			= 0.0;
-
-    Real lCos				= 0.0;
-    Real lSin				= 0.0;
-    Vector3 lDirection     = Vector3();
-		 
-    Real i = 0;
-
-    while (i < 360) 
-      {
-
-	lAlpha = ( i / 180 ) * M_PI;
-	lSinAlpha =  sin( lAlpha );
-	lCosAlpha =  cos( lAlpha );
-
-
-	lX = mMinorAxis.first * lCosAlpha;
-
-	lY = mMajorAxis.first * lSinAlpha;
-
-	lFactor = sqrt( lX*lX + lY*lY );
-
-	lCos = lX / lFactor;
-	lSin = lY / lFactor;
-
-	lDirection = (mMinorAxis.second * lCos) + (mMajorAxis.second * lSin);
-		 
-	lPoints.push_back( new Point3( (mCenter + (lDirection * lFactor)) ) );
-
-	i = i + (360.0 / pSteps);
-			 
-      } 
-
-    return lPoints;
-
-  }
-	 
-  void draw()
-  {
-		 
-    ListPtrPoint3 lBoundaries = this->BoundariesSamples(50);
- 		 	
-    for(ListPtrPoint3Iterator it = lBoundaries.begin();it != lBoundaries.end();++it)
-      {		
-	Point3 point = (*(*it));
-	glPointSize(1.5);
-	glColor3f(0.0,1.0,0.25);
-				
-	glVertex3f(point[0],point[1],point[2]);
-      }
-			
-
-  }
 
 private:
 	 
@@ -387,19 +179,8 @@ private:
 	  
   /// Splat radius
   Real mSplatRadius;
-
-  /// Minor Axis
-  std::pair<Real,Vector3> mMinorAxis;
-	  
-  /// Major Axis
-  std::pair<Real,Vector3> mMajorAxis;
-	  
-  /// Perpendicular error
-  Real mPerpendicularError;
-	  
-  /// An identification number for the surfel
-  unsigned int mID;
-	   
+   
+  int mID;
 
 };
 

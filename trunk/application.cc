@@ -33,6 +33,7 @@ Application::Application( GLint default_mode ) {
 
   rotating = 0;
   show_points = false;
+  selected = 0;
 
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
@@ -118,10 +119,14 @@ void Application::draw( void ) {
   // Set eye for back face culling in vertex shader
   point_based_render->setEye( camera->positionVector() );
 
-  for (unsigned int i = 0; i < primitives.size(); ++i) {
-    // Project samples to screen space
-	point_based_render->projectSamples( &primitives[i] );
+  if (selected == 0) {
+	for (unsigned int i = 0; i < primitives.size(); ++i) {
+	  // Project samples to screen space
+	  point_based_render->projectSamples( &primitives[i] );
+	}
   }
+  else
+	point_based_render->projectSamples( &primitives[selected-1] );
 
   // Interpolates projected surfels using pyramid algorithm
   point_based_render->interpolate();
@@ -176,7 +181,7 @@ void Application::changeRendererType( int type ) {
  * the choice one of the inherited classes is instanced.
  **/
 void Application::createPointRenderer( void ) {  
-  
+
   if (point_based_render)
 	delete point_based_render;
 
@@ -190,6 +195,7 @@ void Application::createPointRenderer( void ) {
   assert (point_based_render);
 
   ((PyramidPointRendererBase*)point_based_render)->createShaders();
+
 }
 
 /**
@@ -236,22 +242,36 @@ int Application::startFileReading ( void ) {
 int Application::appendFile ( const char * filename ) { 
 
    // Create a new primitive from given file
-  primitives.push_back( Primitives( primitives.size() ) );
-  objects[0].addPrimitives( primitives.back().getId() );
 
-  readPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
+  cout << primitives.size() << " : " << filename << endl;;
+
+  primitives.push_back( Primitives( primitives.size() ) );
+  int id = primitives.back().getId();
+
+  objects[0].addPrimitives( id );
+
+  readPlyTrianglesColor (filename, primitives[id].getSurfels(), primitives[id].getTriangles());
+
+//   if (primitives.size() == 1)
+// 	computeNormFactors(primitives[id].getSurfels());
+
+//   normalize(primitives[id].getSurfels());
+  
+//   primitives[id].setRendererType( render_mode );
+
+//   primitives[id].clearSurfels();
 
   return 0;
 }
 
 int Application::finishFileReading ( void ) { 
 
-  computeNormFactors((primitives.back()).getSurfels());
-  
+  computeNormFactors(primitives[0].getSurfels());
+
   for (unsigned int i = 0; i < primitives.size(); ++i) {
 	normalize(primitives[i].getSurfels());
-	// Sets the default rendering algorithm
 	primitives[i].setRendererType( render_mode );
+	primitives[i].clearSurfels();
   }
 
   createPointRenderer();
@@ -414,4 +434,19 @@ void Application::setBackFaceCulling ( bool c ) {
  **/
 void Application::setEllipticalWeight ( bool b ) {
   point_based_render->setEllipticalWeight(b);
+}
+
+void Application::increaseSelected ( void ) {
+  selected++;
+  if (selected > primitives.size())
+	selected = 0;
+  cout << "selected : " << selected << endl;
+
+}
+
+void Application::decreaseSelected ( void ) {
+  selected--;
+  if (selected < 0)
+	selected = primitives.size();
+  cout << "selected : " << selected << endl;
 }

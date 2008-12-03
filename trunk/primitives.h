@@ -39,6 +39,8 @@ class Primitives
   vector<Surfeld> * getSurfels ( void ) { return &surfels; }
   vector<Triangle> * getTriangles ( void ) { return &triangles; }
 
+  void clearSurfels ( void );
+
   int getRendererType ( void ) { return renderer_type; }
   void setRendererType ( int type );
 
