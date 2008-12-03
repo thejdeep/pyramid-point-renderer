@@ -111,6 +111,12 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 	back_face_culling = !back_face_culling;
     application->setBackFaceCulling ( back_face_culling );
     break;
+  case '.':
+	application->increaseSelected ( );
+	break;
+  case ',':
+	application->decreaseSelected ( );
+	break;
   case '+' :
     mask_size ++;
     application->setGpuMask ( mask_size );
@@ -277,23 +283,35 @@ int main(int argc, char * argv []) {
     exit(0);
   }
 
-  if (strcmp (argv[1], "scan") == 0) {
+  if (strcmp (argv[1], "catacomba") == 0) {
 	application->startFileReading();
-	// 	application->appendFile( "../plys/vcl/dom_mal19_w4-O.ply" );
-	// 	application->appendFile( "../plys/vcl/dom_mal19_w4-W.ply" );
-	application->appendFile( "../plys/vcl/dom_mal19_w2_arc-D-1.ply" );
-	application->appendFile( "../plys/vcl/dom_mal19_w2_arc-D-2.ply" );
-	application->appendFile( "../plys/vcl/dom_mal19_w2_B-1.ply" );
-	application->appendFile( "../plys/vcl/dom_mal19_w2_B-2.ply" );
+	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w4-O.ply" );
+ 	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w4-W.ply" );
+	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_arc-D-1.ply" );
+	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_arc-D-2.ply" );
+	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_B-1.ply" );
+	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_B-2.ply" );
 	application->finishFileReading();
 	application->changeMaterial(5);
 	back_face_culling = false;
 	application->setBackFaceCulling ( back_face_culling );
   }
+  else if (strcmp (argv[1], "scan") == 0) {
+	application->startFileReading();
+ 	application->appendFile( "../plys/vcg/new/dom_mal19_w2_arc-S.ply" );
+ 	application->appendFile( "../plys/vcg/new/dom_mal19_w2_arc-N.ply" );
+	application->appendFile( "../plys/vcg/new/dom_mal19_w2-N.ply" );
+	application->appendFile( "../plys/vcg/new/dom_mal19_w2-M.ply" );
+ 	application->appendFile( "../plys/vcg/new/dom_mal19_w2-S.ply" );
+  	application->appendFile( "../plys/vcg/new/dom_mal19_w4-M.ply" );
+	application->finishFileReading();
+	application->changeMaterial(5);
+	back_face_culling = false;
+	application->setBackFaceCulling ( back_face_culling );
+  }
+
   else
 	application->readFile( argv[1] );
-
-  //  application->readFile( "../plys/dragon.ply" );
 
   cout << "Total points : " << application->getNumberPoints() << endl;
 

@@ -87,6 +87,10 @@ class Application
   void mouseMiddleMotionShift( int x, int y );
   void mouseRightMotion( int x, int y );
 
+  void increaseSelected ( void );
+  void decreaseSelected ( void );
+
+
  private :
 
   // Generic class, is instanced as one of the inherited classes (rendering algorithms)
@@ -109,6 +113,8 @@ class Application
   // Flags on/off
   bool show_points;
   bool rotating;
+
+  int selected;
 
   /***** Frames per second and Surfels per second vars ******/
   double sps, fps;
