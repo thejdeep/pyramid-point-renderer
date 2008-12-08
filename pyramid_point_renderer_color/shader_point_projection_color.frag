@@ -5,7 +5,7 @@
 // Projects points to screen space and rotates normal
 // stores output on texture
 #extension GL_ARB_draw_buffers : enable
-#extension GL_EXT_gpu_shader4 : enable
+//#extension GL_EXT_gpu_shader4 : enable
 
 // height of near viewing plane
 //uniform float h_near;
