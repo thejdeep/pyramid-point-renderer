@@ -2,33 +2,26 @@
 
 = Introduction =
 
-The code is almost self-contained except mainly for the Qt4 dependency,
-however, the application classes are independent of the interface, thus
-I am at the moment building a lightweight GLut based version, it should be already working with the included makefiles but without any interface. You will
-also need to have GLee installed.
+The code is almost self-contained except for another library developed in our lab and GLee,
+The application classes are independent of the interface, thus
+I have substituted the Qt interface for a lightweight GLut based version.
 
 = Details =
 
 Requirements:
 
-  * Up to this moment you do need a quite recent graphics card to use the system because it uses some functionalities from Shader Model 4. Some renderers should also work with Shader Model 3 with few modifications, but since it implies removing some functionalities I have not done it yet.
+  * I have successfully tested this code in a variety of computers and configurations, including an HP tx1215 laptop with a nVidia 6150 graphics board. It should run on nVidia GeForce 5 series, but I have not yet tested.
 
 Before you compile:
 
   * Have GLUT installed.
 
-  * Download and compile at least the glslKernel of the [http://code.google.com/p/lcgtk/ LcgTk] library.
+  * Download the [http://code.google.com/p/lcgtk/ LcgTk] library and compile the glslKernel (run *make* in this subdirectory).
 
   * To use the glslKernel you also need to install GLee from Elf-stone [http://elf-stone.com/glee.php].
 
-  * Have Qt4 installed if you want the version with interface.
-
-  * Change the *!LcgTk* path in the _pyramid-point-renderer.pro_ file.
-
-In the pyramid-point-renderer type the following:
-
-  * qmake-qt4 (Generates the Makefile, if you want the GLut version don't use this command, otherwise you will overwrite it's makefile)
+In the pyramid-point-renderer directory type the following:
 
   * make
 
-Now execute _*pyramid-point-renderer*_ for the Qt version or _*pyramid-point-renderer <ply_model>*_ for the GLut version.
+  * ../ppr < plyfile >

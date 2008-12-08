@@ -3,14 +3,21 @@
 = Introduction =
 
 This How-To explains a very simple application class to use the rendering system.
+I built a very simple keyboard+mouse interface with glut.
 It only loads one model at a time, and can only use three different
 rendering algorithms:
 
-  * The original Pyramid Point Rendering algorithm *PYRAMID_POINTS*.
+  * [F1] The original Pyramid Point Rendering algorithm *PYRAMID_POINTS*.
 
-  * Pyramid Point Rendering with color per vertex *PYRAMID_POINTS_COLOR*.
+  * [F2] Pyramid Point Rendering with color per vertex *PYRAMID_POINTS_COLOR*.
 
-  * Pyramid with templates algorithm *PYRAMID_TEMPLATES*.
+  * [F3] Pyramid with templates algorithm *PYRAMID_TEMPLATES*.
+
+You can change the basic material with the numerical keys [0-4].
+
+[d] toogles the depth occlusion test.
+
+[b] toogles the back face culling.
 
 = Objects and Primitives =
 
@@ -19,9 +26,9 @@ each part can be rendered with a different algorithm.
 
 Basically, the object class defines its state (position, rotation, etc), while the
 primitives class holds the objects primitives, surfels in this case. An object
-is associated to one or primitives, in such a way that it can be composed of
+is associated to one or more primitives instances, in such a way that it can be composed of
 multiple parts, such as a tree model is composed of three files : leaves, branches and trunk.
-More often, it is one to one relation, each object defines the state of one set of primitives.
+More often, it is an one to one relation, each object defines the state of one set of primitives.
 
 The primitives class defines how the surfels are loaded on vertex arrays depending on the
 rendering mode selected. This class also holds the method to draw the vertex arrays.
@@ -30,6 +37,11 @@ rendering mode selected. This class also holds the method to draw the vertex arr
 
 Each rendering algorithm is in a directory of its own, containing the code, a header file, and
 shaders (GLSL). They all inherit the *point_based_render* class.
+In this simple application, the second and third classes (*PYRAMID_POINTS_COLOR*
+& *PYRAMID_TEMPLATES*) actually inherits from *PYRAMID_POINTS* since most methods
+are the same.
+In fact *PYRAMID_POINTS* is generic enough that *PYRAMID_POINTS_COLOR* only redefines
+the shaders files.
 
 == main.c ==
 
@@ -42,7 +54,7 @@ of a *ply* file with normal and radius per vertex.
 
 == application ==
 
-The application class is the bridge between an interface (GLut, Qt) and the algorithm.
+The application class is the bridge between an interface (GLut, Glui, Qt, etc) and the algorithm.
 It contains implementation of mouse methods and calls to attribution methods (flags).
 It also contains the primitives and objects declarations, although in this simple example
 there is only one of each, it is still treated as a list for the simplicity of
