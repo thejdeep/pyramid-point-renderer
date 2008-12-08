@@ -1,4 +1,6 @@
 
+OS = linux
+
 OBJECTS = application.o \
 	camera.o \
 	main.o \
@@ -49,12 +51,20 @@ OBJ = $(patsubst %,$(OBJDIR)/%,$(OBJECTS))
 
 OBJ2 = $(patsubst %,$(OBJDIR)/%,$(OBJS))
 
+ifeq ($(OS), windows)
+LIBDIRS = -L"$(HOME)/lcgtk/glslKernel/"
+else
 LIBDIRS = -L$(HOME)/lcgtk/glslKernel/
+endif
 
 MATLIB     = -lm
-#GLLIBS	  = -lopengl32 -lglu32
+ifeq ($(OS), windows)
+GLLIBS	  = -lopengl32 -lglu32
+GLUTLIB    = -lGLee -lglslKernel -lglut32win
+else
 GLLIBS     = -lGLU -lGL
-GLUTLIB    = -lGLee -lglslKernel -lglut 
+GLUTLIB    = -lGLee -lglslKernel -lglut
+endif
 XLIBS      = -lXext -lX11 -lXi -lpthread
 
 LIBLIST = $(GLUTLIB) $(GLLIBS) $(MATLIB)

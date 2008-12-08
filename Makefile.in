@@ -1,19 +1,20 @@
 .SUFFIXES: .cc .c
 
-# flags for C++ compiler:
-MODE = final
+#OS = linux
 
 # compiler names
 CC = gcc
 CXX = g++
 
-INCLUDEDIRS = -I$(HOME)/lcgtk/ -I./ -I../ -I./ewa_surface_splatting/ -I./pyramid_point_renderer_base/ \
-	-I./point_ids/ -I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ \
-	-I./pyramid_point_renderer_texture/ -I./pyramid_lod -I./jfa_splatting/ \
-	-I./pyramid_trees/ -I./pyramid_templates/ -I./triangle_renderer/ \
-	-I./pyramid_triangle_renderer/ -I./ellipse_rasterization/
-
+ifeq ($(OS), windows)
+INCLUDEDIRS = -I"$(HOME)/lcgtk/" -I. -I.. -I./pyramid_point_renderer_base/ \
+	-I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ -I./pyramid_templates/
+OBJDIR = ./objs
+else
+INCLUDEDIRS = -I$(HOME)/lcgtk/ -I./ -I../ -I./pyramid_point_renderer_base/ \
+	-I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ -I./pyramid_templates/
 OBJDIR = objs
+endif
 
 CXXFLAGS = -g -O3 -Wall -Wno-deprecated
 
