@@ -108,6 +108,7 @@ void Camera::setView (void) {
   gluLookAt(position[0]*radius, position[1]*radius, position[2]*radius,
 	    target[0], target[1], target[2],
 	    up[0], up[1], up[2]);
+
 }
 
 /**
@@ -213,15 +214,15 @@ void Camera::newTarget( const Point* t ) {
 
   target = *t;
 
-  radius = sqrt( pow(position[0] - target[0], 2) + pow(position[1] - target[1], 2) + pow(position[2] - target[2], 2));
-  //ajusta os angles para o novo target
-  angle_v = acos((( position[1] - target[1]) / radius));
-  angle_h = acos((( position[0] - target[0]) / (radius * sin(angle_v))));
-  if (position[2] > target[2])
-    {
-      if (position[0] > target[0]) angle_h = M_PI*2 - angle_h;
-      else angle_h = M_PI*2 - angle_h;
-    }
+//   radius = sqrt( pow(position[0] - target[0], 2) + pow(position[1] - target[1], 2) + pow(position[2] - target[2], 2));
+//   //ajusta os angles para o novo target
+//   angle_v = acos((( position[1] - target[1]) / radius));
+//   angle_h = acos((( position[0] - target[0]) / (radius * sin(angle_v))));
+//   if (position[2] > target[2])
+//     {
+//       if (position[0] > target[0]) angle_h = M_PI*2 - angle_h;
+//       else angle_h = M_PI*2 - angle_h;
+//     }
 
   //  computePosition();
 }

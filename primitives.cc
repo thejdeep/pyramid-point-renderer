@@ -149,7 +149,7 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
 // 	color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
 // 	color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
 
-	color_array[pos*4 + 3] = 255;
+	color_array[pos*4 + 3] = id;
 
     normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
     normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y);

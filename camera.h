@@ -134,6 +134,8 @@ public:
 
   const double getRadius ( void ) const { return radius; }
 
+  void newTarget( const Point* p );
+
 private:
 
   // Screen size
@@ -202,8 +204,6 @@ private:
   void mapToSphere(Point &, const double r) const;
 
   void projectToScreen(Point* p, Point &screen_pos);
-
-  void newTarget( const Point* p );
 
   void normalizeCoordinates(Point& p);
 
