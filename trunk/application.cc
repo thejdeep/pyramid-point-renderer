@@ -113,8 +113,12 @@ void Application::draw( void ) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   point_based_render->clearBuffers();
 
+
   // Reset camera position and direction
   camera->setView();
+
+  objects[0].translate();
+  //  camera->newTarget( objects[0].getCenter() );
 
   // Set eye for back face culling in vertex shader
   point_based_render->setEye( camera->positionVector() );
@@ -218,8 +222,8 @@ int Application::readFile ( const char * filename ) {
 
   MYreadPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
 
-  computeNormFactors((primitives.back()).getSurfels());
-  normalize((primitives.back()).getSurfels());
+//   computeNormFactors((primitives.back()).getSurfels());
+//   normalize((primitives.back()).getSurfels());
 
   // connect new object to new primitive
   objects[0].addPrimitives( primitives.back().getId() );
@@ -271,7 +275,7 @@ int Application::finishFileReading ( void ) {
   for (unsigned int i = 0; i < primitives.size(); ++i) {
 	normalize(primitives[i].getSurfels());
 	primitives[i].setRendererType( render_mode );
-	primitives[i].clearSurfels();
+	//primitives[i].clearSurfels();
   }
 
   createPointRenderer();
@@ -327,8 +331,8 @@ void Application::mouseMiddleMotion(int x, int y) {
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotionShift(int x, int y) {
-  camera->translate(x, y);
-  //camera->translateVec(x, y, objects[*it].getCenter());
+  //  camera->translate(x, y);
+  camera->translateVec(x, y, objects[0].getCenter());
   camera->updateMouse();  
 }
 
@@ -438,7 +442,7 @@ void Application::setEllipticalWeight ( bool b ) {
 
 void Application::increaseSelected ( void ) {
   selected++;
-  if (selected > primitives.size())
+  if (selected > (int)primitives.size())
 	selected = 0;
   cout << "selected : " << selected << endl;
 

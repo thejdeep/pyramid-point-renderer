@@ -37,124 +37,6 @@ float pointInCircle(in vec2 d, in float radius){
   else return -1.0;
 }
 
-/**
- * Compute the intersection of an ellipse (axis oriented) and a line
- * segment.
- * Obtained from http://www.kevlindev.com/
- * @param p Center of ellipse
- * @param rx Major axis of ellipse
- * @param ry Minor axis of ellipse
- * @param a1 Point of line segment
- * @param a2 Point of line segment
- * @return 0 if no intersection, 1 if segment intersects ellipse, 2 if
- * segment is contained inside the ellipse
- **/
-int intersectEllipseLine (in vec2 p, in float rx, in float ry, in vec2 a1, in vec2 a2) {
-  vec2 origin = a1;
-  vec2 dir = a2 - a1;
-  vec2 center = p;
-  vec2 diff = origin - center;
-  vec2 mDir = vec2(dir.x/(rx*rx), dir.y/(ry*ry));
-  vec2 mDiff = vec2(diff.x/(rx*rx), diff.y/(ry*ry));
-
-  float a = dot(dir, mDir);
-  float b = dot(dir, mDiff);
-  float c = dot(diff, mDiff) - 1.0;
-  float d = b*b - a*c;
-
-  if (d < 0.0)
-    return 0;
-
-  if ( d > 0.0 ) {
-    float root = sqrt(d);
-    float t_a = (-b - root) / a;
-    float t_b = (-b + root) / a;
-    if ( ((t_a < 0.0) || (1.0 < t_a)) && ((t_b < 0.0) || (1.0 < t_b)) ) {
-      if ( ((t_a < 0.0) && (t_b < 0.0)) || ((t_a > 1.0) && (t_b > 1.0)) )
-		return 0;
-      else
-		return 2;
-    }
-    else
-      return 1;
-  } 
-  else {
-    float t = -b/a;
-    if ( (0.0 <= t) && (t <= 1.0) )
-      return 1;
-    else
-      return 0;
-  }
-}
-
-/**
- * Intersection between a pixel's box and an ellipse.
- * @param pixel Given pixel.
- * @param point Center of pixel.
- * @param unit Half the size of a pixel, orthogonal distance from
- * @param center to boundaries of pixel.
- * @return 1 if ellipse intersects or is inside pixel, 0 otherwise.
- **/
-float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in float unit){
-
-  vec2 center = vec2(0.0, 0.0);
-
-  // rotate point to ellipse's coordinate system
-  vec2 desloc_point = d;
-			
-  // check if ellipse center is inside box
-  if (((center[0] >= desloc_point[0] - unit) && (center[0] <= desloc_point[0] + unit)) &&
-      ((center[1] >= desloc_point[1] - unit) && (center[1] <= desloc_point[1] + unit)))
-    return length(d);
-
-  // projected normal length
-  float len = length(normal.xy);
-  normal.y /= len;
-
-  // ellipse rotation angle
-  float angle = acos(normal.y);
-  if (normal.x > 0.0)
-    angle *= -1.0;
-
-  // major and minor axis
-  float a = 2.0*radius*reconstruction_filter_size;
-  float b = a*normal.z;
-
-  // include antialiasing filter
-  a += prefilter_size;
-  b += prefilter_size;
-
-  // rotated pixel box to match ellipse coordinate system
-  // box order = | 2  3 |
-  //             | 0  1 |
-  float cos_angle = cos(angle);
-  float sin_angle = sin(angle);
-
-  vec2 rot_box[4];
-
-  rot_box[0] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
-
-  rot_box[1] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
-
-  rot_box[2] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
-  
-  rot_box[3] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
-
-  // ellipse intersects the pixels box
-  if (((intersectEllipseLine(center, a, b, rot_box[0], rot_box[1]) > 0) ||
-       (intersectEllipseLine(center, a, b, rot_box[2], rot_box[0]) > 0) ||
-       (intersectEllipseLine(center, a, b, rot_box[3], rot_box[1]) > 0) ||
-       (intersectEllipseLine(center, a, b, rot_box[3], rot_box[2]) > 0)))
-    return length(d);
-
-  // ellipse totally outside pixel without intersection
-  return -1.0;
-}
-
 // tests if a point is inside an ellipse.
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
@@ -193,49 +75,11 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   b += prefilter_size;
 
   // inside ellipse test
-  //  float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
   if (test <= reconstruction_filter_size)
     return test;
-  else return -1.0;
-}
-
-// tests if a point is inside a parallelogram
-// @param d Difference vector from center of ellipse to point.
-// @param radius Ellipse major axis length * 0.5.
-// @param normal Normal vector.
-float pointInRectangle(in vec2 d, in float radius, in vec3 normal){
-  float len = length(normal.xy);
-  normal.y /= len;
-
-  // angle between normal and z direction
-  float angle = acos(normal.x);
-  /*   if (normal.x > 0.0) */
-  /*     angle *= -1.0; */
-
-  // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-						  -d.x*sin(angle) + d.y*cos(angle));
-
-  // major and minor axis
-  float a = 1.0*radius;
-  float b = a*normal.z;
-
-  // include antialiasing filter (increase both axis)
-  a += prefilter_size;
-  b += prefilter_size;
-
-  float scale = reconstruction_filter_size + prefilter_size;
-
-  float test = 0.0;
-  if (((rotated_pos.x >= -normal.x * scale) && (rotated_pos.x <= 0.0)) &&
-      ((rotated_pos.y <= radius) && (rotated_pos.y >= -radius)))
-    test = 1.0;
-
-  if (test == 1.0)
-    return test;
-  else return -1.0;
+  return -1.0;
 }
 
 void main (void) {
@@ -405,8 +249,8 @@ void main (void) {
 		  if (elliptical_weight)
 			weights[i] = 1.0 - dist_test;
 		  else
-			weights[i] = exp(-0.001*dist_test);
-
+			//			weights[i] = 1.0;
+			weights[i] = exp(-0.5*(1.0-dist_test));
 
 		  total_weight += 1.0;
 
@@ -444,7 +288,7 @@ void main (void) {
 		  // Ellipse in range
 		  if (weights[i] > 0.0)
 			{
-			  //if (abs(pixelC[i].w - obj_id) < 0.1 ) 
+			  if (abs(pixelC[i].w - obj_id) == 0.0 ) 
 			  {
 				// Depth test between ellipses in range
 				if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  

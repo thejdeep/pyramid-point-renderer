@@ -276,7 +276,8 @@ int main(int argc, char * argv []) {
   depth_test = true;
   back_face_culling = true;
 
-  application = new Application(PYRAMID_POINTS_COLOR);
+  application = new Application(PYRAMID_POINTS_COLOR);  
+
 
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
