@@ -24,9 +24,9 @@ In the pyramid-point-renderer directory type the following:
 
   * make
 
-  * ../ppr < plyfile >
+  * ./ppr < plyfile >
 
-I have successfully compiled under Windows with the Mingw and the Msys enviroment, never tested with Visual Studio
-or any other option. Windows users may try to compile with (you might need to change the glut library name):
+I have successfully compiled under Windows with Mingw and the Msys enviroment, never tested with Visual Studio.
+Windows users may try to compile with (you might need to change the glut library name):
 
   * make OS=windows
