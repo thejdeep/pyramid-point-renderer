@@ -1,13 +1,27 @@
-#summary One-sentence summary of this page.
+#summary Instructions on how to compile the code.
 
 = Introduction =
 
-Add your content here.
-
+The code is almost self-contained except for another library developed in our lab and GLee,
+The application classes are independent of the interface, thus
+I have substituted the Qt interface for a lightweight GLut based version.
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Requirements:
+
+  * I have successfully tested this code in a variety of computers and configurations, including an HP tx1215 laptop with a nVidia 6150 graphics board. It should run on nVidia GeForce 5 series, but I have not yet tested.
+
+Before you compile:
+
+  * Have GLUT installed.
+
+  * Download the [http://code.google.com/p/lcgtk/ LcgTk] library and compile the glslKernel (run *make* in this subdirectory).
+
+  * To use the glslKernel you also need to install GLee from Elf-stone [http://elf-stone.com/glee.php].
+
+In the pyramid-point-renderer directory type the following:
+
+  * make
+
+  * ../ppr < plyfile >
