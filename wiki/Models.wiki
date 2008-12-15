@@ -2,21 +2,14 @@
 
 = Introduction =
 
-The only accepted file format in the moment is the
-Stanford PLY format.
+With the inclusion of the VCG library the old ply library was removed and any file accepted by the VCG import method can be used.
 
 = Details =
 
-The repository already includes the _ply.c_ and _ply.h_ files. These have been a little modified to compile without warnings. Unfortunately, to my knowledge, the ply library was built specifically for 32-bits architectures, so if you are running on a 64-bits machine you'll not be able to use binary plys, only ASCII plys.
-
-Links to the complete ply library can be found at http://graphics.stanford.edu/data/3Dscanrep/
-
-To convert from binary to ASCII use the *ply2ascii* program in the ply library.
-
-The accepted _ply_ files must have two more attributes besides the vertex coordinates:
+The accepted files must have two more attributes besides the vertex coordinates:
 
   * Normals
-  * Radius
+  * Radius (for the time being it is set as "quality" in the file header to be compatible with VCG)
 
 These three attributes compose a _surfel_.
 
@@ -24,11 +17,11 @@ These three attributes compose a _surfel_.
 
 ===Surfel Coordinates===
 
-The 3D coordinates are expected to be normalized between [-1, +1].
+The 3D coordinates.
 
 ===Surfel Normals===
 
-Vertex normals may be computed using the ply library or by any other convenient method.
+Per vertex normal.
 
 ===Surfel Radius===
 
@@ -37,17 +30,4 @@ The radius of a surfel corresponds to its sampling distance. This can be compute
 ===Precomputed Models===
 
 Some models with precomputed normals and radius can be found at [http://www.lcg.ufrj.br/Projetos/pbr]. A few smaller models can also be found here under the *Downloads* tab.
-
-==LOD Models==
-
-Models containing the Level-of-Detail structure can be generated from the *Write LOD* option in the *File* menu, or loaded directed. Lod model files must contain the extension _.lod_. For more info see [Interface].
-
-==Tree Models==
-
-Tree models are line-based representations converted from the original triangulated models. They must contain the extension _.pol_. For more info see [Interface].
-
-==Scenes==
-
-Files with extensions _.scn_ contains one or more models with position, rotation, material and renderer type information. It also stores the camera's position and direction as well as light position. A scene file can be loaded as any other kind of file from the *Open* file menu option.
-
-After setting up the models a scene file can be created by selecting the option *Write Scene* from the *File* menu. For the moment it always creates a file named *scene.scn* that should be renamed to avoid overwriting.
+NOTE: Since I changed the library I will upload soon the files with the correct headers.
