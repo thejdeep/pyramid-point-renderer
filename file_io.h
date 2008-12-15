@@ -148,7 +148,7 @@ void computeNormFactors (vector<Surfeld> * surfels) {
 	compZ = 0;
   }
 
-  compX = compY = compZ = 0.00;
+  //compX = compY = compZ = 0.00;
 }
 
 /* /\* /// Normalize the input points in the range [-1, 1]. *\/ */
@@ -322,7 +322,7 @@ void readPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
 		Point p (v.x, v.y, v.z);
 		Vector n (v.nx, v.ny, v.nz);
-		Color c (v.red/255.0, v.green/255.0, v.blue/255.0);
+		LAL::Color c (v.red/255.0, v.green/255.0, v.blue/255.0);
 
 		//		double r = v.radius;
 		double r = 0.001;
@@ -423,7 +423,7 @@ void MYreadPlyTrianglesColor (const char *filename, vector<Surfeld> *surfels,
 
 		Point p (v.x, v.y, v.z);
 		Vector n (v.nx, v.ny, v.nz);
-		Color c (v.r/255.0, v.g/255.0, v.b/255.0);
+		LAL::Color c (v.r/255.0, v.g/255.0, v.b/255.0);
 		double r = v.radius;
       
 		surfels->push_back ( Surfeld (p, n, c, r, (unsigned int)j) );

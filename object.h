@@ -19,12 +19,12 @@ class Object
   
   Object() { }
 
-  Object(int id_num, double x, double y, double z, Quat q) : _id(id_num) {
+ Object(int id_num, double x, double y, double z, Quat q) : scale_factor(1.0), _id(id_num) {
     center = Point(x, y, z);
     q_rot = q;
   }
 
-  Object(int id_num, double x, double y, double z) : _id(id_num) {
+ Object(int id_num, double x, double y, double z) : scale_factor(1.0), _id(id_num) {
     center = Point(x, y, z);
     q_rot.a = 1.0; 
     q_rot.x = 0.0; 
@@ -32,7 +32,7 @@ class Object
     q_rot.z = 0.0;
   }
 
-  Object(int id_num) : _id(id_num) {
+ Object(int id_num) : scale_factor(1.0), _id(id_num) {
     center = Point(0.0, 0.0, 0.0);
     q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
   }
@@ -44,9 +44,9 @@ class Object
   }
 
   void render ( void );
-  void render ( Point camera_pos );
   void translate ( void );
   void rotate ( void );
+  void scale ( void );
 
   void setId ( int id_num ) { _id = id_num; }
   int id ( void ) const { return _id; }
@@ -55,6 +55,9 @@ class Object
   void setFilename ( const char* name ) {
     strcpy (&_filename[0], name);
   }
+
+  double* getScaleFactor ( void ) { return &scale_factor; }
+
 
   Point* getCenter ( void ) { return &center; }
 
@@ -73,6 +76,9 @@ class Object
   // Center position (for individual translation)
   Point center;
   vector<Point> centers;
+
+  // Scale factor for zooming
+  double scale_factor;
 
   // Rotation quaternion (for individual rotation)
   Quat q_rot;

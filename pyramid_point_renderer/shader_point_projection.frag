@@ -9,6 +9,8 @@
 // height of near viewing plane
 //uniform float h_near;
 
+uniform float scale;
+
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
 
@@ -40,12 +42,13 @@ void main(void)
 
   float depth_interval;
 
-  depth_interval = radius_depth_w.x;
+  depth_interval = radius_depth_w.x*scale;
   //depth_interval = perspective_radius(radius_depth_w.x);
 
   // First buffer  : normal.x, normal.y, normal.z, radius
   // Second buffer : minimum depth, depth interval, center.x, center.y
   // Third buffer  : color
-  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z ); 
+  //  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z );
+  gl_FragData[0] = vec4 (normalize(normal_vec), radius_depth_w.x*(scale/radius_depth_w.z) );
   gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval, 0.0, 0.0);
 }

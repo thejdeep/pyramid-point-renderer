@@ -8,6 +8,7 @@
  **/
 
 #include "camera.h"
+#include "matrix.cc"
 
 // Conversion from radians to degrees
 const double rad_to_deg = 180.0/M_PI;
@@ -19,7 +20,7 @@ const double rad_to_deg = 180.0/M_PI;
  **/
 Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h), 
 				   zoom_factor(1.0), fov(1.0),
-				   z_near(0.001), z_far(10.0) {
+				   z_near(0.01), z_far(100.0) {
   view_mode = PERSPECTIVE;
 
   static double identity [16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -29,22 +30,28 @@ Camera::Camera(const int w, const int h) : screen_width (w), screen_height (h),
   q_last = q_rot;
   q_lookAt = q_rot;
 
-  position = Point(0.0, 0.0, 1.0);
-  up = Vector(0.0, 1.0, 0.0);
-
   // Initialize values
   q_lookAt.normalize();
-  position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
-  up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
+  //  position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
 
-  target = Point(0.0, 0.0, 0.0);
+   up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
+   view_vector = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
+//   up = Vector (0.0, 1.0, 0.0);
+//   view_vector = Vector(0.0, 0.0, 1.0);
+  position = Point (0.0, 0.0, -5.0);
+
+  track_center = Point (0.0, 0.0, 0.0);
+
+  view_vector.Normalize();
+  up.Normalize();
 
   angle_h = M_PI/2.0;
   angle_v = M_PI/2.0;
 
-  light_position[0] = 0.0; light_position[1] = 0.0; light_position[2] = 1.0;
+  light_position = Point(0.0, 0.0, 1.0);
 
-  radius = 10.0;
+  radius = 1.0;
+
 }
 
 /**
@@ -88,6 +95,24 @@ void Camera::initLight (void) {
 }
 
 /**
+ * Resets the view mode properties.
+ * Sets camera projection to perspective or orthographic.
+ **/
+void Camera::resetViewMode ( void ) {
+
+  double w = (double)screen_width;
+  double h = (double)screen_height;
+
+  double x = 1.0 * zoom_factor;
+  double y = 1.0 * zoom_factor;
+
+  if (view_mode == PERSPECTIVE)
+    gluPerspective( 45, (w/h), z_near, z_far );
+  else
+    glOrtho( -x, x, -y, y, z_near, z_far );
+}
+
+/**
  * Sets OpenGL camera.
  * Initialize viewport and resets projection and modelview matrices.
  * Translates and rotates camera direction and position.
@@ -103,12 +128,18 @@ void Camera::setView (void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  initLight();
+  glTranslatef(position[0], position[1], position[2]);
 
-  gluLookAt(position[0]*radius, position[1]*radius, position[2]*radius,
-	    target[0], target[1], target[2],
-	    up[0], up[1], up[2]);
+  //initLight();
 
+  //glTranslatef(track_center[0], track_center[1], track_center[2]);
+  //glMultMatrixd ( rotationMatrix() );
+  //glTranslatef(-track_center[0], -track_center[1], -track_center[2]);
+
+//   target = position + view_vector;
+//   gluLookAt(position[0], position[1], position[2],
+// 	    target[0], target[1], target[2],
+// 	    up[0], up[1], up[2]);
 }
 
 /**
@@ -138,34 +169,7 @@ void Camera::setRotation (void) {
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 }
 
-/**
- * Resets the view mode properties.
- * Sets camera projection to perspective or orthographic.
- **/
-void Camera::resetViewMode ( void ) {
 
-  double w = (double)screen_width;
-  double h = (double)screen_height;
-
-//   double diag = sqrt (w*w + h*h);
-//   double top = h / diag * 0.5 * fov * z_near;
-//   double bottom = - top;
-//   double right = w / diag * 0.5 * fov * z_near;
-//   double left = -right;
-
-//   left *= zoom_factor;
-//   right *= zoom_factor;
-//   top *= zoom_factor;
-//   bottom *= zoom_factor;
-  double x = 1.0 * zoom_factor;
-  double y = 1.0 * zoom_factor;
-
-  if (view_mode == PERSPECTIVE)
-    //  glFrustum(left, right, bottom, top, z_near, z_far);
-    gluPerspective( 60, (w/h), z_near, z_far );
-  else
-    glOrtho( -x, x, -y, y, z_near, z_far );
-}
 
 /**
  * Switch between orthographic and perspective modes
@@ -209,24 +213,6 @@ void Camera::reshape(int w, int h) {
   glLoadIdentity();
 }
 
-
-void Camera::newTarget( const Point* t ) {
-
-  target = *t;
-
-//   radius = sqrt( pow(position[0] - target[0], 2) + pow(position[1] - target[1], 2) + pow(position[2] - target[2], 2));
-//   //ajusta os angles para o novo target
-//   angle_v = acos((( position[1] - target[1]) / radius));
-//   angle_h = acos((( position[0] - target[0]) / (radius * sin(angle_v))));
-//   if (position[2] > target[2])
-//     {
-//       if (position[0] > target[0]) angle_h = M_PI*2 - angle_h;
-//       else angle_h = M_PI*2 - angle_h;
-//     }
-
-  //  computePosition();
-}
-
 void Camera::normalizeCoordinates(Point& p)
 {
   double w = screen_width;
@@ -259,6 +245,7 @@ void Camera::startRotation(int x, int y) {
  **/
 void Camera::endRotation( void ) {
   q_last = q_rot;
+  q_last_lookAt = q_lookAt;
 }
 
 /**
@@ -285,9 +272,8 @@ void Camera::rotate( void ) {
   q_lookAt = (q_last_lookAt*inc*q_last_lookAt.conjugate())*q_last_lookAt;
   q_lookAt.normalize();
 
-  position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
+  view_vector = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
   up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
-
 }
 
 /**
@@ -296,6 +282,26 @@ void Camera::rotate( void ) {
  * @param y Mouse screen y coordinate
  **/
 void Camera::rotate(int x, int y) {
+
+//   mouse_curr = Point(x, y, 0.0);
+
+//   Point d_curr = mouse_curr;
+//   Point d_start = mouse_start;
+
+//   normalizeCoordinates(d_curr);
+//   normalizeCoordinates(d_start);
+
+//   mapToSphere(d_start, 1.0);
+//   mapToSphere(d_curr, 1.0);
+
+//   Point axis = (d_curr - track_center) ^ (d_start - track_center);
+
+//   float angle = sqrt(d_start.SquaredDistance(d_curr)) / radius;
+
+//   Quat inc(axis[0], axis[1], axis[2], -angle);
+
+//   q_lookAt = inc*q_last;
+  //  q_lookAt.normalize();
 
   mouse_curr = Point(x, y, 0.0);
 
@@ -314,17 +320,15 @@ void Camera::rotate(int x, int y) {
   Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
   Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
 
-//   Quat inc = q1*q0;
-//   q_rot = (q_lookAt*inc*q_lookAt.inverse())*q_last;
-//   q_rot.normalize();
-
   Quat inc = q0*q1;
   q_lookAt = (q_last_lookAt*inc*q_last_lookAt.conjugate())*q_last_lookAt;
   q_lookAt.normalize();
 
-  position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
+  view_vector = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
   up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
 
+  view_vector.Normalize();
+  up.Normalize();
 }
 
 /**
@@ -350,30 +354,38 @@ void Camera::startQuatRotation(int x, int y, Quat* q) {
  **/
 void Camera::rotateQuat(int x, int y, Quat *q, Point* obj_center) {
 
-  Point screen_obj_center;
-  projectToScreen(obj_center, screen_obj_center);
+//   Point screen_obj_center;
+//   projectToScreen(obj_center, screen_obj_center);
 
   mouse_curr = Point(x, y, 0.0);
 
-  Point d_curr = mouse_curr - screen_obj_center;
-  Point d_start = mouse_start - screen_obj_center;
+  Point d_curr = mouse_curr;
+  Point d_start = mouse_start;
 
-  normalizeCoordinates(d_curr);
-  normalizeCoordinates(d_start);
+//   normalizeCoordinates(d_curr);
+//   normalizeCoordinates(d_start);
 
-  d_start[2] = 0.0;
-  d_curr[2] = 0.0;
+  mapToSphere(d_start, radius);
+  mapToSphere(d_curr, radius);
 
-  mapToSphere(d_start, 1.0);
-  mapToSphere(d_curr, 1.0);
 
-  Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
-  Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
+  Point axis = (d_curr - track_center) ^ (d_start - track_center);
 
-  Quat inc = q1*q0;
+  float angle = sqrt(d_start.SquaredDistance(d_curr)) / radius;
 
-  *q = (q_rot.conjugate()*(q_lookAt*inc*q_lookAt.conjugate())*q_rot)*q_last;
+  Quat inc(axis[0], axis[1], axis[2], -angle);
+
+  *q = inc*q_last;
+
+  // Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
+  // Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
+  
+  // Quat inc = q0*q1;
+
+  // *q = (q_rot.conjugate()*(q_lookAt*inc*q_lookAt.conjugate())*q_rot)*q_last;
+
   q->normalize();
+
 }
 
 /**
@@ -415,12 +427,12 @@ void Camera::zooming(int x, int y) {
 
   mouse_curr = Point(x, y, 0.0);
 
-  Vector dist = 10.0*(mouse_start - mouse_curr);
+  Vector dist = 5.0*(mouse_start - mouse_curr);
   dist[0] = 0.0;
   dist[1] /= screen_height;
   dist[2] = 0.0;
 
-  //  position += view * dist[1];
+  //position -= view_vector * dist[1];
   radius += dist[1];
 
   mouse_start = mouse_curr;
@@ -433,42 +445,70 @@ void Camera::zooming(int x, int y) {
 **/
 void Camera::translate (int x, int y) {
 
-//   mouse_curr = Point(x, y, 0.0);
-
-//   Point start =  projectToWorld(mouse_start);
-//   Point current =  projectToWorld(mouse_curr);
-
-//   //  radius += 0.01*(current[1] - start[1]);
-
-//   mouse_start = mouse_curr;
-
   mouse_curr = Point(x, y, 0.0);
 
-  Point d_curr = mouse_curr;
-  Point d_start = mouse_start;
+  GLdouble modelview[4][4];
+  
+  glPushMatrix();  
+  setView();
+  glGetDoublev(GL_MODELVIEW_MATRIX, &modelview[0][0]);
+  glPopMatrix();
 
-  normalizeCoordinates(d_curr);
-  normalizeCoordinates(d_start);
+  double Mi[4][4];
+  inverse2 (modelview, Mi);
 
-  d_start[2] = 0.0;
-  d_curr[2] = 0.0;
+  // view point
+  double v[4] = {0.0, 0.0, 0.0, 1.0};
+  multiply (v, Mi);
+  Point vp (v[0], v[1], v[2]);
+  Vector vp_vec = vp - Point(0.0,0.0,0.0);
 
-  mapToSphere(d_start, 1.0);
-  mapToSphere(d_curr, 1.0);
+  // view plane
+  Vector plane_norm = vp - track_center;
+  plane_norm.Normalize();
+  double plane_D = plane_norm * (track_center - Point(0.0,0.0,0.0));
 
-  Quat q0 (d_start[0], d_start[1], d_start[2], 0.0);
-  Quat q1 (d_curr[0], d_curr[1], d_curr[2], 0.0);
+  // first line from window (mouse_curr)
+  Point line_p;
+  Point p (mouse_curr[0], mouse_curr[1], 0.0);
+  line_p = projectToWorld(p);
 
-//   Quat inc = q1*q0;
-//   q_rot = (q_lookAt*inc*q_lookAt.conjugate())*q_last;
-//   q_rot.normalize();
+  Vector line_dir = (line_p - vp);
+  line_dir.Normalize();
 
-//   Quat inc = q0*q1;
-//   q_lookAt = (q_last_lookAt*inc*q_last_lookAt.conjugate())*q_last_lookAt;
-//   q_lookAt.normalize();
+  // intersect line and view plane
+  double k = plane_norm * line_dir;
+  double r = (plane_D - (plane_norm*vp_vec)) / k;
 
-//   position = q_lookAt.rotate(Vector(0.0, 0.0, 1.0));
-//   up = q_lookAt.rotate(Vector(0.0, 1.0, 0.0));
+  Point pi1 = vp + line_dir*r;
+
+  // first line from window (mouse_curr)
+  p = Point (mouse_start[0], mouse_start[1], 0.0);
+  line_p = projectToWorld(p);
+  line_dir = (line_p - vp);
+  line_dir.Normalize();
+
+  // intersect line and view plane
+  k = plane_norm * line_dir;
+  r = (plane_D - (plane_norm*vp_vec)) / k;
+  Point pi2 = vp + line_dir*r;
+
+  //cout << pi2 - pi1 << endl ;
+
+  mouse_curr = Point(x, y, 1.0);
+  mouse_start[2] = mouse_curr[2];
+
+  Point start = projectToWorld(mouse_start);
+  Point current = projectToWorld(mouse_curr);
+
+  Quat rot = q_lookAt;
+  rot.inverse();
+
+  Vector rot_vec = current - start;
+
+  track_center += rot.rotate(rot_vec);
+  
+  mouse_start = mouse_curr;
 
 }
 
@@ -506,20 +546,29 @@ void Camera::updateMouse ( void ) {
  * @param y Mouse screen y coordinate.
  * @param vec Object's position vector.
 **/
-void Camera::zoomingVec (int x, int y, Point* center) {
+void Camera::zoomingVec (int x, int y, double* factor) {
 
   mouse_curr = Point(x, y, 1.0);
-  mouse_start[2] = mouse_curr[2];
 
-  Point start =  projectToWorld(mouse_start);
-  Point current =  projectToWorld(mouse_curr);
+  Vector dist = 5.0*(mouse_start - mouse_curr);
+  dist[0] = 0.0;
+  dist[1] /= screen_height;
+  dist[2] = 0.0;
 
-  Vector view = (position*radius) - *center;
-  view.Normalize();
+  (*factor) += dist[1];
 
-  (*center) -= view*(current[1] - start[1])*0.1;
+  mouse_start = mouse_curr;
 
-  //  mouse_start = mouse_curr;
+//   mouse_curr = Point(x, y, 1.0);
+//   mouse_start[2] = mouse_curr[2];
+
+//   Point start =  projectToWorld(mouse_start);
+//   Point current =  projectToWorld(mouse_curr);
+
+//   Vector view = (position*radius) - *center;
+//   view.Normalize();
+
+//   (*center) -= view*(current[1] - start[1])*0.1;
 }
 
 /**
@@ -555,23 +604,25 @@ double Camera::squaredDistance(const double p[3], const double q[3]) const {
  * Returns the rotation matrix
  * @return rotation matrix
 **/
-const double* Camera::rotationMatrix ( void ) {
+const GLdouble* Camera::rotationMatrix ( void ) {
 
-  double n, s;
+  //  double n, s;
   double xs, ys, zs;
   double wx, wy, wz;
   double xx, xy, xz;
   double yy, yz, zz;
 
-  Quat q = q_rot;
+  Quat q = q_lookAt;
 
-  n = (q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.a * q.a);
-  s = (n > 0.0) ? (2.0 / n) : 0.0;
+//   n = (q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.a * q.a);
+//   s = (n > 0.0) ? (2.0 / n) : 0.0;
 
-  xs = q.x * s;  ys = q.y * s;  zs = q.z * s;
+  //  xs = q.x * s;  ys = q.y * s;  zs = q.z * s;
+  xs = q.x + q.x; ys = q.y + q.y; zs = q.z + q.z;
   wx = q.a * xs; wy = q.a * ys; wz = q.a * zs;
   xx = q.x * xs; xy = q.x * ys; xz = q.x * zs;
   yy = q.y * ys; yz = q.y * zs; zz = q.z * zs;
+
 
   rotation_matrix [0] = 1.0 - (yy + zz);
   rotation_matrix [1] = xy - wz;
@@ -588,46 +639,47 @@ const double* Camera::rotationMatrix ( void ) {
   rotation_matrix[10] = 1.0 - (xx + yy);
   rotation_matrix[11] = 0.0;
 
-  rotation_matrix[12] = 0.0;
-  rotation_matrix[13] = 0.0;
-  rotation_matrix[14] = 0.0;
+  rotation_matrix[12] = track_center[0];
+  rotation_matrix[13] = track_center[1];
+  rotation_matrix[14] = track_center[2];
+//   rotation_matrix[12] = 0.0;
+//   rotation_matrix[13] = 0.0;
+//   rotation_matrix[14] = 0.0;
   rotation_matrix[15] = 1.0;
 
-  double xw, yw, zw;
-  xx = q.x * q.x;
-  xy = q.x * q.y;
-  xz = q.x * q.z;
-  xw = q.x * q.a;
+//   double xw, yw, zw;
+//   xx = q.x * q.x;
+//   xy = q.x * q.y;
+//   xz = q.x * q.z;
+//   xw = q.x * q.a;
 
-  yy = q.y * q.y;
-  yz = q.y * q.z;
-  yw = q.y * q.a;
+//   yy = q.y * q.y;
+//   yz = q.y * q.z;
+//   yw = q.y * q.a;
 
-  zz = q.z * q.z;
-  zw = q.z * q.a;
+//   zz = q.z * q.z;
+//   zw = q.z * q.a;
 
-  rotation_matrix[0]  = 1 - 2 * ( yy + zz );
-  rotation_matrix[1]  =     2 * ( xy + zw );
-  rotation_matrix[2]  =     2 * ( xz - yw );
-  rotation_matrix[3] = 0;
+//   rotation_matrix[0]  = 1 - 2 * ( yy + zz );
+//   rotation_matrix[1]  =     2 * ( xy + zw );
+//   rotation_matrix[2]  =     2 * ( xz - yw );
+//   rotation_matrix[3] = 0;
 
-  rotation_matrix[4]  =     2 * ( xy - zw );
-  rotation_matrix[5]  = 1 - 2 * ( xx + zz );
-  rotation_matrix[6]  =     2 * ( yz + xw );
-  rotation_matrix[7] = 0;
+//   rotation_matrix[4]  =     2 * ( xy - zw );
+//   rotation_matrix[5]  = 1 - 2 * ( xx + zz );
+//   rotation_matrix[6]  =     2 * ( yz + xw );
+//   rotation_matrix[7] = 0;
   
-  rotation_matrix[8]  =     2 * ( xz + yw );
-  rotation_matrix[9]  =     2 * ( yz - xw );
-  rotation_matrix[10] = 1 - 2 * ( xx + yy );
-  rotation_matrix[11] = 0;
+//   rotation_matrix[8]  =     2 * ( xz + yw );
+//   rotation_matrix[9]  =     2 * ( yz - xw );
+//   rotation_matrix[10] = 1 - 2 * ( xx + yy );
+//   rotation_matrix[11] = 0;
  
-  // Translation vector = position
-  rotation_matrix[12] = position[0];
-  rotation_matrix[13] = position[1];
-  rotation_matrix[14] = position[2];
-
-  rotation_matrix[15] = 1;
-
+//   //  Translation vector = position
+//   rotation_matrix[12] = track_center[0];
+//   rotation_matrix[13] = track_center[1];
+//   rotation_matrix[14] = track_center[2];
+//   rotation_matrix[15] = 1;
 
   return rotation_matrix;
 }
@@ -691,19 +743,29 @@ Point Camera::projectToWorld(const Point& p) {
   GLdouble xo, yo, zo;
 
   glPushMatrix();
-
   setView();
-
-  GLdouble model_view[16];
-  GLdouble projection[16];
   GLint viewport[4];
-  glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
-  glGetDoublev(GL_PROJECTION_MATRIX, projection);
   glGetIntegerv(GL_VIEWPORT, viewport);
-
-  gluUnProject(p[0], viewport[3] - p[1], p[2], model_view, projection, viewport, &xo, &yo, &zo);
-
   glPopMatrix();
+
+  xo = (p[0]- viewport[0])/ (viewport[2]/2.0) - 1;
+  yo = (p[1]- viewport[1])/ (viewport[3]/2.0) - 1;
+  zo = 2*p[2] - 1;
+
+//   glPushMatrix();
+
+//   setView();
+
+//   GLdouble model_view[16];
+//   GLdouble projection[16];
+//   GLint viewport[4];
+//   glGetDoublev(GL_MODELVIEW_MATRIX, model_view);
+//   glGetDoublev(GL_PROJECTION_MATRIX, projection);
+//   glGetIntegerv(GL_VIEWPORT, viewport);
+
+//   gluUnProject(p[0], viewport[3] - p[1], p[2], model_view, projection, viewport, &xo, &yo, &zo);
+
+//   glPopMatrix();
 
   return Point(xo, yo, zo);
 }

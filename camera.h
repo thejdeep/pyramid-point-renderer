@@ -98,12 +98,12 @@ public:
   /// Translate a given vector
   void translateVec (int x, int y, Point* );
   /// Translate a given vector in the z axis
-  void zoomingVec (int x, int y, Point* );
+  void zoomingVec (int x, int y, double* );
   /// Rotate a given quaternion
   void rotateQuat(int x, int y, Quat *q, Point* );
 
   /// Return rotation matrix
-  const double* rotationMatrix ( void );// { return rotation_matrix; }
+  const GLdouble* rotationMatrix ( void );// { return rotation_matrix; }
 
   /// Return rotation quat
   const Quat rotationQuat ( void ) { return q_rot; }
@@ -134,8 +134,6 @@ public:
 
   const double getRadius ( void ) const { return radius; }
 
-  void newTarget( const Point* p );
-
 private:
 
   // Screen size
@@ -145,17 +143,23 @@ private:
   int view_mode;
 
   // Rotation matrix, current and previous
-  double rotation_matrix[16];
-  double prev_matrix[16];
+  GLdouble rotation_matrix[16];
+  GLdouble prev_matrix[16];
 
   // Translation vector
   Point position;
+
+  // Trackball center
+  Point track_center;
 
   // Normal vector = side translation direction
   Vector normal;
 
   // View vector - target - position
-  Vector view;
+  Vector view_vector;
+
+  // Target point
+  Point target;
 
   // Up vector
   Vector up;
@@ -195,7 +199,6 @@ private:
   int button_pressed;
 
   double angle_h, angle_v;
-  Point target;
 
   double squaredDistance(const double [3], const double [3]) const;
 
