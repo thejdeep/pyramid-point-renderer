@@ -11,9 +11,9 @@ The accepted files must have two more attributes besides the vertex coordinates:
   * Normals
   * Radius (for the time being it is set as "quality" in the file header to be compatible with VCG)
 
-These three attributes compose a _surfel_.
-
 ==Attributes==
+
+These three attributes compose a _surfel_:
 
 ===Surfel Coordinates===
 
