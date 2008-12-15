@@ -16,6 +16,10 @@ Before you compile:
 
   * Have GLUT installed.
 
+  * Download the [http://vcg.sourceforge.net VCG] library, no need to install or compile, the necessary files are included in the Makefile, only needs to set correct path to the VCG library directory. You can download it directly using svn:
+
+     svn co https://vcg.svn.sourceforge.net/svnroot/vcg vcg
+
   * Download the [http://code.google.com/p/lcgtk/ LcgTk] library and compile the glslKernel (run *make* in this subdirectory).
 
   * To use the glslKernel you also need to install GLee from Elf-stone [http://elf-stone.com/glee.php].
