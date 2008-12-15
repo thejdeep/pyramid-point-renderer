@@ -31,31 +31,17 @@ void Object::rotate ( void ) {
 
   double rot[4] = {acos(q_rot.a) * 2.0 * rad_to_deg,
 		   q_rot.x * s, q_rot.y * s, q_rot.z * s};
-  //  if (q_rot.a == 1)
-  //    rot[1] = rot[2] = 0.0; rot[3] = 0.0;
+   if (q_rot.a == 1)
+     rot[1] = rot[2] = 0.0; rot[3] = 0.0;
 
   glRotatef(rot[0], rot[1], rot[2], rot[3]);
 }
+
 void Object::translate ( void ) {
   glTranslatef(center[0], center[1], center[2]);
 }
 
-void Object::render ( Point camera_pos ) {
-
-  Point c = Point (center[0] + camera_pos[0],
-		   center[1] + camera_pos[1],
-		   center[2] + camera_pos[2]);
-
-  glTranslatef(c[0], c[1], c[2]);
-
-  rotate();
-
-//     // Convert from quaternion to angle+axis
-//   double s = 1.0 / sqrt(1 - q_rot.a*q_rot.a);
-//   double rot[4] = {acos(q_rot.a) * 2.0 * rad_to_deg,
-// 		   q_rot.x * s, q_rot.y * s, q_rot.z * s};
-//   if (q_rot.a == 1) {
-//     rot[1] = rot[2] = 0.0; rot[3] = 0.0;
-//   }
-//   glRotatef(rot[0], rot[1], rot[2], rot[3]);
+void Object::scale ( void ) {
+  glScalef ( scale_factor, scale_factor, scale_factor );
 }
+

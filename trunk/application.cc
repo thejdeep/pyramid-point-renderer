@@ -7,12 +7,7 @@
  *
  **/
 
-#include "file_io.h"
-
-// Glut was included only because the Qt function to
-// write on the screen contains bugs and is not working
-// properly. This is necessary for the color bars numbers.
-#include <GL/glut.h>
+#include "application.h"
 
 /**
  * Initialize opengl and application state variables.
@@ -21,9 +16,12 @@ Application::Application( GLint default_mode ) {
 
   canvas_width = canvas_height = 768;
 
-  // Initialize camera
-  camera = new Camera(canvas_width + canvas_width/16,
-		      canvas_height + canvas_height/16);
+  trackball.center=vcg::Point3f(0, 0, 0);
+  trackball.radius= 1;
+
+  trackball_light.center=vcg::Point3f(0, 0, 0);
+  trackball_light.radius= 1;
+
 
   render_mode = default_mode;
 
@@ -51,18 +49,38 @@ Application::Application( GLint default_mode ) {
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
 
-  camera->initLight();
 
-  glEnable(GL_NORMALIZE);
-  check_for_ogl_error();
+  /* Old camera init light routine*/
+  glEnable (GL_LIGHTING);
+  glEnable (GL_LIGHT0);
+  glDisable (GL_COLOR_MATERIAL);
 
+  Vector ambient_light = Vector( 0.0, 0.0, 0.0 );
+  Vector diffuse_light = Vector( 1.0, 1.0, 1.0 );
+  Vector specular_light = Vector( 1.0, 1.0, 1.0 );
+
+  GLfloat al[] = {ambient_light[0], ambient_light[1],
+		  ambient_light[2], 1.0};
+
+  GLfloat dl[] = {diffuse_light[0], diffuse_light[1],
+		  diffuse_light[2], 1.0};
+
+  GLfloat sl[] = {specular_light[0], specular_light[1],
+		  specular_light[2], 1.0};
+
+  glLightfv(GL_LIGHT0, GL_AMBIENT, al);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
+
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
+
+  check_for_ogl_error("Init");
 }
 
 Application::~Application( void ) {
   objects.clear();
   primitives.clear();
   delete point_based_render;
-  delete camera;
 }
 
 /// Renders a surfel as a opengl point primitive
@@ -93,7 +111,7 @@ void Application::drawPoints(void) {
   glBegin(GL_POINTS);
   
   for (surfelVectorIter it = primitives[0].getSurfels()->begin(); it != primitives[0].getSurfels()->end(); ++it) {
-	Color c = it->color();
+	LAL::Color c = it->color();
 	glColor4f(c[0], c[1], c[2], 1.0f);  
 	glVertex(it);
   }
@@ -113,22 +131,60 @@ void Application::draw( void ) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   point_based_render->clearBuffers();
 
-
   // Reset camera position and direction
-  camera->setView();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
 
-  objects[0].translate();
-  //  camera->newTarget( objects[0].getCenter() );
+  glViewport(0, 0, canvas_width, canvas_height);
+  gluPerspective( 45, (GLfloat)canvas_width/(GLfloat)canvas_height, 0.01, 100.0 );
+  
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  Point camera_offset (0, 0, 5);
+  gluLookAt(camera_offset[0], camera_offset[1], camera_offset[2],   0,0,0,   0,1,0);
+
+  /** Set light direction **/
+  glPushMatrix();
+  trackball_light.GetView();
+  trackball_light.Apply();
+  glEnable (GL_LIGHTING);
+  glEnable (GL_LIGHT0);
+  static float lightPosF[]={0.0, 0.0, 1.0, 0.0};
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosF);
+  glPopMatrix();
+  
+  glPushMatrix();
+  trackball.GetView();  
+  trackball.Apply();
+
+  float diag = 2.0f/FullBBox.Diag();
+  glScalef(diag, diag, diag);
+  glTranslatef(-FullBBox.Center()[0], -FullBBox.Center()[1], -FullBBox.Center()[2]);
+
+  // Get eye position rotated in inverse direction
+  // for backface culling
+  glPushMatrix();
+  Trackball tr;
+  tr.track = trackball.track;
+  tr.radius = trackball.radius;
+  tr.center = trackball.center;
+  tr.GetView();
+//   vcg::Matrix44f rotM;
+//   tr.track.rot.ToMatrix(rotM); 
+//   vcg::Invert(rotM);
+//   vcg::Point3<float> vp = rotM*vcg::Point3f(0, 0, camera_offset[2]);
+  vcg::Point3<float> vp = tr.camera.ViewPoint();
+  glPopMatrix();
 
   // Set eye for back face culling in vertex shader
-  point_based_render->setEye( camera->positionVector() );
+  point_based_render->setEye( Point(vp[0], vp[1], vp[2]) );
+  point_based_render->setScaleFactor( trackball.track.sca );
 
-  if (selected == 0) {
-	for (unsigned int i = 0; i < primitives.size(); ++i) {
+  if (selected == 0)
+	for (unsigned int i = 0; i < primitives.size(); ++i)
 	  // Project samples to screen space
 	  point_based_render->projectSamples( &primitives[i] );
-	}
-  }
   else
 	point_based_render->projectSamples( &primitives[selected-1] );
 
@@ -145,18 +201,17 @@ void Application::draw( void ) {
   if (show_points)
     drawPoints();
 
-  if (rotating)
-    camera->rotate();
+  glPopMatrix();
 
   // necessary to compute correct fps
-  glFinish();
+  //  glFinish();
 }
 
 /// Reshape func
 /// @param w New window width
 /// @param h New window height
 void Application::reshape(int w, int h) {
-  camera->reshape(w, h);
+  //  camera->reshape(w, h);
 }
 
 vector<Surfeld>* Application::getSurfelsList ( void ) {
@@ -203,6 +258,55 @@ void Application::createPointRenderer( void ) {
 }
 
 /**
+ * Reads a ply file using the VCG library
+ * @param filename Given file name.
+ * @param surfels Pointer to surfel vector to be filled with mesh data.
+ **/
+void Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
+  /** read using vcg plylib **/
+  CMesh mesh;
+
+  tri::io::Importer<CMesh>::Open(mesh, filename);
+
+  cout << "vertices : " << mesh.vn << endl;
+  cout << "faces : " << mesh.fn << endl;
+
+//   cout << "has normal per vertex " << mesh.HasPerVertexNormal() << endl;
+//   cout << "has color per vertex " << mesh.HasPerVertexColor() << endl;
+//   cout << "has radius per vertex " << mesh.HasPerVertexQuality() << endl;
+
+  /// Compute BBox
+  vcg::tri::UpdateBounding<CMesh>::Box(mesh);
+  FullBBox.Add(mesh.bbox);
+
+  float diag = 2.0f/FullBBox.Diag();
+  cout << "diag : " << diag << endl;
+  cout << "center : " << FullBBox.Center()[0] << " " << FullBBox.Center()[1] << " " << FullBBox.Center()[2] << endl;
+
+  //vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
+
+  CMesh::VertexIterator vit;
+
+  unsigned int pos = 0;
+  for (vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit) {
+	
+	vcg::Point3f p = (*vit).P();
+	Point p_lal (p[0], p[1], p[2]);
+	vcg::Point3f n = (*vit).N();
+	Vector n_lal (n[0], n[1], n[2]);
+ 	vcg::Color4b c = (*vit).C();
+ 	LAL::Color c_lal (c[0]/255.0, c[1]/255.0, c[2]/255.0);
+
+	double radius = (double)((*vit).Q());
+	if (radius <= 0.0)
+	  radius = 0.001;
+
+	surfels->push_back ( Surfeld (p_lal, n_lal, c_lal, radius, pos) );
+	++pos;
+  }
+}
+
+/**
  * Reads a ply file, creates an object and
  * loads the vertices and triangles in the associated primitive.
  * It is possible to load multiple objects and multiple primitives
@@ -220,17 +324,13 @@ int Application::readFile ( const char * filename ) {
   objects.push_back( Object( 0 ) );
   objects.back().setFilename( filename );
 
-  MYreadPlyTrianglesColor (filename, (primitives.back()).getSurfels(), (primitives.back()).getTriangles());
-
-//   computeNormFactors((primitives.back()).getSurfels());
-//   normalize((primitives.back()).getSurfels());
+  readFile ( filename, (primitives.back()).getSurfels() );
 
   // connect new object to new primitive
   objects[0].addPrimitives( primitives.back().getId() );
   // Sets the default rendering algorithm
   primitives[0].setRendererType( render_mode );
 
-  //  if (!point_based_render)
   createPointRenderer( );
 
   return 0;
@@ -254,7 +354,7 @@ int Application::appendFile ( const char * filename ) {
 
   objects[0].addPrimitives( id );
 
-  readPlyTrianglesColor (filename, primitives[id].getSurfels(), primitives[id].getTriangles());
+  readFile ( filename, (primitives.back()).getSurfels() );
 
 //   if (primitives.size() == 1)
 // 	computeNormFactors(primitives[id].getSurfels());
@@ -270,10 +370,7 @@ int Application::appendFile ( const char * filename ) {
 
 int Application::finishFileReading ( void ) { 
 
-  computeNormFactors(primitives[0].getSurfels());
-
   for (unsigned int i = 0; i < primitives.size(); ++i) {
-	normalize(primitives[i].getSurfels());
 	primitives[i].setRendererType( render_mode );
 	//primitives[i].clearSurfels();
   }
@@ -286,61 +383,71 @@ int Application::finishFileReading ( void ) {
 /// Mouse Left Button Function, starts rotation
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
-void Application::mouseLeftButton(int x, int y) {  
-  camera->startRotation(x, y);
-  //camera->startQuatRotation(x, y, objects[*it].getRotationQuat());
+void Application::mouseLeftButton(int x, int y) { 
+  trackball.MouseDown(x,  canvas_height-y, Trackball::BUTTON_LEFT);
 }
 
 /// Mouse Middle Button Function, zoom
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
 void Application::mouseMiddleButton(int x, int y) {
-  camera->mouseSetClick(x, y);
+  trackball.MouseDown(x,  canvas_height-y, Trackball::BUTTON_MIDDLE);
+  last_y = y;
 }
 
 /// Mouse Right Button Function, light translation
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
 void Application::mouseRightButton(int x, int y) {
-  camera->mouseSetClick(x, y);
+  trackball_light.MouseDown(x,  canvas_height-y, Trackball::BUTTON_LEFT);  
 }
 
 /// Mouse Release Function
-void Application::mouseReleaseButton( void ) {
-  camera->endRotation();
+void Application::mouseReleaseLeftButton( void ) {
+  trackball.ButtonUp(Trackball::BUTTON_LEFT);
+}
+
+/// Mouse Release Function
+void Application::mouseReleaseMiddleButton( void ) {
+  trackball.ButtonUp(Trackball::BUTTON_MIDDLE);
+}
+
+/// Mouse Release Function
+void Application::mouseReleaseRightButton( void ) {
+  trackball_light.ButtonUp(Trackball::BUTTON_LEFT);
 }
 
 /// Mouse left movement func, rotates the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseLeftMotion(int x, int y) {
-  camera->rotate(x, y);
-  //camera->rotateQuat(x, y, objects[*it].getRotationQuat(), objects[*it].getCenter());
+  trackball.MouseMove(x,  canvas_height-y);
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotion(int x, int y) {
-  camera->zooming (x, y);
-  //camera->zoomingVec(x, y, objects[*it].getCenter());
-  camera->updateMouse();
+  if (y - last_y < 0)
+	trackball.MouseWheel(0.25);
+  else
+	trackball.MouseWheel(-0.25);
+
+  last_y = y;
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseMiddleMotionShift(int x, int y) {
-  //  camera->translate(x, y);
-  camera->translateVec(x, y, objects[0].getCenter());
-  camera->updateMouse();  
+  trackball.MouseMove(x,  canvas_height-y);
 }
 
 /// Mouse right movement func, light translation
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
 void Application::mouseRightMotion(int x, int y) {
-  camera->lightTranslate(x, y);
+  trackball_light.MouseMove(x,  canvas_height-y);
 }
 
 /**
@@ -402,8 +509,6 @@ void Application::setPerVertexColor ( bool c ) {
  **/
 void Application::setAutoRotate ( bool r ) {
   rotating = r;
-  if (r == true)
-	camera->startRotation(canvas_width/2,canvas_height/2);
 }
 
 /**

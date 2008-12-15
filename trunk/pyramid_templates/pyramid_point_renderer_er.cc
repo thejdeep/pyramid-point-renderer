@@ -20,6 +20,8 @@ const int PyramidPointRendererER::projectionCallbackFunc( void ) const {
 
   shader_projection->set_uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
 
+  shader_projection->set_uniform("scale", (GLfloat)scale_factor);
+
   //  shader_projection->set_uniform("min_size", (GLfloat) (((gpu_mask_size*2.0)+1.0) / (2.0 * canvas_width)));
   shader_projection->set_uniform("canvas_width", (GLfloat)canvas_width);
   shader_projection->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));

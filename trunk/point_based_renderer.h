@@ -27,7 +27,7 @@ class PointBasedRenderer
    * Default constructor, creates an 1024x1024 screen size.
    **/
   PointBasedRenderer() : window_width(1024), window_height(1024),
-    canvas_width(1024), canvas_height(1024),
+    canvas_width(1024), canvas_height(1024), scale_factor(1.0),
     material_id(0), depth_test(1), elliptical_weight(0),
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
@@ -38,7 +38,7 @@ class PointBasedRenderer
    * @param h Screen height.
    **/
   PointBasedRenderer(int w, int h) : window_width(w), window_height(h),
-    canvas_width(h), canvas_height(h),
+    canvas_width(h), canvas_height(h), scale_factor(1.0),
     material_id(0), depth_test(1), elliptical_weight(0),
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
@@ -94,6 +94,14 @@ class PointBasedRenderer
     **/
    void setEye (Point e) {
      eye = e;
+   }
+
+   /** 
+    * Sets scale factor for zooming, scales sample's radius size.
+    * @param s Given scale factor.
+    **/
+   void setScaleFactor (double s) {
+     scale_factor = s;
    }
 
    /**
@@ -159,6 +167,9 @@ class PointBasedRenderer
    /// Eye position.
    Point eye;
 
+   /// Scale factor (camera zooming)
+   double scale_factor;
+
    /// Identification of the material from materials.h table.
    int material_id;
 
@@ -183,7 +194,6 @@ inline void check_for_ogl_error( string from = "") {
   if (err != GL_NO_ERROR) {
 	cerr << from << endl;
 	cerr << __FILE__ << " (" << __LINE__ << ") " << gluErrorString(err) << endl;
-	//    fprintf(stderr, "%s(%d) glError: %s\n", __FILE__, __LINE__, gluErrorString(err));
   }
 }
 

@@ -11,7 +11,7 @@ INCLUDEDIRS = -I"$(HOME)/lcgtk/" -I. -I.. -I./pyramid_point_renderer_base/ \
 	-I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ -I./pyramid_templates/
 OBJDIR = ./objs
 else
-INCLUDEDIRS = -I$(HOME)/lcgtk/ -I./ -I../ -I./pyramid_point_renderer_base/ \
+INCLUDEDIRS = -I$(HOME)/lcgtk/ -I$(HOME)/vcglib/ -I./ -I../ -I./pyramid_point_renderer_base/ \
 	-I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ -I./pyramid_templates/
 OBJDIR = objs
 endif

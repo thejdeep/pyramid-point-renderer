@@ -334,6 +334,8 @@ const int PyramidPointRendererBase::projectionCallbackFunc( void ) const
   shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
   shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
 
+  shader_projection->set_uniform("scale", (GLfloat)scale_factor);
+
   // Projection phase takes care of rasterizing the pixels by projecting surfels, 
   // no need to send textures.
   return true;

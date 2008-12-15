@@ -13,14 +13,33 @@
 #define __APPLICATION__
 
 //OpenGL and GLUT includes
+// Standard headers
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <stack>
 #include <cassert>
+
+using namespace std;
+
+#include <vcg/simplex/vertexplus/base.h>
+#include <vcg/simplex/vertexplus/component.h>
+
+#include <vcg/simplex/faceplus/base.h>
+#include <vcg/simplex/faceplus/component.h>
+
+#include <vcg/complex/trimesh/base.h>
+#include <vcg/complex/trimesh/update/normal.h>
+#include <vcg/complex/trimesh/update/bounding.h>
+#include <vcg/complex/trimesh/update/flag.h>
+
+// input output
+#include <wrap/io_trimesh/import.h>
 
 //IO includes
 #include <sstream>
-#include <fstream>
-#include <iostream>
 #include <iomanip>
-
 #include <cmath>
 
 #include <list>
@@ -31,7 +50,15 @@
 #include "pyramid_point_renderer_color.h"
 #include "pyramid_point_renderer_er.h"
 
-#include "camera.h"
+#include <wrap/gui/trackball.h>
+
+using namespace vcg;
+
+class CFace;
+class CEdge;
+class CVertex  : public VertexSimp2< CVertex, CEdge, CFace, vertex::Coord3f, vertex::Normal3f, vertex::Color4b, vertex::Qualityf > {};
+class CFace    : public FaceSimp2< CVertex, CEdge, CFace, face::VertexRef > {};
+class CMesh    : public vcg::tri::TriMesh< vector<CVertex>, vector<CFace> > {};
 
 class Application
 {
@@ -50,7 +77,7 @@ class Application
 
   Application( GLint default_mode = PYRAMID_POINTS );
   ~Application();
-
+  
   int readFile ( const char * filename );
   int appendFile ( const char * filename );
 
@@ -64,7 +91,6 @@ class Application
   void changeMaterial( int mat );
 
   int getNumberPoints ( void );
-  Camera* getCamera ( void ) { return camera; }
   vector<Surfeld>* getSurfelsList ( void );
 
   void setGpuMask ( int m );
@@ -81,23 +107,32 @@ class Application
   void mouseLeftButton( int x, int y );
   void mouseMiddleButton(int x, int y);
   void mouseRightButton(int x, int y);
-  void mouseReleaseButton( void );
   void mouseLeftMotion( int x, int y );
   void mouseMiddleMotion( int x, int y );
   void mouseMiddleMotionShift( int x, int y );
   void mouseRightMotion( int x, int y );
 
+  void mouseReleaseLeftButton( void );
+  void mouseReleaseMiddleButton( void );
+  void mouseReleaseRightButton( void );
+
   void increaseSelected ( void );
   void decreaseSelected ( void );
 
-
  private :
+
+  void readFile ( const char * filename, vector<Surfeld> *surfels );
+
+  Trackball trackball;
+  Trackball trackball_light;
+
+  Box3f FullBBox;
+
+  // for zooming
+  int last_y;
 
   // Generic class, is instanced as one of the inherited classes (rendering algorithms)
   PointBasedRenderer *point_based_render;
-
-  // Camera class
-  Camera *camera;
 
   int canvas_width, canvas_height;
 

@@ -225,12 +225,30 @@ void mouse(int button, int state, int x, int y) {
       
   }
   else if (state == GLUT_UP) {
+	if (button == GLUT_LEFT_BUTTON) {
+      application->mouseReleaseLeftButton();
+    }
+    else if (button == GLUT_MIDDLE_BUTTON) {
+      application->mouseReleaseMiddleButton();
+    }
+    else if (button == GLUT_RIGHT_BUTTON) {
+      application->mouseReleaseRightButton();
+    }
+
     button_pressed = -1;
     //    camera->endRotation();
   }
 
   glutPostRedisplay();
 }
+
+// void mouseWheel(int button, int dir, int x, int y) {
+//   if (dir > 0)
+// 	application->mouseWheel(1);
+//   else
+// 	application->mouseWheel(-1);
+// }
+
 
 /// Mouse movement func
 /// @param x X coordinate of mouse pointer
@@ -278,7 +296,6 @@ int main(int argc, char * argv []) {
 
   application = new Application(PYRAMID_POINTS_COLOR);  
 
-
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
     exit(0);
@@ -310,7 +327,14 @@ int main(int argc, char * argv []) {
 	back_face_culling = false;
 	application->setBackFaceCulling ( back_face_culling );
   }
-
+  else if (strcmp (argv[1], "piazza") == 0) {
+	application->startFileReading();
+ 	application->appendFile( "../plys/TOF/piazza.ply" );
+	application->finishFileReading();
+	application->changeMaterial(5);
+	back_face_culling = false;
+	application->setBackFaceCulling ( back_face_culling );
+  }
   else
 	application->readFile( argv[1] );
 
@@ -322,6 +346,7 @@ int main(int argc, char * argv []) {
   glutReshapeFunc(reshape);
   glutMouseFunc(mouse);
   glutMotionFunc(mouseMotion);
+  //  glutMouseWheelFunc(mouseWheel);
   glutKeyboardFunc(keyboard);
   glutSpecialFunc(keyboardSpecial);
 

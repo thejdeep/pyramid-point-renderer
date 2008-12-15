@@ -51,22 +51,31 @@ public:
 
   // Rotate a vector using this quaternion
   Vector rotate(Vector vec) {
-    double len = vec.Length();
+	
+	Quat r = *this;
+	r.inverse();
+	Quat tmp (vec[0], vec[1], vec[2], 0);
+	tmp = *this * tmp * r;
 
-/*     if (len == 0.0) */
-/*       return; */
-
-    Quat v(vec.x, vec.y, vec.z, 1.0);
-    Quat qbar(-x, -y, -z, a); // complement
-    Quat qtmp;
- 
-    qtmp = composeWith(v);
-    qtmp = qtmp.composeWith(qbar);
-    qtmp.normalize();
-
-    //rescale to original size
-    return Vector(qtmp.x, qtmp.y, qtmp.z) * len;
+	return Vector(tmp.x, tmp.y, tmp.z);
   }
+
+ /*    double len = vec.Length(); */
+
+/* /\*     if (len == 0.0) *\/ */
+/* /\*       return; *\/ */
+
+/*     Quat v(vec.x, vec.y, vec.z, 1.0); */
+/*     Quat qbar(-x, -y, -z, a); // complement */
+/*     Quat qtmp; */
+ 
+/*     qtmp = composeWith(v); */
+/*     qtmp = qtmp.composeWith(qbar); */
+/*     qtmp.normalize(); */
+
+/*     //rescale to original size */
+/*     return Vector(qtmp.x, qtmp.y, qtmp.z) * len; */
+/*    }  */
 
   // Multiply by given quaternion
   // @param q Given quaternion
@@ -77,7 +86,7 @@ public:
     result.x = a*q.x + x*q.a + y*q.z - z*q.y;
     result.y = a*q.y + y*q.a + z*q.x - x*q.z;
     result.z = a*q.z + z*q.a + x*q.y - y*q.x;
-    //result.normalize();
+    result.normalize();
     return result;
   }
       
@@ -114,6 +123,7 @@ public:
 
   //  multiplication with another quaternion
   Quat operator *(const Quat r) const {
+
     return Quat ( (this->y*r.z - this->z*r.y) + this->x*r.a + r.x*this->a,
 		  (this->z*r.x - this->x*r.z) + this->y*r.a + r.y*this->a,
 		  (this->x*r.y - this->y*r.x) + this->z*r.a + r.z*this->a,
