@@ -17,6 +17,8 @@ bool depth_test;
 bool back_face_culling;
 int button_pressed;
 bool active_shift;
+bool active_ctrl;
+bool active_alt;
 int mask_size;
 double reconstruction_filter_size;
 double prefilter_size;
@@ -204,39 +206,53 @@ void keyboardSpecial(int key_pressed, int x, int y) {
 /// @param y Y coordinate of mouse click
 void mouse(int button, int state, int x, int y) {
   
-  if (glutGetModifiers() == GLUT_ACTIVE_SHIFT)
-    active_shift = 1;
-  else
-    active_shift = 0;
-
   button_pressed = button;
-  //Point click = unproject(Point (x, y, 0.0));
 
   if (state == GLUT_DOWN) {
+	active_shift = active_ctrl = active_alt = 0;	
+	
+	switch (glutGetModifiers()) {
+	case GLUT_ACTIVE_SHIFT : active_shift = 1; break;
+	case GLUT_ACTIVE_CTRL : active_ctrl = 1; break;
+	case GLUT_ACTIVE_ALT : active_alt = 1; break;
+	case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_CTRL : active_shift = 1; active_ctrl = 1; break;
+	case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_ALT : active_shift = 1; active_alt = 1; break;
+	case GLUT_ACTIVE_CTRL | GLUT_ACTIVE_ALT : active_ctrl = 1; active_alt = 1; break;
+	case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_CTRL | GLUT_ACTIVE_ALT : active_shift = 1; active_ctrl = 1; active_alt = 1; break;
+	}
+
     if (button == GLUT_LEFT_BUTTON) {
-      application->mouseLeftButton(x, y);
+      application->mouseLeftButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_MIDDLE_BUTTON) {
-      application->mouseMiddleButton(x, y);
+	  application->mouseMiddleButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_RIGHT_BUTTON) {
-      application->mouseRightButton(x, y);
+      application->mouseRightButton(x, y, active_shift, active_ctrl, active_alt );
     }
       
   }
   else if (state == GLUT_UP) {
 	if (button == GLUT_LEFT_BUTTON) {
-      application->mouseReleaseLeftButton();
+      application->mouseReleaseLeftButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_MIDDLE_BUTTON) {
-      application->mouseReleaseMiddleButton();
+	  application->mouseReleaseMiddleButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_RIGHT_BUTTON) {
-      application->mouseReleaseRightButton();
+      application->mouseReleaseRightButton(x, y, active_shift, active_ctrl, active_alt );
+    }
+    else if (button == 3) {
+      application->mouseWheel(+1, active_shift, active_ctrl, active_alt );
+    }
+    else if (button == 4) {
+      application->mouseWheel(-1, active_shift, active_ctrl, active_alt );
     }
 
+
     button_pressed = -1;
-    //    camera->endRotation();
+	active_shift = 0;
+	active_ctrl = 0;
   }
 
   glutPostRedisplay();
@@ -257,19 +273,12 @@ void mouseMotion(int x, int y) {
 
   //  Point click = unproject (Point (x, y, 0.0));
 
-  if (button_pressed == GLUT_LEFT_BUTTON) {
-    application->mouseLeftMotion(x, y);
-  }
-  else if (button_pressed == GLUT_MIDDLE_BUTTON) {
-    if (active_shift)
-      application->mouseMiddleMotionShift(x, y);
-    else
-      application->mouseMiddleMotion(x, y);
-  }
-   else if (button_pressed == GLUT_RIGHT_BUTTON) {
-     application->mouseRightMotion(x, y);
-
-   }
+  if (button_pressed == GLUT_LEFT_BUTTON)
+    application->mouseLeftMotion(x, y, active_shift, active_ctrl, active_alt );
+  else if (button_pressed == GLUT_MIDDLE_BUTTON)
+	application->mouseMiddleMotion(x, y, active_shift, active_ctrl, active_alt );
+  else if (button_pressed == GLUT_RIGHT_BUTTON)
+	application->mouseRightMotion(x, y, active_shift, active_ctrl, active_alt );
 
   glutPostRedisplay();  
 }
