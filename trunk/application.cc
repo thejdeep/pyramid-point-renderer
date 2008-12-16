@@ -22,6 +22,9 @@ Application::Application( GLint default_mode ) {
   trackball_light.center=vcg::Point3f(0, 0, 0);
   trackball_light.radius= 1;
 
+  clipRatioNear = 1.0;
+  clipRatioFar = 10.0;
+  fov = 45.0;
 
   render_mode = default_mode;
 
@@ -118,6 +121,33 @@ void Application::drawPoints(void) {
   glEnd();
 }
 
+void Application::setView( void )
+{
+
+  glViewport(0, 0, canvas_width, canvas_height);
+  GLfloat fAspect = (GLfloat)canvas_width/ (GLfloat)canvas_height;
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  // Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
+
+  float ratio = 1.75f;
+  float objDist = ratio / tanf(vcg::math::ToRad(fov*.5f));
+  
+  float nearPlane = objDist - 2.f*clipRatioNear;
+  float farPlane =  objDist + 10.f*clipRatioFar;
+
+  if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
+
+  if(fov==5)
+	glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,objDist - 2.f*clipRatioNear, objDist+2.f*clipRatioFar);
+  else    		
+	gluPerspective(fov, fAspect, nearPlane, farPlane);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(0, 0, objDist, 0, 0, 0, 0, 1, 0);
+}
+
 /** 
  * Display method to render the models.
  **/
@@ -131,18 +161,18 @@ void Application::draw( void ) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   point_based_render->clearBuffers();
 
+  setView();
   // Reset camera position and direction
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  glViewport(0, 0, canvas_width, canvas_height);
-  gluPerspective( 45, (GLfloat)canvas_width/(GLfloat)canvas_height, 0.01, 100.0 );
+//   glMatrixMode(GL_PROJECTION);
+//   glLoadIdentity();
+//   glViewport(0, 0, canvas_width, canvas_height);
+//   gluPerspective( 60, (GLfloat)canvas_width/(GLfloat)canvas_height, 0.001, 100.0 );
   
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+//   glMatrixMode(GL_MODELVIEW);
+//   glLoadIdentity();
 
-  Point camera_offset (0, 0, 5);
-  gluLookAt(camera_offset[0], camera_offset[1], camera_offset[2],   0,0,0,   0,1,0);
+//   Point camera_offset (0, 0, 5);
+//   gluLookAt(camera_offset[0], camera_offset[1], camera_offset[2],   0,0,0,   0,1,0);
 
   /** Set light direction **/
   glPushMatrix();
@@ -153,11 +183,14 @@ void Application::draw( void ) {
   static float lightPosF[]={0.0, 0.0, 1.0, 0.0};
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosF);
   glPopMatrix();
-  
+  /** ******************** **/
+
+  // Apply trackball transformation
   glPushMatrix();
   trackball.GetView();  
   trackball.Apply();
 
+  // Use bounding box to centralize and scale object
   float diag = 2.0f/FullBBox.Diag();
   glScalef(diag, diag, diag);
   glTranslatef(-FullBBox.Center()[0], -FullBBox.Center()[1], -FullBBox.Center()[2]);
@@ -170,21 +203,23 @@ void Application::draw( void ) {
   tr.radius = trackball.radius;
   tr.center = trackball.center;
   tr.GetView();
-//   vcg::Matrix44f rotM;
-//   tr.track.rot.ToMatrix(rotM); 
-//   vcg::Invert(rotM);
-//   vcg::Point3<float> vp = rotM*vcg::Point3f(0, 0, camera_offset[2]);
   vcg::Point3<float> vp = tr.camera.ViewPoint();
   glPopMatrix();
+
+//   vcg::Matrix44f rotM;
+//   trackball.track.rot.ToMatrix(rotM); 
+//   vcg::Invert(rotM);
+//   vcg::Point3<float> vp = rotM*vcg::Point3f(0, 0, camera_offset[2]);
 
   // Set eye for back face culling in vertex shader
   point_based_render->setEye( Point(vp[0], vp[1], vp[2]) );
   point_based_render->setScaleFactor( trackball.track.sca );
 
+  // project all primitives
   if (selected == 0)
 	for (unsigned int i = 0; i < primitives.size(); ++i)
-	  // Project samples to screen space
 	  point_based_render->projectSamples( &primitives[i] );
+  // project only selected part
   else
 	point_based_render->projectSamples( &primitives[selected-1] );
 
@@ -279,16 +314,11 @@ void Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
   vcg::tri::UpdateBounding<CMesh>::Box(mesh);
   FullBBox.Add(mesh.bbox);
 
-  float diag = 2.0f/FullBBox.Diag();
-  cout << "diag : " << diag << endl;
-  cout << "center : " << FullBBox.Center()[0] << " " << FullBBox.Center()[1] << " " << FullBBox.Center()[2] << endl;
+  // vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
 
-  //vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
-
-  CMesh::VertexIterator vit;
-
+  // Load vertex arrays in primitive class
   unsigned int pos = 0;
-  for (vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit) {
+  for (CMesh::VertexIterator vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit) {
 	
 	vcg::Point3f p = (*vit).P();
 	Point p_lal (p[0], p[1], p[2]);
@@ -358,11 +388,8 @@ int Application::appendFile ( const char * filename ) {
 
 //   if (primitives.size() == 1)
 // 	computeNormFactors(primitives[id].getSurfels());
-
 //   normalize(primitives[id].getSurfels());
-  
 //   primitives[id].setRendererType( render_mode );
-
 //   primitives[id].clearSurfels();
 
   return 0;
@@ -374,7 +401,6 @@ int Application::finishFileReading ( void ) {
 	primitives[i].setRendererType( render_mode );
 	//primitives[i].clearSurfels();
   }
-
   createPointRenderer();
 
   return 0;
@@ -383,72 +409,127 @@ int Application::finishFileReading ( void ) {
 /// Mouse Left Button Function, starts rotation
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
-void Application::mouseLeftButton(int x, int y) { 
-  trackball.MouseDown(x,  canvas_height-y, Trackball::BUTTON_LEFT);
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseLeftButton(int x, int y, bool shift, bool ctrl, bool alt) {
+  int button = Trackball::BUTTON_LEFT;
+  if (shift) button = button | Trackball::KEY_SHIFT;
+  if (ctrl) button = button | Trackball::KEY_CTRL;
+  if (alt) button = button | Trackball::KEY_ALT;
+  trackball.MouseDown(x, canvas_height-y, button );
 }
 
 /// Mouse Middle Button Function, zoom
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
-void Application::mouseMiddleButton(int x, int y) {
-  trackball.MouseDown(x,  canvas_height-y, Trackball::BUTTON_MIDDLE);
-  last_y = y;
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseMiddleButton(int x, int y, bool shift, bool ctrl, bool alt) {
+  int button = Trackball::BUTTON_MIDDLE;
+  if (shift) button = button | Trackball::KEY_SHIFT;
+  if (ctrl) button = button | Trackball::KEY_CTRL;
+  if (alt) button = button | Trackball::KEY_ALT;
+  trackball.MouseDown(x, canvas_height-y, button );
 }
 
 /// Mouse Right Button Function, light translation
 /// @param x X coordinate of mouse click
 /// @param y Y coordinate of mouse click
-void Application::mouseRightButton(int x, int y) {
-  trackball_light.MouseDown(x,  canvas_height-y, Trackball::BUTTON_LEFT);  
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseRightButton(int x, int y, bool shift, bool ctrl, bool alt) {
+  trackball_light.MouseDown(x, canvas_height-y, Trackball::BUTTON_LEFT);  
 }
 
 /// Mouse Release Function
-void Application::mouseReleaseLeftButton( void ) {
-  trackball.ButtonUp(Trackball::BUTTON_LEFT);
+/// @param x X coordinate of mouse pointer
+/// @param y Y coordinate of mouse pointer
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseReleaseLeftButton(int x, int y, bool shift, bool ctrl, bool alt ) {
+  int button = Trackball::BUTTON_LEFT;
+  if (shift) button = button | Trackball::KEY_SHIFT;
+  if (ctrl) button = button | Trackball::KEY_CTRL;
+  if (alt) button = button | Trackball::KEY_ALT;
+  trackball.MouseUp(x, canvas_height-y, button );
 }
 
 /// Mouse Release Function
-void Application::mouseReleaseMiddleButton( void ) {
-  trackball.ButtonUp(Trackball::BUTTON_MIDDLE);
+/// @param x X coordinate of mouse pointer
+/// @param y Y coordinate of mouse pointer
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseReleaseMiddleButton(int x, int y, bool shift, bool ctrl, bool alt ) {
+  int button = Trackball::BUTTON_MIDDLE;
+  if (shift) button = button | Trackball::KEY_SHIFT;
+  if (ctrl) button = button | Trackball::KEY_CTRL;
+  if (alt) button = button | Trackball::KEY_ALT;
+  trackball.MouseUp(x, canvas_height-y, button );
 }
 
 /// Mouse Release Function
-void Application::mouseReleaseRightButton( void ) {
-  trackball_light.ButtonUp(Trackball::BUTTON_LEFT);
+/// @param x X coordinate of mouse pointer
+/// @param y Y coordinate of mouse pointer
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseReleaseRightButton(int x, int y, bool shift, bool ctrl, bool alt ) {
+  trackball_light.MouseUp(x, canvas_height-y, Trackball::BUTTON_LEFT);
 }
 
 /// Mouse left movement func, rotates the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
-void Application::mouseLeftMotion(int x, int y) {
-  trackball.MouseMove(x,  canvas_height-y);
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseLeftMotion(int x, int y, bool shift, bool ctrl, bool alt ) {
+  trackball.MouseMove(x, canvas_height-y);
 }
 
 /// Mouse middle movement func, zooms the camera or selected object
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
-void Application::mouseMiddleMotion(int x, int y) {
-  if (y - last_y < 0)
-	trackball.MouseWheel(0.25);
-  else
-	trackball.MouseWheel(-0.25);
-
-  last_y = y;
-}
-
-/// Mouse middle movement func, zooms the camera or selected object
-/// @param x X coordinate of mouse pointer
-/// @param y Y coordinate of mouse pointer
-void Application::mouseMiddleMotionShift(int x, int y) {
-  trackball.MouseMove(x,  canvas_height-y);
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseMiddleMotion(int x, int y, bool shift, bool ctrl, bool alt ) {
+  trackball.MouseMove(x, canvas_height-y);
 }
 
 /// Mouse right movement func, light translation
 /// @param x X coordinate of mouse pointer
 /// @param y Y coordinate of mouse pointer
-void Application::mouseRightMotion(int x, int y) {
-  trackball_light.MouseMove(x,  canvas_height-y);
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseRightMotion(int x, int y, bool shift, bool ctrl, bool alt) {
+  trackball_light.MouseMove(x, canvas_height-y);
 }
+
+/// Mouse wheel control
+/// @param step Wheel direction +1 (forward) or -1(back)
+/// @param shift Flag for shift key state down/up
+/// @param ctrl Flag for control key state down/up
+/// @param alt Flag for alt key state down/up
+void Application::mouseWheel( int step, bool shift, bool ctrl, bool alt ) {
+  float notch = 1.0 * step;
+
+  if (shift && ctrl) 
+	clipRatioFar *= powf(1.2f, notch);
+  else if (shift)
+	fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f);
+  else if (ctrl)
+	clipRatioNear *= powf(1.2f, notch);  
+  else
+	trackball.MouseWheel( step );
+}
+
 
 /**
  * Returns the model's number of points.

@@ -18,6 +18,8 @@ void main(void)
   if (radius_depth_w.x <= 0.0)
     discard;
 
+  normal_vec = normalize(normal_vec);
+
   float depth_interval = radius_depth_w.x*scale;
 
   // First buffer  : normal.x, normal.y, normal.z, radius
@@ -25,7 +27,7 @@ void main(void)
   // Third buffer  : color
   //  gl_FragData[0] = vec4 (normalize(normal_vec), radius_depth_w.x / radius_depth_w.z ); 
 
-  gl_FragData[0] = vec4 (normalize(normal_vec), radius_depth_w.x*(scale/radius_depth_w.z) );
+  gl_FragData[0] = vec4 (normal_vec.xyz, radius_depth_w.x*(scale/radius_depth_w.z) );
   gl_FragData[1] = vec4 (radius_depth_w.y - depth_interval, depth_interval, 0.0, 0.0);
   gl_FragData[2] = gl_Color;
 }

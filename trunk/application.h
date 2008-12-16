@@ -87,6 +87,8 @@ class Application
   void draw ( void );
   void reshape ( int w, int h );
 
+  void setView( void );
+
   void changeRendererType ( int type );
   void changeMaterial( int mat );
 
@@ -104,17 +106,19 @@ class Application
   void setPrefilter ( double s );
   void setDepthTest ( bool d );
   
-  void mouseLeftButton( int x, int y );
-  void mouseMiddleButton(int x, int y);
-  void mouseRightButton(int x, int y);
-  void mouseLeftMotion( int x, int y );
-  void mouseMiddleMotion( int x, int y );
-  void mouseMiddleMotionShift( int x, int y );
-  void mouseRightMotion( int x, int y );
+  void mouseLeftButton( int x, int y, bool shift, bool ctrl, bool alt );
+  void mouseMiddleButton(int x, int y, bool shift, bool ctrl, bool alt );
+  void mouseRightButton(int x, int y, bool shift, bool ctrl, bool alt );
 
-  void mouseReleaseLeftButton( void );
-  void mouseReleaseMiddleButton( void );
-  void mouseReleaseRightButton( void );
+  void mouseLeftMotion( int x, int y, bool shift, bool ctrl, bool alt );
+  void mouseMiddleMotion( int x, int y, bool shift, bool ctrl, bool alt );
+  void mouseRightMotion( int x, int y, bool shift, bool ctrl, bool alt );
+
+  void mouseReleaseLeftButton( int x, int y, bool shift, bool ctrl, bool alt );
+  void mouseReleaseMiddleButton( int x, int y, bool shift, bool ctrl, bool alt );
+  void mouseReleaseRightButton( int x, int y, bool shift, bool ctrl, bool alt );
+
+  void mouseWheel( int step, bool shift, bool ctrl, bool alt );
 
   void increaseSelected ( void );
   void decreaseSelected ( void );
@@ -128,13 +132,13 @@ class Application
 
   Box3f FullBBox;
 
-  // for zooming
-  int last_y;
-
   // Generic class, is instanced as one of the inherited classes (rendering algorithms)
   PointBasedRenderer *point_based_render;
 
   int canvas_width, canvas_height;
+
+  float clipRatioNear, clipRatioFar;
+  float fov;
 
   // Lists of objects and primitives
   // In this simple application only one object associated to one primitive is used.
