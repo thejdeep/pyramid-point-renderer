@@ -146,6 +146,13 @@ void Application::setView( void )
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(0, 0, objDist, 0, 0, 0, 0, 1, 0);
+
+  // Compute factor for scaling projected sample radius size
+  // the usual perspective foreshortening should take into account the
+  // near plane, but since the viewport transformation already scales
+  // accordingly, there is no need to multiple by N
+  // Not 100% sure about this, but it is working better with scaling by N
+  scale_factor = 1.0 / (tanf(vcg::math::ToRad(fov*.5f)) * 2.0);
 }
 
 /** 
@@ -203,17 +210,19 @@ void Application::draw( void ) {
   tr.radius = trackball.radius;
   tr.center = trackball.center;
   tr.GetView();
-  vcg::Point3<float> vp = tr.camera.ViewPoint();
+  vcg::Point3f vp = tr.camera.ViewPoint();
   glPopMatrix();
 
 //   vcg::Matrix44f rotM;
 //   trackball.track.rot.ToMatrix(rotM); 
 //   vcg::Invert(rotM);
 //   vcg::Point3<float> vp = rotM*vcg::Point3f(0, 0, camera_offset[2]);
-
+  
   // Set eye for back face culling in vertex shader
   point_based_render->setEye( Point(vp[0], vp[1], vp[2]) );
-  point_based_render->setScaleFactor( trackball.track.sca );
+
+  // Set factor for scaling projected radii of samples
+  point_based_render->setScaleFactor( scale_factor );
 
   // project all primitives
   if (selected == 0)
@@ -525,6 +534,8 @@ void Application::mouseWheel( int step, bool shift, bool ctrl, bool alt ) {
   else if (shift)
 	fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f);
   else if (ctrl)
+	clipRatioNear *= powf(1.2f, notch);  
+  else if (ctrl && alt)
 	clipRatioNear *= powf(1.2f, notch);  
   else
 	trackball.MouseWheel( step );
