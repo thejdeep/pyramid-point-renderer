@@ -344,8 +344,11 @@ int main(int argc, char * argv []) {
 	back_face_culling = false;
 	application->setBackFaceCulling ( back_face_culling );
   }
-  else
+  else {
 	application->readFile( argv[1] );
+	application->changeMaterial(material);
+	application->setBackFaceCulling ( back_face_culling );
+  }
 
   cout << "Total points : " << application->getNumberPoints() << endl;
 

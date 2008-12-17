@@ -139,6 +139,7 @@ class Application
 
   float clipRatioNear, clipRatioFar;
   float fov;
+  float scale_factor;
 
   // Lists of objects and primitives
   // In this simple application only one object associated to one primitive is used.
