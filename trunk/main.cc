@@ -218,6 +218,9 @@ void keyboardSpecial(int key_pressed, int x, int y) {
     application->setPrefilter ( prefilter_size );
 	application->setDepthTest( depth_test );
 	application->setBackFaceCulling( back_face_culling );
+	application->setEllipticalWeight( elliptical_weight );
+	application->setQualityThreshold( quality_threshold );
+	application->setQualityPerVertex( quality_per_vertex );
     break;
   }
 
@@ -341,7 +344,7 @@ int main(int argc, char * argv []) {
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
   material = 0;
-  quality_threshold = 0.02;
+  quality_threshold = 0.0;
   auto_rotate = false;
   elliptical_weight = true;
   depth_test = true;
@@ -382,6 +385,7 @@ int main(int argc, char * argv []) {
 	application->finishFileReading();
 	material = 5;
 	back_face_culling = true;
+	quality_threshold = 0.02;
   }
   // single file
   else {
@@ -395,6 +399,7 @@ int main(int argc, char * argv []) {
   application->setEllipticalWeight( elliptical_weight );
   application->setQualityThreshold( quality_threshold );
   application->setGpuMask ( mask_size );
+  application->setQualityPerVertex( quality_per_vertex );
 
   //GLUT callback functions
   glutDisplayFunc(display);

@@ -17,10 +17,8 @@ void main (void) {
 	color.a = normal.a;
 	normal.a = length(normal.xyz);
 
-    // *10.0 is for the weight correction during synthesis to avoid clamping values greater than 1.0
-    color.rgb /= normal.a;
-	normal = normalize(normal);
-	
+	color.rgb /= normal.a;
+ 	normal.rgb = normalize(normal.rgb);	
 
 	if (shininess == 99.0) {
 	  //color.a *= normal.b;
