@@ -23,11 +23,11 @@
 
 using namespace std;
 
-#include <vcg/simplex/vertexplus/base.h>
-#include <vcg/simplex/vertexplus/component.h>
+#include <vcg/simplex/vertex/base.h>
+#include <vcg/simplex/vertex/component.h>
 
-#include <vcg/simplex/faceplus/base.h>
-#include <vcg/simplex/faceplus/component.h>
+#include <vcg/simplex/face/base.h>
+#include <vcg/simplex/face/component.h>
 
 #include <vcg/complex/trimesh/base.h>
 #include <vcg/complex/trimesh/update/normal.h>
