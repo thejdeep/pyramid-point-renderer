@@ -14,7 +14,7 @@
  **/
 Application::Application( GLint default_mode ) {
 
-  canvas_width = canvas_height = 768;
+  canvas_width = canvas_height = 1024;
 
   trackball.center=vcg::Point3f(0, 0, 0);
   trackball.radius= 1;
@@ -306,18 +306,26 @@ void Application::createPointRenderer( void ) {
  * @param filename Given file name.
  * @param surfels Pointer to surfel vector to be filled with mesh data.
  **/
-void Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
+int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
   /** read using vcg plylib **/
   CMesh mesh;
 
+  int mask = 0;
+
+  tri::io::Importer<CMesh>::LoadMask(filename, mask);
   tri::io::Importer<CMesh>::Open(mesh, filename);
 
-  cout << "vertices : " << mesh.vn << endl;
-  cout << "faces : " << mesh.fn << endl;
+  bool color_per_vertex = false;
+  if (mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
+	color_per_vertex = true;
+
+  bool quality_per_vertex = false;
+  if (mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
+	quality_per_vertex = true;
 
 //   cout << "has normal per vertex " << mesh.HasPerVertexNormal() << endl;
 //   cout << "has color per vertex " << mesh.HasPerVertexColor() << endl;
-//   cout << "has radius per vertex " << mesh.HasPerVertexQuality() << endl;
+//  cout << "has radius per vertex " << mesh.HasPerVertexQuality() << endl;
 
   /// Compute BBox
   vcg::tri::UpdateBounding<CMesh>::Box(mesh);
@@ -333,16 +341,26 @@ void Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
 	Point p_lal (p[0], p[1], p[2]);
 	vcg::Point3f n = (*vit).N();
 	Vector n_lal (n[0], n[1], n[2]);
- 	vcg::Color4b c = (*vit).C();
- 	LAL::Color c_lal (c[0]/255.0, c[1]/255.0, c[2]/255.0);
 
-	double radius = (double)((*vit).Q());
-	if (radius <= 0.0)
-	  radius = 0.001;
+ 	double quality = 1.0;
+	if (quality_per_vertex)
+	  quality = (double)((*vit).Q());
 
+	LAL::Color c_lal (0.2, 0.2, 0.2, quality);
+	if (color_per_vertex) {
+	  vcg::Color4b c = (*vit).C();		
+	  c_lal = LAL::Color(c[0]/255.0, c[1]/255.0, c[2]/255.0, quality);
+	}
+
+ 	double radius = (double)((*vit).Q());
+// 	if (radius <= 0.0)
+	//double radius = 0.25;
+	
 	surfels->push_back ( Surfeld (p_lal, n_lal, c_lal, radius, pos) );
 	++pos;
   }
+
+  return mesh.vn;
 }
 
 /**
@@ -386,25 +404,25 @@ int Application::appendFile ( const char * filename ) {
 
    // Create a new primitive from given file
 
-  cout << primitives.size() << " : " << filename << endl;;
+  //cout << primitives.size() << " : " << filename << endl;
 
   primitives.push_back( Primitives( primitives.size() ) );
   int id = primitives.back().getId();
 
   objects[0].addPrimitives( id );
 
-  readFile ( filename, (primitives.back()).getSurfels() );
+  int pts = readFile ( filename, (primitives.back()).getSurfels() );
 
 //   if (primitives.size() == 1)
 // 	computeNormFactors(primitives[id].getSurfels());
 //   normalize(primitives[id].getSurfels());
-//   primitives[id].setRendererType( render_mode );
+//  primitives[id].setRendererType( render_mode );
 //   primitives[id].clearSurfels();
 
-  return 0;
+  return pts;
 }
 
-int Application::finishFileReading ( void ) { 
+int Application::finishFileReading ( void ) {
 
   for (unsigned int i = 0; i < primitives.size(); ++i) {
 	primitives[i].setRendererType( render_mode );
@@ -527,7 +545,7 @@ void Application::mouseRightMotion(int x, int y, bool shift, bool ctrl, bool alt
 /// @param ctrl Flag for control key state down/up
 /// @param alt Flag for alt key state down/up
 void Application::mouseWheel( int step, bool shift, bool ctrl, bool alt ) {
-  float notch = 1.0 * step;
+  float notch = 0.3 * step;
 
   if (shift && ctrl) 
 	clipRatioFar *= powf(1.2f, notch);
@@ -538,7 +556,7 @@ void Application::mouseWheel( int step, bool shift, bool ctrl, bool alt ) {
   else if (ctrl && alt)
 	clipRatioNear *= powf(1.2f, notch);  
   else
-	trackball.MouseWheel( step );
+	trackball.MouseWheel( notch );
 }
 
 
@@ -563,6 +581,15 @@ int Application::getNumberPoints ( void ) {
 void Application::setReconstructionFilter ( double s ) { 
   if (point_based_render)
     point_based_render->setReconstructionFilterSize(s);
+}
+
+/**
+ * Sets the quality threshold for interpolating samples.
+ * @param q Quality threshold.
+ **/
+void Application::setQualityThreshold ( double q ) { 
+  if (point_based_render)
+    point_based_render->setQualityThreshold(q);
 }
 
 /**
@@ -636,6 +663,15 @@ void Application::setBackFaceCulling ( bool c ) {
 void Application::setEllipticalWeight ( bool b ) {
   point_based_render->setEllipticalWeight(b);
 }
+
+/**
+ * Turns quality per vertex on/off.
+ * @param c Quality per vertex state.
+ **/
+void Application::setQualityPerVertex ( bool c ) {
+  point_based_render->setQualityPerVertex(c);
+}
+
 
 void Application::increaseSelected ( void ) {
   selected++;

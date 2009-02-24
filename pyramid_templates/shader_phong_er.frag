@@ -14,24 +14,34 @@ void main (void) {
   vec4 color = texture2D (textureB, gl_TexCoord[0].st).yzwx;  
 
   if (normal.a != 0.0) {
+	color.a = normal.a;
+	normal.a = length(normal.xyz);
 
     // *10.0 is for the weight correction during synthesis to avoid clamping values greater than 1.0
-    color.rgb /= normal.a * 10.0;
+    color.rgb /= normal.a;
+	normal = normalize(normal);
+	
 
-    normal = normalize(normal);
-
-    vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
+	if (shininess == 99.0) {
+	  //color.a *= normal.b;
+	  color.rgb = vec3(color.a, 1.0-color.a, 0.0);
+	}
+	else if (shininess == 98.0) {
+	  color.rgb = normal.rgb; 
+	}
+	else {
+	  vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
      
-    color += color_ambient * (gl_LightSource[0].ambient + gl_LightModel.ambient);
+	  color += color_ambient * (gl_LightSource[0].ambient + gl_LightModel.ambient);
 
-    float NdotL = max(dot(normal.xyz, lightDir.xyz), 0.0);
+	  float NdotL = max(dot(normal.xyz, lightDir.xyz), 0.0);
 
-    if (NdotL > 0.0) {
-      color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
-      float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
-      color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
-    }
-
+	  if (NdotL > 0.0) {
+		color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
+		float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
+		color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
+	  }
+	}
     color.a = 1.0;
   }
   else

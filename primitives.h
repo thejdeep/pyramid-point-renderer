@@ -51,6 +51,8 @@ class Primitives
 
   Point eye;
 
+  float max_quality;
+
  private:
 
   void setPyramidPointsArrays( void );

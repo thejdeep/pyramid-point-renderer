@@ -20,6 +20,9 @@ uniform int mask_size;
 uniform float canvas_width;
 uniform int level;
 
+uniform bool quality_per_vertex;
+uniform float quality_threshold;
+
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
@@ -83,9 +86,9 @@ int intersectEllipseLine (in vec2 p, in float rx, in float ry, in vec2 a1, in ve
     float t_b = (-b + root) / a;
     if ( ((t_a < 0.0) || (1.0 < t_a)) && ((t_b < 0.0) || (1.0 < t_b)) ) {
       if ( ((t_a < 0.0) && (t_b < 0.0)) || ((t_a > 1.0) && (t_b > 1.0)) )
-	return 0;
+		return 0;
       else
-	return 2;
+		return 2;
     }
     else
       return 1;
@@ -145,16 +148,16 @@ float intersectEllipsePixel (in vec2 d, in float radius, in vec3 normal, in floa
 
   vec2 rot_box[4]; 
   rot_box[0] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
+					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
   rot_box[1] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] - unit)*sin_angle,
-		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
+					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] - unit)*cos_angle);
 
   rot_box[2] = vec2((desloc_point[0] - unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-		    -(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+					-(desloc_point[0] - unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
   
   rot_box[3] = vec2((desloc_point[0] + unit)*cos_angle + (desloc_point[1] + unit)*sin_angle,
-		    -(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
+					-(desloc_point[0] + unit)*sin_angle + (desloc_point[1] + unit)*cos_angle);
 
   // ellipse intersects the pixels box
   if (((intersectEllipseLine(center, a, b, rot_box[0], rot_box[1]) > 0) ||
@@ -189,7 +192,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
   // rotate point to ellipse coordinate system
   vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle,
-			 -d.x*sin_angle + d.y*cos_angle);
+						  -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
   float a = 1.0*radius;
@@ -250,55 +253,54 @@ void main (void) {
       // this ellipse has stop propagating, it lies on the finer level
       // the sign of the unprojected radius determines if it has reached the correct level (positive) or not (negative)
       if (pixelB[i].x < 0.0) {
-	// test for minimum depth coordinate of valid ellipses
-	if (pixelA[i].w <= zmin) {
-	  zmin = pixelA[i].w;
-	  zmax = pixelB[i].x;
-	  obj_id = pixelC[i].w; //only necessary if using color buffer
-	}
+		// test for minimum depth coordinate of valid ellipses
+		//if (pixelA[i].w <= zmin) {
+		if ( ((quality_per_vertex) && (pixelC[i].w > obj_id)) || ((!quality_per_vertex) && (pixelA[i].w <= zmin)) ) {
+		  zmin = pixelA[i].w;
+		  zmax = abs(pixelB[i].x);
+		  obj_id = pixelC[i].w; //only necessary if using color buffer for quality
+		}
       }
       else {
-	// if ellipse not in correct level ignore it during average
-	pixelB[i].y = -1.0;
+		// if ellipse not in correct level ignore it during average
+		pixelB[i].y = -1.0;
       }
     }
   }
-
-  float new_zmax = zmax;
 
   // Gather pixels values
   for (int i = 0; i < 4; ++i)
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelB[i].y > 0.0) 
-      {
-	if (abs(pixelC[i].w - obj_id) < 0.1 )
-	{
-	  // Depth test between valid in reach ellipses
-	  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
-	  if ((!depth_test) || (abs(zmin - pixelA[i].w) <= 1.0*abs(pixelB[i].x)))
-	    {
-	      //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
-	      float w = 1.0;
-	      bufferA.xyz += pixelA[i].xyz * w;
+		{
+		  if ((!quality_per_vertex) || (abs(pixelC[i].w - obj_id) <= quality_threshold) )
+			{
+			  // Depth test between valid in reach ellipses
+			  // if ((!depth_test) || (pixelB[i].x - pixelC[i].y <= zmax))
+			  if ((!depth_test) || (abs(zmin - pixelA[i].w) <= (zmax+pixelB[i].x)))
+				{
+				  //float w = abs(4.0 * PI * 4.0 * pixelA[i].w * pixelA[i].w * pixelA[i].z);
+				  float w = 1.0;//pixelC[i].a;
+				  bufferA.xyz += pixelA[i].xyz * w;
 
-	      // radius computation
-	      bufferB.x = max(abs(bufferB.x), abs(pixelB[i].x));
-	      bufferB.y = max(bufferB.y, pixelB[i].y);
+				  // radius computation
+				  bufferB.x = max(abs(bufferB.x), abs(pixelB[i].x));
+				  bufferB.y = max(bufferB.y, pixelB[i].y);
 
-	      // average depth
-	      bufferA.w += pixelA[i].w * w;
+				  // average depth
+				  bufferA.w += pixelA[i].w * w;
 
-	      // average tex coords
-	      bufferB.zw += pixelB[i].zw * w;
+				  // average tex coords
+				  bufferB.zw += pixelB[i].zw * w;
 
-	      // average tex coords
-	      bufferC += pixelC[i] * w;
+				  // average tex coords
+				  bufferC += pixelC[i] * w;
 	      
-	      valid_pixels += w;
-	    }
-	}
-      }
+				  valid_pixels += w;
+				}
+			}
+		}
     }
 
   // average values if there are any valid ellipses
@@ -307,16 +309,22 @@ void main (void) {
     {
       bufferA /= valid_pixels;
       bufferB.zw /= valid_pixels;
-      bufferC.w = obj_id;
       bufferC.rgb /= valid_pixels;
+      bufferC.w = obj_id;
 
       // If this ellipse is on the correct pyramid level stop its propagation
-      // i.e., it will not be used in the average of the next coarser level
+      // i.e., it will not be used in the average of the next coarser level	  
+
       float log_level = log2( ( 2.0 * bufferB.y * reconstruction_filter_size * canvas_width ) / float(mask_size*2 + 1) );
       if (level == int( floor(log_level) ))
-	bufferB.x = abs(bufferB.x);
+		bufferB.x = abs(bufferB.x);
       else
-	bufferB.x = abs(bufferB.x) * -1.0;
+		bufferB.x = abs(bufferB.x) * -1.0;
+
+/* 	  if ((2.0*bufferB.y*canvas_width*reconstruction_filter_size) > float(mask_size*2 + 1)) */
+/* 		bufferB.x = abs(bufferB.x); */
+/*       else */
+/* 		bufferB.x = abs(bufferB.x) * -1.0; */
     }
 
   // first buffer = (n.x, n.y, n.z, radius)

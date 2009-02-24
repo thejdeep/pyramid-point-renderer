@@ -41,6 +41,9 @@ const int PyramidPointRendererER::analysisCallbackFunc( void ) const {
   shader_analysis->set_uniform("depth_test", depth_test);
   shader_analysis->set_uniform("mask_size", gpu_mask_size);
 
+  shader_analysis->set_uniform("quality_threshold", quality_threshold);
+  shader_analysis->set_uniform("quality_per_vertex", quality_per_vertex);
+
   // Loads the textures ids as uniforms for shader access
   for (int i = 0; i < fbo_buffers_count/2; ++i)
     shader_analysis->set_uniform(shader_texture_names[i].c_str(), i);
@@ -64,7 +67,10 @@ const int PyramidPointRendererER::synthesisCallbackFunc( void ) const {
   shader_synthesis->set_uniform("mask_size", gpu_mask_size);
   shader_synthesis->set_uniform("depth_test", depth_test);  
 
-
+  if (quality_per_vertex)
+	shader_synthesis->set_uniform("quality_threshold", quality_threshold);
+  else
+	shader_synthesis->set_uniform("quality_threshold", 1.0);
 
   // Loads the textures ids as uniforms for shader access
   for (int i = 0; i < fbo_buffers_count/2; ++i)

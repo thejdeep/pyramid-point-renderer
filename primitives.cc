@@ -133,6 +133,40 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   normal_array = new GLfloat[number_points * 3];
   color_array = new GLubyte[number_points * 4];
 
+  double mean = 0.0;
+  double standard_deviation = 0.0;
+  double max_quality = 0.0;
+  double min_quality = 10000.0;
+  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+	double q = (double)it->color()[3];
+	if (q < 10000)
+	  mean += (double)it->color()[3];
+  }
+  mean /= double(surfels.size());
+
+  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+	double q = (double)it->color()[3];
+	if (q < 10000)
+	  standard_deviation += ((double)it->color()[3] - mean) * ((double)it->color()[3] - mean);
+  }
+  standard_deviation = sqrt ( (1.0/double(surfels.size())) * standard_deviation );
+
+  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+
+	double q = (double)it->color()[3];
+	//q = (q - mean) / (standard_deviation / two_pi);
+	if (q < 10000) {
+	  if (q > max_quality)
+		max_quality = q;
+	  if (q < min_quality)
+		min_quality = q;
+	}
+  }
+
+//   cout << "Mean :  " << mean << endl;
+//   cout << "Standard Deviation :  " << standard_deviation << endl;
+//   cout << "max - min : " << max_quality << " : " << min_quality << endl;
+
   int pos = 0;
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
@@ -140,6 +174,10 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
     vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y);
     vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z);
     vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
+
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y);
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z);
 
 	color_array[pos*4 + 0] = (GLubyte)(it->color()[0] * 255.0);
 	color_array[pos*4 + 1] = (GLubyte)(it->color()[1] * 255.0);
@@ -149,12 +187,16 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
 // 	color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
 // 	color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
 
-	color_array[pos*4 + 3] = 1.0;
+//	double q = it->color()[3] / max_quality;
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
-    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y);
-    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z);
+	double q = (double)it->color()[3];
 
+	q = (q - min_quality) / (max_quality - min_quality);
+	q = min (1.0, q);
+	q = max (0.0, q);
+
+	color_array[pos*4 + 3] = (GLubyte)(q * 255.0);
+	
     ++pos;
   }
 

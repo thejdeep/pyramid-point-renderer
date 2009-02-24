@@ -10,6 +10,7 @@ uniform int back_face_culling;
 
 varying vec3 normal_vec;
 varying vec3 radius_depth_w;
+varying float dist_to_eye;
 
 void main(void)
 {
@@ -33,7 +34,10 @@ void main(void)
       normal_vec = normalize(gl_NormalMatrix * gl_Normal);
       float radius = gl_Vertex.w;
 
-      radius_depth_w = vec3(radius, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
+	  dist_to_eye = length(eye - gl_Vertex.xyz);
+
+	  //      radius_depth_w = vec3(radius, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
+      radius_depth_w = vec3(radius, v.z, v.w);
       
       gl_Position = v;
     }
