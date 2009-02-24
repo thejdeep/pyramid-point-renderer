@@ -498,6 +498,8 @@ const int PyramidPointRendererBase::synthesisCallbackFunc( void ) const
   shader_synthesis->set_uniform("depth_test", depth_test);
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
 
+  shader_synthesis->set_uniform("level", cur_level);
+
   for (int i = 0; i < fbo_buffers_count/2; ++i)
     shader_synthesis->set_uniform(shader_texture_names[i].c_str(), i);
 

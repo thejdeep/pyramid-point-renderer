@@ -18,6 +18,10 @@ void main (void) {
     normal = normalize(normal);
 
 	if (shininess == 99.0) {
+	  color.a *= normal.b;
+	  color.rgb = vec3(color.a, 1.0-color.a, 0.0);
+	}
+	else if (shininess == 98.0) {
 	  color.rgb = normal.rgb; 
 	}
 	else {

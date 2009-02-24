@@ -9,9 +9,13 @@
 
 #include "application.h"
 #include "GL/glut.h"
+#include <stdio.h>
+#include <dirent.h>
+#include <errno.h>
 
-static int g_Width = 816;                          // Initial window width
-static int g_Height = 816;                         // Initial window height
+
+static int g_Width = 1056;                          // Initial window width
+static int g_Height = 1056;                         // Initial window height
 
 bool depth_test;
 bool back_face_culling;
@@ -22,6 +26,8 @@ bool active_alt;
 int mask_size;
 double reconstruction_filter_size;
 double prefilter_size;
+double quality_threshold;
+double quality_per_vertex;
 int material;
 bool auto_rotate;
 bool elliptical_weight;
@@ -96,9 +102,16 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case '6' :
     material = 6;
     break;
+ case '7' :
+    material = 7;
+    break;
   case 'r':
 	auto_rotate = !auto_rotate;
 	application->setAutoRotate( auto_rotate );
+	break;
+  case 'c':
+	quality_per_vertex = !quality_per_vertex;
+	application->setQualityPerVertex( quality_per_vertex );
 	break;
   case 'w':
 	elliptical_weight = !elliptical_weight;
@@ -113,6 +126,18 @@ void keyboard(unsigned char key_pressed, int x, int y) {
 	back_face_culling = !back_face_culling;
     application->setBackFaceCulling ( back_face_culling );
     break;
+  case '/':
+	if (quality_threshold > 0.0)
+	  quality_threshold -= 0.01;
+	application->setQualityThreshold ( abs(quality_threshold) );
+	cout << "quality threshold : " << quality_threshold << endl;
+	break;
+  case '*':
+	if (quality_threshold < 1.0)
+	  quality_threshold += 0.01;
+	application->setQualityThreshold ( quality_threshold );
+	cout << "quality threshold : " << quality_threshold << endl;
+	break;
   case '.':
 	application->increaseSelected ( );
 	break;
@@ -155,6 +180,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case '4' :
   case '5' :
   case '6' :
+  case '7' :
     application->changeMaterial ( material );
   }
 
@@ -283,6 +309,23 @@ void mouseMotion(int x, int y) {
   glutPostRedisplay();  
 }
 
+/*function... might want it in some class?*/
+int getFilesFromDirectory (string dir, vector<string> &files)
+{
+    DIR *dp;
+    struct dirent *dirp;
+    if((dp  = opendir(dir.c_str())) == NULL) {
+        cout << "Error(" << errno << ") opening " << dir << endl;
+        return errno;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+        files.push_back(string(dirp->d_name));
+    }
+    closedir(dp);
+    return 0;
+}
+
 
 /// Main Program
 int main(int argc, char * argv []) {
@@ -294,63 +337,64 @@ int main(int argc, char * argv []) {
   glutInitWindowPosition(150, 0);
   glutCreateWindow ("Point Based Rendering");
 
-  mask_size = 1;
+  mask_size = 2;
   reconstruction_filter_size = 1.0;
   prefilter_size = 1.0;
   material = 0;
+  quality_threshold = 0.02;
   auto_rotate = false;
-  elliptical_weight = false;
+  elliptical_weight = true;
   depth_test = true;
   back_face_culling = true;
+  quality_per_vertex = false;
 
-  application = new Application(PYRAMID_POINTS_COLOR);  
+  application = new Application(PYRAMID_TEMPLATES);  
 
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
     exit(0);
   }
 
-  if (strcmp (argv[1], "catacomba") == 0) {
+  // directory
+  if (strcmp (argv[1], "-d") == 0) {
+	string dir = string(argv[2]);
+	vector<string> files = vector<string>();
+	getFilesFromDirectory(dir,files);
+
 	application->startFileReading();
-	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w4-O.ply" );
- 	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w4-W.ply" );
-	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_arc-D-1.ply" );
-	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_arc-D-2.ply" );
-	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_B-1.ply" );
-	application->appendFile( "../plys/vcg/catacomba/dom_mal19_w2_B-2.ply" );
+
+	// remove non ply files in directory
+	for (unsigned int i = 0; i < files.size(); i++){
+	  if (files[i].rfind("ply") == string::npos) {
+		files.erase(files.begin()+i);
+		--i;
+	  }
+	}
+
+	int pts = 0;
+	// for every ply file in directory
+	for (unsigned int i = 0; i < files.size(); i++) {
+	  pts += application->appendFile( (dir + files[i]).c_str() );
+	  cout << i+1 << "/" << files.size() << " : " << (dir + files[i]).c_str() << endl;
+	  cout << "points : " << setiosflags(ios::fixed) << setprecision(2) << pts/1000000.0 << "M" << endl;
+	}
+
 	application->finishFileReading();
-	application->changeMaterial(5);
-	back_face_culling = false;
-	application->setBackFaceCulling ( back_face_culling );
+	material = 5;
+	back_face_culling = true;
   }
-  else if (strcmp (argv[1], "scan") == 0) {
-	application->startFileReading();
- 	application->appendFile( "../plys/vcg/new/dom_mal19_w2_arc-S.ply" );
- 	application->appendFile( "../plys/vcg/new/dom_mal19_w2_arc-N.ply" );
-	application->appendFile( "../plys/vcg/new/dom_mal19_w2-N.ply" );
-	application->appendFile( "../plys/vcg/new/dom_mal19_w2-M.ply" );
- 	application->appendFile( "../plys/vcg/new/dom_mal19_w2-S.ply" );
-  	application->appendFile( "../plys/vcg/new/dom_mal19_w4-M.ply" );
-	application->finishFileReading();
-	application->changeMaterial(5);
-	back_face_culling = false;
-	application->setBackFaceCulling ( back_face_culling );
-  }
-  else if (strcmp (argv[1], "piazza") == 0) {
-	application->startFileReading();
- 	application->appendFile( "../plys/TOF/piazza.ply" );
-	application->finishFileReading();
-	application->changeMaterial(5);
-	back_face_culling = false;
-	application->setBackFaceCulling ( back_face_culling );
-  }
+  // single file
   else {
 	application->readFile( argv[1] );
-	application->changeMaterial(material);
-	application->setBackFaceCulling ( back_face_culling );
+	cout << "points : " << application->getNumberPoints() << endl; 
   }
-
-  cout << "Total points : " << application->getNumberPoints() << endl;
+  
+  // Set initial values
+  application->changeMaterial(material);
+  application->setBackFaceCulling ( back_face_culling );
+  application->setEllipticalWeight( elliptical_weight );
+  application->setQualityThreshold( quality_threshold );
+  application->setGpuMask ( mask_size );
 
   //GLUT callback functions
   glutDisplayFunc(display);

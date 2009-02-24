@@ -101,7 +101,9 @@ class Application
 
   void setBackFaceCulling ( bool c );
   void setEllipticalWeight ( bool b );
+  void setQualityPerVertex ( bool c );
 
+  void setQualityThreshold ( double q );
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
   void setDepthTest ( bool d );
@@ -125,7 +127,7 @@ class Application
 
  private :
 
-  void readFile ( const char * filename, vector<Surfeld> *surfels );
+  int readFile ( const char * filename, vector<Surfeld> *surfels );
 
   Trackball trackball;
   Trackball trackball_light;

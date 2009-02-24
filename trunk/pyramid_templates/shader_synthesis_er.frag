@@ -24,6 +24,8 @@ uniform int mask_size;
 
 uniform int level;
 
+uniform float quality_threshold;
+
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
@@ -74,10 +76,10 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
   // rotate point to ellipse coordinate system
   vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-			  -d.x*sin(angle) + d.y*cos(angle));
+						  -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = 1.0*radius*reconstruction_filter_size;
+  float a = radius*reconstruction_filter_size;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -93,8 +95,8 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 }
 
 void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
-		  in vec3 normal, in float r, in float ellipseZ, in float unprojected_radius, 
-		  in vec3 color, in vec2 local_displacement) {
+				  in vec3 normal, in float r, in float ellipseZ, in float depth_interval, 
+				  in vec4 color, in vec2 local_displacement) {
   // if pixel from displacement position is a projected surfel, check if current
   // pixel is inside its radius
   float dist_test = pointInEllipse(local_displacement.xy, r, normal);
@@ -105,34 +107,42 @@ void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
     // weight is the gaussian exponential of the distance to the ellipse's center
     float weight;
     if (elliptical_weight)
-      weight = 1.0 - dist_test;
+      weight = (1.0 - dist_test)*(1.0 - dist_test);
     else
       weight = exp(-0.5*dist_test);
 
-    // current depth value of pixel (weighted depth / accumulated weight)
-    float pixelZ = buffer1.x / buffer0.w;
+	weight *= (color.a*color.a);
 
-    // sum contribution to current values if pixel near current surface (elipse)
-    /*if ((buffer1.y != 0.0) && (ellipseZ > pixelZ) &&  { */
+	float accumulated_weight = length(buffer0.xyz);
+    // current depth value of pixel (weighted depth / accumulated weight)
+    float pixelZ = buffer1.x / accumulated_weight;
 
     // if the weight is zero this pixel is empty, attribute the ellipse values
     if (buffer0.w == 0.0) {
-      buffer0 = vec4(normal * weight, weight);
+      buffer0 = vec4(normal * weight, color.a);
       buffer1 = vec4(ellipseZ * weight, color.rgb * weight);
     }
     else
       {
-	// add ellipses values to current buffer if they belong to same surface
-	if ( (!depth_test) ||
-	     ((abs(ellipseZ - pixelZ) <= 2.0*unprojected_radius)) ) {	  
-	  buffer0 += vec4(normal * weight, weight);
-	  buffer1 += vec4(ellipseZ * weight, color.rgb * weight);	  
-	}
-	// overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
-	else if (ellipseZ < pixelZ) {
-	  buffer0 = vec4(normal * weight, weight);
-	  buffer1 = vec4(ellipseZ * weight, color.rgb * weight);
-	}
+		// add ellipses values to current buffer if they belong to same surface		
+		if ( (!depth_test) ||
+			 ((abs(ellipseZ - pixelZ) <= (depth_interval))) ) {
+		  /* buffer0 += vec4(normal * weight, 0.0); */
+		  /* buffer1 += vec4(ellipseZ * weight, color.rgb * weight); */
+		  if (abs(color.a - buffer0.w) < quality_threshold) {
+			buffer0 += vec4(normal * weight, 0.0);
+			buffer1 += vec4(ellipseZ * weight, color.rgb * weight);
+		  }
+		  else if (color.a > buffer0.w) {
+			buffer0 = vec4(normal * weight, color.a);
+			buffer1 = vec4(ellipseZ * weight, color.rgb * weight);
+		  }
+		}
+		// overwrite pixel if ellipse is in front or if pixel is empty, otherwise keep current pixel
+		else if ((ellipseZ < pixelZ) ) {
+		  buffer0 = vec4(normal * weight, color.a);
+		  buffer1 = vec4(ellipseZ * weight, color.rgb * weight);
+		}
       }
   }
 }
@@ -146,7 +156,7 @@ void main (void) {
   vec2 local_displacement;
 
   // this is to make sure weight is not clamped if greater than 1.0
-  buffer0.w *= 10.0;
+  //buffer0.w *= 10.0;
 
   if (level == 0) {
     buffer0 = vec4(0.0);
@@ -156,32 +166,31 @@ void main (void) {
   for (int j = -mask_size; j <= mask_size; ++j) {
     for (int i = -mask_size; i <= mask_size; ++i) {
       {
-	{
-	  local_displacement = vec2(i, j) * oo_fbo_size.st;
-	  ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+		{
+		  local_displacement = vec2(i, j) * oo_fbo_size.st;
+		  ellipse1 = texture2D (textureB, gl_TexCoord[3].st + local_displacement.xy).xyzw;
 
-	  // if pixel is set as in current level and radius > 0
-	  if ((ellipse1.y > 0.0) && (ellipse1.x > 0.0)) {
+		  // if pixel is set as in current level and radius > 0
+		  if ((ellipse1.y > 0.0) && (ellipse1.x > 0.0)) {
 	    
-	    // retrieve candidate ellipse from displacement position
-	    ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-	    ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
-	      {
-				
-		// displacement from current pixel and ellipse center in pixel dimension
-		vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
-
-		splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse1.y, 
-			     ellipse0.w, ellipse1.x, ellipse2.rgb, local_pixel_displacement);
-	      }
-	    }
-	}
+			// retrieve candidate ellipse from displacement position
+			ellipse0 = texture2D (textureA, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+			ellipse2 = texture2D (textureC, gl_TexCoord[3].st + local_displacement.xy).xyzw;
+			{				
+			  // displacement from current pixel and ellipse center in pixel dimension
+			  vec2 local_pixel_displacement = (gl_TexCoord[0].st - ellipse1.zw) * fbo_size * oo_canvas_size;
+		  
+			  splatEllipse(buffer0, buffer1, ellipse0.xyz, ellipse1.y, 
+						   ellipse0.w, ellipse1.x, ellipse2.rgba, local_pixel_displacement);
+			}
+		  }
+		}
       }
     }
   }
 
   // to make sure weight is not clamped if greater than 1.0
-  buffer0.w *= 0.1;
+  //buffer0.w *= 0.1;
 
   gl_FragData[0] = buffer0;
   gl_FragData[1] = buffer1;

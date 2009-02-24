@@ -15,6 +15,8 @@ uniform float half_pixel_size;
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
+uniform int level;
+
 // textures on finer level
 uniform sampler2D textureA;
 uniform sampler2D textureB;
@@ -114,6 +116,9 @@ void main (void) {
     }
   }
 
+  if (level < 0)
+	occluded = true;
+
   // unspecified pixel (weight == 0.0) or occluded pixel
   // synthesize pixel
   if ((bufferA.w == 0.0) || occluded)
@@ -156,7 +161,7 @@ void main (void) {
       // lookup four pixels on coarser level (color attachment 2)
       pixelB[0] = texture2D(textureB, tex_coord[0]); // up-right
       pixelB[1] = texture2D(textureB, tex_coord[1]); // up-left
-      pixelB[2] = texture2D(textureB, tex_coord[2]); // down-right
+	  pixelB[2] = texture2D(textureB, tex_coord[2]); // down-right
       pixelB[3] = texture2D(textureB, tex_coord[3]); // down-left
 
       // lookup four pixels on coarser level (color attachment 4)
@@ -233,10 +238,14 @@ void main (void) {
 		pixelB[i].zw += dist_to_pixel;
 
 		// if specified scatter pixel test distance to center of ellipse
-		if (pixelA[i].w > 0.0) {
-		  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-		  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
-		  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+		
+		if ((pixelA[i].w > 0.0)) {
+		  //		  if ((pixelC[i].w > 0.1) || (!elliptical_weight))
+			{
+			  dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
+			  //dist_test = intersectEllipsePixel (pixelB[i].zw, pixelA[i].w, pixelA[i].xyz, half_pixel_size);
+			  //dist_test = pointInCircle(pixelB[i].zw, pixelA[i].w);
+			}
 		}
 		else
 		  dist_test = -1.0;
@@ -246,30 +255,41 @@ void main (void) {
 		  weights[i] = 0.0;
 		}
 		else {
-		  if (elliptical_weight)
-			weights[i] = 1.0 - dist_test;
-		  else
+/* 		  if (elliptical_weight) */
+/* 			weights[i] = 1.0 - dist_test; */
+/* 		  else */
 			//			weights[i] = 1.0;
-			weights[i] = exp(-0.5*(1.0-dist_test));
-
+		  //		  weights[i] = exp(-0.5*(1.0-dist_test));
+		  weights[i] = 1.0 - dist_test;
 		  total_weight += 1.0;
 
 		  // depth test only for ellises in range
-		  if (pixelB[i].x < zmin) {
-			zmin = pixelB[i].x;
-			zmax = pixelB[i].y;
-			obj_id = pixelC[i].w;
+		  //		  
+		  if (elliptical_weight){
+			if (obj_id < pixelC[i].w) {
+
+			  zmin = pixelB[i].x;
+			  zmax = pixelB[i].y;
+			  obj_id = pixelC[i].w;
+			}
+		  }
+		  else{
+			if (pixelB[i].x < zmin) {
+			  zmin = pixelB[i].x;
+			  zmax = pixelB[i].y;
+			  obj_id = pixelC[i].w;
+			}
 		  }
 		}
       }
 
       // If the pixel was set as occluded but there is an ellipse
       // in range that does not occlude it, do not synthesize
-	  if (occluded) {
-	  	for (int i = 0; i < 4; ++i)
-	  	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0))
-	  	    occluded = false;
-	  }
+/* 	  if (occluded) { */
+/* 	  	for (int i = 0; i < 4; ++i) */
+/* 	  	  if ((bufferB.x <= pixelB[i].x + pixelB[i].y) && (weights[i] != 0.0)) */
+/* 	  	    occluded = false; */
+/* 	  } */
 
       // If the pixel was set as occluded but there are no valid
       // pixels in range to synthesize, leave as it is
@@ -288,7 +308,7 @@ void main (void) {
 		  // Ellipse in range
 		  if (weights[i] > 0.0)
 			{
-			  if (abs(pixelC[i].w - obj_id) == 0.0 ) 
+			  //if ((!elliptical_weight) || ( abs(pixelC[i].w - obj_id) < 0.2 ) ) 
 			  {
 				// Depth test between ellipses in range
 				if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmin + zmax)) {		  
