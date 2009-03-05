@@ -14,7 +14,8 @@
  **/
 Application::Application( GLint default_mode ) {
 
-  canvas_width = canvas_height = 1024;
+  canvas_width = canvas_height = 512;
+  windows_width = windows_height = canvas_width + 2*(canvas_width/32);
 
   trackball.center=vcg::Point3f(0, 0, 0);
   trackball.radius= 1;
@@ -35,9 +36,6 @@ Application::Application( GLint default_mode ) {
   rotating = 0;
   show_points = false;
   selected = 0;
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
 
   for (int i = 0; i < 8; ++i) {
     glActiveTexture(GL_TEXTURE0 + i);
@@ -124,8 +122,8 @@ void Application::drawPoints(void) {
 void Application::setView( void )
 {
 
-  glViewport(0, 0, canvas_width, canvas_height);
-  GLfloat fAspect = (GLfloat)canvas_width/ (GLfloat)canvas_height;
+  glViewport(0, 0, windows_width, windows_height);
+  GLfloat fAspect = (GLfloat)windows_width/ (GLfloat)windows_height;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   // Si deve mettere la camera ad una distanza che inquadri la sfera unitaria bene.
@@ -222,7 +220,7 @@ void Application::draw( void ) {
   point_based_render->setEye( Point(vp[0], vp[1], vp[2]) );
 
   // Set factor for scaling projected radii of samples
-  point_based_render->setScaleFactor( scale_factor );
+  point_based_render->setScaleFactor( scale_factor ); 
 
   // project all primitives
   if (selected == 0)
@@ -237,7 +235,7 @@ void Application::draw( void ) {
 
   // Computes per pixel color with deferred shading
   point_based_render->draw();
-  
+
   glDisable (GL_LIGHTING);
   glDisable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
@@ -352,9 +350,9 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
 	  c_lal = LAL::Color(c[0]/255.0, c[1]/255.0, c[2]/255.0, quality);
 	}
 
- 	double radius = (double)((*vit).Q());
+	double radius = (double)((*vit).Q());
 // 	if (radius <= 0.0)
-	//double radius = 0.25;
+//	double radius = 0.25;
 	
 	surfels->push_back ( Surfeld (p_lal, n_lal, c_lal, radius, pos) );
 	++pos;

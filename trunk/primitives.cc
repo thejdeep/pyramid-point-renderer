@@ -187,7 +187,7 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
 // 	color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
 // 	color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
 
-//	double q = it->color()[3] / max_quality;
+	//double q = it->color()[3] / max_quality;
 
 	double q = (double)it->color()[3];
 

@@ -138,6 +138,7 @@ class Application
   PointBasedRenderer *point_based_render;
 
   int canvas_width, canvas_height;
+  int windows_width, windows_height;
 
   float clipRatioNear, clipRatioFar;
   float fov;

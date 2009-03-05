@@ -14,8 +14,7 @@
 #include <errno.h>
 
 
-static int g_Width = 1056;                          // Initial window width
-static int g_Height = 1056;                         // Initial window height
+static int windows_size = 544;                          // Initial window width
 
 bool depth_test;
 bool back_face_culling;
@@ -64,8 +63,7 @@ void idle( void ) {
 
 void reshape(GLint width, GLint height)
 {
-  g_Width = width;
-  g_Height = height;
+  windows_size = width;
   
 }
 
@@ -335,7 +333,7 @@ int main(int argc, char * argv []) {
 
   // GLUT Window Initialization:
   glutInit (&argc, argv);
-  glutInitWindowSize (g_Width, g_Height);
+  glutInitWindowSize (windows_size, windows_size);
   glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(150, 0);
   glutCreateWindow ("Point Based Rendering");

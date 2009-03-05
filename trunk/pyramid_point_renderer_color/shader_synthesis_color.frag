@@ -15,7 +15,7 @@ uniform float half_pixel_size;
 uniform float reconstruction_filter_size;
 uniform float prefilter_size;
 
-uniform int level;
+//uniform int level;
 
 // textures on finer level
 uniform sampler2D textureA;
@@ -116,8 +116,8 @@ void main (void) {
     }
   }
 
-  if (level < 0)
-	occluded = true;
+/*   if (level < 0) */
+/* 	occluded = true; */
 
   // unspecified pixel (weight == 0.0) or occluded pixel
   // synthesize pixel
