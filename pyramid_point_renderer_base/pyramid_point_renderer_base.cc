@@ -276,7 +276,7 @@ const pixels_struct PyramidPointRendererBase::generatePixels(const int level, co
   if (0 == level)
     {
       result.x = canvas_border_width;
-      result.y = canvas_border_height;
+      result.y = canvas_border_height;	  
     }
   else if (1 == level)
     {
@@ -498,7 +498,7 @@ const int PyramidPointRendererBase::synthesisCallbackFunc( void ) const
   shader_synthesis->set_uniform("depth_test", depth_test);
   shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
 
-  shader_synthesis->set_uniform("level", cur_level);
+  //shader_synthesis->set_uniform("level", cur_level);
 
   for (int i = 0; i < fbo_buffers_count/2; ++i)
     shader_synthesis->set_uniform(shader_texture_names[i].c_str(), i);
@@ -643,7 +643,6 @@ void PyramidPointRendererBase::interpolate() {
   copyAnalysisPyramid();
 
   rasterizeSynthesisPyramid();
-
   //  copyAnalysisPyramid();
 }
 

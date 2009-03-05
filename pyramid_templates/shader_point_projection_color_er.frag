@@ -46,5 +46,5 @@ void main(void)
   // avoids sample with low quality overwritting sample with high quality in same pixel
   // during depth test
   
-  //gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
+  gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
 }
