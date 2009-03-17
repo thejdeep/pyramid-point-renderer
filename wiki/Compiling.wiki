@@ -20,6 +20,8 @@ Before you compile:
 
      svn co https://vcg.svn.sourceforge.net/svnroot/vcg vcg
 
+  * Set the VCGDIR path in the Makefile.in file
+
 In the pyramid-point-renderer directory type the following:
 
   * make
