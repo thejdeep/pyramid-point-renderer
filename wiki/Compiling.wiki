@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The code is almost self-contained except for another library developed in our lab and GLee,
+The code is almost self-contained except for the VCG library and GLew,
 The application classes are independent of the interface, thus
 I have substituted the Qt interface for a lightweight GLut based version.
 
@@ -14,15 +14,11 @@ Requirements:
 
 Before you compile:
 
-  * Have GLUT installed.
+  * Have *GLUT* and *GLEW* installed.
 
   * Download the [http://vcg.sourceforge.net VCG] library, no need to install or compile, the necessary files are included in the Makefile, only needs to set correct path to the VCG library directory. You can download it directly using svn:
 
      svn co https://vcg.svn.sourceforge.net/svnroot/vcg vcg
-
-  * Download the [http://code.google.com/p/lcgtk/ LcgTk] library and compile the glslKernel (run *make* in this subdirectory).
-
-  * To use the glslKernel you also need to install GLee from Elf-stone [http://elf-stone.com/glee.php].
 
 In the pyramid-point-renderer directory type the following:
 
@@ -30,7 +26,7 @@ In the pyramid-point-renderer directory type the following:
 
   * ./ppr < plyfile >
 
-I have successfully compiled under Windows with Mingw and the Msys enviroment, never tested with Visual Studio.
+I developed everything under Linux, but I have successfully compiled under Windows with Mingw and the Msys enviroment, never tested with Visual Studio.
 Windows users may try to compile with (you might need to change the glut library name):
 
   * make OS=windows
