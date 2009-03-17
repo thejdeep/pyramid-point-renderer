@@ -1,34 +1,39 @@
 #summary Understanding the basic commands.
 = Introduction =
 
-The Qt interface provides the main interface with the application. It still contain some debug purposes only widgets, but it is fairly simple to understand.
+I removed the Qt interface since this renderer will soon be integrated with Meshlab, thus users wanting to test with GUI will be able to do so from there.
+However, I left a basic GLUT interface so the rendered can also be used independently from Meshlab, note that the VCG lib is still used in this case, but there is not need to have Qt installed.
 
 = Details =
 
-==Filter Sizes==
+== Renderers ==
 
-Two different filters were inherited from the _Surface Splatting_ method: the reconstruction  filter and the prefilter.
+F1 key : original renderer
+F2 key : original renderer with color per vertex (if available from ply file)
+F3 key : template version renderer with color per vertex (if available from ply file)
+
+== Colors ==
+
+[0 .. 4] key: switch between predefined material types.
+5 key : no material
+7 key : normal map
+
+== Mask Size (Template Version) ==
+
+The mask size can be modified with the - and + keys.
+
+== Filter Sizes ==
 
 The reconstruction filter is a global size modifier for all ellipses, thus increasing it will enlarge all ellipses proportionally. 
+[ key : decrease
+] key : increase
 
-The prefilter is added to reconstruction filter and is used for anti-aliasing purposes. Increasing the prefilter size tends to leave the splats more "round".
+== Depth Test ==
 
-==Per Vertex Color==
+d key : depth test _on/off_.
 
-If a models has _RGB_ attributes per vertex, the colors can be interpolated using the algorithm when this check box is enabled.
+== Back Face Culling ==
 
-==Depth Test==
+b key : back face culling _on/off_.
 
-A flag for turning depth test _on/off_.
 
-==LOD==
-
-The *LOD* check box will only work for models with _.lod_ extension. It alternates between constant splat size rendering and using the lod structure.
-
-The *LOD Colors* renders each resolution level splat with a different color, where the they are respectively from coarsest to finest: Ruby - Turquoise - Gold - Silver
-
-==Colors Bar==
-
-When rendering in *LOD* mode this check box renders on screen a colored graph depicting the usage of each level of resolution.
-
-The color bars will in the future also work for the "Ellipse Rasterization" rendering mode.
