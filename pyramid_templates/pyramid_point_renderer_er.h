@@ -11,7 +11,6 @@
 #include <cmath>
 #include <cassert>
 
-//#include "point_based_renderer.h"
 #include "../pyramid_point_renderer_base/pyramid_point_renderer_base.h"
 
 class PyramidPointRendererER : public PyramidPointRendererBase
@@ -19,12 +18,13 @@ class PyramidPointRendererER : public PyramidPointRendererBase
  private:
 
   void createShaders ( void );
+
   const int synthesisCallbackFunc( void ) ;
   const int analysisCallbackFunc( void ) ;
   const int projectionCallbackFunc( void ) ;
-    const int phongShadingCallbackFunc( void ) ;
+  const int phongShadingCallbackFunc( void ) ;
   void rasterizeSynthesisPyramid();
-    void rasterizePhongShading(int bufferIndex);
+  void rasterizePhongShading(int bufferIndex);
 
  public:
 

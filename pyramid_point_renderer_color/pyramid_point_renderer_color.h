@@ -17,11 +17,10 @@
 class PyramidPointRendererColor : public PyramidPointRendererBase
 {
  private:
-  
-
- public:
   void createShaders ( void );
 
+ public:
+  
   PyramidPointRendererColor(int w, int h);
  
 };
