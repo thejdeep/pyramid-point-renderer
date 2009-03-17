@@ -17,10 +17,9 @@
 class PyramidPointRenderer : public PyramidPointRendererBase
 {
  private:
-  
+  void createShaders ( void );
 
  public:
-  void createShaders ( void );
 
   PyramidPointRenderer(int w, int h);
  

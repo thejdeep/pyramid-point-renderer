@@ -46,12 +46,7 @@ class PyramidPointRendererBase : public PointBasedRenderer
 
   const double computeHalfPixelSize( void ) const;
 
-  void resetPointers ( void ) {
-/* 	shader_projection = NULL; */
-/* 	shader_analysis = NULL; */
-/* 	shader_copy = NULL; */
-/* 	shader_synthesis = NULL; */
-/* 	shader_phong = NULL; */
+  void resetPointers ( void ) {   
 	fbo_buffers = NULL;
 	fbo_textures = NULL;
 	shader_texture_names = NULL;

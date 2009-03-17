@@ -158,7 +158,7 @@ void Application::setView( void )
 void Application::draw( void ) {
 
   if (primitives.size() == 0)
-    return;
+    return;  
 
   // Clear all buffers including pyramid algorithm buffers
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -294,7 +294,7 @@ void Application::createPointRenderer( void ) {
 
   assert (point_based_render);
 
-  ((PyramidPointRendererBase*)point_based_render)->createShaders();
+  ((PyramidPointRendererBase*)point_based_render)->createShaders(); 
 
 }
 

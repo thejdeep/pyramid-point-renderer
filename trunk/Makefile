@@ -77,7 +77,7 @@ HEADERS = application.h \
 	pyramid_point_renderer/pyramid_point_renderer_base.h \
 	pyramid_point_renderer/pyramid_point_renderer.h \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.h \
-#	pyramid_templates/pyramid_point_renderer_er.h
+	pyramid_templates/pyramid_point_renderer_er.h
 
 ###################################
 

@@ -586,7 +586,7 @@ void PyramidPointRendererBase::clearBuffers( void ) {
   glEnable(GL_DEPTH_TEST);
   glDepthMask(GL_TRUE);
   glDepthFunc(GL_LESS);
-  
+
   GLint currentDrawBuffer;
   glGetIntegerv(GL_DRAW_BUFFER, &currentDrawBuffer);
 
