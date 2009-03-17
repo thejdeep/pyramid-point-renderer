@@ -50,7 +50,6 @@ Application::Application( GLint default_mode ) {
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
 
-
   /* Old camera init light routine*/
   glEnable (GL_LIGHTING);
   glEnable (GL_LIGHT0);

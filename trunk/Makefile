@@ -37,8 +37,8 @@ CODES =	application.cc \
 	point_based_renderer.cc \
 	primitives.cc \
 	timer.c \
-	$(HOME)/vcglib/wrap/gui/trackball.cpp \
-	$(HOME)/vcglib/wrap/gui/trackmode.cpp \
+	$(HOME)/progs/vcglib/wrap/gui/trackball.cpp \
+	$(HOME)/progs/vcglib/wrap/gui/trackmode.cpp \
 	pyramid_point_renderer/pyramid_point_renderer_base.cc \
 	pyramid_point_renderer/pyramid_point_renderer.cc \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
@@ -51,24 +51,22 @@ OBJ = $(patsubst %,$(OBJDIR)/%,$(OBJECTS))
 OBJ2 = $(patsubst %,$(OBJDIR)/%,$(OBJS))
 
 ifeq ($(OS), windows)
-LIBDIRS = -L"$(HOME)/lcgtk/glslKernel/"
+LIBDIRS = 
 else
-LIBDIRS = -L$(HOME)/lcgtk/glslKernel/
+LIBDIRS = 
 endif
 
 MATLIB     = -lm
 ifeq ($(OS), windows)
 GLLIBS	  = -lopengl32 -lglu32
-GLUTLIB    = -lGLee -lglslKernel -lglut32win
+GLUTLIB    = -lGLEW -lglut32win
 else
 GLLIBS     = -lGLU -lGL
-GLUTLIB    = -lGLee -lglslKernel -lglut
+GLUTLIB    = -lGLEW -lglut
 endif
 XLIBS      = -lXext -lX11 -lXi -lpthread
 
 LIBLIST = $(GLUTLIB) $(GLLIBS) $(MATLIB)
-
-VCGDIR = $(HOME)/vcglib/wrap/gui
 
 HEADERS = application.h \
 	main.h \
@@ -79,7 +77,7 @@ HEADERS = application.h \
 	pyramid_point_renderer/pyramid_point_renderer_base.h \
 	pyramid_point_renderer/pyramid_point_renderer.h \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.h \
-	pyramid_templates/pyramid_point_renderer_er.h
+#	pyramid_templates/pyramid_point_renderer_er.h
 
 ###################################
 
@@ -90,17 +88,17 @@ $(OBJDIR)/%.o: %.cc
 	@echo "Compiling C++ code : $@"
 	$(CXX) -c -o $@ $< $(INCLUDEDIRS) $(CXXFLAGS)
 
-$(OBJDIR)/trackmode.o: $(HOME)/vcglib/wrap/gui/trackmode.cpp
+$(OBJDIR)/trackmode.o: $(VCGDIR)/wrap/gui/trackmode.cpp
 	@echo
 	@echo "Compiling C++ code : $@"
 	$(CXX) -c -o $@ $< $(INCLUDEDIRS) $(CXXFLAGS)
 
-$(OBJDIR)/trackball.o: $(HOME)/vcglib/wrap/gui/trackball.cpp
+$(OBJDIR)/trackball.o: $(VCGDIR)/wrap/gui/trackball.cpp
 	@echo
 	@echo "Compiling C++ code : $@"
 	$(CXX) -c -o $@ $< $(INCLUDEDIRS) $(CXXFLAGS)
 
-$(OBJDIR)/plylib.o: $(HOME)/vcglib/wrap/ply/plylib.cpp
+$(OBJDIR)/plylib.o: $(VCGDIR)/wrap/ply/plylib.cpp
 	@echo
 	@echo "Compiling C++ code : $@"
 	$(CXX) -c -o $@ $< $(INCLUDEDIRS) $(CXXFLAGS)

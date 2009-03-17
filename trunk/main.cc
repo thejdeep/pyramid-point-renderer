@@ -349,7 +349,15 @@ int main(int argc, char * argv []) {
   back_face_culling = true;
   quality_per_vertex = false;
 
-  application = new Application(PYRAMID_TEMPLATES);  
+  GLenum err = glewInit();
+  if (GLEW_OK != err)
+	{
+	  /* Problem: glewInit failed, something is seriously wrong. */
+	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	  exit(0);
+	}
+
+  application = new Application(PYRAMID_POINTS);  
 
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;

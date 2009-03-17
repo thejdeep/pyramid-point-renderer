@@ -24,10 +24,10 @@ class PyramidPointRendererBase : public PointBasedRenderer
 {
  private:
 
-  virtual const int analysisCallbackFunc( void ) const;
-  virtual const int projectionCallbackFunc( void ) const;
-  virtual const int synthesisCallbackFunc( void ) const;
-  virtual const int phongShadingCallbackFunc( void ) const;
+  virtual const int analysisCallbackFunc( void ) ;
+  virtual const int projectionCallbackFunc( void ) ;
+  virtual const int synthesisCallbackFunc( void ) ;
+  virtual const int phongShadingCallbackFunc( void ) ;
   virtual void rasterizeAnalysisPyramid( void );
   virtual void rasterizeSynthesisPyramid( void );
   virtual void rasterizePhongShading(int bufferIndex);
@@ -36,7 +36,7 @@ class PyramidPointRendererBase : public PointBasedRenderer
 
   void createFBO( void );
   void copyAnalysisPyramid();
-  const int copyCallbackFunc( void ) const;
+  const int copyCallbackFunc( void ) ;
   void projectSurfels( const Primitives * const );
 
   const pixels_struct generatePixels(const int level, const GLuint fbo, const int buffersCount, const GLuint* buffers) const;
@@ -47,14 +47,14 @@ class PyramidPointRendererBase : public PointBasedRenderer
   const double computeHalfPixelSize( void ) const;
 
   void resetPointers ( void ) {
-	 shader_projection = NULL;
-	 shader_analysis = NULL;
-	 shader_copy = NULL;
-	 shader_synthesis = NULL;
-	 shader_phong = NULL;
-	 fbo_buffers = NULL;
-	 fbo_textures = NULL;
-	 shader_texture_names = NULL;
+/* 	shader_projection = NULL; */
+/* 	shader_analysis = NULL; */
+/* 	shader_copy = NULL; */
+/* 	shader_synthesis = NULL; */
+/* 	shader_phong = NULL; */
+	fbo_buffers = NULL;
+	fbo_textures = NULL;
+	shader_texture_names = NULL;
   }
 
  public:
@@ -84,16 +84,23 @@ class PyramidPointRendererBase : public PointBasedRenderer
   /// Canvas border height.
   int canvas_border_height;
 
-  /// Projection shader.
-  glslKernel *shader_projection;
-  /// Pyramid copy phase shader.
-  glslKernel *shader_copy;
-  /// Pyramid analysis phase shader.
-  glslKernel *shader_analysis;
-  /// Pyramid synthesis phase shader.
-  glslKernel *shader_synthesis;
-  /// Phong shading shader.
-  glslKernel *shader_phong;
+  /// Shaders using VCG lib
+  ProgramVF mShaderProjection;
+  ProgramVF mShaderCopy;
+  ProgramVF mShaderAnalysis;
+  ProgramVF mShaderSynthesis;
+  ProgramVF mShaderPhong;
+
+/*   /// Projection shader. */
+/*   glslKernel *shader_projection; */
+/*   /// Pyramid copy phase shader. */
+/*   glslKernel *shader_copy; */
+/*   /// Pyramid analysis phase shader. */
+/*   glslKernel *shader_analysis; */
+/*   /// Pyramid synthesis phase shader. */
+/*   glslKernel *shader_synthesis; */
+/*   /// Phong shading shader. */
+/*   glslKernel *shader_phong; */
 
   /// Textures names to pass as uniform to shaders
   string *shader_texture_names;

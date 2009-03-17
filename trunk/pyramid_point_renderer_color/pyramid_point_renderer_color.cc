@@ -15,37 +15,25 @@ PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PyramidPoin
 
 void PyramidPointRendererColor::createShaders ( void ) {
 
-  bool shader_inst_debug = 0;
-
+  // Store texture names to be passed as uniforms
   shader_texture_names = new string[fbo_buffers_count/2];
-
   shader_texture_names[0] = "textureA";
   shader_texture_names[1] = "textureB";
   shader_texture_names[2] = "textureC";
 
-  shader_projection = new glslKernel();
-  shader_projection->vertex_source("pyramid_point_renderer_color/shader_point_projection_color.vert");
-  shader_projection->fragment_source("pyramid_point_renderer_color/shader_point_projection_color.frag");
-  shader_projection->install( shader_inst_debug );
- 
-  shader_analysis = new glslKernel();
-  shader_analysis->vertex_source("pyramid_point_renderer_color/shader_analysis_color.vert");
-  shader_analysis->fragment_source("pyramid_point_renderer_color/shader_analysis_color.frag");
-  shader_analysis->install( shader_inst_debug );
+  mShaderProjection.LoadSources("pyramid_point_renderer_color/shader_point_projection_color.vert", "pyramid_point_renderer_color/shader_point_projection_color.frag");
+  mShaderProjection.prog.Link();
 
-  shader_copy = new glslKernel();
-  shader_copy->vertex_source("pyramid_point_renderer_color/shader_copy_color.vert");
-  shader_copy->fragment_source("pyramid_point_renderer_color/shader_copy_color.frag");
-  shader_copy->install( shader_inst_debug );
+  mShaderAnalysis.LoadSources("pyramid_point_renderer_color/shader_analysis_color.vert", "pyramid_point_renderer_color/shader_analysis_color.frag");
+  mShaderAnalysis.prog.Link();
 
-  shader_synthesis = new glslKernel();
-  shader_synthesis->vertex_source("pyramid_point_renderer_color/shader_synthesis_color.vert");
-  shader_synthesis->fragment_source("pyramid_point_renderer_color/shader_synthesis_color.frag");
-  shader_synthesis->install( shader_inst_debug );
+  mShaderCopy.LoadSources("pyramid_point_renderer_color/shader_copy_color.vert", "pyramid_point_renderer_color/shader_copy_color.frag");
+  mShaderCopy.prog.Link();
 
-  shader_phong = new glslKernel();
-  shader_phong->vertex_source("pyramid_point_renderer_color/shader_phong_color.vert");
-  shader_phong->fragment_source("pyramid_point_renderer_color/shader_phong_color.frag");
-  shader_phong->install( shader_inst_debug );
+  mShaderSynthesis.LoadSources("pyramid_point_renderer_color/shader_synthesis_color.vert", "pyramid_point_renderer_color/shader_synthesis_color.frag");
+  mShaderSynthesis.prog.Link();
+
+  mShaderPhong.LoadSources("pyramid_point_renderer_color/shader_phong_color.vert", "pyramid_point_renderer_color/shader_phong_color.frag");
+  mShaderPhong.prog.Link();
 
 }

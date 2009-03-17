@@ -12,6 +12,9 @@
 #include <vector>
 #include <cmath>
 
+#include <iostream>
+#include <wrap/gl/shaders.h>
+
 #include "GL/gl.h"
 #include "GL/glu.h"
 

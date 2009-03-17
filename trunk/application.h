@@ -23,6 +23,19 @@
 
 using namespace std;
 
+//IO includes
+#include <sstream>
+#include <iomanip>
+#include <cmath>
+
+#include <list>
+#include <vector>
+
+#include "pyramid_point_renderer_base.h"
+#include "pyramid_point_renderer.h"
+#include "pyramid_point_renderer_color.h"
+#include "pyramid_point_renderer_er.h"
+
 #include <vcg/simplex/vertex/base.h>
 #include <vcg/simplex/vertex/component.h>
 
@@ -36,19 +49,6 @@ using namespace std;
 
 // input output
 #include <wrap/io_trimesh/import.h>
-
-//IO includes
-#include <sstream>
-#include <iomanip>
-#include <cmath>
-
-#include <list>
-#include <vector>
-
-#include "pyramid_point_renderer_base.h"
-#include "pyramid_point_renderer.h"
-#include "pyramid_point_renderer_color.h"
-#include "pyramid_point_renderer_er.h"
 
 #include <wrap/gui/trackball.h>
 

@@ -64,12 +64,6 @@ PyramidPointRendererBase::~PyramidPointRendererBase()  {
 
   glDeleteFramebuffersEXT(1, &fbo);
 
-  delete shader_projection;
-  delete shader_analysis;
-  delete shader_copy;
-  delete shader_synthesis;
-  delete shader_phong;
-
   delete [] fbo_buffers;
   delete [] fbo_textures;
 
@@ -328,13 +322,12 @@ const pixels_struct PyramidPointRendererBase::generatePixels(const int level, co
  * @return True if done with rasterization, False if still needs to
  * render textures.
  **/
-const int PyramidPointRendererBase::projectionCallbackFunc( void ) const
+const int PyramidPointRendererBase::projectionCallbackFunc( void )
 {
-  shader_projection->use();
-  shader_projection->set_uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
-  shader_projection->set_uniform("back_face_culling", (GLint)back_face_culling);
-
-  shader_projection->set_uniform("scale", (GLfloat)scale_factor);
+  mShaderProjection.prog.Bind();
+  mShaderProjection.prog.Uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+  mShaderProjection.prog.Uniform("back_face_culling", (GLint)back_face_culling);
+  mShaderProjection.prog.Uniform("scale", (GLfloat)scale_factor);
 
   // Projection phase takes care of rasterizing the pixels by projecting surfels, 
   // no need to send textures.
@@ -369,7 +362,7 @@ void PyramidPointRendererBase::projectSurfels ( const Primitives* const prim )
   // Render vertices using the vertex buffer object.
   prim->render();
 
-  shader_projection->use(0);
+  mShaderProjection.prog.Unbind();
 }
 
 /**
@@ -387,18 +380,19 @@ const double PyramidPointRendererBase::computeHalfPixelSize( void ) const {
  * @return True if done with rasterization, False if still needs to
  * render textures.
  **/
-const int PyramidPointRendererBase::analysisCallbackFunc( void ) const {
-  shader_analysis->use();
-  shader_analysis->set_uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));  
-  shader_analysis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
-  shader_analysis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
-  shader_analysis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+const int PyramidPointRendererBase::analysisCallbackFunc( void )  {
 
-  shader_analysis->set_uniform("depth_test", depth_test);
+  mShaderAnalysis.prog.Bind();
+  mShaderAnalysis.prog.Uniform("oo_2fbo_size", (GLfloat)(0.5 / fbo_width), (GLfloat)(0.5 / fbo_height));
+  mShaderAnalysis.prog.Uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
+  mShaderAnalysis.prog.Uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
+  mShaderAnalysis.prog.Uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+  mShaderAnalysis.prog.Uniform("depth_test", depth_test);
   
   // Loads the textures ids as uniforms for shader access
   for (int i = 0; i < fbo_buffers_count/2; ++i)
-    shader_analysis->set_uniform(shader_texture_names[i].c_str(), i);
+     mShaderAnalysis.prog.Uniform(shader_texture_names[i].c_str(), i);
+
 
   // Not done, still has to rasterize quads with textures.
   return false; 
@@ -436,7 +430,7 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
       destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
       
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, ANALYSIS);
-      shader_analysis->use(0);
+	  mShaderAnalysis.prog.Unbind();
     }
 }
 
@@ -445,13 +439,13 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
  * @return True if done with rasterization, False if still needs to
  * render textures.
  **/
-const int PyramidPointRendererBase::copyCallbackFunc( void ) const
+const int PyramidPointRendererBase::copyCallbackFunc( void ) 
 {
-  shader_copy->use();
+  mShaderCopy.prog.Bind();
 
   // Loads the textures ids as uniforms for shader access
   for (int i = 0; i < fbo_buffers_count/2; ++i)
-    shader_copy->set_uniform(shader_texture_names[i].c_str(), i);
+    mShaderCopy.prog.Uniform(shader_texture_names[i].c_str(), i);
 
   return false; /* not done, rasterize quad */
 }
@@ -480,28 +474,25 @@ void PyramidPointRendererBase::copyAnalysisPyramid( void ) {
       destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]); 
 
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, COPY);
-      shader_copy->use(0);
+	  mShaderCopy.prog.Unbind();
     }
 
 }
 
-const int PyramidPointRendererBase::synthesisCallbackFunc( void ) const
+const int PyramidPointRendererBase::synthesisCallbackFunc( void ) 
 {
-  shader_synthesis->use();
-  shader_synthesis->set_uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
-  shader_synthesis->set_uniform("oo_fbo_size", (GLfloat)(1.0/fbo_width), (GLfloat)(1.0/fbo_height));
+  mShaderSynthesis.prog.Bind();
 
-  shader_synthesis->set_uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
-  shader_synthesis->set_uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
-  shader_synthesis->set_uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
-
-  shader_synthesis->set_uniform("depth_test", depth_test);
-  shader_synthesis->set_uniform("elliptical_weight", elliptical_weight);
-
-  //shader_synthesis->set_uniform("level", cur_level);
+  mShaderSynthesis.prog.Uniform("fbo_size", (GLfloat)fbo_width, (GLfloat)fbo_height);
+  mShaderSynthesis.prog.Uniform("oo_fbo_size", (GLfloat)(1.0/fbo_width), (GLfloat)(1.0/fbo_height));
+  mShaderSynthesis.prog.Uniform("half_pixel_size", (GLfloat)computeHalfPixelSize());
+  mShaderSynthesis.prog.Uniform("prefilter_size", (GLfloat)(prefilter_size / (GLfloat)(canvas_width)));
+  mShaderSynthesis.prog.Uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+  mShaderSynthesis.prog.Uniform("depth_test", depth_test);
+  mShaderSynthesis.prog.Uniform("elliptical_weight", elliptical_weight);
 
   for (int i = 0; i < fbo_buffers_count/2; ++i)
-    shader_synthesis->set_uniform(shader_texture_names[i].c_str(), i);
+	mShaderSynthesis.prog.Uniform(shader_texture_names[i].c_str(), i);
 
   return false; /* not done, rasterize quad */
 }
@@ -529,25 +520,25 @@ void PyramidPointRendererBase::rasterizeSynthesisPyramid( void )
       destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
 
       rasterizePixels(destinationPixels, source0Pixels, source1Pixels, SYNTHESIS);
-      shader_synthesis->use(0);
+	  mShaderSynthesis.prog.Unbind();
     }
 }
 
 /**
  * Rasterize level 0 of pyramid with per pixel shading.
  **/
-const int PyramidPointRendererBase::phongShadingCallbackFunc( void ) const
+const int PyramidPointRendererBase::phongShadingCallbackFunc( void ) 
 {
-  shader_phong->use();
+  mShaderPhong.prog.Bind();
 
-  shader_phong->set_uniform(shader_texture_names[0].c_str(), 0);
+  mShaderPhong.prog.Uniform(shader_texture_names[0].c_str(), 0);
   for (int i = 2; i < fbo_buffers_count/2; ++i) 
-    shader_phong->set_uniform(shader_texture_names[i].c_str(), i-1);
+    mShaderPhong.prog.Uniform(shader_texture_names[i].c_str(), i-1);
 
-  shader_phong->set_uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
-  shader_phong->set_uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
-  shader_phong->set_uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
-  shader_phong->set_uniform("shininess", Mats[material_id][12]);
+  mShaderPhong.prog.Uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
+  mShaderPhong.prog.Uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
+  mShaderPhong.prog.Uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
+  mShaderPhong.prog.Uniform("shininess", Mats[material_id][12]);
 
   return false; /* not done, rasterize quad */
 }
@@ -562,10 +553,11 @@ void PyramidPointRendererBase::rasterizePhongShading(int bufferIndex)
 
   nullPixels = generatePixels(0, 0, 0, 0);
 
-  shader_projection->use(0);
-  shader_analysis->use(0);
-  shader_copy->use(0);
-  shader_synthesis->use(0);
+  mShaderProjection.prog.Unbind();
+  mShaderCopy.prog.Unbind();
+  mShaderAnalysis.prog.Unbind();
+  mShaderSynthesis.prog.Unbind();
+  mShaderPhong.prog.Unbind();
 
   GLuint buffers[fbo_buffers_count/2 - 1];
 
@@ -579,7 +571,7 @@ void PyramidPointRendererBase::rasterizePhongShading(int bufferIndex)
   destinationPixels = generatePixels(level, 0, 1, &back[0]);
   rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
 
-  shader_phong->use(0);
+  mShaderPhong.prog.Unbind();
 }
 
 
@@ -643,7 +635,7 @@ void PyramidPointRendererBase::interpolate() {
   copyAnalysisPyramid();
 
   rasterizeSynthesisPyramid();
-  //  copyAnalysisPyramid();
+
 }
 
 /**
