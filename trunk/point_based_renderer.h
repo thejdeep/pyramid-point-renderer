@@ -10,10 +10,11 @@
 #define __POINT_BASED_RENDERER_H__
 
 #include "glslKernel/glslKernel.h"
-#include "surfels.h"
+#include "surfel.hpp"
 #include "pyramid_types.h"
 #include "materials.h"
 #include "object.h"
+#include <iostream>
 
 /**
  * Base class for rendering algorithms.
@@ -104,7 +105,7 @@ class PointBasedRenderer
     * Sets eye vector used mainly for backface culling.
     * @param e Given eye vector.
     **/
-   void setEye (Point e) {
+   void setEye (Point3f e) {
      eye = e;
    }
 
@@ -177,7 +178,7 @@ class PointBasedRenderer
    int canvas_height;
 
    /// Eye position.
-   Point eye;
+   Point3f eye;
 
    /// Scale factor (camera zooming)
    double scale_factor;

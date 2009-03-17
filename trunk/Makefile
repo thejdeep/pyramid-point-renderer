@@ -7,7 +7,6 @@ OBJECTS = application.o \
 	object.o \
 	point_based_renderer.o \
 	primitives.o \
-	surfels.o \
 	timer.o \
 	trackball.o \
 	trackmode.o \
@@ -23,7 +22,6 @@ OBJS =	application.o \
 	object.o \
 	point_based_renderer.o \
 	primitives.o \
-	surfels.o \
 	timer.o \
 	trackball.o \
 	trackmode.o \
@@ -38,7 +36,6 @@ CODES =	application.cc \
 	object.cc \
 	point_based_renderer.cc \
 	primitives.cc \
-	surfels.cc \
 	timer.c \
 	$(HOME)/vcglib/wrap/gui/trackball.cpp \
 	$(HOME)/vcglib/wrap/gui/trackmode.cpp \
@@ -78,7 +75,6 @@ HEADERS = application.h \
 	object.h \
 	point_based_renderer.h \
 	primitives.h \
-	surfels.h \
 	timer.h \
 	pyramid_point_renderer/pyramid_point_renderer_base.h \
 	pyramid_point_renderer/pyramid_point_renderer.h \
