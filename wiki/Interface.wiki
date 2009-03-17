@@ -16,7 +16,7 @@ F3 key : template version renderer with color per vertex (if available from ply 
 
 == Colors ==
 
-[0 .. 4] key: switch between predefined material types.
+0 .. 4 key: switch between predefined material types.
 
 5 key : no material
 
