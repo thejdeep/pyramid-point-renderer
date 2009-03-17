@@ -19,27 +19,16 @@ class Object
   
   Object() { }
 
- Object(int id_num, double x, double y, double z, Quat q) : scale_factor(1.0), _id(id_num) {
-    center = Point(x, y, z);
-    q_rot = q;
-  }
-
  Object(int id_num, double x, double y, double z) : scale_factor(1.0), _id(id_num) {
-    center = Point(x, y, z);
-    q_rot.a = 1.0; 
-    q_rot.x = 0.0; 
-    q_rot.y = 0.0; 
-    q_rot.z = 0.0;
+    center = Point3f(x, y, z);
   }
 
  Object(int id_num) : scale_factor(1.0), _id(id_num) {
-    center = Point(0.0, 0.0, 0.0);
-    q_rot.a = 1.0; q_rot.x = 0.0; q_rot.y = 0.0; q_rot.z = 0.0;
+    center = Point3f(0.0, 0.0, 0.0);
   }
 
   ~Object() {
 	centers.clear();
-	rotations.clear();
 	primitives_ids_list.clear();
   }
 
@@ -59,14 +48,11 @@ class Object
   double* getScaleFactor ( void ) { return &scale_factor; }
 
 
-  Point* getCenter ( void ) { return &center; }
+  Point3f* getCenter ( void ) { return &center; }
 
-  void setCenter ( Point c ) { 
+  void setCenter ( Point3f c ) { 
     center = c;
   }
-
-  Quat* getRotationQuat ( void ) { return &q_rot; }
-  void setRotationQuat ( Quat* q ) { q_rot = *q; }
 
   void addPrimitives( int p_id) { primitives_ids_list.push_back(p_id); }
   vector< int > * getPrimitivesList( void ) { return &primitives_ids_list; }
@@ -74,15 +60,11 @@ class Object
  private:
 
   // Center position (for individual translation)
-  Point center;
-  vector<Point> centers;
+  Point3f center;
+  vector<Point3f> centers;
 
   // Scale factor for zooming
   double scale_factor;
-
-  // Rotation quaternion (for individual rotation)
-  Quat q_rot;
-  vector<Quat> rotations;
 
   // Number of instances of this object
   int instances;

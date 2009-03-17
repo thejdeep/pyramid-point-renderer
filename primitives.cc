@@ -98,14 +98,14 @@ void Primitives::setPyramidPointsArrays ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x);
-    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y);
-    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z);
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center()[0]);
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center()[1]);
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center()[2]);
     vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
-    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y);
-    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z);
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal()[0]);
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal()[1]);
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal()[2]);
 
     ++pos;
   }
@@ -138,22 +138,22 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   double max_quality = 0.0;
   double min_quality = 10000.0;
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
-	double q = (double)it->color()[3];
+	double q = (double)it->Quality();
 	if (q < 10000)
-	  mean += (double)it->color()[3];
+	  mean += (double)it->Quality();
   }
   mean /= double(surfels.size());
 
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
-	double q = (double)it->color()[3];
+	double q = (double)it->Quality();
 	if (q < 10000)
-	  standard_deviation += ((double)it->color()[3] - mean) * ((double)it->color()[3] - mean);
+	  standard_deviation += ((double)it->Quality() - mean) * ((double)it->Quality() - mean);
   }
   standard_deviation = sqrt ( (1.0/double(surfels.size())) * standard_deviation );
 
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
-	double q = (double)it->color()[3];
+	double q = (double)it->Quality();
 	//q = (q - mean) / (standard_deviation / two_pi);
 	if (q < 10000) {
 	  if (q > max_quality)
@@ -170,26 +170,22 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   int pos = 0;
   for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->Center().x);
-    vertex_array[pos*4 + 1] = (GLfloat)(it->Center().y);
-    vertex_array[pos*4 + 2] = (GLfloat)(it->Center().z);
+    vertex_array[pos*4 + 0] = (GLfloat)(it->Center()[0]);
+    vertex_array[pos*4 + 1] = (GLfloat)(it->Center()[1]);
+    vertex_array[pos*4 + 2] = (GLfloat)(it->Center()[2]);
     vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->Normal().x);
-    normal_array[pos*3 + 1] = (GLfloat)(it->Normal().y);
-    normal_array[pos*3 + 2] = (GLfloat)(it->Normal().z);
+    normal_array[pos*3 + 0] = (GLfloat)(it->Normal()[0]);
+    normal_array[pos*3 + 1] = (GLfloat)(it->Normal()[1]);
+    normal_array[pos*3 + 2] = (GLfloat)(it->Normal()[2]);
 
-	color_array[pos*4 + 0] = (GLubyte)(it->color()[0] * 255.0);
-	color_array[pos*4 + 1] = (GLubyte)(it->color()[1] * 255.0);
-	color_array[pos*4 + 2] = (GLubyte)(it->color()[2] * 255.0);
-
-// 	color_array[pos*4 + 0] = (GLfloat)(it->color()[0]);
-// 	color_array[pos*4 + 1] = (GLfloat)(it->color()[1]);
-// 	color_array[pos*4 + 2] = (GLfloat)(it->color()[2]);
+	color_array[pos*4 + 0] = (GLubyte)(it->Color()[0]);
+	color_array[pos*4 + 1] = (GLubyte)(it->Color()[1]);
+	color_array[pos*4 + 2] = (GLubyte)(it->Color()[2]);
 
 	//double q = it->color()[3] / max_quality;
 
-	double q = (double)it->color()[3];
+	double q = (double)it->Quality();
 
 	q = (q - min_quality) / (max_quality - min_quality);
 	q = min (1.0, q);

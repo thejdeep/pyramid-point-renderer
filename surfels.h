@@ -17,27 +17,27 @@
 #include "surfel.hpp"
 
 using namespace std;
-using namespace LAL;
+using namespace vcg;
 
-typedef Point3<double> Point;
-typedef Vector3<double> Vector;
+/* typedef vcg::Point3f Point3; */
+/* typedef vcg::Point4f Point4; */
 
 struct Box
 {
   Box() {}
 
-  Box(Point a, Point b) : _min(a), _max(b) {}
+  Box(Point3 a, Point3 b) : _min(a), _max(b) {}
 
 
-  const Point min ( void ) const { return _min; }
-  const Point max ( void ) const { return _max; }
+  const Point3 min ( void ) const { return _min; }
+  const Point3 max ( void ) const { return _max; }
 
-  const double xmin ( void ) const { return _min.x; }
-  const double ymin ( void ) const { return _min.y; }
-  const double zmin ( void ) const { return _min.z; }
-  const double xmax ( void ) const { return _max.x; }
-  const double ymax ( void ) const { return _max.y; }
-  const double zmax ( void ) const { return _max.z; }
+  const double xmin ( void ) const { return _min[0]; }
+  const double ymin ( void ) const { return _min[1]; }
+  const double zmin ( void ) const { return _min[2]; }
+  const double xmax ( void ) const { return _max[0]; }
+  const double ymax ( void ) const { return _max[1]; }
+  const double zmax ( void ) const { return _max[2]; }
 
   Point _min, _max;
 
@@ -48,9 +48,9 @@ struct Triangle {
   int id;
 };
 
-static const Point default_color (0.8, 0.4, 0.2);
-static const Point bg_color (1.0, 1.0, 1.0);
-static const Point black_color (0.0, 0.0, 0.0);
+static const Point3 default_color (0.8, 0.4, 0.2);
+static const Point3 bg_color (1.0, 1.0, 1.0);
+static const Point3 black_color (0.0, 0.0, 0.0);
 
 typedef Surfel<double> Surfeld;
 

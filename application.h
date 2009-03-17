@@ -67,7 +67,7 @@ class Application
   void createPointRenderer( void );
   void glVertex ( const Surfeld * s ) const;
   void glVertex ( const surfelVectorIter it ) const;
-  void glVertex ( const Point p ) const;
+  void glVertex ( const Point3f p ) const;
 
   void changePrimitivesRendererType ( point_render_type_enum type );
 

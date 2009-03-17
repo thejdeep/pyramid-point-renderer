@@ -17,10 +17,10 @@ Application::Application( GLint default_mode ) {
   canvas_width = canvas_height = 512;
   windows_width = windows_height = canvas_width + 2*(canvas_width/32);
 
-  trackball.center=vcg::Point3f(0, 0, 0);
+  trackball.center = vcg::Point3f(0, 0, 0);
   trackball.radius= 1;
 
-  trackball_light.center=vcg::Point3f(0, 0, 0);
+  trackball_light.center = vcg::Point3f(0, 0, 0);
   trackball_light.radius= 1;
 
   clipRatioNear = 1.0;
@@ -56,9 +56,9 @@ Application::Application( GLint default_mode ) {
   glEnable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
 
-  Vector ambient_light = Vector( 0.0, 0.0, 0.0 );
-  Vector diffuse_light = Vector( 1.0, 1.0, 1.0 );
-  Vector specular_light = Vector( 1.0, 1.0, 1.0 );
+  Point3f ambient_light = Point3f( 0.0, 0.0, 0.0 );
+  Point3f diffuse_light = Point3f( 1.0, 1.0, 1.0 );
+  Point3f specular_light = Point3f( 1.0, 1.0, 1.0 );
 
   GLfloat al[] = {ambient_light[0], ambient_light[1],
 		  ambient_light[2], 1.0};
@@ -87,20 +87,20 @@ Application::~Application( void ) {
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
 void Application::glVertex(const Surfeld * s) const {
-  Point p = s->Center();
+  Point3f p = s->Center();
   glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Renders a surfel as a opengl point primitive
 /// @param s Pointer to surfel
 void Application::glVertex(const surfelVectorIter it) const {
-  Point p = it->Center();
+  Point3f p = it->Center();
   glVertex3f(p[0], p[1], p[2]);
 }
 
 /// Renders a vertex
 /// @param p Given vertex position
-void Application::glVertex(const Point p) const {
+void Application::glVertex(const Point3f p) const {
   glVertex3f(p[0], p[1], p[2]);
 }
 
@@ -112,7 +112,7 @@ void Application::drawPoints(void) {
   glBegin(GL_POINTS);
   
   for (surfelVectorIter it = primitives[0].getSurfels()->begin(); it != primitives[0].getSurfels()->end(); ++it) {
-	LAL::Color c = it->color();
+	Color4b c = it->Color();
 	glColor4f(c[0], c[1], c[2], 1.0f);  
 	glVertex(it);
   }
@@ -192,7 +192,7 @@ void Application::draw( void ) {
 
   // Apply trackball transformation
   glPushMatrix();
-  trackball.GetView();  
+  trackball.GetView();
   trackball.Apply();
 
   // Use bounding box to centralize and scale object
@@ -217,7 +217,7 @@ void Application::draw( void ) {
 //   vcg::Point3<float> vp = rotM*vcg::Point3f(0, 0, camera_offset[2]);
   
   // Set eye for back face culling in vertex shader
-  point_based_render->setEye( Point(vp[0], vp[1], vp[2]) );
+  point_based_render->setEye( Point3f(vp[0], vp[1], vp[2]) );
 
   // Set factor for scaling projected radii of samples
   point_based_render->setScaleFactor( scale_factor ); 
@@ -321,8 +321,8 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
   if (mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
 	quality_per_vertex = true;
 
-//   cout << "has normal per vertex " << mesh.HasPerVertexNormal() << endl;
-//   cout << "has color per vertex " << mesh.HasPerVertexColor() << endl;
+//  cout << "has normal per vertex " << quality_per_vertex << endl;
+//  cout << "has color per vertex " << color_per_vertex << endl;
 //  cout << "has radius per vertex " << mesh.HasPerVertexQuality() << endl;
 
   /// Compute BBox
@@ -336,25 +336,21 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
   for (CMesh::VertexIterator vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit) {
 	
 	vcg::Point3f p = (*vit).P();
-	Point p_lal (p[0], p[1], p[2]);
 	vcg::Point3f n = (*vit).N();
-	Vector n_lal (n[0], n[1], n[2]);
 
  	double quality = 1.0;
 	if (quality_per_vertex)
 	  quality = (double)((*vit).Q());
 
-	LAL::Color c_lal (0.2, 0.2, 0.2, quality);
+	Color4b c (0.2, 0.2, 0.2, 1.0);
 	if (color_per_vertex) {
-	  vcg::Color4b c = (*vit).C();		
-	  c_lal = LAL::Color(c[0]/255.0, c[1]/255.0, c[2]/255.0, quality);
+	  c = Color4b ((GLubyte)(*vit).C()[0], (GLubyte)(*vit).C()[1], (GLubyte)(*vit).C()[2], 1.0);
 	}
 
-	double radius = (double)((*vit).Q());
-// 	if (radius <= 0.0)
-//	double radius = 0.25;
+    double radius = (double)((*vit).Q());
+	//double radius = 0.25;
 	
-	surfels->push_back ( Surfeld (p_lal, n_lal, c_lal, radius, pos) );
+	surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
 	++pos;
   }
 

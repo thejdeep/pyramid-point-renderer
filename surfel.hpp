@@ -15,16 +15,16 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 
-#include "lal/Point3.hpp"
-#include "lal/Vector3.hpp"
-#include "lal/Color.hpp"
+#include "vcg/space/point3.h"
+#include "vcg/space/color4.h"
 
 extern "C" 
 {
 #include <stdio.h>
-
 #include <strings.h>
 }
+
+#include <list>
 
 //#define PI 3.1415926535897932384626433832795
 
@@ -37,38 +37,34 @@ extern "C"
  **/
 
 
+using namespace vcg;
+
 template <class Real > class Surfel
 {
 public:
 		
-  typedef LAL::Point3<Real>  Point3; 
-  typedef LAL::Vector3<Real> Vector3;
-  typedef LAL::Color         Color;
-
-
-  typedef std::list<Point3* >       			ListPtrPoint3;
+  typedef std::list<Point3f* >       			ListPtrPoint3;
   typedef typename ListPtrPoint3::iterator  	ListPtrPoint3Iterator;
 
   Surfel ()
   {
-    mCenter = Point3();
-    mNormal = Vector3();
+    mCenter = Point3f();
+    mNormal = Point3f();
+	mQuality = 0.0;
     mSplatRadius = 0.0;
-
-		 
   }
-
-
 	
-  Surfel (const Point3& position, 
-	  const Vector3& normal,
-	  const Color& color,
-	  Real radius,
-	  unsigned int 	id ) : 	mCenter(position),
-				mNormal(normal),
-				mColor(color),
-				mSplatRadius(radius),
-				mID(id)
+  Surfel (const Point3f& position, 
+		  const Point3f& normal,
+		  const Color4b& color,
+		  Real quality,
+		  Real radius,
+		  unsigned int 	id ) : 	mCenter(position),
+								mNormal(normal),
+								mColor(color),
+								mQuality(quality),
+								mSplatRadius(radius),
+								mID(id)
   {
 
   };
@@ -77,24 +73,23 @@ public:
   inline const Surfel<Real>& operator= ( const Surfel<Real>& pSurfel)
   {
     this->mCenter    = pSurfel.Center();
-    this->mNormal    = pSurfel.Normal();
- 
-    this->mColor     = pSurfel.color();
+    this->mNormal    = pSurfel.Normal(); 
+    this->mColor     = pSurfel.Color();
+	this->mQuality   = pSurfel.Quality();
+	this->mSplatRadius = pSurfel.Radius();
 		 
     return ( *this );
   }
 	 
-  Surfel (const Point3& 	position)
+  Surfel (const Point3f& position)
   {
     this->mCenter 		= position;
 	         
-  };
-	
-    
+  };	    
 	   
   ~Surfel() {};
 	
-  const Point3 Center () const 
+  const Point3f Center () const 
   { 
     return  ( this->mCenter ) ; 
   };
@@ -104,12 +99,12 @@ public:
     return ( this->mCenter[axis] ); 
   };
 	 
-  void SetCenter(const Point3& pCenter) 
+  void SetCenter(const Point3f& pCenter) 
   { 
-    this->mCenter = Point3(pCenter); 
+    this->mCenter = Point3f(pCenter); 
   };
 	
-  const Vector3 Normal(void) const 
+  const Point3f Normal(void) const 
   { 
     return (this->mNormal); 
   };
@@ -119,9 +114,9 @@ public:
     return ( this->mNormal[axis] ); 
   };
 	 
-  void SetNormal (const Vector3& normal )
+  void SetNormal (const Point3f& normal )
   { 
-    this->mNormal = Vector3(normal); 
+    this->mNormal = Point3f(normal); 
   };
 
   unsigned int ID () const 
@@ -144,12 +139,22 @@ public:
     this->mSplatRadius = pRadius; 
   };
 
-  Color color (void) const 
+  const Real Quality (void) const
+  { 
+    return this->mQuality;
+  }
+
+  void SetQuality ( const Real& pQuality )
+  { 
+    this->mQuality = pQuality;
+  };
+
+  Color4b Color (void) const
   { 
     return this->mColor; 
   };
 
-  void SetColor ( const Color& pColor ) 
+  void SetColor ( const Color4b& pColor ) 
   { 
     this->mColor = pColor; 
   };
@@ -170,16 +175,21 @@ public:
 private:
 	 
   /// Point coordinates
-  Point3 mCenter;
+  Point3f mCenter;
 
   /// Estimated surface normal at point sample
-  Vector3 mNormal;
-	  
-  Color mColor;
+  Point3f mNormal;
+
+  /// RGB color
+  Color4b mColor;
+
+  /// Quality
+  Real mQuality;
 	  
   /// Splat radius
   Real mSplatRadius;
-   
+
+  /// Surfel ID
   int mID;
 
 };

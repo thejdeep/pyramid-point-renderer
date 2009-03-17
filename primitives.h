@@ -9,7 +9,7 @@
 #ifndef __PRIMITIVES_H__
 #define __PRIMITIVES_H__
 
-#include "quat.h"
+#include "surfel.hpp"
 
 #include <cfloat>
 
@@ -21,6 +21,13 @@ typedef enum
   } point_render_type_enum;
 
 using namespace std;
+
+static const Point3f default_color (0.8, 0.4, 0.2);
+static const Point3f bg_color (1.0, 1.0, 1.0);
+static const Point3f black_color (0.0, 0.0, 0.0);
+
+typedef Surfel<double> Surfeld;
+typedef vector<Surfeld>::iterator surfelVectorIter;
 
 class Primitives
 {
@@ -37,7 +44,7 @@ class Primitives
   void render ( void ) const;
 
   vector<Surfeld> * getSurfels ( void ) { return &surfels; }
-  vector<Triangle> * getTriangles ( void ) { return &triangles; }
+  //  vector<Triangle> * getTriangles ( void ) { return &triangles; }
 
   void clearSurfels ( void );
 
@@ -49,7 +56,7 @@ class Primitives
 
   int numberPoints ( void ) const { return number_points; }
 
-  Point eye;
+  Point3f eye;
 
   float max_quality;
 
@@ -80,7 +87,7 @@ class Primitives
   vector<Surfeld> surfels;
 
   // Vector of triangles belonging to this object.
-  vector<Triangle> triangles;
+  //  vector<Triangle> triangles;
 
 };
 
