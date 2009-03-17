@@ -19,10 +19,10 @@ class PyramidPointRendererER : public PyramidPointRendererBase
  private:
 
   void createShaders ( void );
-  const int synthesisCallbackFunc( void ) const;
-  const int analysisCallbackFunc( void ) const;
-  const int projectionCallbackFunc( void ) const;
-    const int phongShadingCallbackFunc( void ) const;
+  const int synthesisCallbackFunc( void ) ;
+  const int analysisCallbackFunc( void ) ;
+  const int projectionCallbackFunc( void ) ;
+    const int phongShadingCallbackFunc( void ) ;
   void rasterizeSynthesisPyramid();
     void rasterizePhongShading(int bufferIndex);
 

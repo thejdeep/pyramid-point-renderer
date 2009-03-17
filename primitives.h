@@ -11,6 +11,9 @@
 
 #include "surfel.hpp"
 
+#include <iostream>
+#include <fstream>
+#include <assert.h>
 #include <cfloat>
 
 typedef enum 

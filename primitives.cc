@@ -1,11 +1,7 @@
-#include "glslKernel/glslKernel.h"
+//#include "glslKernel/glslKernel.h"
 
 #include "primitives.h"
 #include "point_based_renderer.h"
-
-#include <iostream>
-#include <fstream>
-#include <assert.h>
 
 
 Primitives::~Primitives() {
