@@ -36,4 +36,14 @@ d key : depth test _on/off_.
 
 b key : back face culling _on/off_.
 
+== Mouse ==
+
+left+Drag : rotate
+left+Ctrl+Drag : Pan
+left+Shift+Drag : Zoom
+wheel : Zoom
+Shift+wheel : Change perspective
+Ctrl+wheel : Move far clipping plane
+Ctrl+shift+wheel : Move near clipping plane
+right : Change light direction
 
