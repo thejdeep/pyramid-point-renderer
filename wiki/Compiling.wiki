@@ -16,11 +16,11 @@ Before you compile:
 
   * Have *GLUT* and *GLEW* installed.
 
-  * Download the [http://vcg.sourceforge.net VCG] library, no need to install or compile, the necessary files are included in the Makefile, only needs to set correct path to the VCG library directory. You can download it directly using svn:
+  * Download the [http://vcg.sourceforge.net VCG] library, no need to install or compile, the necessary files are included in the Makefile. You can download it directly using svn:
 
      svn co https://vcg.svn.sourceforge.net/svnroot/vcg vcg
 
-  * Set the VCGDIR path in the Makefile.in file
+  * Set the VCGDIR path in the Makefile.in file to where you downloaded the VCG library
 
 In the pyramid-point-renderer directory type the following:
 
