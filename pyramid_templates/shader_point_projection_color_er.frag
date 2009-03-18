@@ -5,7 +5,6 @@
 // Projects points to screen space and rotates normal
 // stores output on texture
 #extension GL_ARB_draw_buffers : enable
-// #extension GL_EXT_gpu_shader4 : enable
 
 uniform vec2 oo_fbo_size;
 uniform float scale;
