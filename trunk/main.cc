@@ -343,7 +343,7 @@ int main(int argc, char * argv []) {
   material = 0;
   quality_threshold = 0.0;
   auto_rotate = false;
-  elliptical_weight = true;
+  elliptical_weight = false;
   depth_test = true;
   back_face_culling = true;
   quality_per_vertex = false;
