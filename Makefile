@@ -4,7 +4,7 @@ OS = linux
 OBJECTS = application.o \
 	main.o \
 	point_based_renderer.o \
-	primitives.o \
+	object.o \
 	trackball.o \
 	trackmode.o \
 	plylib.o
@@ -17,7 +17,7 @@ SUBDIRS = pyramid_point_renderer_base \
 OBJS =	application.o \
 	main.o \
 	point_based_renderer.o \
-	primitives.o \
+	object.o \
 	trackball.o \
 	trackmode.o \
 	plylib.o \
@@ -29,7 +29,7 @@ OBJS =	application.o \
 CODES =	application.cc \
 	main.cc \
 	point_based_renderer.cc \
-	primitives.cc \
+	object.cc \
 	$(HOME)/progs/vcglib/wrap/gui/trackball.cpp \
 	$(HOME)/progs/vcglib/wrap/gui/trackmode.cpp \
 	pyramid_point_renderer/pyramid_point_renderer_base.cc \
@@ -64,7 +64,7 @@ LIBLIST = $(GLUTLIB) $(GLLIBS) $(MATLIB)
 HEADERS = application.h \
 	main.h \
 	point_based_renderer.h \
-	primitives.h \
+	object.h \
 	pyramid_point_renderer/pyramid_point_renderer_base.h \
 	pyramid_point_renderer/pyramid_point_renderer.h \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.h \

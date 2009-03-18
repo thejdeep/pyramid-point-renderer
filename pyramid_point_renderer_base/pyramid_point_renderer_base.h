@@ -37,7 +37,7 @@ class PyramidPointRendererBase : public PointBasedRenderer
   void createFBO( void );
   void copyAnalysisPyramid();
   const int copyCallbackFunc( void ) ;
-  void projectSurfels( const Primitives * const );
+  void projectSurfels( const Object * const );
 
   const pixels_struct generatePixels(const int level, const GLuint fbo, const int buffersCount, const GLuint* buffers) const;
   const void rasterizePixels(const pixels_struct dest, const pixels_struct src0, const pixels_struct src1, const int phase);
@@ -64,7 +64,7 @@ class PyramidPointRendererBase : public PointBasedRenderer
 
   void draw();
   void clearBuffers (void);
-  void projectSamples (Primitives* const prim );
+  void projectSamples (Object* const obj );
   void interpolate ( void );
 
  protected:

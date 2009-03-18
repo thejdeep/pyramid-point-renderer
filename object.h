@@ -6,8 +6,8 @@
  *
  **/
 
-#ifndef __PRIMITIVES_H__
-#define __PRIMITIVES_H__
+#ifndef __OBJECT_H__
+#define __OBJECT_H__
 
 #include "surfel.hpp"
 
@@ -32,22 +32,21 @@ static const Point3f black_color (0.0, 0.0, 0.0);
 typedef Surfel<double> Surfeld;
 typedef vector<Surfeld>::iterator surfelVectorIter;
 
-class Primitives
+class Object
 {
  public:
   
-  Primitives() { }
+  Object() { }
 
-  Primitives(int id_num, GLfloat t) : id(id_num) {}
+  Object(int id_num, GLfloat t) : id(id_num) {}
     
-  Primitives(int id_num) : id(id_num)  {}
+  Object(int id_num) : id(id_num)  {}
       
-  ~Primitives();
+  ~Object();
 
   void render ( void ) const;
 
   vector<Surfeld> * getSurfels ( void ) { return &surfels; }
-  //  vector<Triangle> * getTriangles ( void ) { return &triangles; }
 
   void clearSurfels ( void );
 
@@ -68,7 +67,7 @@ class Primitives
   void setPyramidPointsArrays( void );
   void setPyramidPointsArraysColor( void );
 
-  // Primitives group identification number.
+  // Object group identification number.
   int id;
  
   // Rendering type.
@@ -88,9 +87,6 @@ class Primitives
 
   // Vector of surfels belonging to this object.
   vector<Surfeld> surfels;
-
-  // Vector of triangles belonging to this object.
-  //  vector<Triangle> triangles;
 
 };
 
