@@ -271,7 +271,8 @@ void Application::createPointRenderer( void ) {
 
   assert (point_based_render);
 
-  ((PyramidPointRendererBase*)point_based_render)->createShaders(); 
+  ((PyramidPointRendererBase*)point_based_render)->createShaders();
+   setQualityPerVertex(quality_per_vertex);
 
 }
 
@@ -289,17 +290,26 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
   tri::io::Importer<CMesh>::LoadMask(filename, mask);
   tri::io::Importer<CMesh>::Open(mesh, filename);
 
+  bool normal_per_vertex = false;
+  if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+ 	normal_per_vertex = true;
+
   bool color_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
 	color_per_vertex = true;
 
-  bool quality_per_vertex = false;
+  quality_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
 	quality_per_vertex = true;
 
-//  cout << "has normal per vertex " << quality_per_vertex << endl;
-//  cout << "has color per vertex " << color_per_vertex << endl;
-//  cout << "has radius per vertex " << mesh.HasPerVertexQuality() << endl;
+  bool radius_per_vertex = false;
+  if (mask & vcg::tri::io::Mask::IOM_VERTRADIUS)
+ 	radius_per_vertex = true;
+
+  cout << "has normal per vertex : " << normal_per_vertex << endl;
+  cout << "has quality per vertex : " << quality_per_vertex << endl;
+  cout << "has color per vertex : " << color_per_vertex << endl;
+  cout << "has radius per vertex : " << radius_per_vertex << endl;
 
   /// Compute BBox
   vcg::tri::UpdateBounding<CMesh>::Box(mesh);
@@ -323,9 +333,9 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
 	  c = Color4b ((GLubyte)(*vit).C()[0], (GLubyte)(*vit).C()[1], (GLubyte)(*vit).C()[2], 1.0);
 	}
 
-	// must include Radius field in ply lib to not use the quality as radius
-    double radius = (double)((*vit).Q());
-	//double radius = 0.25;
+	double radius = 0.25;
+	if (radius_per_vertex)
+	  radius = (double)((*vit).R());
 	
 	surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
 	++pos;

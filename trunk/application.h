@@ -56,7 +56,7 @@ using namespace vcg;
 
 class CFace;
 class CEdge;
-class CVertex  : public VertexSimp2< CVertex, CEdge, CFace, vertex::Coord3f, vertex::Normal3f, vertex::Color4b, vertex::Qualityf > {};
+class CVertex  : public VertexSimp2< CVertex, CEdge, CFace, vertex::Coord3f, vertex::Normal3f, vertex::Color4b, vertex::Radiusf, vertex::Qualityf > {};
 class CFace    : public FaceSimp2< CVertex, CEdge, CFace, face::VertexRef > {};
 class CMesh    : public vcg::tri::TriMesh< vector<CVertex>, vector<CFace> > {};
 
@@ -147,6 +147,9 @@ class Application
   // Determines which rendering class to use (Pyramid points, with color per vertex, templates version ...)
   // see objects.h for the complete list (point_render_type_enum).
   GLint render_mode;
+
+  // This is determined while reading the ply file, but can only be set after creating the point renderer
+  bool quality_per_vertex;
 
   // Flags on/off
   bool show_points;
