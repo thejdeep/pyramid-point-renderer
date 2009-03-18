@@ -69,8 +69,6 @@ class Application
   void glVertex ( const surfelVectorIter it ) const;
   void glVertex ( const Point3f p ) const;
 
-  void changePrimitivesRendererType ( point_render_type_enum type );
-
   void drawPoints ( void );
 
  public :
@@ -93,7 +91,6 @@ class Application
   void changeMaterial( int mat );
 
   int getNumberPoints ( void );
-  vector<Surfeld>* getSurfelsList ( void );
 
   void setGpuMask ( int m );
   void setPerVertexColor ( bool b );
@@ -144,9 +141,7 @@ class Application
   float fov;
   float scale_factor;
 
-  // Lists of objects and primitives
-  // In this simple application only one object associated to one primitive is used.
-  vector<Object> objects;
+  // Lists of primitives (usually one ply file is associated to one primitive in list)
   vector<Primitives> primitives;
 
   // Determines which rendering class to use (Pyramid points, pyramid lines for tree rendering, ellipse rasterization ...)
