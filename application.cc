@@ -80,7 +80,6 @@ Application::Application( GLint default_mode ) {
 }
 
 Application::~Application( void ) {
-  objects.clear();
   primitives.clear();
   delete point_based_render;
 }
@@ -258,22 +257,13 @@ void Application::reshape(int w, int h) {
   //  camera->reshape(w, h);
 }
 
-vector<Surfeld>* Application::getSurfelsList ( void ) {
-  vector< int >* prims = objects[0].getPrimitivesList();
-  return primitives[*prims->begin()].getSurfels();
-}
-
-void Application::changePrimitivesRendererType( point_render_type_enum type ) {
-  for (unsigned int i = 0; i < primitives.size(); ++i)
-	primitives[i].setRendererType(type);
-}
-
 /**
  * Changes the rendering algorithm.
  * @param type Rendering mode.
  **/
 void Application::changeRendererType( int type ) {
-  changePrimitivesRendererType ( (point_render_type_enum) type );
+  for (unsigned int i = 0; i < primitives.size(); ++i)
+	primitives[i].setRendererType((point_render_type_enum) type);
   render_mode = type;
   createPointRenderer( );
 }
@@ -351,7 +341,7 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
 
 	// must include Radius field in ply lib to not use the quality as radius
     double radius = (double)((*vit).Q());
-	//double radius = 0.025;
+	//double radius = 0.25;
 	
 	surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
 	++pos;
@@ -374,14 +364,8 @@ int Application::readFile ( const char * filename ) {
   // Create a new primitive from given file
   primitives.push_back( Primitives( primitives.size() ) );
 
-  // Create a new object with id 0
-  objects.push_back( Object( 0 ) );
-  objects.back().setFilename( filename );
-
   readFile ( filename, (primitives.back()).getSurfels() );
 
-  // connect new object to new primitive
-  objects[0].addPrimitives( primitives.back().getId() );
   // Sets the default rendering algorithm
   primitives[0].setRendererType( render_mode );
 
@@ -390,25 +374,10 @@ int Application::readFile ( const char * filename ) {
   return 0;
 }
 
-int Application::startFileReading ( void ) {
-  // Create a new object with id 0
-  objects.push_back( Object( 0 ) ); 
-
-  return 0;
-}
-
 int Application::appendFile ( const char * filename ) { 
-
    // Create a new primitive from given file
-
   primitives.push_back( Primitives( primitives.size() ) );
-  int id = primitives.back().getId();
-
-  objects[0].addPrimitives( id );
-
   int pts = readFile ( filename, (primitives.back()).getSurfels() );
-
-
   return pts;
 }
 

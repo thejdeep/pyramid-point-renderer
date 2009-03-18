@@ -369,8 +369,6 @@ int main(int argc, char * argv []) {
 	vector<string> files = vector<string>();
 	getFilesFromDirectory(dir,files);
 
-	application->startFileReading();
-
 	// remove non ply files in directory
 	for (unsigned int i = 0; i < files.size(); i++){
 	  if (files[i].rfind("ply") == string::npos) {
