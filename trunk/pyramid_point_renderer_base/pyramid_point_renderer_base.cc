@@ -336,9 +336,9 @@ const int PyramidPointRendererBase::projectionCallbackFunc( void )
 
 /** 
  * Project point sized samples to screen space.
- * @param prim Pointer to object's primitives for rendering.
+ * @param obj Pointer to object for rendering.
  **/
-void PyramidPointRendererBase::projectSurfels ( const Primitives* const prim )
+void PyramidPointRendererBase::projectSurfels ( const Object* const obj )
 {
   pixels_struct nullPixels;
   pixels_struct destinationPixels;
@@ -360,7 +360,7 @@ void PyramidPointRendererBase::projectSurfels ( const Primitives* const prim )
   glPointSize(1.0);
 
   // Render vertices using the vertex buffer object.
-  prim->render();
+  obj->render();
 
   mShaderProjection.prog.Unbind();
 }
@@ -611,9 +611,9 @@ void PyramidPointRendererBase::clearBuffers( void ) {
 /**
  * Reconstructs the surface for visualization.
  **/
-void PyramidPointRendererBase::projectSamples(Primitives* const prim) {
+void PyramidPointRendererBase::projectSamples(Object* const obj) {
   // Project points to framebuffer with depth test on.
-  projectSurfels( prim );
+  projectSurfels( obj );
 
   check_for_ogl_error("project samples");
 }

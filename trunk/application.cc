@@ -13,6 +13,7 @@
 
 /**
  * Initialize opengl and application state variables.
+ * @param default_mode Defines the initial rendering mode.
  **/
 Application::Application( GLint default_mode ) {
 
@@ -53,34 +54,17 @@ Application::Application( GLint default_mode ) {
   glDepthMask(GL_FALSE);
 
   /* Old camera init light routine*/
-  glEnable (GL_LIGHTING);
-  glEnable (GL_LIGHT0);
-  glDisable (GL_COLOR_MATERIAL);
+//   glEnable (GL_LIGHTING);
+//   glEnable (GL_LIGHT0);
+//   glDisable (GL_COLOR_MATERIAL);
 
-//   Point3f ambient_light = Point3f( 0.0, 0.0, 0.0 );
-//   Point3f diffuse_light = Point3f( 1.0, 1.0, 1.0 );
-//   Point3f specular_light = Point3f( 1.0, 1.0, 1.0 );
-
-//   GLfloat al[] = {ambient_light[0], ambient_light[1],
-// 		  ambient_light[2], 1.0};
-
-//   GLfloat dl[] = {diffuse_light[0], diffuse_light[1],
-// 		  diffuse_light[2], 1.0};
-
-//   GLfloat sl[] = {specular_light[0], specular_light[1],
-// 		  specular_light[2], 1.0};
-
-//   glLightfv(GL_LIGHT0, GL_AMBIENT, al);
-//   glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
-//   glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
-
-  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
+//   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
 
   check_for_ogl_error("Init");
 }
 
 Application::~Application( void ) {
-  primitives.clear();
+  objects.clear();
   delete point_based_render;
 }
 
@@ -111,7 +95,7 @@ void Application::drawPoints(void) {
 
   glBegin(GL_POINTS);
   
-  for (surfelVectorIter it = primitives[0].getSurfels()->begin(); it != primitives[0].getSurfels()->end(); ++it) {
+  for (surfelVectorIter it = objects[0].getSurfels()->begin(); it != objects[0].getSurfels()->end(); ++it) {
 	Color4b c = it->Color();
 	glColor4f(c[0], c[1], c[2], 1.0f);  
 	glVertex(it);
@@ -164,7 +148,7 @@ void Application::draw( void ) {
 // 	time = glutGet(GLUT_ELAPSED_TIME);
 //   frame ++;
 
-  if (primitives.size() == 0)
+  if (objects.size() == 0)
     return;  
 
   // Clear all buffers including pyramid algorithm buffers
@@ -218,13 +202,13 @@ void Application::draw( void ) {
   // Set factor for scaling projected radii of samples in projection phase
   point_based_render->setScaleFactor( scale_factor );
 
-  // project all primitives
+  // project all objects
   if (selected == 0)
-	for (unsigned int i = 0; i < primitives.size(); ++i)
-	  point_based_render->projectSamples( &primitives[i] );
+	for (unsigned int i = 0; i < objects.size(); ++i)
+	  point_based_render->projectSamples( &objects[i] );
   // project only selected part
   else
-	point_based_render->projectSamples( &primitives[selected-1] );
+	point_based_render->projectSamples( &objects[selected-1] );
 
   // Interpolates projected surfels using pyramid algorithm (pull-push)
   point_based_render->interpolate();
@@ -262,8 +246,8 @@ void Application::reshape(int w, int h) {
  * @param type Rendering mode.
  **/
 void Application::changeRendererType( int type ) {
-  for (unsigned int i = 0; i < primitives.size(); ++i)
-	primitives[i].setRendererType((point_render_type_enum) type);
+  for (unsigned int i = 0; i < objects.size(); ++i)
+	objects[i].setRendererType((point_render_type_enum) type);
   render_mode = type;
   createPointRenderer( );
 }
@@ -351,42 +335,40 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
 }
 
 /**
- * Reads a ply file, creates an object and
- * loads the vertices and triangles in the associated primitive.
- * It is possible to load multiple objects and multiple primitives
- * per object, but for this simple example only one primitive associate
- * to one object is considered
+ * Reads a ply file, and loads the vertices and triangles in the associated primitive.
  * @param filename Given file name.
- * @return Id number of created object.
  **/
-int Application::readFile ( const char * filename ) {
+void Application::readFile ( const char * filename ) {
 
   // Create a new primitive from given file
-  primitives.push_back( Primitives( primitives.size() ) );
+  objects.push_back( Object( objects.size() ) );
 
-  readFile ( filename, (primitives.back()).getSurfels() );
+  readFile ( filename, (objects.back()).getSurfels() );
 
   // Sets the default rendering algorithm
-  primitives[0].setRendererType( render_mode );
+  objects[0].setRendererType( render_mode );
 
   createPointRenderer( );
-
-  return 0;
 }
 
+
+/// Reads a single file from a list
+/// This is used when reading a directory with multiples files composing a model.
+/// @param filename The ply file.
+/// @return Number of points read from ply file.
 int Application::appendFile ( const char * filename ) { 
    // Create a new primitive from given file
-  primitives.push_back( Primitives( primitives.size() ) );
-  int pts = readFile ( filename, (primitives.back()).getSurfels() );
+  objects.push_back( Object( objects.size() ) );
+  int pts = readFile ( filename, (objects.back()).getSurfels() );
   return pts;
 }
 
+/// Finalizes the multiple files reading routine.
+/// Creates all objects arrays.
 int Application::finishFileReading ( void ) {
 
-  for (unsigned int i = 0; i < primitives.size(); ++i) {
-	primitives[i].setRendererType( render_mode );
-	//primitives[i].clearSurfels();
-  }
+  for (unsigned int i = 0; i < objects.size(); ++i)
+	objects[i].setRendererType( render_mode );
   createPointRenderer();
 
   return 0;
@@ -526,8 +508,8 @@ void Application::mouseWheel( int step, bool shift, bool ctrl, bool alt ) {
 int Application::getNumberPoints ( void ) {
   
   int num_pts = 0;
-  for (unsigned int i = 0; i < primitives.size(); ++i)
-	num_pts += primitives[i].numberPoints();
+  for (unsigned int i = 0; i < objects.size(); ++i)
+	num_pts += objects[i].numberPoints();
 
   return num_pts;
 }
@@ -574,9 +556,9 @@ void Application::setGpuMask ( int m ) {
  * @param c Per-vertex color state.
  **/
 void Application::setPerVertexColor ( bool c ) {
-  for (unsigned int i = 0; i < primitives.size(); ++i) {
+  for (unsigned int i = 0; i < objects.size(); ++i) {
 	// Reset renderer type to load per vertex color or default color in vertex array
-	primitives[i].setRendererType( primitives[i].getRendererType() );
+	objects[i].setRendererType( objects[i].getRendererType() );
   }
 }
 
@@ -631,18 +613,21 @@ void Application::setQualityPerVertex ( bool c ) {
   point_based_render->setQualityPerVertex(c);
 }
 
-
+/// Cycles through objects list for displaying individual parts of the model.
+/// When selected = 0 displays all files
 void Application::increaseSelected ( void ) {
   selected++;
-  if (selected > (int)primitives.size())
+  if (selected > (int)objects.size())
 	selected = 0;
   cout << "selected : " << selected << endl;
 
 }
 
+/// Cycles through objects list for displaying individual parts of the model.
+/// When selected = 0 displays all files
 void Application::decreaseSelected ( void ) {
   selected--;
   if (selected < 0)
-	selected = primitives.size();
+	selected = objects.size();
   cout << "selected : " << selected << endl;
 }

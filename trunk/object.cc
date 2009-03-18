@@ -1,10 +1,8 @@
-//#include "glslKernel/glslKernel.h"
-
-#include "primitives.h"
+#include "object.h"
 #include "point_based_renderer.h"
 
 
-Primitives::~Primitives() {
+Object::~Object() {
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
@@ -17,7 +15,7 @@ Primitives::~Primitives() {
 /**
  * Render object using designed rendering system.
  **/
-void Primitives::render ( void ) const {
+void Object::render ( void ) const {
 
   if (renderer_type == PYRAMID_POINTS) {
 
@@ -61,7 +59,7 @@ void Primitives::render ( void ) const {
  * Changes the renderer type.
  * @param rtype Given renderer type.
  **/
-void Primitives::setRendererType ( int rtype ) {
+void Object::setRendererType ( int rtype ) {
 
   renderer_type = rtype;
 
@@ -84,7 +82,7 @@ void Primitives::setRendererType ( int rtype ) {
 /**
  * Create arrays and VBO.
  **/
-void Primitives::setPyramidPointsArrays ( void ) {
+void Object::setPyramidPointsArrays ( void ) {
 
   GLfloat *vertex_array, *normal_array;
   number_points = surfels.size();
@@ -120,7 +118,7 @@ void Primitives::setPyramidPointsArrays ( void ) {
 /**
  * Create arrays and VBO for pyramid point renderer color class.
  **/
-void Primitives::setPyramidPointsArraysColor ( void ) {
+void Object::setPyramidPointsArraysColor ( void ) {
 
   GLfloat *vertex_array, *normal_array;
   GLubyte *color_array;
@@ -211,6 +209,6 @@ void Primitives::setPyramidPointsArraysColor ( void ) {
   check_for_ogl_error("Array Buffers Creation");
 }
 
-void Primitives::clearSurfels ( void ) {  
+void Object::clearSurfels ( void ) {  
   surfels.clear();
 }

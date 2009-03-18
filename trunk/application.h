@@ -76,7 +76,7 @@ class Application
   Application( GLint default_mode = PYRAMID_POINTS );
   ~Application();
   
-  int readFile ( const char * filename );
+  void readFile ( const char * filename );
   int appendFile ( const char * filename );
 
   int startFileReading ( void );
@@ -141,11 +141,11 @@ class Application
   float fov;
   float scale_factor;
 
-  // Lists of primitives (usually one ply file is associated to one primitive in list)
-  vector<Primitives> primitives;
+  // Lists of objects (usually one ply file is associated to one object in list)
+  vector<Object> objects;
 
-  // Determines which rendering class to use (Pyramid points, pyramid lines for tree rendering, ellipse rasterization ...)
-  // see primitives.h for the complete list (point_render_type_enum).
+  // Determines which rendering class to use (Pyramid points, with color per vertex, templates version ...)
+  // see objects.h for the complete list (point_render_type_enum).
   GLint render_mode;
 
   // Flags on/off

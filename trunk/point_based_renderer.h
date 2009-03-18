@@ -19,8 +19,6 @@
 #include "materials.h"
 #include "object.h"
 
-#include "primitives.h"
-
 /**
  * Base class for rendering algorithms.
  **/
@@ -67,7 +65,7 @@ class PointBasedRenderer
     * Projects samples to screen space.
     * @param p Point to primitives instance containing samples.
     **/
-   virtual void projectSamples(Primitives* p) {}
+   virtual void projectSamples(Object* p) {}
 
    /**
     * Clears all buffers, including those of the framebuffer object.
