@@ -343,7 +343,7 @@ int main(int argc, char * argv []) {
   material = 0;
   quality_threshold = 0.0;
   auto_rotate = false;
-  elliptical_weight = false;
+  elliptical_weight = true;
   depth_test = true;
   back_face_culling = true;
   quality_per_vertex = false;
@@ -402,7 +402,7 @@ int main(int argc, char * argv []) {
   application->setEllipticalWeight( elliptical_weight );
   application->setQualityThreshold( quality_threshold );
   application->setGpuMask ( mask_size );
-  application->setQualityPerVertex( quality_per_vertex );
+  //application->setQualityPerVertex( quality_per_vertex );
 
   //GLUT callback functions
   glutDisplayFunc(display);
