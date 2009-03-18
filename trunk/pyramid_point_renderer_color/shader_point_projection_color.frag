@@ -41,5 +41,5 @@ void main(void)
 
   // avoids point with low quality overwritting point with high quality
   // during depth test
-  // gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
+  gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
 }

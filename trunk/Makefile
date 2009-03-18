@@ -125,4 +125,3 @@ clean:
 depend: $(CODES)
 	makedepend $(INCLUDEDIRS) $(CODES)
 
-# DO NOT DELETE

@@ -55,9 +55,8 @@ void display( void )
 }
 
 void idle( void ) {
-
-  if (auto_rotate)
-	display();
+  //  if (auto_rotate)
+  display();
 }
 
 

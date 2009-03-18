@@ -9,6 +9,8 @@
 
 #include "application.h"
 
+#include "GL/glut.h"
+
 /**
  * Initialize opengl and application state variables.
  **/
@@ -55,22 +57,22 @@ Application::Application( GLint default_mode ) {
   glEnable (GL_LIGHT0);
   glDisable (GL_COLOR_MATERIAL);
 
-  Point3f ambient_light = Point3f( 0.0, 0.0, 0.0 );
-  Point3f diffuse_light = Point3f( 1.0, 1.0, 1.0 );
-  Point3f specular_light = Point3f( 1.0, 1.0, 1.0 );
+//   Point3f ambient_light = Point3f( 0.0, 0.0, 0.0 );
+//   Point3f diffuse_light = Point3f( 1.0, 1.0, 1.0 );
+//   Point3f specular_light = Point3f( 1.0, 1.0, 1.0 );
 
-  GLfloat al[] = {ambient_light[0], ambient_light[1],
-		  ambient_light[2], 1.0};
+//   GLfloat al[] = {ambient_light[0], ambient_light[1],
+// 		  ambient_light[2], 1.0};
 
-  GLfloat dl[] = {diffuse_light[0], diffuse_light[1],
-		  diffuse_light[2], 1.0};
+//   GLfloat dl[] = {diffuse_light[0], diffuse_light[1],
+// 		  diffuse_light[2], 1.0};
 
-  GLfloat sl[] = {specular_light[0], specular_light[1],
-		  specular_light[2], 1.0};
+//   GLfloat sl[] = {specular_light[0], specular_light[1],
+// 		  specular_light[2], 1.0};
 
-  glLightfv(GL_LIGHT0, GL_AMBIENT, al);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
+//   glLightfv(GL_LIGHT0, GL_AMBIENT, al);
+//   glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
+//   glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
 
@@ -157,6 +159,12 @@ void Application::setView( void )
  **/
 void Application::draw( void ) {
 
+//   static int time;
+//   static int frame = 0;
+//   if (frame == 0)
+// 	time = glutGet(GLUT_ELAPSED_TIME);
+//   frame ++;
+
   if (primitives.size() == 0)
     return;  
 
@@ -165,18 +173,8 @@ void Application::draw( void ) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   point_based_render->clearBuffers();
 
+  // initializes matrices, perspective and look at
   setView();
-  // Reset camera position and direction
-//   glMatrixMode(GL_PROJECTION);
-//   glLoadIdentity();
-//   glViewport(0, 0, canvas_width, canvas_height);
-//   gluPerspective( 60, (GLfloat)canvas_width/(GLfloat)canvas_height, 0.001, 100.0 );
-  
-//   glMatrixMode(GL_MODELVIEW);
-//   glLoadIdentity();
-
-//   Point camera_offset (0, 0, 5);
-//   gluLookAt(camera_offset[0], camera_offset[1], camera_offset[2],   0,0,0,   0,1,0);
 
   /** Set light direction **/
   glPushMatrix();
@@ -191,7 +189,11 @@ void Application::draw( void ) {
 
   // Apply trackball transformation
   glPushMatrix();
+
+  // Loads current OpenGl state matrices into trackball matrices
   trackball.GetView();
+
+  // apllys transformations : translate to origin, multiply by trackball matrix, translate back
   trackball.Apply();
 
   // Use bounding box to centralize and scale object
@@ -207,19 +209,15 @@ void Application::draw( void ) {
   tr.radius = trackball.radius;
   tr.center = trackball.center;
   tr.GetView();
+  // the ViewPoint method returns the eye position (0,0,0) multiplied by the inverse modelview matrix
   vcg::Point3f vp = tr.camera.ViewPoint();
   glPopMatrix();
-
-//   vcg::Matrix44f rotM;
-//   trackball.track.rot.ToMatrix(rotM); 
-//   vcg::Invert(rotM);
-//   vcg::Point3<float> vp = rotM*vcg::Point3f(0, 0, camera_offset[2]);
-  
-  // Set eye for back face culling in vertex shader
+ 
+  // Set eye for back face culling in vertex shader of projection phase
   point_based_render->setEye( Point3f(vp[0], vp[1], vp[2]) );
 
-  // Set factor for scaling projected radii of samples
-  point_based_render->setScaleFactor( scale_factor ); 
+  // Set factor for scaling projected radii of samples in projection phase
+  point_based_render->setScaleFactor( scale_factor );
 
   // project all primitives
   if (selected == 0)
@@ -229,7 +227,7 @@ void Application::draw( void ) {
   else
 	point_based_render->projectSamples( &primitives[selected-1] );
 
-  // Interpolates projected surfels using pyramid algorithm
+  // Interpolates projected surfels using pyramid algorithm (pull-push)
   point_based_render->interpolate();
 
   // Computes per pixel color with deferred shading
@@ -244,7 +242,12 @@ void Application::draw( void ) {
 
   glPopMatrix();
 
-  // necessary to compute correct fps
+//   if (frame == 10) {
+// 	frame = 0;
+// 	int endtime = glutGet(GLUT_ELAPSED_TIME);
+// 	cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
+//   }
+
   //  glFinish();
 }
 
@@ -346,8 +349,9 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
 	  c = Color4b ((GLubyte)(*vit).C()[0], (GLubyte)(*vit).C()[1], (GLubyte)(*vit).C()[2], 1.0);
 	}
 
+	// must include Radius field in ply lib to not use the quality as radius
     double radius = (double)((*vit).Q());
-	//double radius = 0.25;
+	//double radius = 0.025;
 	
 	surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
 	++pos;
@@ -397,8 +401,6 @@ int Application::appendFile ( const char * filename ) {
 
    // Create a new primitive from given file
 
-  //cout << primitives.size() << " : " << filename << endl;
-
   primitives.push_back( Primitives( primitives.size() ) );
   int id = primitives.back().getId();
 
@@ -406,11 +408,6 @@ int Application::appendFile ( const char * filename ) {
 
   int pts = readFile ( filename, (primitives.back()).getSurfels() );
 
-//   if (primitives.size() == 1)
-// 	computeNormFactors(primitives[id].getSurfels());
-//   normalize(primitives[id].getSurfels());
-//  primitives[id].setRendererType( render_mode );
-//   primitives[id].clearSurfels();
 
   return pts;
 }

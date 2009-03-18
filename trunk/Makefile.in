@@ -9,7 +9,7 @@ CXX = g++
 VCGDIR = $(HOME)/progs/vcglib
 
 ifeq ($(OS), windows)
-INCLUDEDIRS = -I. -I.. -I/usr/include/GL -I./pyramid_point_renderer_base/ \
+INCLUDEDIRS = -I$(VCGDIR) -I. -I.. -I/usr/include/GL -I./pyramid_point_renderer_base/ \
 	-I./pyramid_point_renderer/ -I./pyramid_point_renderer_color/ -I./pyramid_templates/
 OBJDIR = ./objs
 else
