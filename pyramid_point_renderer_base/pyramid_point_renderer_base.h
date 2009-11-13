@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <cstdlib>
 
 #include "point_based_renderer.h"
 

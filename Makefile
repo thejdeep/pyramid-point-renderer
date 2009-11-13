@@ -1,6 +1,8 @@
 
 OS = linux
 
+include Makefile.in
+
 OBJECTS = application.o \
 	main.o \
 	point_based_renderer.o \
@@ -30,14 +32,13 @@ CODES =	application.cc \
 	main.cc \
 	point_based_renderer.cc \
 	object.cc \
-	$(HOME)/progs/vcglib/wrap/gui/trackball.cpp \
-	$(HOME)/progs/vcglib/wrap/gui/trackmode.cpp \
+	$(VCGDIR)/wrap/gui/trackball.cpp \
+	$(VCGDIR)/wrap/gui/trackmode.cpp \
 	pyramid_point_renderer/pyramid_point_renderer_base.cc \
 	pyramid_point_renderer/pyramid_point_renderer.cc \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
 	pyramid_templates/pyramid_point_renderer_er.cc
 
-include Makefile.in
 
 OBJ = $(patsubst %,$(OBJDIR)/%,$(OBJECTS))
 
