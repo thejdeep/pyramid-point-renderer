@@ -34,6 +34,7 @@ using namespace std;
 #include "pyramid_point_renderer_base.h"
 #include "pyramid_point_renderer.h"
 #include "pyramid_point_renderer_color.h"
+#include "pyramid_point_renderer_elipse.h"
 #include "pyramid_point_renderer_er.h"
 
 #include <vcg/simplex/vertex/base.h>

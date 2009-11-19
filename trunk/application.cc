@@ -264,6 +264,8 @@ void Application::createPointRenderer( void ) {
 
   if (render_mode == PYRAMID_POINTS)
 	point_based_render = new PyramidPointRenderer(canvas_width, canvas_height);
+  else if (render_mode == PYRAMID_ELIPSES)
+	point_based_render = new PyramidPointRendererElipse(canvas_width, canvas_height);
   else if (render_mode == PYRAMID_POINTS_COLOR)
 	point_based_render = new PyramidPointRendererColor(canvas_width, canvas_height);
   else if (render_mode == PYRAMID_TEMPLATES)

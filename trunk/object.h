@@ -20,7 +20,8 @@ typedef enum
   {
     PYRAMID_POINTS,
     PYRAMID_POINTS_COLOR,
-    PYRAMID_TEMPLATES
+    PYRAMID_TEMPLATES,
+    PYRAMID_ELIPSES
   } point_render_type_enum;
 
 using namespace std;
@@ -65,6 +66,7 @@ class Object
  private:
 
   void setPyramidPointsArrays( void );
+  void setPyramidElipsesArrays( void );
   void setPyramidPointsArraysColor( void );
 
   // Object group identification number.
