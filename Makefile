@@ -14,6 +14,7 @@ OBJECTS = application.o \
 SUBDIRS = pyramid_point_renderer_base \
 	pyramid_point_renderer \
 	pyramid_point_renderer_color \
+	pyramid_point_renderer_elipse \
 	pyramid_templates
 
 OBJS =	application.o \
@@ -26,6 +27,7 @@ OBJS =	application.o \
 	pyramid_point_renderer_base.o \
 	pyramid_point_renderer.o \
 	pyramid_point_renderer_color.o \
+	pyramid_point_renderer_elipse.o \
 	pyramid_point_renderer_er.o
 
 CODES =	application.cc \
@@ -37,6 +39,7 @@ CODES =	application.cc \
 	pyramid_point_renderer/pyramid_point_renderer_base.cc \
 	pyramid_point_renderer/pyramid_point_renderer.cc \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
+	pyramid_point_renderer_elipse/pyramid_point_renderer_elipse.cc \
 	pyramid_templates/pyramid_point_renderer_er.cc
 
 
@@ -69,6 +72,7 @@ HEADERS = application.h \
 	pyramid_point_renderer/pyramid_point_renderer_base.h \
 	pyramid_point_renderer/pyramid_point_renderer.h \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.h \
+	pyramid_point_renderer_elipse/pyramid_point_renderer_elipse.h \
 	pyramid_templates/pyramid_point_renderer_er.h
 
 ###################################

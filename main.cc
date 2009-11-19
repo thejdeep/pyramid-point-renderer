@@ -202,6 +202,10 @@ void keyboardSpecial(int key_pressed, int x, int y) {
     application->changeRendererType ( 2 );
 	cout << "PYRAMID TEMPLATES WITH COLOR" << endl;
     break;
+  case GLUT_KEY_F4 :
+    application->changeRendererType ( 3 );
+	cout << "PYRAMID ELIPSES" << endl;
+    break;
   }
 
   // reset values
