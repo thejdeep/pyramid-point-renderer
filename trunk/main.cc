@@ -213,6 +213,7 @@ void keyboardSpecial(int key_pressed, int x, int y) {
   case GLUT_KEY_F1 :
   case GLUT_KEY_F2 :
   case GLUT_KEY_F3 :
+  case GLUT_KEY_F4 :
     application->setGpuMask ( mask_size );
     application->changeMaterial ( material );
     application->setReconstructionFilter ( reconstruction_filter_size );
