@@ -13,37 +13,35 @@ PyramidPointRendererER::PyramidPointRendererER(int w, int h) : PyramidPointRende
 }
 
 const int PyramidPointRendererER::projectionCallbackFunc( void )  {
-  mShaderProjection.prog.Bind();
-  mShaderProjection.prog.Uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
-  mShaderProjection.prog.Uniform("back_face_culling", (GLint)back_face_culling);
-  mShaderProjection.prog.Uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
-  mShaderProjection.prog.Uniform("scale", (GLfloat)scale_factor);
-  mShaderProjection.prog.Uniform("canvas_width", (GLfloat)canvas_width);
-  mShaderProjection.prog.Uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
-  mShaderProjection.prog.Uniform("mask_size", gpu_mask_size);
+	mShaderProjection.prog.Bind();
+	mShaderProjection.prog.Uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+	mShaderProjection.prog.Uniform("back_face_culling", (GLint)back_face_culling);
+	mShaderProjection.prog.Uniform("oo_fbo_size", (GLfloat)(1.0/(GLfloat)fbo_width), (GLfloat)(1.0/(GLfloat)fbo_height));
+	mShaderProjection.prog.Uniform("scale", (GLfloat)scale_factor);
+	mShaderProjection.prog.Uniform("canvas_width", (GLfloat)canvas_width);
+	mShaderProjection.prog.Uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+	mShaderProjection.prog.Uniform("mask_size", gpu_mask_size);
 
-
-  return true;
+	return true;
 }
 
 const int PyramidPointRendererER::analysisCallbackFunc( void )  {
 
-  mShaderAnalysis.prog.Bind();
-  mShaderAnalysis.prog.Uniform("oo_2fbo_size", (GLfloat)(0.5 / (GLfloat)fbo_width), (GLfloat)(0.5 / (GLfloat)fbo_height));
-  mShaderAnalysis.prog.Uniform("level", (GLint)cur_level);
-  mShaderAnalysis.prog.Uniform("canvas_width", (GLfloat)canvas_width);
-  mShaderAnalysis.prog.Uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
-  mShaderAnalysis.prog.Uniform("depth_test", (bool)depth_test);
-  mShaderAnalysis.prog.Uniform("mask_size", (GLint)gpu_mask_size);
-  mShaderAnalysis.prog.Uniform("quality_threshold", (GLfloat)quality_threshold);
-  mShaderAnalysis.prog.Uniform("quality_per_vertex", (bool)quality_per_vertex);
+	mShaderAnalysis.prog.Bind();
+	mShaderAnalysis.prog.Uniform("oo_2fbo_size", (GLfloat)(0.5 / (GLfloat)fbo_width), (GLfloat)(0.5 / (GLfloat)fbo_height));
+	mShaderAnalysis.prog.Uniform("level", (GLint)cur_level);
+	mShaderAnalysis.prog.Uniform("canvas_width", (GLfloat)canvas_width);
+	mShaderAnalysis.prog.Uniform("reconstruction_filter_size", (GLfloat)(reconstruction_filter_size));
+	mShaderAnalysis.prog.Uniform("depth_test", (bool)depth_test);
+	mShaderAnalysis.prog.Uniform("mask_size", (GLint)gpu_mask_size);
+	mShaderAnalysis.prog.Uniform("quality_threshold", (GLfloat)quality_threshold);
+	mShaderAnalysis.prog.Uniform("quality_per_vertex", (bool)quality_per_vertex);
 
-  // Loads the textures ids as uniforms for shader access
-  for (int i = 0; i < fbo_buffers_count/2; ++i)
-     mShaderAnalysis.prog.Uniform(shader_texture_names[i].c_str(), i);
+	// Loads the textures ids as uniforms for shader access
+	for (int i = 0; i < fbo_buffers_count/2; ++i)
+		mShaderAnalysis.prog.Uniform(shader_texture_names[i].c_str(), i);
 
-
-  return false; /* not done, rasterize quad */
+	return false; /* not done, rasterize quad */
 }
 
 
@@ -106,18 +104,17 @@ void PyramidPointRendererER::rasterizeSynthesisPyramid( void )
 
 const int PyramidPointRendererER::phongShadingCallbackFunc( void ) 
 {
-  mShaderPhong.prog.Bind();
+	mShaderPhong.prog.Bind();
 
-  mShaderPhong.prog.Uniform("textureA", 0);
-  mShaderPhong.prog.Uniform("textureB", 1);
+	mShaderPhong.prog.Uniform("textureA", 0);
+	mShaderPhong.prog.Uniform("textureB", 1);
 
-  mShaderPhong.prog.Uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
-  mShaderPhong.prog.Uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
-  mShaderPhong.prog.Uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
-  mShaderPhong.prog.Uniform("shininess", Mats[material_id][12]);
+	mShaderPhong.prog.Uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
+	mShaderPhong.prog.Uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
+	mShaderPhong.prog.Uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
+	mShaderPhong.prog.Uniform("shininess", Mats[material_id][12]);
 
-
-  return false; /* not done, rasterize quad */
+	return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererER::rasterizePhongShading(int bufferIndex)

@@ -35,60 +35,64 @@ typedef vector<Surfeld>::iterator surfelVectorIter;
 
 class Object
 {
- public:
-  
-  Object() { }
+  public:
 
-  Object(int id_num, GLfloat t) : id(id_num) {}
-    
-  Object(int id_num) : id(id_num)  {}
-      
-  ~Object();
+	Object() { }
 
-  void render ( void ) const;
+	Object(int id_num, GLfloat t) : id(id_num) {}
 
-  vector<Surfeld> * getSurfels ( void ) { return &surfels; }
+	Object(int id_num) : id(id_num)  {}
 
-  void clearSurfels ( void );
+	~Object();
 
-  int getRendererType ( void ) { return renderer_type; }
-  void setRendererType ( int type );
+	void render ( void ) const;
 
-  void setId ( int id_num ) { id = id_num; }
-  int getId ( void ) { return id; }
+	vector<Surfeld> * getSurfels ( void ) { return &surfels; }
 
-  int numberPoints ( void ) const { return number_points; }
+	void clearSurfels ( void );
 
-  Point3f eye;
+	int getRendererType ( void ) { return renderer_type; }
+	void setRendererType ( int type );
 
-  float max_quality;
+	void setId ( int id_num ) { id = id_num; }
+	int getId ( void ) { return id; }
 
- private:
+	int numberPoints ( void ) const { return number_points; }
 
-  void setPyramidPointsArrays( void );
-  void setPyramidElipsesArrays( void );
-  void setPyramidPointsArraysColor( void );
+	Point3f eye;
 
-  // Object group identification number.
-  int id;
- 
-  // Rendering type.
-  int renderer_type;
+	float max_quality;
 
-  /// Vertex buffer
-  GLuint vertex_buffer;
+  private:
 
-  /// Color Buffer
-  GLuint color_buffer;
+	void setPyramidPointsArrays( void );
+	void setPyramidElipsesArrays( void );
+	void setPyramidPointsArraysColor( void );
 
-  /// Normal Buffer
-  GLuint normal_buffer;
+	// Object group identification number.
+	int id;
 
-  /// Number of samples.
-  int number_points;
+	// Rendering type.
+	int renderer_type;
 
-  // Vector of surfels belonging to this object.
-  vector<Surfeld> surfels;
+	/// Vertex buffer
+	GLuint vertex_buffer;
+
+	/// Color Buffer
+	GLuint color_buffer;
+
+	/// Normal Buffer
+	GLuint normal_buffer;
+
+	/// Ellipses axes buffers
+	GLuint u_buffer;
+	GLuint v_buffer;
+
+	/// Number of samples.
+	int number_points;
+
+	// Vector of surfels belonging to this object.
+	vector<Surfeld> surfels;
 
 };
 
