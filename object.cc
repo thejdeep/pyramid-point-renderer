@@ -3,13 +3,16 @@
 
 
 Object::~Object() {
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-  glDeleteBuffers(1, &vertex_buffer);
-  glDeleteBuffers(1, &color_buffer);
-  glDeleteBuffers(1, &normal_buffer);
+	glDeleteBuffers(1, &vertex_buffer);
+	glDeleteBuffers(1, &color_buffer);
+	glDeleteBuffers(1, &normal_buffer);
+	glDeleteBuffers(1, &u_buffer);
+	glDeleteBuffers(1, &v_buffer);
 }
 
 /**
@@ -36,8 +39,12 @@ void Object::render ( void ) const {
     glVertexPointer(4, GL_FLOAT, 0, NULL);
 
     glEnableClientState(GL_NORMAL_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, u_buffer);
     glNormalPointer(GL_FLOAT, 0, NULL);
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, v_buffer);
+    glTexCoordPointer(4, GL_FLOAT, 0, NULL);
 
     glDrawArrays(GL_POINTS, 0, number_points);
   }
@@ -62,8 +69,9 @@ void Object::render ( void ) const {
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-  check_for_ogl_error("Pritives render");
+  check_for_ogl_error("Primitives render");
 
 }
 
@@ -98,35 +106,47 @@ void Object::setRendererType ( int rtype ) {
  **/
 void Object::setPyramidElipsesArrays ( void ) {
 
-  GLfloat *vertex_array, *normal_array;
-  number_points = surfels.size();
-  vertex_array = new GLfloat[number_points * 4];
-  normal_array = new GLfloat[number_points * 3];
+	/// Create the coordinates array, and the two principal axes arrays
+	GLfloat *vertex_array, *u_array, *v_array;
+	number_points = surfels.size();
+	vertex_array = new GLfloat[number_points * 4];
+	u_array = new GLfloat[number_points * 3];
+	v_array = new GLfloat[number_points * 4];
 
-  int pos = 0;
-  for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
+	int pos = 0;
+	for (surfelVectorIter it = surfels.begin(); it != surfels.end(); ++it) {
 
-    vertex_array[pos*4 + 0] = (GLfloat)(it->Center()[0]);
-    vertex_array[pos*4 + 1] = (GLfloat)(it->Center()[1]);
-    vertex_array[pos*4 + 2] = (GLfloat)(it->Center()[2]);
-    vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
+		vertex_array[pos*4 + 0] = (GLfloat)(it->Center()[0]);
+		vertex_array[pos*4 + 1] = (GLfloat)(it->Center()[1]);
+		vertex_array[pos*4 + 2] = (GLfloat)(it->Center()[2]);
+		vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-    normal_array[pos*3 + 0] = (GLfloat)(it->Normal()[0]);
-    normal_array[pos*3 + 1] = (GLfloat)(it->Normal()[1]);
-    normal_array[pos*3 + 2] = (GLfloat)(it->Normal()[2]);
+		u_array[pos*3 + 0] = (GLfloat)(it->Normal()[0]);
+		u_array[pos*3 + 1] = (GLfloat)(it->Normal()[1]);
+		u_array[pos*3 + 2] = (GLfloat)(it->Normal()[2]);
 
-    ++pos;
-  }
+		v_array[pos*4 + 0] = (GLfloat)(it->Normal()[0]);
+		v_array[pos*4 + 1] = (GLfloat)(it->Normal()[1]);
+		v_array[pos*4 + 2] = (GLfloat)(it->Normal()[2]);
+		v_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-  glGenBuffers(1, &vertex_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-  glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)vertex_array, GL_STATIC_DRAW);
-  delete [] vertex_array;
+		++pos;
+	}
 
-  glGenBuffers(1, &normal_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-  glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)normal_array, GL_STATIC_DRAW);
-  delete [] normal_array;
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)vertex_array, GL_STATIC_DRAW);
+	delete [] vertex_array;
+
+	glGenBuffers(1, &u_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, u_buffer);
+	glBufferData(GL_ARRAY_BUFFER, number_points * 3 * sizeof(float), (const void*)u_array, GL_STATIC_DRAW);
+	delete [] u_array;
+
+	glGenBuffers(1, &v_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, v_buffer);
+	glBufferData(GL_ARRAY_BUFFER, number_points * 4 * sizeof(float), (const void*)v_array, GL_STATIC_DRAW);
+	delete [] v_array;
 }
 
 /**

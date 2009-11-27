@@ -476,7 +476,6 @@ void PyramidPointRendererBase::copyAnalysisPyramid( void ) {
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, COPY);
 	  mShaderCopy.prog.Unbind();
     }
-
 }
 
 const int PyramidPointRendererBase::synthesisCallbackFunc( void ) 
@@ -529,51 +528,50 @@ void PyramidPointRendererBase::rasterizeSynthesisPyramid( void )
  **/
 const int PyramidPointRendererBase::phongShadingCallbackFunc( void ) 
 {
-  mShaderPhong.prog.Bind();
+	mShaderPhong.prog.Bind();
 
-  mShaderPhong.prog.Uniform(shader_texture_names[0].c_str(), 0);
-  for (int i = 2; i < fbo_buffers_count/2; ++i) 
-    mShaderPhong.prog.Uniform(shader_texture_names[i].c_str(), i-1);
+	mShaderPhong.prog.Uniform(shader_texture_names[0].c_str(), 0);
+	for (int i = 2; i < fbo_buffers_count/2; ++i)
+		mShaderPhong.prog.Uniform(shader_texture_names[i].c_str(), i-1);
 
-  mShaderPhong.prog.Uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
-  mShaderPhong.prog.Uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
-  mShaderPhong.prog.Uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
-  mShaderPhong.prog.Uniform("shininess", Mats[material_id][12]);
+	mShaderPhong.prog.Uniform("color_ambient", Mats[material_id][0], Mats[material_id][1], Mats[material_id][2], Mats[material_id][3]);
+	mShaderPhong.prog.Uniform("color_diffuse", Mats[material_id][4], Mats[material_id][5], Mats[material_id][6], Mats[material_id][7]);
+	mShaderPhong.prog.Uniform("color_specular", Mats[material_id][8], Mats[material_id][9], Mats[material_id][10], Mats[material_id][11]);
+	mShaderPhong.prog.Uniform("shininess", Mats[material_id][12]);
 
-  return false; /* not done, rasterize quad */
+	return false; /* not done, rasterize quad */
 }
 
 void PyramidPointRendererBase::rasterizePhongShading(int bufferIndex)
      /* using ping-pong rasterization between color attachment pairs 0-2 and 1-3 */
 {
-  int level = 0;
-  pixels_struct nullPixels;
-  pixels_struct sourcePixels;
-  pixels_struct destinationPixels;
+	int level = 0;
+	pixels_struct nullPixels;
+	pixels_struct sourcePixels;
+	pixels_struct destinationPixels;
 
-  nullPixels = generatePixels(0, 0, 0, 0);
+	nullPixels = generatePixels(0, 0, 0, 0);
 
-  mShaderProjection.prog.Unbind();
-  mShaderCopy.prog.Unbind();
-  mShaderAnalysis.prog.Unbind();
-  mShaderSynthesis.prog.Unbind();
-  mShaderPhong.prog.Unbind();
+	mShaderProjection.prog.Unbind();
+	mShaderCopy.prog.Unbind();
+	mShaderAnalysis.prog.Unbind();
+	mShaderSynthesis.prog.Unbind();
+	mShaderPhong.prog.Unbind();
 
-  GLuint buffers[fbo_buffers_count/2 - 1];
+	GLuint buffers[fbo_buffers_count/2 - 1];
 
-  buffers[0] = fbo_buffers[bufferIndex];
+	buffers[0] = fbo_buffers[bufferIndex];
 
-  for (int i = 1; i < fbo_buffers_count/2; ++i)
-    buffers[i] = fbo_buffers[bufferIndex + i*2 + 2];
-  sourcePixels = generatePixels(level, fbo, fbo_buffers_count/2 - 1, &buffers[0]);
+	for (int i = 1; i < fbo_buffers_count/2; ++i)
+		buffers[i] = fbo_buffers[bufferIndex + i*2 + 2];
+	sourcePixels = generatePixels(level, fbo, fbo_buffers_count/2 - 1, &buffers[0]);
 
-  GLuint back[1] = {GL_BACK};
-  destinationPixels = generatePixels(level, 0, 1, &back[0]);
-  rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
+	GLuint back[1] = {GL_BACK};
+	destinationPixels = generatePixels(level, 0, 1, &back[0]);
+	rasterizePixels(destinationPixels, sourcePixels, nullPixels, PHONG);
 
-  mShaderPhong.prog.Unbind();
+	mShaderPhong.prog.Unbind();
 }
-
 
 /**
  * Clear all framebuffers and screen buffer.

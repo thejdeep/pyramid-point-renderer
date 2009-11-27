@@ -2,7 +2,7 @@
 ** pyramid_point_renderer.h Pyramid Point Based Rendering header.
 **
 **
-**   history:	created  02-Jul-07
+**   history:	created  20-Nov-09
 */
 
 
@@ -16,12 +16,11 @@
 
 class PyramidPointRendererElipse : public PyramidPointRendererBase
 {
- private:
-  void createShaders ( void );
+	private:
+		void createShaders ( void );
 
- public:
-
-  PyramidPointRendererElipse(int w, int h);
+	public:
+		PyramidPointRendererElipse(int w, int h);
  
 };
 

@@ -349,8 +349,8 @@ int main(int argc, char * argv []) {
   quality_threshold = 0.0;
   auto_rotate = false;
   elliptical_weight = true;
-  depth_test = true;
-  back_face_culling = true;
+  depth_test = false;
+  back_face_culling = false;
   quality_per_vertex = false;
 
   GLenum err = glewInit();
