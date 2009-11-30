@@ -1,7 +1,7 @@
 #version 120
 
-uniform sampler2D textureA;
 uniform sampler2D textureB;
+uniform sampler2D textureC;
 
 uniform vec4 color_ambient;
 uniform vec4 color_diffuse;
@@ -10,18 +10,18 @@ uniform float shininess;
 
 void main (void) {
 
-	vec4 minor_axis = texture2D (textureA, gl_TexCoord[0].st).xyzw;    
+	vec4 minor_axis = texture2D (textureB, gl_TexCoord[0].st).xyzw;    
 	vec4 color = vec4(1.0);
 
-	if (minor_axis.a != 0.0) {
+	if (minor_axis.w != 0.0) {
 
-		vec4 major_axis = texture2D (textureB, gl_TexCoord[0].st).xyzw;
-		vec4 normal = cross(minor_axis, major_axis);
-	
+		vec4 major_axis = texture2D (textureC, gl_TexCoord[0].st).xyzw;
+		vec3 normal = cross(minor_axis.xyz, major_axis.xyz);
+
 	    normal = normalize(normal);
 
 		if (shininess == 99.0) {
-			color.rgb = normal.rgb; 
+			color.rgb = normal.rgb;
 		}
 		else {
 			vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
@@ -41,7 +41,8 @@ void main (void) {
 		color.a = 1.0;
 	}
 	else
-    	color = vec4(1.0, 0.0, 0.0, 1.0);
-  
+    	color = vec4(1.0, 1.0, 1.0, 0.0);
+
 	gl_FragColor = color;
 }
+

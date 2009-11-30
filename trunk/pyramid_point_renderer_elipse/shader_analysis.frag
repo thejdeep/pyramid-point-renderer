@@ -31,7 +31,8 @@ vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size),
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
-float pointInEllipse(in vec2 d, in float major_axis_length, in float minor_axis_length, in vec3 major_axis, in vec3 minor_axis){
+float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length, 
+					 in vec3 minor_axis, in vec3 major_axis){
   float len = length(minor_axis.xy);
 
   if (len == 0.0)
@@ -104,11 +105,9 @@ void main (void) {
   float zmax = -10000.0;
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
-    if (pixelA[i].w > 0.0) {
-      dist_test = pointInEllipse(pixelA[i].zw + gather_pixel_desloc[i].xy, pixelB[i].w, pixelC[i].w, pixelB[i].xyz,
-      pixelC[i].xyz);
-      //dist_test = pointInCircle(pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w);
-      //dist_test = intersectEllipsePixel (pixelB[i].zw + gather_pixel_desloc[i].xy, pixelA[i].w, pixelA[i].xyz, half_pixel_size*2.0);
+    if (pixelB[i].w > 0.0) {
+      dist_test = 1.0;
+      //dist_test = pointInEllipse(pixelA[i].zw + gather_pixel_desloc[i].xy, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
 
 	  if  (dist_test != 0.0)
 		{
@@ -131,9 +130,8 @@ void main (void) {
   for (int i = 0; i < 4; ++i)
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
-      if (pixelB[i].w > 0.0) 
+      if (pixelB[i].w > 0.0)
 		{
-	  	
 		  //if (abs(pixelC[i].w - obj_id) < 0.1 )
 		  {
 			// Depth test between valid in reach ellipses
@@ -146,7 +144,7 @@ void main (void) {
 
 				// Increment ellipse total path with distance from gather pixel to center
 				bufferA.zw += (pixelA[i].zw + gather_pixel_desloc[i].xy) * w;	     
-	      
+
 				// Take maximum depth range
 				new_zmax = max(pixelA[i].x + pixelA[i].y, new_zmax);
 	      
@@ -158,7 +156,7 @@ void main (void) {
 
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
-  
+
   if (valid_pixels > 0.0)
     {
       bufferA.x = zmin;

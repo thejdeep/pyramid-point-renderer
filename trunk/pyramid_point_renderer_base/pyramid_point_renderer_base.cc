@@ -393,7 +393,6 @@ const int PyramidPointRendererBase::analysisCallbackFunc( void )  {
   for (int i = 0; i < fbo_buffers_count/2; ++i)
      mShaderAnalysis.prog.Uniform(shader_texture_names[i].c_str(), i);
 
-
   // Not done, still has to rasterize quads with textures.
   return false; 
 }
@@ -424,9 +423,9 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
 	buffers[i] = fbo_buffers[i*2 + ((level - 1) % 2)];
       sourcePixels = generatePixels(level - 1, fbo, fbo_buffers_count/2, &buffers[0]);
       
-      // Destination texture with correspondig level position, always one above the source texture level
+      // Destination texture with corresponding level position, always one above the source texture level
       for (int i = 0; i < fbo_buffers_count/2; ++i)
-	buffers[i] = fbo_buffers[i*2 + ((level) % 2)];
+    	  buffers[i] = fbo_buffers[i*2 + ((level) % 2)];
       destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
       
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, ANALYSIS);
