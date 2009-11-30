@@ -18,6 +18,9 @@ class PyramidPointRendererElipse : public PyramidPointRendererBase
 {
 	private:
 		void createShaders ( void );
+		const int phongShadingCallbackFunc( void );
+
+		void rasterizePhongShading(int bufferIndex);
 
 	public:
 		PyramidPointRendererElipse(int w, int h);

@@ -13,19 +13,24 @@ varying vec3 major_axis;
 varying float minor_length;
 varying float major_length;
 varying float depth;
-varying float w;
 varying float dist_to_eye;
 
 void main(void)
 {  
-	minor_axis = gl_Normal.xyz;
-	major_axis = gl_TexCoord[0].xyz;
+	vec3 normal = gl_Normal.xyz;
+	//minor_axis = gl_Normal.xyz;
+	//major_axis = gl_TexCoord[0].xyz;
+	
+	if (normal.y > 0.01)
+		minor_axis = normalize(cross(vec3(0,0,1), normal));
+	else
+		minor_axis = normalize(cross(normal, vec3(0,1,0)));
+	major_axis = normalize(cross(normal, minor_axis));
 
-	if ( (back_face_culling == 1) && (normalize(dot((eye - gl_Vertex.xyz), cross(major_axis, minor_axis))) < -0.1 )) {
-
+	if ( (back_face_culling == 1) && (normalize(dot((eye - gl_Vertex.xyz), cross(minor_axis, major_axis))) < -0.1 )) {	
     	minor_length = 0.0;
     	major_length = 0.0;
-    
+
     	// for some reason seting the vector to vec4(0.0) drops
     	// the performance significantly, at least on the GeForce8800 -- RM 2007-10-19
     	gl_Position = vec4(1.0);
@@ -33,12 +38,12 @@ void main(void)
 	else
 	{
     	// only rotate point and normal if not culled
-      	vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);           
+      	vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
 		gl_TexCoord[0] = gl_MultiTexCoord0;
-		
-		float minor_length = gl_Vertex.w;
-		float major_length = gl_TexCoord[0].w;		
+
+		minor_length = gl_Vertex.w;
+		major_length = gl_TexCoord[0].w;
 
 		minor_axis = normalize(gl_NormalMatrix * minor_axis);
     	major_axis = normalize(gl_NormalMatrix * major_axis);
@@ -47,8 +52,8 @@ void main(void)
 
       	// compute depth value without projection matrix, only modelview
       	depth = -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z;
-      	w = v.w;
-      
+      	//w = v.w;
+
       	gl_Position = v;
 	}
 }

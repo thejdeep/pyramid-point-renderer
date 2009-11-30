@@ -24,7 +24,8 @@ uniform sampler2D textureC;
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
-float pointInEllipse(in vec2 d, in float major_axis_length, in float minor_axis_length, in vec3 major_axis, in vec3 minor_axis){
+float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length, 
+					 in vec3 minor_axis, in vec3 major_axis){
   float len = length(minor_axis.xy);
 
   if (len == 0.0)
@@ -64,7 +65,6 @@ void main (void) {
 
   vec2 tex_coord[4];
 
-  
   vec4 bufferA = vec4(0.0, 0.0, 0.0, 0.0);  
   vec4 bufferB = vec4(0.0, 0.0, 0.0, 0.0);
   vec4 bufferC = vec4(0.0, 0.0, 0.0, 0.0);
@@ -115,7 +115,7 @@ void main (void) {
       // weights
       vec4 weights;
       vec2 tmp = vec2(1.0, 1.0) - fractional;
-    
+
       // down-left
       weights.x = fractional.x * fractional.y;
       // down-right
@@ -211,13 +211,12 @@ void main (void) {
 
 		// if specified scatter pixel test distance to center of ellipse
 		if (pixelB[i].w > 0.0)
-		  //dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
-	  	  dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
+	  	  dist_test = 0.0;//pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
 		else
 		  dist_test = -1.0;
  	
 		// if not specified or out of range dont use it
-		if ((pixelB[i].w == 0.0) || (dist_test == -1.0)) {
+		if (dist_test == -1.0) {
 		  weights[i] = 0.0;
 		}
 		else {
@@ -264,8 +263,7 @@ void main (void) {
 			{
 			  // Depth test between ellipses in range
 			  //if ((!depth_test) || (pixelB[i].x <= zmin + zmax))
-			  if ((!depth_test) || (pixelA[i].x - pixelA[i].y <= zmin + zmax))
-				{
+			  if ((!depth_test) || (pixelA[i].x - pixelA[i].y <= zmin + zmax)) {
 				  total_weight += weights[i];
 				  bufferA += weights[i] * pixelA[i];
 				  bufferB += weights[i] * pixelB[i];
@@ -283,8 +281,8 @@ void main (void) {
 		}
       }
     }
-  
-  	gl_FragData[0] = bufferA;  
-	gl_FragData[1] = bufferB;  
+    	
+  	gl_FragData[0] = bufferA;
+	gl_FragData[1] = bufferB;
 	gl_FragData[2] = bufferC;
 }
