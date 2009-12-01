@@ -420,14 +420,14 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
 
       // Source texture with corresponding level position, starts with original image and moves up
       for (int i = 0; i < fbo_buffers_count/2; ++i)
-	buffers[i] = fbo_buffers[i*2 + ((level - 1) % 2)];
+    	  buffers[i] = fbo_buffers[i*2 + ((level - 1) % 2)];
       sourcePixels = generatePixels(level - 1, fbo, fbo_buffers_count/2, &buffers[0]);
-      
+
       // Destination texture with corresponding level position, always one above the source texture level
       for (int i = 0; i < fbo_buffers_count/2; ++i)
     	  buffers[i] = fbo_buffers[i*2 + ((level) % 2)];
       destinationPixels = generatePixels(level, fbo, fbo_buffers_count/2, &buffers[0]);
-      
+
       rasterizePixels(destinationPixels, sourcePixels, nullPixels, ANALYSIS);
 	  mShaderAnalysis.prog.Unbind();
     }

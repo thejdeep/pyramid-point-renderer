@@ -143,11 +143,11 @@ void main (void) {
 				bufferC += pixelC[i] * w;
 
 				// Increment ellipse total path with distance from gather pixel to center
-				bufferA.zw += (pixelA[i].zw + gather_pixel_desloc[i].xy) * w;	     
+				bufferA.zw += (pixelA[i].zw + gather_pixel_desloc[i].xy) * w;
 
 				// Take maximum depth range
 				new_zmax = max(pixelA[i].x + pixelA[i].y, new_zmax);
-	      
+
 				valid_pixels += w;
 			  }
 		  }
@@ -156,9 +156,7 @@ void main (void) {
 
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
-
-  if (valid_pixels > 0.0)
-    {
+  if (valid_pixels > 0.0) {
       bufferA.x = zmin;
       bufferA.y = new_zmax - zmin;
       bufferA.zw /= valid_pixels;
@@ -167,8 +165,7 @@ void main (void) {
       bufferB.xyz = normalize(bufferB.xyz);
       bufferC /= valid_pixels;
       bufferC.xyz = normalize(bufferC.xyz);
-      
-    }
+	}
 
   // first buffer = (depth, max_depth, dx, dy)
   gl_FragData[0] = bufferA;
