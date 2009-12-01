@@ -1,4 +1,5 @@
 /* Synthesis step */
+#version 120
 
 #extension GL_ARB_draw_buffers : enable
 //#version 120
@@ -46,8 +47,8 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
 						  -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 1.0*major_axis_length;
-  float b = 1.0*minor_axis_length;
+  float a = 2.0*major_axis_length;
+  float b = 2.0*minor_axis_length;
 
   // include antialiasing filter
   a += prefilter_size;
@@ -83,8 +84,8 @@ void main (void) {
 
   if (depth_test) {
     if  (bufferB.w != 0.0) {
-      vec4 up_pixelA = texture2D (textureA, gl_TexCoord[2].st).xyzw;
-      vec4 up_pixelB = texture2D (textureB, gl_TexCoord[2].st).xyzw;
+      vec4 up_pixelA = texture2D (textureA, gl_TexCoord[3].st).xyzw;
+      vec4 up_pixelB = texture2D (textureB, gl_TexCoord[3].st).xyzw;
       
       if ( (up_pixelB.w != 0.0) && (bufferA.x > up_pixelA.x + up_pixelA.y) ) {
 		occluded = true;
@@ -97,7 +98,7 @@ void main (void) {
   if ((bufferB.w == 0.0) || occluded)
     {
       // coordinates for pixel on up-right position of coarser level
-      tex_coord[0].st = fbo_size * gl_TexCoord[2].st;
+      tex_coord[0].st = fbo_size * gl_TexCoord[3].st;
       vec2 fractional = fract(tex_coord[0].st);
       tex_coord[0].st += fractional;
   
@@ -211,7 +212,7 @@ void main (void) {
 
 		// if specified scatter pixel test distance to center of ellipse
 		if (pixelB[i].w > 0.0)
-	  	  dist_test = 0.0;//pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
+	  	  dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
 		else
 		  dist_test = -1.0;
  	
