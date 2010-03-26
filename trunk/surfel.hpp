@@ -39,10 +39,9 @@ extern "C"
  * surface normal at it's center.
  **/
 
-
 using namespace vcg;
 
-template <class Real > class Surfel
+template <class Real> class Surfel
 {
 public:
 		
@@ -53,33 +52,32 @@ public:
   {
     mCenter = Point3f();
     mNormal = Point3f();
-	mQuality = 0.0;
+    mQuality = 0.0;
     mSplatRadius = 0.0;
+
   }
-	
   Surfel (const Point3f& position, 
-		  const Point3f& normal,
-		  const Color4b& color,
-		  Real quality,
-		  Real radius,
-		  unsigned int 	id ) : 	mCenter(position),
-								mNormal(normal),
-								mColor(color),
-								mQuality(quality),
-								mSplatRadius(radius),
-								mID(id)
+	  const Point3f& normal,
+	  const Color4b& color,
+	  Real quality,
+	  Real radius,
+	  unsigned int 	id ) : 	mCenter(position),
+				mNormal(normal),
+				mColor(color),
+				mQuality(quality),
+				mSplatRadius(radius),
+				mID(id)
   {
 
   };
-	  
 	  
   inline const Surfel<Real>& operator= ( const Surfel<Real>& pSurfel)
   {
     this->mCenter    = pSurfel.Center();
     this->mNormal    = pSurfel.Normal(); 
     this->mColor     = pSurfel.Color();
-	this->mQuality   = pSurfel.Quality();
-	this->mSplatRadius = pSurfel.Radius();
+    this->mQuality   = pSurfel.Quality();
+    this->mSplatRadius = pSurfel.Radius();
 		 
     return ( *this );
   }
@@ -195,6 +193,13 @@ private:
   /// Surfel ID
   int mID;
 
+  /// Minor Axis
+  std::pair<Real, Point3f> mMinorAxis;
+
+  /// Major Axis
+  std::pair<Real, Point3f> mMajorAxis;
+
 };
+
 
 #endif

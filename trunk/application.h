@@ -77,7 +77,7 @@ class Application
   Application( GLint default_mode = PYRAMID_POINTS );
   ~Application();
   
-  void readFile ( const char * filename );
+  void readFile ( const char * filename, bool eliptical = 0 );
   int appendFile ( const char * filename );
 
   int startFileReading ( void );
@@ -125,7 +125,7 @@ class Application
 
  private :
 
-  int readFile ( const char * filename, vector<Surfeld> *surfels );
+  int readSurfelFile ( const char * filename, vector<Surfeld> *surfels, bool eliptical = 0 );
 
   Trackball trackball;
   Trackball trackball_light;

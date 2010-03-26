@@ -6,7 +6,7 @@ OS = linux
 CC = gcc
 CXX = g++
 
-VCGDIR = $(HOME)/devel/vcglib
+VCGDIR = $(HOME)/devel/vcglib/
 
 ifeq ($(OS), windows)
 INCLUDEDIRS = -I$(VCGDIR) -I. -I.. -I/usr/include/GL -I./pyramid_point_renderer_base/ \

@@ -24,7 +24,7 @@ Application::Application( GLint default_mode ) {
   trackball.radius= 1;
 
   trackball_light.center = vcg::Point3f(0, 0, 0);
-  trackball_light.radius= 1;
+  trackball_light.radius = 1;
 
   clipRatioNear = 1.0;
   clipRatioFar = 10.0;
@@ -276,7 +276,7 @@ void Application::createPointRenderer( void ) {
  * @param filename Given file name.
  * @param surfels Pointer to surfel vector to be filled with mesh data.
  **/
-int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
+int Application::readSurfelFile ( const char * filename, vector<Surfeld> *surfels, bool eliptical ) {
   /** read using vcg plylib **/
   CMesh mesh;
 
@@ -343,18 +343,20 @@ int Application::readFile ( const char * filename, vector<Surfeld> *surfels ) {
  * Reads a ply file, and loads the vertices and triangles in the associated primitive.
  * @param filename Given file name.
  **/
-void Application::readFile ( const char * filename ) {
+void Application::readFile ( const char * filename, bool eliptical ) {
 
   // Create a new primitive from given file
   objects.push_back( Object( objects.size() ) );
 
-  readFile ( filename, (objects.back()).getSurfels() );
+  readSurfelFile ( filename, (objects.back()).getSurfels() );
 
   // Sets the default rendering algorithm
   objects[0].setRendererType( render_mode );
 
   createPointRenderer( );
 }
+
+
 
 
 /// Reads a single file from a list
@@ -364,7 +366,7 @@ void Application::readFile ( const char * filename ) {
 int Application::appendFile ( const char * filename ) { 
    // Create a new primitive from given file
   objects.push_back( Object( objects.size() ) );
-  int pts = readFile ( filename, (objects.back()).getSurfels() );
+  int pts = readSurfelFile ( filename, (objects.back()).getSurfels() );
   return pts;
 }
 

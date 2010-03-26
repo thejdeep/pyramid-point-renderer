@@ -26,7 +26,8 @@ uniform sampler2D textureC;
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length, 
-					 in vec3 minor_axis, in vec3 major_axis){
+					 in vec3 minor_axis, in vec3 major_axis){	
+					 
   float len = length(minor_axis.xy);
 
   if (len == 0.0)
@@ -47,8 +48,8 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
 						  -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 2.0*major_axis_length;
-  float b = 2.0*minor_axis_length;
+  float a = major_axis_length;
+  float b = minor_axis_length;
 
   // include antialiasing filter
   a += prefilter_size;
@@ -206,16 +207,17 @@ void main (void) {
 
       	// distance from synthesized pixel to center of scatter pixel
 		vec2 dist_to_pixel = vec2(float(pixel_config[i*2]), float(pixel_config[i*2 + 1])) * half_pixel_size;		
-		
+
 		// Add distance to center of ellipse
 		pixelA[i].zw += dist_to_pixel;
 
 		// if specified scatter pixel test distance to center of ellipse
-		if (pixelB[i].w > 0.0)
+		if (pixelB[i].w > 0.0)		
+			//dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, cross(pixelB[i].xyz, pixelC[i].xyz), pixelC[i].xyz);
 	  	  dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
 		else
 		  dist_test = -1.0;
- 	
+
 		// if not specified or out of range dont use it
 		if (dist_test == -1.0) {
 		  weights[i] = 0.0;

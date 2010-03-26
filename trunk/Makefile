@@ -50,7 +50,7 @@ OBJ2 = $(patsubst %,$(OBJDIR)/%,$(OBJS))
 ifeq ($(OS), windows)
 LIBDIRS = 
 else
-LIBDIRS = 
+LIBDIRS = -L/usr/lib64/	
 endif
 
 MATLIB     = -lm
