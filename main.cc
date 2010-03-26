@@ -36,17 +36,17 @@ Application *application;
 void display( void )
 {
 
-//   static int frame = 0, time, timebase = 0, fps;
+  //   static int frame = 0, time, timebase = 0, fps;
 
-//   frame++;
-//   time = glutGet(GLUT_ELAPSED_TIME);
+  //   frame++;
+  //   time = glutGet(GLUT_ELAPSED_TIME);
 	
-//   if (time - timebase > 1000) {
-// 	fps = frame*1000.0/(time-timebase);
-// 	cout << fps << endl;
-// 	timebase = time;
-// 	frame = 0;
-//   }
+  //   if (time - timebase > 1000) {
+  // 	fps = frame*1000.0/(time-timebase);
+  // 	cout << fps << endl;
+  // 	timebase = time;
+  // 	frame = 0;
+  //   }
   
   application->draw();
 
@@ -75,7 +75,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case 27 :
   case 'q' :
   case 'Q' :
-	delete application;
+    delete application;
     exit(0);
     break;
   case '0' :
@@ -99,48 +99,48 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case '6' :
     material = 6;
     break;
- case '7' :
+  case '7' :
     material = 7;
     break;
   case 'r':
-	auto_rotate = !auto_rotate;
-	application->setAutoRotate( auto_rotate );
-	break;
+    auto_rotate = !auto_rotate;
+    application->setAutoRotate( auto_rotate );
+    break;
   case 'c':
-	quality_per_vertex = !quality_per_vertex;
-	application->setQualityPerVertex( quality_per_vertex );
-	break;
+    quality_per_vertex = !quality_per_vertex;
+    application->setQualityPerVertex( quality_per_vertex );
+    break;
   case 'w':
-	elliptical_weight = !elliptical_weight;
-	application->setEllipticalWeight( elliptical_weight );
-	cout << "Elliptical weight : " << elliptical_weight << endl;
-	break;
+    elliptical_weight = !elliptical_weight;
+    application->setEllipticalWeight( elliptical_weight );
+    cout << "Elliptical weight : " << elliptical_weight << endl;
+    break;
   case 'd' :
-	depth_test = !depth_test;
+    depth_test = !depth_test;
     application->setDepthTest ( depth_test );
     break;
   case 'b' :
-	back_face_culling = !back_face_culling;
+    back_face_culling = !back_face_culling;
     application->setBackFaceCulling ( back_face_culling );
     break;
   case '/':
-	if (quality_threshold > 0.0)
-	  quality_threshold -= 0.01;
-	application->setQualityThreshold ( abs(quality_threshold) );
-	cout << "quality threshold : " << quality_threshold << endl;
-	break;
+    if (quality_threshold > 0.0)
+      quality_threshold -= 0.01;
+    application->setQualityThreshold ( abs(quality_threshold) );
+    cout << "quality threshold : " << quality_threshold << endl;
+    break;
   case '*':
-	if (quality_threshold < 1.0)
-	  quality_threshold += 0.01;
-	application->setQualityThreshold ( quality_threshold );
-	cout << "quality threshold : " << quality_threshold << endl;
-	break;
+    if (quality_threshold < 1.0)
+      quality_threshold += 0.01;
+    application->setQualityThreshold ( quality_threshold );
+    cout << "quality threshold : " << quality_threshold << endl;
+    break;
   case '.':
-	application->increaseSelected ( );
-	break;
+    application->increaseSelected ( );
+    break;
   case ',':
-	application->decreaseSelected ( );
-	break;
+    application->decreaseSelected ( );
+    break;
   case '+' :
     mask_size ++;
     application->setGpuMask ( mask_size );
@@ -156,7 +156,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     else
       reconstruction_filter_size += 0.1;
     application->setReconstructionFilter ( reconstruction_filter_size );
-	cout << "filter size : " << reconstruction_filter_size << endl;
+    cout << "filter size : " << reconstruction_filter_size << endl;
     break;
   case '[' :
     if (reconstruction_filter_size > 0.15)
@@ -164,7 +164,7 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     else if (reconstruction_filter_size > 0.0)
       reconstruction_filter_size -= 0.01;
     application->setReconstructionFilter ( reconstruction_filter_size );
-	cout << "filter size : " << reconstruction_filter_size << endl;
+    cout << "filter size : " << reconstruction_filter_size << endl;
     break;
   }
 
@@ -192,19 +192,19 @@ void keyboardSpecial(int key_pressed, int x, int y) {
   switch (key_pressed) {
   case GLUT_KEY_F1 :
     application->changeRendererType ( 0 );
-	cout << "PYRAMID POINTS" << endl;
+    cout << "PYRAMID POINTS" << endl;
     break;
   case GLUT_KEY_F2 :
     application->changeRendererType ( 1 );
-	cout << "PYRAMID POINTS WITH COLOR" << endl;
+    cout << "PYRAMID POINTS WITH COLOR" << endl;
     break;
   case GLUT_KEY_F3 :
     application->changeRendererType ( 2 );
-	cout << "PYRAMID TEMPLATES WITH COLOR" << endl;
+    cout << "PYRAMID TEMPLATES WITH COLOR" << endl;
     break;
   case GLUT_KEY_F4 :
     application->changeRendererType ( 3 );
-	cout << "PYRAMID ELIPSES" << endl;
+    cout << "PYRAMID ELIPSES" << endl;
     break;
   }
 
@@ -218,11 +218,11 @@ void keyboardSpecial(int key_pressed, int x, int y) {
     application->changeMaterial ( material );
     application->setReconstructionFilter ( reconstruction_filter_size );
     application->setPrefilter ( prefilter_size );
-	application->setDepthTest( depth_test );
-	application->setBackFaceCulling( back_face_culling );
-	application->setEllipticalWeight( elliptical_weight );
-	application->setQualityThreshold( quality_threshold );
-	application->setQualityPerVertex( quality_per_vertex );
+    application->setDepthTest( depth_test );
+    application->setBackFaceCulling( back_face_culling );
+    application->setEllipticalWeight( elliptical_weight );
+    application->setQualityThreshold( quality_threshold );
+    application->setQualityPerVertex( quality_per_vertex );
     break;
   }
 
@@ -240,23 +240,23 @@ void mouse(int button, int state, int x, int y) {
   button_pressed = button;
 
   if (state == GLUT_DOWN) {
-	active_shift = active_ctrl = active_alt = 0;	
+    active_shift = active_ctrl = active_alt = 0;	
 	
-	switch (glutGetModifiers()) {
-	case GLUT_ACTIVE_SHIFT : active_shift = 1; break;
-	case GLUT_ACTIVE_CTRL : active_ctrl = 1; break;
-	case GLUT_ACTIVE_ALT : active_alt = 1; break;
-	case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_CTRL : active_shift = 1; active_ctrl = 1; break;
-	case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_ALT : active_shift = 1; active_alt = 1; break;
-	case GLUT_ACTIVE_CTRL | GLUT_ACTIVE_ALT : active_ctrl = 1; active_alt = 1; break;
-	case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_CTRL | GLUT_ACTIVE_ALT : active_shift = 1; active_ctrl = 1; active_alt = 1; break;
-	}
+    switch (glutGetModifiers()) {
+    case GLUT_ACTIVE_SHIFT : active_shift = 1; break;
+    case GLUT_ACTIVE_CTRL : active_ctrl = 1; break;
+    case GLUT_ACTIVE_ALT : active_alt = 1; break;
+    case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_CTRL : active_shift = 1; active_ctrl = 1; break;
+    case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_ALT : active_shift = 1; active_alt = 1; break;
+    case GLUT_ACTIVE_CTRL | GLUT_ACTIVE_ALT : active_ctrl = 1; active_alt = 1; break;
+    case GLUT_ACTIVE_SHIFT | GLUT_ACTIVE_CTRL | GLUT_ACTIVE_ALT : active_shift = 1; active_ctrl = 1; active_alt = 1; break;
+    }
 
     if (button == GLUT_LEFT_BUTTON) {
       application->mouseLeftButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_MIDDLE_BUTTON) {
-	  application->mouseMiddleButton(x, y, active_shift, active_ctrl, active_alt );
+      application->mouseMiddleButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_RIGHT_BUTTON) {
       application->mouseRightButton(x, y, active_shift, active_ctrl, active_alt );
@@ -264,11 +264,11 @@ void mouse(int button, int state, int x, int y) {
       
   }
   else if (state == GLUT_UP) {
-	if (button == GLUT_LEFT_BUTTON) {
+    if (button == GLUT_LEFT_BUTTON) {
       application->mouseReleaseLeftButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_MIDDLE_BUTTON) {
-	  application->mouseReleaseMiddleButton(x, y, active_shift, active_ctrl, active_alt );
+      application->mouseReleaseMiddleButton(x, y, active_shift, active_ctrl, active_alt );
     }
     else if (button == GLUT_RIGHT_BUTTON) {
       application->mouseReleaseRightButton(x, y, active_shift, active_ctrl, active_alt );
@@ -282,8 +282,8 @@ void mouse(int button, int state, int x, int y) {
 
 
     button_pressed = -1;
-	active_shift = 0;
-	active_ctrl = 0;
+    active_shift = 0;
+    active_ctrl = 0;
   }
 
   glutPostRedisplay();
@@ -307,9 +307,9 @@ void mouseMotion(int x, int y) {
   if (button_pressed == GLUT_LEFT_BUTTON)
     application->mouseLeftMotion(x, y, active_shift, active_ctrl, active_alt );
   else if (button_pressed == GLUT_MIDDLE_BUTTON)
-	application->mouseMiddleMotion(x, y, active_shift, active_ctrl, active_alt );
+    application->mouseMiddleMotion(x, y, active_shift, active_ctrl, active_alt );
   else if (button_pressed == GLUT_RIGHT_BUTTON)
-	application->mouseRightMotion(x, y, active_shift, active_ctrl, active_alt );
+    application->mouseRightMotion(x, y, active_shift, active_ctrl, active_alt );
 
   glutPostRedisplay();  
 }
@@ -317,18 +317,18 @@ void mouseMotion(int x, int y) {
 /*function... might want it in some class?*/
 int getFilesFromDirectory (string dir, vector<string> &files)
 {
-    DIR *dp;
-    struct dirent *dirp;
-    if((dp  = opendir(dir.c_str())) == NULL) {
-        cout << "Error(" << errno << ") opening " << dir << endl;
-        return errno;
-    }
+  DIR *dp;
+  struct dirent *dirp;
+  if((dp  = opendir(dir.c_str())) == NULL) {
+    cout << "Error(" << errno << ") opening " << dir << endl;
+    return errno;
+  }
 
-    while ((dirp = readdir(dp)) != NULL) {
-        files.push_back(string(dirp->d_name));
-    }
-    closedir(dp);
-    return 0;
+  while ((dirp = readdir(dp)) != NULL) {
+    files.push_back(string(dirp->d_name));
+  }
+  closedir(dp);
+  return 0;
 }
 
 
@@ -355,13 +355,14 @@ int main(int argc, char * argv []) {
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
-	{
-	  /* Problem: glewInit failed, something is seriously wrong. */
-	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-	  exit(0);
-	}
+    {
+      /* Problem: glewInit failed, something is seriously wrong. */
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+      exit(0);
+    }
 
-  application = new Application(PYRAMID_TEMPLATES);  
+  //application = new Application(PYRAMID_TEMPLATES);
+  application = new Application(PYRAMID_ELIPSES);
 
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
@@ -370,35 +371,40 @@ int main(int argc, char * argv []) {
 
   // directory
   if (strcmp (argv[1], "-d") == 0) {
-	string dir = string(argv[2]);
-	vector<string> files = vector<string>();
-	getFilesFromDirectory(dir,files);
+    string dir = string(argv[2]);
+    vector<string> files = vector<string>();
+    getFilesFromDirectory(dir,files);
 
-	// remove non ply files in directory
-	for (unsigned int i = 0; i < files.size(); i++){
-	  if (files[i].rfind("ply") == string::npos) {
-		files.erase(files.begin()+i);
-		--i;
-	  }
-	}
+    // remove non ply files in directory
+    for (unsigned int i = 0; i < files.size(); i++){
+      if (files[i].rfind("ply") == string::npos) {
+	files.erase(files.begin()+i);
+	--i;
+      }
+    }
 
-	int pts = 0;
-	// for every ply file in directory
-	for (unsigned int i = 0; i < files.size(); i++) {
-	  pts += application->appendFile( (dir + files[i]).c_str() );
-	  cout << i+1 << "/" << files.size() << " : " << (dir + files[i]).c_str() << endl;
-	  cout << "points : " << setiosflags(ios::fixed) << setprecision(2) << pts/1000000.0 << "M" << endl;
-	}
+    int pts = 0;
+    // for every ply file in directory
+    for (unsigned int i = 0; i < files.size(); i++) {
+      pts += application->appendFile( (dir + files[i]).c_str() );
+      cout << i+1 << "/" << files.size() << " : " << (dir + files[i]).c_str() << endl;
+      cout << "points : " << setiosflags(ios::fixed) << setprecision(2) << pts/1000000.0 << "M" << endl;
+    }
 
-	application->finishFileReading();
-	material = 5;
-	back_face_culling = true;
-	quality_threshold = 0.02;
+    application->finishFileReading();
+    material = 5;
+    back_face_culling = true;
+    quality_threshold = 0.02;
+  }
+  // eliptical surfel file
+  else if (strcmp (argv[1], "-l") == 0) {
+    application->readFile( argv[2], true );
+    cout << "elipses : " << application->getNumberPoints() << endl; 
   }
   // single file
   else {
-	application->readFile( argv[1] );
-	cout << "points : " << application->getNumberPoints() << endl; 
+    application->readFile( argv[1] );
+    cout << "points : " << application->getNumberPoints() << endl; 
   }
   
   // Set initial values

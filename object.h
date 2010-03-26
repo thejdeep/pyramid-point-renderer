@@ -37,6 +37,7 @@ class Object
 {
   public:
 
+
 	Object() { }
 
 	Object(int id_num, GLfloat t) : id(id_num) {}
