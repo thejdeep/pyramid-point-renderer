@@ -44,6 +44,7 @@ using namespace std;
 #include <vcg/simplex/face/component.h>
 
 #include <vcg/complex/trimesh/base.h>
+
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/bounding.h>
 #include <vcg/complex/trimesh/update/flag.h>
@@ -53,13 +54,25 @@ using namespace std;
 
 #include <wrap/gui/trackball.h>
 
+//#include "IOSurfels.hpp"
+
 using namespace vcg;
 
+class CVertex;
 class CFace;
 class CEdge;
-class CVertex  : public VertexSimp2< CVertex, CEdge, CFace, vertex::Coord3f, vertex::Normal3f, vertex::Color4b, vertex::Radiusf, vertex::Qualityf > {};
-class CFace    : public FaceSimp2< CVertex, CEdge, CFace, face::VertexRef > {};
-class CMesh    : public vcg::tri::TriMesh< vector<CVertex>, vector<CFace> > {};
+
+class MyUsedTypes: public vcg::UsedTypes< vcg::Use<CVertex>::AsVertexType, vcg::Use<CEdge>::AsEdgeType, vcg::Use<CFace>::AsFaceType> {};
+
+class CVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vertex::Normal3f, vertex::Color4b, vertex::Radiusf, vertex::Qualityf> {};
+class CFace : public vcg::Face<MyUsedTypes, vcg::face::VertexRef> {};
+class CMesh : public vcg::tri::TriMesh< std::vector<CVertex>, std::vector<CFace> > {};
+
+
+//class CVertex : public VertexSimp2< CVertex, CEdge, CFace, vertex::Coord3f, vertex::Normal3f, vertex::Color4b, vertex::Radiusf, vertex::Qualityf > {};
+
+/* class CFace    : public FaceSimp2< CVertex, CEdge, CFace, face::VertexRef > {}; */
+/* class CMesh    : public vcg::tri::TriMesh< vector<CVertex>, vector<CFace> > {}; */
 
 class Application
 {

@@ -29,17 +29,25 @@
 #include <vcg/complex/trimesh/update/normal.h>
 #include <vcg/complex/trimesh/update/flag.h>
 
+#include <wrap/io_trimesh/import_ply.h>
+#include <wrap/io_trimesh/export_ply.h>
+#include <wrap/io_trimesh/io_ply.h>
+#include <wrap/ply/plylib.h>
+
 // Local
 #include "Math/BoundingBox3.hpp"
-#include "Surfel.hpp"
+#include "surfel.hpp"
 
-class CEdge;
-class CFaceO;
-class CVertexO;
+class MyVertex;
 
 //Vert Mem Occupancy  --- 40b ---
 
-class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO,
+class MyVertex;
+class MyFace;
+
+class MyUsedTypes: public vcg::UsedTypes< vcg::Use<MyVertex>::AsVertexType, vcg::Use<MyFace>::AsFaceType>{};
+
+class MyVertex  : public vcg::Vertex< MyUsedTypes,
   vcg::vertex::InfoOcf,           /*  4b */
   vcg::vertex::Coord3f,           /* 12b */
   vcg::vertex::BitFlags,          /*  4b */
@@ -52,32 +60,9 @@ class CVertexO  : public vcg::VertexSimp2< CVertexO, CEdge, CFaceO,
   vcg::vertex::CurvaturefOcf,     /*  0b */
   vcg::vertex::CurvatureDirfOcf,  /*  0b */
   vcg::vertex::Radiusf         /*  0b */
-  >{
-};
+  >{};
 
-//
-class CEdge : public vcg::EdgeSimp2<CVertexO,CEdge,CFaceO, vcg::edge::EVAdj> {
-public:
-	inline CEdge(){};
-	inline CEdge( CVertexO * v0, CVertexO * v1)
-	{
-		V(0)= v0 ; V(1)= v1;
-	};
-	static inline CEdge OrderedEdge(CVertexO* v0,CVertexO* v1)
-	{
-		if(v0<v1)
-		{
-			return CEdge(v0,v1);
-		}
-		else {
-			return CEdge(v1,v0);
-		}
-	}
-};
-
-//Face Mem Occupancy  --- 32b ---
-
-class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
+class MyFace    : public vcg::Face< MyUsedTypes,
       vcg::face::InfoOcf,              /* 4b */
       vcg::face::VertexRef,            /*12b */
       vcg::face::BitFlags,             /* 4b */
@@ -90,27 +75,15 @@ class CFaceO    : public vcg::FaceSimp2<  CVertexO, CEdge, CFaceO,
       vcg::face::WedgeTexCoordfOcf     /* 0b */
     > {};
 
-class CMesh    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
-public :
-	vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
-	const vcg::Box3f &trBB()
-	{
-		static vcg::Box3f bb;
-		bb.SetNull();
-		bb.Add(Tr,bbox);
-		return bb;
-	}
-};
+class MyMesh   : public vcg::tri::TriMesh< std::vector<MyVertex> ,std::vector<MyFace> >{};
 
-
-namespace Celer {
 
 template<class Real = float> class IOSurfels{
 public:
 
 	typedef ::vcg::ply::PropDescriptor PropDescriptor ;
 
-	typedef typename CMesh::VertexIterator VertexIterator;
+	typedef typename MyMesh::VertexIterator VertexIterator;
 
 	IOSurfels()
 	{
@@ -121,8 +94,8 @@ public:
 	static int SaveMesh (const char * filename,
 			std::vector<Surfel<Real> >& pSurfel,vcg::CallBackPos *cb)
 	{
-		CMesh mesh;
-        VertexIterator vi = vcg::tri::Allocator<CMesh>::AddVertices(mesh,pSurfel.size());
+		MyMesh mesh;
+        VertexIterator vi = vcg::tri::Allocator<MyMesh>::AddVertices(mesh,pSurfel.size());
         int mask = 0;
 		vcg::tri::io::PlyInfo info;
 		bool binary = 0;
@@ -148,16 +121,16 @@ public:
 
 		info.mask = mask;
 
-		int result = vcg::tri::io::ExporterPLY<CMesh>::Save(mesh,filename,binary,info,cb);
+		int result = vcg::tri::io::ExporterPLY<MyMesh>::Save(mesh,filename,binary,info,cb);
 
 
 	}
 	static int LoadMesh (
 			const char * filename,
 			std::vector<Surfel<Real> >& pSurfel,
-			Celer::BoundingBox3<Real>& pBox,vcg::CallBackPos *cb)
+			BoundingBox3<Real>& pBox,vcg::CallBackPos *cb)
 	{
-		CMesh mesh;
+		MyMesh mesh;
 
 		int mask = 0;
 
@@ -169,8 +142,8 @@ public:
 		vcg::tri::io::PlyInfo info;
 		info.cb = cb;
 
-		vcg::tri::io::ImporterPLY<CMesh>::LoadMask(filename, mask,info);
-		int i = vcg::tri::io::ImporterPLY<CMesh>::Open(mesh,filename,info);
+		vcg::tri::io::ImporterPLY<MyMesh>::LoadMask(filename, mask,info);
+		int i = vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh,filename,info);
 
 
 		bool normal_per_vertex = false;
@@ -193,15 +166,15 @@ public:
         unsigned int pos = 0;
         Surfel<Real> s;
 
-		for (CMesh::VertexIterator vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit)
+		for (MyMesh::VertexIterator vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit)
 		{
-		        Celer::Vector3<Real> v = Celer::Vector3<Real> ((*vit).P().X(),(*vit).P().Y(),(*vit).P().Z());
-		        Celer::Vector3<Real> n = Celer::Vector3<Real> ((*vit).N().X(),(*vit).N().Y(),(*vit).N().Z());
+		        Vector3<Real> v = Vector3<Real> ((*vit).P().X(),(*vit).P().Y(),(*vit).P().Z());
+		        Vector3<Real> n = Vector3<Real> ((*vit).N().X(),(*vit).N().Y(),(*vit).N().Z());
 
-		        Celer::Color c = Celer::Color (0.2,0.2,0.2);
+		        Color c = Color (0.2,0.2,0.2);
 		        if(color_per_vertex)
 		        {
-		        	 c = Celer::Color ((*vit).C().X(),(*vit).C().Y(),(*vit).C().Z());
+		        	 c = Color ((*vit).C().X(),(*vit).C().Y(),(*vit).C().Z());
 		        }
 
 		        Real radius = 0.25;
@@ -215,7 +188,7 @@ public:
 		        s.SetRadius(radius);
 
 		        pSurfel.push_back (s);
-				pBox = pBox + Celer::BoundingBox3<Real>(s.Center(0),s.Center(1),s.Center(2),
+				pBox = pBox + BoundingBox3<Real>(s.Center(0),s.Center(1),s.Center(2),
 													    s.Center(0),s.Center(1),s.Center(2));
 		        ++pos;
 
@@ -248,7 +221,6 @@ public:
 			if( pf.AddToRead(Surfel<>::SurfelDesc(i))==-1 )
 			{
 				found = false;
-
 				break;
 			}
 		}
@@ -256,6 +228,8 @@ public:
 		if(!found)
 			return pi.status;
 
+
+		std::cout << "pf.elements.size() " << int(pf.elements.size()) << std::endl;
 
 		for(i=0;i<int(pf.elements.size());i++)
 		{
@@ -266,6 +240,7 @@ public:
 				pf.SetCurElement(i);
 
 				typename Surfel<Real>::LoadPlySurfel vs;
+				std::cout <<  "n  " << n << std::endl;
 
 				for(int j=0;j<n;++j)
 				{
@@ -276,7 +251,32 @@ public:
 
 					}
 
-					pSurfel.push_back(Celer::Surfel<Real>(vs));
+					std::cout << "v.cx " << vs.cx << std::endl;
+					std::cout << "v.cy " << vs.cy << std::endl;
+					std::cout << "v.cz " << vs.cz << std::endl;
+					std::cout << "v.nx " << vs.nx << std::endl;
+					std::cout << "v.ny " << vs.ny << std::endl;
+					std::cout << "v.nz " << vs.nz << std::endl;
+
+					std::cout << "v.major_axisx " << vs.major_axisx << std::endl;
+					std::cout << "v.major_axisy " << vs.major_axisy << std::endl;
+					std::cout << "v.major_axisz " << vs.major_axisz << std::endl;
+					std::cout << "v.major_axissize " << vs.major_axis_size << std::endl;
+
+					std::cout << "v.minor_axisx " << vs.minor_axisx << std::endl;
+					std::cout << "v.minor_axisy " << vs.minor_axisy << std::endl;
+					std::cout << "v.minor_axisz " << vs.minor_axisz << std::endl;
+					std::cout << "v.minor_axissize " << vs.minor_axis_size << std::endl;
+
+					std::cout << "v.r " << vs.r << std::endl;
+					std::cout << "v.g " << vs.g << std::endl;
+					std::cout << "v.b " << vs.b << std::endl;
+
+					std::cout << "v.max_error " << vs.max_error << std::endl;
+					std::cout << "v.min_error " << vs.min_error << std::endl;
+
+					pSurfel.push_back(Surfel<Real>(vs));
+					std::cout <<  pSurfel.back() << std::endl;
 				}
 
 				break;
@@ -318,7 +318,6 @@ public:
 				"property float nx\n"
 				"property float ny\n"
 				"property float nz\n"
-				"property float nx\n"
 				"property float major_axisx\n"
 				"property float major_axisy\n"
 				"property float major_axisz\n"
@@ -347,26 +346,26 @@ public:
 
 			for(std::size_t i = 0; i < pSurfel.size(); ++i)
 			{
-				v = pSurfel[i];
-				t[ 0] = (float)v.cx;
-				t[ 1] = (float)v.cy;
-				t[ 2] = (float)v.cz;
-				t[ 3] = (float)v.nx;
-				t[ 4] = (float)v.ny;
-				t[ 5] = (float)v.nz;
-				t[ 6] = (float)v.major_axisx;
-				t[ 7] = (float)v.major_axisy;
-				t[ 8] = (float)v.major_axisz;
-				t[ 9] = (float)v.major_axis_size;
-				t[10] = (float)v.minor_axisx;
-				t[11] = (float)v.minor_axisy;
-				t[12] = (float)v.minor_axisz;
-				t[13] = (float)v.minor_axis_size;
-				t[14] = (float)v.r;
-				t[15] = (float)v.g;
-				t[16] = (float)v.b;
-				t[17] = (float)v.max_error;
-				t[18] = (float)v.min_error;
+
+				t[ 0] = pSurfel[i].Center().x;
+				t[ 1] = pSurfel[i].Center().y;
+				t[ 2] = pSurfel[i].Center().z;
+				t[ 3] = pSurfel[i].Normal().x;
+				t[ 4] = pSurfel[i].Normal().y;
+				t[ 5] = pSurfel[i].Normal().z;
+				t[ 6] = pSurfel[i].MajorAxis().second.x;
+				t[ 7] = pSurfel[i].MajorAxis().second.y;
+				t[ 8] = pSurfel[i].MajorAxis().second.z;
+				t[ 9] = pSurfel[i].MajorAxis().first;
+				t[10] = pSurfel[i].MinorAxis().second.x;
+				t[11] = pSurfel[i].MinorAxis().second.y;
+				t[12] = pSurfel[i].MinorAxis().second.z;
+				t[13] = pSurfel[i].MinorAxis().first;
+				t[14] = pSurfel[i].ColorRGB().Red();
+				t[15] = pSurfel[i].ColorRGB().Green();
+				t[16] = pSurfel[i].ColorRGB().Blue();
+				t[17] = pSurfel[i].MaxError();
+				t[18] = pSurfel[i].MinError();
 				fwrite(t,sizeof(float),19,fpout);
 
 			}
@@ -376,27 +375,28 @@ public:
 
 			for(std::size_t i = 0; i < pSurfel.size(); ++i)
 			{
-				v = pSurfel[i];
+				std::cout << pSurfel[i] << std::endl;
+				std::cout << v.cx << std::endl;
 				fprintf(fpout,"%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g \n",
-						v.cx,
-						v.cy,
-						v.cz,
-						v.nx,
-						v.ny,
-						v.nz,
-						v.major_axisx,
-						v.major_axisy,
-						v.major_axisz,
-						v.major_axis_size,
-						v.minor_axisx,
-						v.minor_axisy,
-						v.minor_axisz,
-						v.minor_axis_size,
-						v.r,
-						v.g,
-						v.b,
-						v.max_error,
-						v.min_error
+						pSurfel[i].Center().x,
+						pSurfel[i].Center().y,
+						pSurfel[i].Center().z,
+						pSurfel[i].Normal().x,
+						pSurfel[i].Normal().y,
+						pSurfel[i].Normal().z,
+						pSurfel[i].MajorAxis().second.x,
+						pSurfel[i].MajorAxis().second.y,
+						pSurfel[i].MajorAxis().second.z,
+						pSurfel[i].MajorAxis().first,
+						pSurfel[i].MinorAxis().second.x,
+						pSurfel[i].MinorAxis().second.y,
+						pSurfel[i].MinorAxis().second.z,
+						pSurfel[i].MinorAxis().first,
+						pSurfel[i].ColorRGB().Red(),
+						pSurfel[i].ColorRGB().Green(),
+						pSurfel[i].ColorRGB().Blue(),
+						pSurfel[i].MaxError(),
+						pSurfel[i].MinError()
 				);
 			}
 		}
@@ -451,6 +451,6 @@ public:
 	virtual ~IOSurfels();
 };
 
-}
+
 
 #endif /* IMPOTERPLY_HPP_ */
