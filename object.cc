@@ -128,9 +128,13 @@ void Object::setPyramidElipsesArrays ( void ) {
 		vertex_array[pos*4 + 2] = (GLfloat)(it->Center()[2]);
 
 		//minor axis
-		u_array[pos*3 + 0] = (GLfloat)(it->MinorAxis().second[0]);
-		u_array[pos*3 + 1] = (GLfloat)(it->MinorAxis().second[1]);
-		u_array[pos*3 + 2] = (GLfloat)(it->MinorAxis().second[2]);
+		u_array[pos*3 + 0] = (GLfloat)(it->Normal()[0]);
+		u_array[pos*3 + 1] = (GLfloat)(it->Normal()[1]);
+		u_array[pos*3 + 2] = (GLfloat)(it->Normal()[2]);
+
+// 		u_array[pos*3 + 0] = (GLfloat)(it->MinorAxis().second[0]);
+// 		u_array[pos*3 + 1] = (GLfloat)(it->MinorAxis().second[1]);
+// 		u_array[pos*3 + 2] = (GLfloat)(it->MinorAxis().second[2]);
 		vertex_array[pos*4 + 3] = (GLfloat)(it->MinorAxis().first);
 
 		//major axis
