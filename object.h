@@ -48,7 +48,8 @@ class Object
 
 	void render ( void ) const;
 
-	vector<Surfeld> * getSurfels ( void ) { return &surfels; }
+	vector<Surfeld>& getSurfels ( void ) { return surfels; }
+
 
 	void clearSurfels ( void );
 

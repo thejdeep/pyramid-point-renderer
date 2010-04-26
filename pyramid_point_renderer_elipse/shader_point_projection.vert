@@ -1,3 +1,4 @@
+
 // GLSL CODE
 
 /// 1st Vertex Shader
@@ -17,17 +18,24 @@ varying float dist_to_eye;
 
 void main(void)
 {  
-  vec3 normal = gl_Normal.xyz;
+	gl_TexCoord[0] = gl_MultiTexCoord0;
+
+  //vec3 normal = gl_TexCoord[0].xyz;
   //minor_axis = gl_Normal.xyz;
   //major_axis = gl_TexCoord[0].xyz;
-	
+/*	
   if (normal.y > 0.01)
     minor_axis = normalize(cross(vec3(0,0,1), normal));
   else
     minor_axis = normalize(cross(normal, vec3(0,1,0)));
   major_axis = normalize(cross(normal, minor_axis));
+*/
+	minor_axis = normalize(gl_Normal.xyz);	
+	major_axis = normalize(gl_TexCoord[0].xyz);
 
-  if ( (back_face_culling == 1) && (normalize(dot((eye - gl_Vertex.xyz), cross(minor_axis, major_axis))) < -0.1 )) {	
+	vec3 normal = cross(minor_axis, major_axis);
+
+  if ( (back_face_culling == 1) && (normalize(dot((eye - gl_Vertex.xyz), normal)) < -0.1 )) {	
     minor_length = 0.0;
     major_length = 0.0;
 
@@ -40,8 +48,7 @@ void main(void)
       // only rotate point and normal if not culled
       vec4 v = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
 
-      gl_TexCoord[0] = gl_MultiTexCoord0;
-
+      
       minor_length = gl_Vertex.w;
       major_length = gl_TexCoord[0].w;
 
@@ -81,11 +88,11 @@ void main(void)
       major_axis = major_proj;
       minor_axis = minor_proj;
 
-      if (major_length < minor_length)
+ //     if (major_length < minor_length)
 	{
 	  //major_length = minor_length;	  
-	  minor_length = gl_TexCoord[0].w;
-	  major_length = minor_length * (length(major_proj.xy) / length(minor_proj.xy));
+//	  minor_length = gl_TexCoord[0].w;
+//	  major_length = minor_length * (length(major_proj.xy) / length(minor_proj.xy));
 /* 	  major_axis = minor_proj; */
 /* 	  minor_axis = major_proj; */
 /* 	  major_axis.xy *= -1; */

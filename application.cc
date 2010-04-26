@@ -17,7 +17,7 @@
  **/
 Application::Application( GLint default_mode ) {
 
-  canvas_width = canvas_height = 512;
+  canvas_width = canvas_height = 800;
   windows_width = windows_height = canvas_width + 2*(canvas_width/32);
 
   trackball.center = vcg::Point3f(0, 0, 0);
@@ -88,7 +88,7 @@ void Application::drawPoints(void) {
 
   glBegin(GL_POINTS);
   
-  for (surfelVectorIter it = objects[0].getSurfels()->begin(); it != objects[0].getSurfels()->end(); ++it) {
+  for (surfelVectorIter it = objects[0].getSurfels().begin(); it != objects[0].getSurfels().end(); ++it) {
 	Color4b c = it->Color();
 	glColor4f(c[0], c[1], c[2], 1.0f);  
 	glVertex(it);
@@ -169,7 +169,7 @@ void Application::draw( void ) {
   // Loads current OpenGl state matrices into trackball matrices
   trackball.GetView();
 
-  // apllys transformations : translate to origin, multiply by trackball matrix, translate back
+  // aplly transformations : translate to origin, multiply by trackball matrix, translate back
   trackball.Apply();
 
   // Use bounding box to centralize and scale object
@@ -276,7 +276,7 @@ void Application::createPointRenderer( void ) {
  * @param filename Given file name.
  * @param surfels Pointer to surfel vector to be filled with mesh data.
  **/
-int Application::readSurfelFile ( const char * filename, vector<Surfeld> *surfels, bool eliptical ) {
+int Application::readSurfelFile ( const char * filename, vector<Surfeld>& surfels, bool eliptical ) {
   /** read using vcg plylib **/
   CMesh mesh;
 
@@ -332,7 +332,7 @@ int Application::readSurfelFile ( const char * filename, vector<Surfeld> *surfel
 	if (radius_per_vertex)
 	  radius = (double)((*vit).R());
 	
-	surfels->push_back ( Surfeld (p, n, c, quality, radius, pos) );
+	surfels.push_back ( Surfeld (p, n, c, quality, radius, pos) );
 	++pos;
   }
 
@@ -348,7 +348,16 @@ void Application::readFile ( const char * filename, bool eliptical ) {
   // Create a new primitive from given file
   objects.push_back( Object( objects.size() ) );
 
-  readSurfelFile ( filename, (objects.back()).getSurfels() );
+  if(eliptical)
+  {
+		IOSurfels<double>::LoadSurfels(filename, (objects.back()).getSurfels());
+
+  }else
+  {
+		IOSurfels<double>::LoadMesh(filename, (objects.back()).getSurfels());
+  }
+
+  //readSurfelFile ( filename, (objects.back()).getSurfels() );
 
   // Sets the default rendering algorithm
   objects[0].setRendererType( render_mode );

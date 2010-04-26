@@ -14,7 +14,7 @@
 #include <errno.h>
 
 
-static int windows_size = 544;                          // Initial window width
+static int windows_size = 800;                          // Initial window width
 
 bool depth_test;
 bool back_face_culling;
