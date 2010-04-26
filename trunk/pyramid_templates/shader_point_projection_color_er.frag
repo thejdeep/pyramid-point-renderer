@@ -32,8 +32,8 @@ void main(void)
   int log_level = int(floor(log2( ( 2.0 * radius * reconstruction_filter_size * canvas_width ) / float(mask_size*2 + 1) )));
 
   //  if (radius > min_size)
-  if (log_level > 100)
-    unprojected_radius *= -1.0;
+/*   if (log_level < 1) */
+/*     unprojected_radius *= -1.0; */
 
   if ((2.0*radius*canvas_width*reconstruction_filter_size) > float(mask_size*2 + 1))
 	unprojected_radius *= -1.0;
@@ -45,5 +45,5 @@ void main(void)
   // avoids sample with low quality overwritting sample with high quality in same pixel
   // during depth test
   
-  gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
+  //  gl_FragDepth = gl_FragCoord.z - gl_Color.a*0.05;
 }

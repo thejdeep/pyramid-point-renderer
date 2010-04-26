@@ -48,10 +48,10 @@ float pointInCircle(in vec2 d, in float radius){
 // @param normal Normal vector.
 float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
-  vec3 normal_vec = normal;
   float len = length(normal.xy);
   
-  if (len == 0.0)
+  //  if (len == 0.0)
+  if (normal.z == 1.0)
     normal.y = 0.0;
   else
     normal.y /= len;
@@ -69,7 +69,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 						  -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 2.0*radius;
+  float a = radius*reconstruction_filter_size;
   float b = a*normal.z;
 
   // include antialiasing filter (increase both axis)
@@ -79,7 +79,7 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size)
+  if (test <= 1.0)
     return test;
   return -1.0;
 }

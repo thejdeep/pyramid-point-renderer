@@ -30,7 +30,8 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
 					 
   float len = length(minor_axis.xy);
 
-  if (len == 0.0)
+  //if (len == 0.0)
+  if (minor_axis.z == 0.0)
     minor_axis.y = 0.0;
   else
     minor_axis.y /= len;
@@ -39,17 +40,16 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
   float angle = acos(minor_axis.y);
   if (minor_axis.x > 0.0)
     angle *= -1.0;
-
+  
   float cos_angle = minor_axis.y;
   float sin_angle = sin(angle);
 
   // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle,
-						  -d.x*sin_angle + d.y*cos_angle);
+  vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle, -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = major_axis_length;
-  float b = minor_axis_length;
+  float a = major_axis_length*reconstruction_filter_size;
+  float b = minor_axis_length*reconstruction_filter_size;
 
   // include antialiasing filter
   a += prefilter_size;
@@ -58,7 +58,7 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size)
+  if (test <= 1.0)
     return test;
   else return -1.0;
 }
@@ -213,7 +213,6 @@ void main (void) {
 
 		// if specified scatter pixel test distance to center of ellipse
 		if (pixelB[i].w > 0.0)		
-			//dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, cross(pixelB[i].xyz, pixelC[i].xyz), pixelC[i].xyz);
 	  	  dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
 		else
 		  dist_test = -1.0;
