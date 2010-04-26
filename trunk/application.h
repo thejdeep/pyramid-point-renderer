@@ -54,7 +54,7 @@ using namespace std;
 
 #include <wrap/gui/trackball.h>
 
-//#include "IOSurfels.hpp"
+#include "IOSurfels.hpp"
 
 using namespace vcg;
 
@@ -138,7 +138,7 @@ class Application
 
  private :
 
-  int readSurfelFile ( const char * filename, vector<Surfeld> *surfels, bool eliptical = 0 );
+  int readSurfelFile ( const char * filename, vector<Surfeld>& surfels, bool eliptical = 0 );
 
   Trackball trackball;
   Trackball trackball_light;

@@ -42,7 +42,14 @@ void Object::render ( void ) const {
     glBindBuffer(GL_ARRAY_BUFFER, u_buffer);
     glNormalPointer(GL_FLOAT, 0, NULL);
 
+    //glEnableClientState(GL_COLOR_ARRAY);
+    //glBindBuffer(GL_ARRAY_BUFFER, v_buffer);
+    //glColorPointer(4, GL_FLOAT, 0, NULL);
+
+	//glClientActiveTexture(GL_TEXTURE0);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    //glEnable(GL_TEXTURE_2D);
+    //glActiveTexture(GL_TEXTURE0);
     glBindBuffer(GL_ARRAY_BUFFER, v_buffer);
     glTexCoordPointer(4, GL_FLOAT, 0, NULL);
 
@@ -119,16 +126,18 @@ void Object::setPyramidElipsesArrays ( void ) {
 		vertex_array[pos*4 + 0] = (GLfloat)(it->Center()[0]);
 		vertex_array[pos*4 + 1] = (GLfloat)(it->Center()[1]);
 		vertex_array[pos*4 + 2] = (GLfloat)(it->Center()[2]);
-		vertex_array[pos*4 + 3] = (GLfloat)(it->Radius());
 
-		u_array[pos*3 + 0] = (GLfloat)(it->Normal()[0]);
-		u_array[pos*3 + 1] = (GLfloat)(it->Normal()[1]);
-		u_array[pos*3 + 2] = (GLfloat)(it->Normal()[2]);
+		//minor axis
+		u_array[pos*3 + 0] = (GLfloat)(it->MinorAxis().second[0]);
+		u_array[pos*3 + 1] = (GLfloat)(it->MinorAxis().second[1]);
+		u_array[pos*3 + 2] = (GLfloat)(it->MinorAxis().second[2]);
+		vertex_array[pos*4 + 3] = (GLfloat)(it->MinorAxis().first);
 
-		v_array[pos*4 + 0] = (GLfloat)(it->Normal()[0]);
-		v_array[pos*4 + 1] = (GLfloat)(it->Normal()[1]);
-		v_array[pos*4 + 2] = (GLfloat)(it->Normal()[2]);
-		v_array[pos*4 + 3] = (GLfloat)(it->Radius());
+		//major axis
+		v_array[pos*4 + 0] = (GLfloat)(it->MajorAxis().second[0]);
+		v_array[pos*4 + 1] = (GLfloat)(it->MajorAxis().second[1]);
+		v_array[pos*4 + 2] = (GLfloat)(it->MajorAxis().second[2]);
+		v_array[pos*4 + 3] = (GLfloat)(it->MajorAxis().first);
 
 		++pos;
 	}
