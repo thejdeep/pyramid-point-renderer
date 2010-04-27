@@ -23,38 +23,43 @@ uniform sampler2D textureB;
 uniform sampler2D textureC;
 
 vec2 gather_pixel_desloc[4] = vec2[4](vec2(-half_pixel_size, -half_pixel_size),
-									  vec2(half_pixel_size, -half_pixel_size),
-									  vec2(-half_pixel_size, half_pixel_size),
-									  vec2(half_pixel_size, half_pixel_size));
+				      vec2(half_pixel_size, -half_pixel_size),
+				      vec2(-half_pixel_size, half_pixel_size),
+				      vec2(half_pixel_size, half_pixel_size));
 
 // tests if a point is inside an ellipse.
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length, 
-					 in vec3 minor_axis, in vec3 major_axis){
+					 in vec3 minor_axis, in vec3 major_axis){	
+					 
   float len = length(minor_axis.xy);
 
-  if (len == 0.0)
+/*   if (minor_axis.y < 0) */
+/*     minor_axis *= -1; */
+
+  if (len == 0.0)  
     minor_axis.y = 0.0;
   else
     minor_axis.y /= len;
 
   // angle between minor_axis and z direction
   float angle = acos(minor_axis.y);
+
   if (minor_axis.x > 0.0)
     angle *= -1.0;
 
-  float cos_angle = minor_axis.y;
-  float sin_angle = sin(angle);
-
+/*   if (minor_axis_length > major_axis_length) */
+/*     angle *= -1.0; */
+  
+  
   // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle,
-						  -d.x*sin_angle + d.y*cos_angle);
+  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle), -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = 1.0*major_axis_length;
-  float b = 1.0*minor_axis_length;
+   float a = major_axis_length*reconstruction_filter_size;
+   float b = minor_axis_length*reconstruction_filter_size;
 
   // include antialiasing filter
   a += prefilter_size;
@@ -63,10 +68,51 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
 
-  if (test <= reconstruction_filter_size)
+  if (test <= 1.0)
     return test;
   else return -1.0;
-}
+}		
+
+// tests if a point is inside an ellipse.
+// Ellipse is centered at origin and point displaced by d.
+// Radius is the half the ellipse's major axis.
+// Minor axis is computed by normal direction.
+/* float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length,  */
+/* 					 in vec3 minor_axis, in vec3 major_axis){ */
+/*   float len = length(minor_axis.xy); */
+
+/*   if (len == 0.0) */
+/*     minor_axis.y = 0.0; */
+/*   else */
+/*     minor_axis.y /= len; */
+
+/*   // angle between minor_axis and z direction */
+/*   float angle = acos(minor_axis.y); */
+/*   if (minor_axis.x > 0.0) */
+/*     angle *= -1.0; */
+
+/*   float cos_angle = minor_axis.y; */
+/*   float sin_angle = sin(angle); */
+
+/*   // rotate point to ellipse coordinate system */
+/*   vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle, */
+/* 						  -d.x*sin_angle + d.y*cos_angle); */
+
+/*   // major and minor axis */
+/*   float a = 1.0*major_axis_length; */
+/*   float b = 1.0*minor_axis_length; */
+
+/*   // include antialiasing filter */
+/*   a += prefilter_size; */
+/*   b += prefilter_size; */
+
+/*   // inside ellipse test */
+/*   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b)); */
+
+/*   if (test <= reconstruction_filter_size) */
+/*     return test; */
+/*   else return -1.0; */
+/* } */
 
 void main (void) {
 
@@ -106,8 +152,8 @@ void main (void) {
   float obj_id = -1.0;
   for (int i = 0; i < 4; ++i) {
     if (pixelB[i].w > 0.0) {
-      dist_test = 1.0;
-      //dist_test = pointInEllipse(pixelA[i].zw + gather_pixel_desloc[i].xy, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
+      //dist_test = 1.0;
+      dist_test = pointInEllipse(pixelA[i].zw + gather_pixel_desloc[i].xy, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
 
 	  if  (dist_test != 0.0)
 		{

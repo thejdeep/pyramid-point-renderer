@@ -345,7 +345,7 @@ int main(int argc, char * argv []) {
   mask_size = 2;
   reconstruction_filter_size = 1.0;
   prefilter_size = 0.0;
-  material = 0;
+  material = 3;
   quality_threshold = 0.0;
   auto_rotate = false;
   elliptical_weight = true;
