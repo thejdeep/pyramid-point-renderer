@@ -30,26 +30,30 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
 					 
   float len = length(minor_axis.xy);
 
-  //if (len == 0.0)
-  if (minor_axis.z == 0.0)
+/*   if (minor_axis.y < 0) */
+/*     minor_axis *= -1; */
+
+  if (len == 0.0)  
     minor_axis.y = 0.0;
   else
     minor_axis.y /= len;
 
   // angle between minor_axis and z direction
   float angle = acos(minor_axis.y);
+
   if (minor_axis.x > 0.0)
     angle *= -1.0;
-  
-  float cos_angle = minor_axis.y;
-  float sin_angle = sin(angle);
 
+/*   if (minor_axis_length > major_axis_length) */
+/*     angle *= -1.0; */
+  
+  
   // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle, -d.x*sin_angle + d.y*cos_angle);
+  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle), -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = major_axis_length*reconstruction_filter_size;
-  float b = minor_axis_length*reconstruction_filter_size;
+   float a = major_axis_length*reconstruction_filter_size;
+   float b = minor_axis_length*reconstruction_filter_size;
 
   // include antialiasing filter
   a += prefilter_size;
