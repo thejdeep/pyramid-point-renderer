@@ -10,7 +10,7 @@ uniform vec3 eye;
 uniform int back_face_culling;
 
 varying vec3 minor_axis;
-varying vec3 major_axis;
+varying vec3 normal;
 varying float minor_length;
 varying float major_length;
 varying float depth;
@@ -22,13 +22,13 @@ void main(void)
 {  
   gl_TexCoord[0] = gl_MultiTexCoord0;
 
-  vec3 normal = normalize(gl_Normal.xyz);
-  major_axis = normalize(gl_TexCoord[0].xyz);
+  normal = normalize(gl_Normal.xyz);
+  vec3 major_axis = normalize(gl_TexCoord[0].xyz);
   minor_axis = normalize(cross(normal, major_axis));
 
-  vec3 e = gl_Vertex.xyz - eye;
+  vec3 e = eye - gl_Vertex.xyz;
 
-  if ( (back_face_culling == 1) && (normalize(dot(e, normal)) > 0.1 )) {
+  if ( (back_face_culling == 1) && (normalize(dot(e, normal)) < -0.1 )) {
     minor_length = 0.0;
     major_length = 0.0;
 
@@ -36,8 +36,20 @@ void main(void)
     // the performance significantly, at least on the GeForce8800 -- RM 2007-10-19
     gl_Position = vec4(1.0);
   }
-  else if (1 == 11) {
-    /// Rytz construction
+  else if (1 == 1) {
+
+
+    dist_to_eye = length(eye - gl_Vertex.xyz);
+
+    // compute depth value without projection matrix, only modelview
+    depth = -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z;
+    //w = v.w;
+
+    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+
+    normal = normalize(gl_NormalMatrix * normal);
+
+    /******************************* RYTZ CONSTRUCTION ******************************************/
 
     minor_length = gl_Vertex.w;
     major_length = gl_TexCoord[0].w;
@@ -47,50 +59,53 @@ void main(void)
     vec2 P = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz + major_axis*major_length, 1.0)).xy;
     vec2 Q = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz + minor_axis*minor_length, 1.0)).xy;
 
-/*     vec2 M = gl_Vertex.xy; */
-/*     vec2 P = gl_Vertex.xy + major_axis.xy*major_length; */
-/*     vec2 Q = gl_Vertex.xy + minor_axis.xy*minor_length; */
+    /// check if projected axes are already perpendicular
+/*     if (dot(P-M, Q-M) == 0.0) { */
+/*          minor_length = length(Q - M); */
+/* 	 major_length = length(P - M); */
 
-    /// rotate P in 90 deegres
-    float angle = PI*0.5;
-    vec2 rot = P - M;
-    rot = vec2(rot.x*cos(angle) + rot.y*sin(angle), -rot.x*sin(angle) + rot.y*cos(angle));
-    P = M + rot;
+/* 	 minor_axis = vec3(normalize(Q - M), 0.0); */
+/* 	 major_axis = vec3(normalize(P - M), 0.0); */
+/*     } */
+/*     else  */
+      {
 
-    /// midpoint of Rytz circle
-    vec2 C = 0.5*(P + Q);
+      /// rotate P in 90 deegres
+      float angle = PI*0.5;
+      vec2 rot = P - M;
+      rot = vec2(rot.x*cos(angle) + rot.y*sin(angle), -rot.x*sin(angle) + rot.y*cos(angle));
+      P = M + rot;
 
-    /// radius of Rytz circle
-    float radius = length(C - M);
+      /// midpoint of Rytz circle
+      vec2 C = 0.5*(P + Q);
 
-    /// find intersections points of line passing through P and Q, and the Rytz circle
-    vec2 X = C + normalize(P - C) * radius;
-    vec2 Y = C + normalize(Q - C) * radius;
+      /// radius of Rytz circle
+      float radius = length(C - M);
 
-    minor_length = length(Q - Y);
-    major_length = length(Q - X);
+      /// find intersections points of line passing through P and Q, and the Rytz circle
+      vec2 X = C + normalize(P - C) * radius;
+      vec2 Y = C + normalize(Q - C) * radius;
 
-    minor_axis = vec3(normalize(X - M), 0.0);
-    major_axis = vec3(normalize(Y - M), 0.0);
+      minor_length = length(Q - Y);
+      major_length = length(Q - X);
+      
+      minor_axis = vec3(normalize(X - M), 0.0);
+      major_axis = vec3(normalize(Y - M), 0.0);
+    }
+       
 
 /*     if (major_length < minor_length) { */
-/*       //      if (alpha < 0) { */
 /*       float tmp = major_length; */
 /*       major_length = minor_length; */
 /*       minor_length = tmp; */
 /*       vec3 tmpv; */
-/*       tmpv = major_axis;       */
+/*       tmpv = major_axis; */
 /*       major_axis = minor_axis; */
 /*       minor_axis = tmp; */
 /*     } */
 
-    dist_to_eye = length(eye - gl_Vertex.xyz);
 
-    // compute depth value without projection matrix, only modelview
-    depth = -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z;
-    //w = v.w;
-
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0);
+    
 
   }
   else
@@ -113,9 +128,6 @@ void main(void)
 
       alpha /= den;
       alpha = atan(alpha)*0.5;
-      
-/*       if (den > 0.0) */
-/* 	alpha = mod((alpha + PI*0.5),  PI ); */
 
       float cos_alpha = cos(alpha);
       float sin_alpha = sin(alpha);
@@ -178,5 +190,6 @@ void main(void)
       //w = v.w;
 
       gl_Position = v;
+      normal = gl_NormalMatrix * normal;
     }
 }

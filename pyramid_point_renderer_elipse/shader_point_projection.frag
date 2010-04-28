@@ -12,7 +12,7 @@
 uniform float scale;
 
 varying vec3 minor_axis;
-varying vec3 major_axis;
+varying vec3 normal;
 varying float minor_length;
 varying float major_length;
 varying float depth;
@@ -32,5 +32,5 @@ void main(void)
   // First buffer : minimum depth, depth interval, center.x, center.y
   gl_FragData[0] = vec4 (depth, 2.0*depth_interval, 0.0, 0.0);
   gl_FragData[1] = vec4 (minor_axis, proj_minor);
-  gl_FragData[2] = vec4 (major_axis, proj_major);
+  gl_FragData[2] = vec4 (normal, proj_major);
 }

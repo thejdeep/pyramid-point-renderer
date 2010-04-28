@@ -26,12 +26,9 @@ uniform sampler2D textureC;
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
 float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length, 
-					 in vec3 minor_axis, in vec3 major_axis){	
+					 in vec3 minor_axis){	
 					 
   float len = length(minor_axis.xy);
-
-/*   if (minor_axis.y < 0) */
-/*     minor_axis *= -1; */
 
   if (len == 0.0)  
     minor_axis.y = 0.0;
@@ -44,16 +41,12 @@ float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_
   if (minor_axis.x > 0.0)
     angle *= -1.0;
 
-/*   if (minor_axis_length > major_axis_length) */
-/*     angle *= -1.0; */
-  
-  
   // rotate point to ellipse coordinate system
   vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle), -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-   float a = major_axis_length*reconstruction_filter_size;
-   float b = minor_axis_length*reconstruction_filter_size;
+  float a = major_axis_length*reconstruction_filter_size;
+  float b = minor_axis_length*reconstruction_filter_size;
 
   // include antialiasing filter
   a += prefilter_size;
@@ -217,7 +210,7 @@ void main (void) {
 
 		// if specified scatter pixel test distance to center of ellipse
 		if (pixelB[i].w > 0.0)		
-	  	  dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz, pixelC[i].xyz);
+	  	  dist_test = pointInEllipse(pixelA[i].zw, pixelB[i].w, pixelC[i].w, pixelB[i].xyz);
 		else
 		  dist_test = -1.0;
 
@@ -272,7 +265,13 @@ void main (void) {
 			  if ((!depth_test) || (pixelA[i].x - pixelA[i].y <= zmin + zmax)) {
 				  total_weight += weights[i];
 				  bufferA += weights[i] * pixelA[i];
-				  bufferB += weights[i] * pixelB[i];
+				  
+				  if (dot(normalize(bufferB.xyz), normalize(pixelB[i].xyz)) < 0)
+				    bufferB.xyz -= weights[i] * pixelB[i].xyz;
+				  else
+				    bufferB.xyz += weights[i] * pixelB[i].xyz;
+
+				  bufferB.w += weights[i] * pixelB[i].w;
 				  bufferC += weights[i] * pixelC[i];
 				}
 			}
