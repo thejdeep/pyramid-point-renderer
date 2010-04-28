@@ -33,56 +33,34 @@ uniform sampler2D textureA;
 uniform sampler2D textureB;
 uniform sampler2D textureC;
 
-
-// tests if a point is inside a circle.
-// Circle is centered at origin, and point is
-// displaced by param d.
-float pointInCircle(in vec2 d, in float radius){
-  float sqrt_len = d.x*d.x + d.y*d.y;
-
-  radius *= 1.0;
-  radius += prefilter_size;
-
-  float dif = sqrt_len / (radius*radius);
-
-  if (dif <= reconstruction_filter_size)
-    return dif;
-  else return -1.0;
-}
-
 // tests if a point is inside an ellipse.
 // Ellipse is centered at origin and point displaced by d.
 // Radius is the half the ellipse's major axis.
 // Minor axis is computed by normal direction.
-// @param d Difference vector from center of ellipse to point.
-// @param radius Ellipse major axis length * 0.5.
-// @param normal Normal vector.
-float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
-  
-  float len = length(normal.xy);
+float pointInEllipse(in vec2 d, in float minor_axis_length, in float major_axis_length, 
+					 in vec3 minor_axis){	
+					 
+  float len = length(minor_axis.xy);
 
-  //  if (len == 0.0)
-  //  if ((normal.y == 0.0) || (normal.x == 0.0))
-  if (normal.z == 1.0)
-    //return pointInCircle(d, radius);
-    normal.y = 0.0;
+  if (len == 0.0)
+    minor_axis.y = 0.0;
   else
-    normal.y /= len;
+    minor_axis.y /= len;
 
-  // angle between normal and z direction
-  float angle = acos(normal.y);
-  if (normal.x > 0.0)
+  // angle between minor_axis and z direction
+  float angle = acos(minor_axis.y);
+
+  if (minor_axis.x > 0.0)
     angle *= -1.0;
 
   // rotate point to ellipse coordinate system
-  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle),
-						  -d.x*sin(angle) + d.y*cos(angle));
+  vec2 rotated_pos = vec2(d.x*cos(angle) + d.y*sin(angle), -d.x*sin(angle) + d.y*cos(angle));
 
   // major and minor axis
-  float a = radius*reconstruction_filter_size;
-  float b = a*normal.z;
+   float a = major_axis_length*reconstruction_filter_size;
+   float b = minor_axis_length*reconstruction_filter_size;
 
-  // include antialiasing filter (increase both axis)
+  // include antialiasing filter
   a += prefilter_size;
   b += prefilter_size;
 
@@ -92,7 +70,8 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
   if (test <= 1.0)
     return test;
   else return -1.0;
-}
+}		
+
 
 void splatEllipse(inout vec4 buffer0, inout vec4 buffer1,
 				  in vec3 normal, in float r, in float ellipseZ, in float depth_interval, 
