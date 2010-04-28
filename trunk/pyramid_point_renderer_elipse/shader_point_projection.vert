@@ -9,6 +9,8 @@
 uniform vec3 eye;
 uniform int back_face_culling;
 
+uniform int rytz;
+
 varying vec3 minor_axis;
 varying vec3 normal;
 varying float minor_length;
@@ -36,7 +38,7 @@ void main(void)
     // the performance significantly, at least on the GeForce8800 -- RM 2007-10-19
     gl_Position = vec4(1.0);
   }
-  else if (1 == 1) {
+  else if (rytz == 1) {
 
 
     dist_to_eye = length(eye - gl_Vertex.xyz);
@@ -55,9 +57,15 @@ void main(void)
     major_length = gl_TexCoord[0].w;
 
     /// project center and two endpoints of axes
-    vec2 M = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0)).xy;
-    vec2 P = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz + major_axis*major_length, 1.0)).xy;
-    vec2 Q = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz + minor_axis*minor_length, 1.0)).xy;
+/*     vec2 M = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz, 1.0)).xy; */
+/*     vec2 P = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz + major_axis*major_length, 1.0)).xy; */
+/*     vec2 Q = (gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz + minor_axis*minor_length, 1.0)).xy; */
+
+    vec2 M = (gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).xy;
+    vec2 P = (gl_ModelViewMatrix * vec4(gl_Vertex.xyz + major_axis*major_length, 1.0)).xy;
+    vec2 Q = (gl_ModelViewMatrix * vec4(gl_Vertex.xyz + minor_axis*minor_length, 1.0)).xy;
+
+
 
     /// check if projected axes are already perpendicular
 /*     if (dot(P-M, Q-M) == 0.0) { */
@@ -119,8 +127,10 @@ void main(void)
       minor_axis *= minor_length;
       major_axis *= major_length;
 
-      float dot_major = dot(normalize(major_axis), normalize(e));
-      float dot_minor = dot(normalize(minor_axis), normalize(e));
+      e = normalize(eye);
+
+      float dot_major = dot(major_axis, e);
+      float dot_minor = dot(minor_axis, e);
 
       float alpha = 2.0*dot_major*dot_minor;
       float den = (minor_length*minor_length + dot_major*dot_major) 
@@ -142,9 +152,12 @@ void main(void)
       rot_minor.y = -major_axis.y * sin_alpha + minor_axis.y * cos_alpha;
       rot_minor.z = -major_axis.z * sin_alpha + minor_axis.z * cos_alpha;
 
-      e = normalize(e);
       vec3 major_proj = rot_major - e * dot(rot_major, e);
       vec3 minor_proj = rot_minor - e * dot(rot_minor, e);
+
+      major_proj = (gl_ModelViewMatrix * vec4(major_proj, 0.0)).xyz;
+      minor_proj = (gl_ModelViewMatrix * vec4(minor_proj, 0.0)).xyz;
+      
 
 /*       vec3 major_proj = (gl_ModelViewMatrix * vec4(rot_major, 0.0)).xyz; */
 /*       vec3 minor_proj = (gl_ModelViewMatrix * vec4(rot_minor, 0.0)).xyz; */
@@ -157,17 +170,17 @@ void main(void)
       major_axis = normalize(major_proj);
       minor_axis = normalize(minor_proj);
 
-      if (major_length < minor_length) {
-      //      if (alpha < 0) {
-	float tmp = major_length;
-	major_length = minor_length;
-	minor_length = tmp;
-	major_axis = normalize(minor_axis);
-	minor_axis = normalize(major_axis);
-      }
+/*       if (major_length < minor_length) { */
+/*       //      if (alpha < 0) { */
+/* 	float tmp = major_length; */
+/* 	major_length = minor_length; */
+/* 	minor_length = tmp; */
+/* 	major_axis = normalize(minor_axis); */
+/* 	minor_axis = normalize(major_axis); */
+/*       } */
 
-      if (abs(dot(major_axis, minor_axis)) < 0.1)
-	  minor_length = 0.0;
+/*       if (abs(dot(major_axis, minor_axis)) < 0.1) */
+/* 	  minor_length = 0.0; */
 	
 
 /*       if (length(major_proj*sin_alpha + minor_proj*cos_alpha) < (length(major_proj*cos_alpha - minor_proj*sin_alpha))) { */
