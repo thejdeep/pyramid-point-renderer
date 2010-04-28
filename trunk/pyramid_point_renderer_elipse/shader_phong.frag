@@ -15,10 +15,10 @@ void main (void) {
 
 	if (minor_axis.w != 0.0) {
 
-		vec4 major_axis = texture2D (textureC, gl_TexCoord[0].st).xyzw;
-		vec3 normal = cross(minor_axis.xyz, major_axis.xyz);
+		vec3 normal = texture2D (textureC, gl_TexCoord[0].st).xyz;
+		//		vec3 normal = cross(minor_axis.xyz, major_axis.xyz);
 
-	    normal = normalize(normal);
+		normal = normalize(normal);
 
 		if (shininess == 99.0) {
 			color.rgb = normal.rgb;
