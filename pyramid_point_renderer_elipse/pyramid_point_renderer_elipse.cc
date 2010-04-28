@@ -13,6 +13,24 @@
 PyramidPointRendererElipse::PyramidPointRendererElipse(int w, int h) : PyramidPointRendererBase(w, h, 6) {
 }
 
+/**
+ * Setting of variables for shader program of the projection phase
+ * @return True if done with rasterization, False if still needs to
+ * render textures.
+ **/
+const int PyramidPointRendererElipse::projectionCallbackFunc( void )
+{
+  mShaderProjection.prog.Bind();
+  mShaderProjection.prog.Uniform("eye", (GLfloat)eye[0], (GLfloat)eye[1], (GLfloat)eye[2]);
+  mShaderProjection.prog.Uniform("back_face_culling", (GLint)back_face_culling);
+  mShaderProjection.prog.Uniform("scale", (GLfloat)scale_factor);
+  mShaderProjection.prog.Uniform("rytz", (GLint) depth_test);
+
+  // Projection phase takes care of rasterizing the pixels by projecting surfels, 
+  // no need to send textures.
+  return true;
+}
+
 /* rasterize level 0 of pyramid with per pixel shading */
 
 const int PyramidPointRendererElipse::phongShadingCallbackFunc( void )
