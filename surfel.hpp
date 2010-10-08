@@ -15,10 +15,21 @@
 #include <iostream>
 #include <wrap/gl/shaders.h>
 
-#include <wrap/io_trimesh/import_ply.h>
-#include <wrap/io_trimesh/export_ply.h>
+
+// #include <vcg/simplex/vertex/base.h>
+// #include <vcg/simplex/face/base.h>
+// #include <vcg/simplex/edge/base.h>
+// #include <vcg/complex/trimesh/base.h>
+
+// #include <vcg/math/quadric.h>
+// #include <vcg/complex/trimesh/clean.h>
+
 #include <wrap/io_trimesh/io_ply.h>
 #include <wrap/ply/plylib.h>
+
+#include <wrap/io_trimesh/import.h>
+#include <wrap/io_trimesh/export_ply.h>
+
 
 #include "GL/gl.h"
 #include "GL/glu.h"
