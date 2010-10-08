@@ -60,9 +60,8 @@ using namespace vcg;
 
 class CVertex;
 class CFace;
-class CEdge;
 
-class MyUsedTypes: public vcg::UsedTypes< vcg::Use<CVertex>::AsVertexType, vcg::Use<CEdge>::AsEdgeType, vcg::Use<CFace>::AsFaceType> {};
+class MyUsedTypes: public vcg::UsedTypes< vcg::Use<CVertex>::AsVertexType, vcg::Use<CFace>::AsFaceType> {};
 
 class CVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vertex::Normal3f, vertex::Color4b, vertex::Radiusf, vertex::Qualityf> {};
 class CFace : public vcg::Face<MyUsedTypes, vcg::face::VertexRef> {};

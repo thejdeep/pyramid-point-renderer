@@ -6,10 +6,10 @@ include Makefile.in
 OBJECTS = application.o \
 	main.o \
 	point_based_renderer.o \
+	plylib.o \
 	object.o \
 	trackball.o \
-	trackmode.o \
-	plylib.o
+	trackmode.o
 
 SUBDIRS = pyramid_point_renderer_base \
 	pyramid_point_renderer \
@@ -17,13 +17,13 @@ SUBDIRS = pyramid_point_renderer_base \
 	pyramid_point_renderer_elipse \
 	pyramid_templates
 
-OBJS =	application.o \
+OBJS =	plylib.o \
+	application.o \
 	main.o \
 	point_based_renderer.o \
 	object.o \
 	trackball.o \
 	trackmode.o \
-	plylib.o \
 	pyramid_point_renderer_base.o \
 	pyramid_point_renderer.o \
 	pyramid_point_renderer_color.o \
@@ -36,6 +36,7 @@ CODES =	application.cc \
 	object.cc \
 	$(VCGDIR)/wrap/gui/trackball.cpp \
 	$(VCGDIR)/wrap/gui/trackmode.cpp \
+	$(VCGDIR)/wrap/ply/plylib.cpp \
 	pyramid_point_renderer/pyramid_point_renderer_base.cc \
 	pyramid_point_renderer/pyramid_point_renderer.cc \
 	pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
