@@ -84,7 +84,7 @@ class PyramidPointRendererBase : public PointBasedRenderer
 	string *shader_texture_names;
 
 	/// The application-created framebuffer object.
-	vector<GLuint*> fbo_lod;
+	vector<GLuint> fbo_lod;
 
 	/// Framebuffer for depth test.
 	GLuint fbo_depth;

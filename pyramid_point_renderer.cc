@@ -26,28 +26,32 @@ void PyramidPointRenderer::createShaders ( void ) {
 
 	bool link;
 
-	mShaderProjection.SetSources(loadShaderSource("shader_point_projection.vert").toAscii().data(), loadShaderSource("shader_point_projection.frag").toAscii().data());
+	//	mShaderProjection.SetSources(loadShaderSource("shader_point_projection.vert").toAscii().data(), loadShaderSource("shader_point_projection.frag").toAscii().data());
+	mShaderProjection.LoadSources("pyramid_point_renderer/shader_point_projection.vert", "pyramid_point_renderer/shader_point_projection.frag");
 	link = mShaderProjection.prog.Link();
 
 	std::string compileinfo = mShaderProjection.fshd.InfoLog();  
 	std::cout << "Projection Frag shader info : " << compileinfo << "\n";
 	assert (link == 1);
 
-	mShaderAnalysis.SetSources(loadShaderSource("shader_analysis.vert").toAscii().data(), loadShaderSource("shader_analysis.frag").toAscii().data());
+	//	mShaderAnalysis.SetSources(loadShaderSource("shader_analysis.vert").toAscii().data(), loadShaderSource("shader_analysis.frag").toAscii().data());
+	mShaderAnalysis.LoadSources("pyramid_point_renderer/shader_analysis.vert", "pyramid_point_renderer/shader_analysis.frag");
 	link = mShaderAnalysis.prog.Link();
 
 	compileinfo = mShaderAnalysis.fshd.InfoLog();  
 	std::cout << "Analysis Frag shader info : " << compileinfo << "\n";
 	assert (link == 1);
 
-	mShaderSynthesis.SetSources(loadShaderSource("shader_synthesis.vert").toAscii().data(), loadShaderSource("shader_synthesis.frag").toAscii().data());
+	//	mShaderSynthesis.SetSources(loadShaderSource("shader_synthesis.vert").toAscii().data(), loadShaderSource("shader_synthesis.frag").toAscii().data());
+	mShaderSynthesis.LoadSources("pyramid_point_renderer/shader_synthesis.vert", "pyramid_point_renderer/shader_synthesis.frag");
 	link = mShaderSynthesis.prog.Link();
 
 	compileinfo = mShaderSynthesis.fshd.InfoLog();  
 	std::cout << "Synthesis Frag shader info : " << compileinfo << "\n";
 	assert (link == 1);
 
-	mShaderPhong.SetSources(loadShaderSource("shader_phong.vert").toAscii().data(), loadShaderSource("shader_phong.frag").toAscii().data());
+	//	mShaderPhong.SetSources(loadShaderSource("shader_phong.vert").toAscii().data(), loadShaderSource("shader_phong.frag").toAscii().data());
+	mShaderPhong.LoadSources("pyramid_point_renderer/shader_phong.vert", "pyramid_point_renderer/shader_phong.frag");
 	link = mShaderPhong.prog.Link();
 
 	compileinfo = mShaderPhong.fshd.InfoLog();  

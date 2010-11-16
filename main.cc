@@ -362,7 +362,7 @@ int main(int argc, char * argv []) {
     }
 
   //application = new Application(PYRAMID_TEMPLATES);
-  application = new Application(PYRAMID_ELIPSES);
+  application = new Application(PYRAMID_POINTS);
 
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
