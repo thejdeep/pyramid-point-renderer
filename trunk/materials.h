@@ -1,23 +1,25 @@
-/**
-*
-* Disciplina: Introducao a Computacao Grafica
-* Professor: Claudio Esperanca
-* Periodo: 2004/01
-*
-* Aluno: Andre de Almeida Maximo
-* DRE: 104004976
-*
-*/
-
-/**
-*
-* Materials Properties Constants (Header)
-*** Copied from:
-*** Nate Robins, 1997
-*** Tool for teaching about OpenGL
-* File: materials.h
-*
-*/
+/****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2006                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
 
 #ifndef __MATERIALS_H__
 #define __MATERIALS_H__
@@ -50,18 +52,18 @@ const GLfloat Mats[NUM_MATERIALS][14] = {
 /* 	0.50000, 0.50000, 0.500000, 1.000000, */
 /* 	100.000000 */
 /*   }, */
-/*   {// No Material */
-/* 	0.0000, 0.000, 0.0000, 1.000000, */
-/* 	0.00000, 0.0000, 0.0000, 1.000000, */
-/* 	0.0000, 0.0000, 0.00000, 1.000000, */
-/* 	0.000000 */
-/*   }, */
+   //~ {// No Material 
+ 	//~ 0.0000, 0.000, 0.0000, 1.000000, 
+ 	//~ 0.00000, 0.0000, 0.0000, 1.000000, 
+ 	//~ 0.0000, 0.0000, 0.00000, 1.000000, 
+ 	//~ 0.000000 
+   //~ }, 
 
   {//silver
 	0.192250, 0.192250, 0.192250, 1.000000,
 	0.507540, 0.507540, 0.507540, 1.000000,
 	0.508273, 0.508273, 0.508273, 1.000000,
-	51.200001
+	1.0000
 },
   {//gold
 	0.247250, 0.199500, 0.074500, 1.000000,

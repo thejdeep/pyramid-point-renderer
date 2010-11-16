@@ -20,8 +20,7 @@ typedef enum
   {
     PYRAMID_POINTS,
     PYRAMID_POINTS_COLOR,
-    PYRAMID_TEMPLATES,
-    PYRAMID_ELIPSES
+    PYRAMID_TEMPLATES
   } point_render_type_enum;
 
 using namespace std;
@@ -32,69 +31,58 @@ static const Point3f black_color (0.0, 0.0, 0.0);
 
 typedef Surfel<double> Surfeld;
 typedef vector<Surfeld>::iterator surfelVectorIter;
+typedef vector<Surfeld>::const_iterator surfelVectorIterConst;
 
 class Object
 {
-  public:
+ public:
+  
+  Object() { }
+   
+  Object(int id_num) : id(id_num)  {}
+      
+  ~Object();
 
+  void render ( void ) const;
 
-	Object() { }
+  vector<Surfeld> * getSurfels ( void ) { return &surfels; }
 
-	Object(int id_num, GLfloat t) : id(id_num) {}
+  void clearSurfels ( void );
 
-	Object(int id_num) : id(id_num)  {}
+  int getRendererType ( void ) { return renderer_type; }
+  void setRendererType ( int type );
 
-	~Object();
+  void setId ( int id_num ) { id = id_num; }
+  int getId ( void ) { return id; }
 
-	void render ( void ) const;
+  int numberPoints ( void ) const { return number_points; }
 
-	vector<Surfeld>& getSurfels ( void ) { return surfels; }
+  Point3f eye;
 
+ private:
 
-	void clearSurfels ( void );
+  void setPyramidPointsDisplayList ( void );
+  void setPyramidPointsColorDisplayList ( void );
+  void setPyramidPointsArrays( void );
+  void setPyramidPointsArraysColor( void );
 
-	int getRendererType ( void ) { return renderer_type; }
-	void setRendererType ( int type );
+  void normalizeQuality( void );
 
-	void setId ( int id_num ) { id = id_num; }
-	int getId ( void ) { return id; }
+  double max_quality, min_quality;
 
-	int numberPoints ( void ) const { return number_points; }
+  // Object group identification number.
+  int id;
+ 
+  // Rendering type.
+  int renderer_type;
 
-	Point3f eye;
+  /// Number of samples.
+  int number_points;
 
-	float max_quality;
+  GLuint pointsDisplayList;
 
-  private:
-
-	void setPyramidPointsArrays( void );
-	void setPyramidElipsesArrays( void );
-	void setPyramidPointsArraysColor( void );
-
-	// Object group identification number.
-	int id;
-
-	// Rendering type.
-	int renderer_type;
-
-	/// Vertex buffer
-	GLuint vertex_buffer;
-
-	/// Color Buffer
-	GLuint color_buffer;
-
-	/// Normal Buffer
-	GLuint normal_buffer;
-
-	/// Ellipses axes buffers
-	GLuint u_buffer;
-	GLuint v_buffer;
-
-	/// Number of samples.
-	int number_points;
-
-	// Vector of surfels belonging to this object.
-	vector<Surfeld> surfels;
+  // Vector of surfels belonging to this object.
+  vector<Surfeld> surfels;
 
 };
 

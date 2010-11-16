@@ -9,13 +9,9 @@
 #ifndef __POINT_BASED_RENDERER_H__
 #define __POINT_BASED_RENDERER_H__
 
-
-
-//#include "glslKernel/glslKernel.h"
 #include <iostream>
 
 #include "surfel.hpp"
-#include "pyramid_types.h"
 #include "materials.h"
 #include "object.h"
 
@@ -30,9 +26,9 @@ class PointBasedRenderer
   /**
    * Default constructor, creates an 1024x1024 screen size.
    **/
-  PointBasedRenderer() : window_width(1024), window_height(1024),
+  PointBasedRenderer() :
     canvas_width(1024), canvas_height(1024), scale_factor(1.0),
-    material_id(0), depth_test(1), elliptical_weight(0),
+    material_id(0), depth_test(1), back_face_culling(1), elliptical_weight(0),
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
 
@@ -41,9 +37,9 @@ class PointBasedRenderer
    * @param w Screen width.
    * @param h Screen height.
    **/
-  PointBasedRenderer(int w, int h) : window_width(w), window_height(h),
-    canvas_width(h), canvas_height(h), scale_factor(1.0),
-    material_id(0), depth_test(1), elliptical_weight(0),
+  PointBasedRenderer(int w, int h) :
+    canvas_width(w), canvas_height(h), scale_factor(1.0),
+    material_id(0), depth_test(1), back_face_culling(1), elliptical_weight(0),
     reconstruction_filter_size(1.0), prefilter_size(1.0)
     {}
   
@@ -54,23 +50,28 @@ class PointBasedRenderer
    /**
     * Render point based model using deferred shading (per pixel shading).
     **/
-  virtual void draw( void ) {}
+	virtual void draw( void ) {}
 
-   /**
-    * Intepolate samples in screen space using pyramid method.
-    **/
-   virtual void interpolate( void ) {}
+	/**
+ 	 * Interpolate samples in screen space using pyramid method.
+	**/
+	virtual void interpolate( void ) {}
 
-   /**
-    * Projects samples to screen space.
-    * @param p Point to primitives instance containing samples.
-    **/
-   virtual void projectSamples(Object* p) {}
+	/**
+	 * Projects samples to screen space.
+	 * @param p Point to primitives instance containing samples.
+	**/
+	virtual void projectSamples(Object* ) {}
 
    /**
     * Clears all buffers, including those of the framebuffer object.
     **/
    virtual void clearBuffers( void ) {}
+
+   /**
+    **/
+   virtual void setMinimumRadiusSize(double s) { minimum_radius_size = s; }
+
 
    /**
     * Sets the size of the prefilter (default = 1.0).
@@ -85,6 +86,13 @@ class PointBasedRenderer
     * @param s Reconstruction filter size.
     **/
    virtual void setReconstructionFilterSize(double s) { reconstruction_filter_size = s; }
+
+   /**
+    * Sets the size of the reconstruction filter (default = 1.0).
+    * This filter works as a multiplier of the radius size in screen space.
+    * @param s Reconstruction filter size.
+    **/
+   virtual double getReconstructionFilterSize(void) { return reconstruction_filter_size; }
 
    /**
     * Sets the quality threshold for interpolating samples.
@@ -102,7 +110,7 @@ class PointBasedRenderer
     * Sets the kernel size, for templates rendering only.
     * @param Kernel size.
     **/
-   virtual void setGpuMaskSize ( int k ) {}
+   virtual void setGpuMaskSize ( int ) {}
 
    /** 
     * Sets eye vector used mainly for backface culling.
@@ -170,10 +178,6 @@ class PointBasedRenderer
    }
 
  protected:
-   /// Window width.
-   GLuint window_width;
-   /// Window height.
-   GLuint window_height;
 
    /// Canvas width.
    int canvas_width;
@@ -208,6 +212,9 @@ class PointBasedRenderer
    double reconstruction_filter_size;
    /// Size of antialising filter.
    double prefilter_size;
+   /// Minimum smallest radius size.
+   double minimum_radius_size;
+
 };
 
 //inline void check_for_ogl_error( char * from = 0) {

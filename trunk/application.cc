@@ -17,7 +17,7 @@
  **/
 Application::Application( GLint default_mode ) {
 
-  canvas_width = canvas_height = 800;
+  canvas_width = canvas_height = 768;
   windows_width = windows_height = canvas_width + 2*(canvas_width/32);
 
   trackball.center = vcg::Point3f(0, 0, 0);
