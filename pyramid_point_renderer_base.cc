@@ -225,7 +225,8 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
       mShaderAnalysis.prog.Uniform("offset", (GLfloat)0.25/lw, (GLfloat)0.25/lh);
       mShaderAnalysis.prog.Uniform("level_ratio", (GLfloat)(2.0*ratio_w/lw), (GLfloat)(2.0*ratio_h/lh));
 
-      rasterizePixels();	  
+      rasterizePixels();
+
       mShaderAnalysis.prog.Unbind();
       //fbo_lod[level]->release();
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -285,15 +286,26 @@ void PyramidPointRendererBase::rasterizeSynthesisPyramid( void )
 
       mShaderSynthesis.prog.Bind();
       mShaderSynthesis.prog.Uniform("level", (GLint)level);
+
       ratio_w = lw;
       ratio_h = lh;
       lw = floorf(canvas_width / pow(2.0, level+1));
       lh = floorf(canvas_height / pow(2.0, level+1));
-      mShaderSynthesis.prog.Uniform("half_pixel_size", (GLfloat)0.5/lw, (GLfloat)0.5/lh);	
+
+      mShaderSynthesis.prog.Uniform("half_pixel_size", (GLfloat)0.5/lw, (GLfloat)0.5/lh);
+
+      check_for_ogl_error("uniforms 0");
+
       mShaderSynthesis.prog.Uniform("level_ratio", (GLfloat)(0.5*ratio_w/lw), (GLfloat)(0.5*ratio_h/lh));
+
+      check_for_ogl_error("uniforms 1");
+
       mShaderSynthesis.prog.Uniform("canvas_ratio", (GLfloat)lw/lh);
 
+      check_for_ogl_error("uniforms 2");
+
       rasterizePixels();
+
       mShaderSynthesis.prog.Unbind();
       //fbo_lod[level]->release();
       glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -413,11 +425,11 @@ void PyramidPointRendererBase::interpolate() {
 
   /// Pull phase - Create pyramid structure
   rasterizeAnalysisPyramid();
-  //  check_for_ogl_error("analysis");
+  check_for_ogl_error("analysis");
 
   /// Push phase - Interpolate scattered data
   rasterizeSynthesisPyramid();
-  // check_for_ogl_error("synthesis");
+  check_for_ogl_error("synthesis");
 }
 
 /**
