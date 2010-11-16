@@ -9,7 +9,7 @@ With the inclusion of the VCG library the old ply library was removed and any fi
 The accepted files must have two more attributes besides the vertex coordinates:
 
   * Normals
-  * Radius (for the time being it is set as "quality" in the file header to be compatible with VCG)
+  * Radius
 
 ==Attributes==
 
@@ -29,4 +29,4 @@ The radius of a surfel corresponds to its sampling distance. This can be compute
 
 ===Precomputed Models===
 
-Some models with precomputed normals and radius can be found here under the *Downloads* tab.
+Some models with precomputed normals and radius can be found here under the *Downloads* tab, or follow the link to the project page under our lab's website.
