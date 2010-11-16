@@ -14,12 +14,16 @@ This is the basic Pyramid Point Rendering as described in:
 
 ==Tree Rendering==
 
+*not included anymore*
+
 This mode is specific for rendering tree models. The interpolation algorithm was adapted to handle lines as well as points. For more details refer to the article to be published on *Computer & Graphics*:
 [http://dx.doi.org/10.1016/j.cag.2008.01.011]
 
 The tree rendering mode still has a few minor bugs that will be treated in a near future.
 
 ==Models with Level-of-Detail Structure==
+
+*not included anymore*
 
 The Lod check box for example should only be used when a _.lod_ model has been loaded.
 The point-based LOD rendering is still a work in progress, thus the reason for its significant bad performance compared to the plain point rendering.
