@@ -14,7 +14,7 @@
 #include <errno.h>
 
 
-static int windows_size = 768;                          // Initial window width
+static int windows_size = 512;                          // Initial window width
 
 bool depth_test;
 bool back_face_culling;
@@ -343,7 +343,7 @@ int main(int argc, char * argv []) {
   glutCreateWindow ("Point Based Rendering");
 
   mask_size = 2;
-  reconstruction_filter_size = 0.1;
+  reconstruction_filter_size = 1.0;
   prefilter_size = 0.0;
   material = 3;
   quality_threshold = 0.0;
