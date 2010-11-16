@@ -1,7 +1,5 @@
 OS = linux
 
-#include Makefile.in
-
 .SUFFIXES: .cc .c
 
 OS = linux
@@ -36,12 +34,6 @@ OBJECTS = application.o \
 	pyramid_point_renderer_color.o
 #	pyramid_point_renderer_elipse.o \
 #	pyramid_point_renderer_er.o
-
-# SUBDIRS = pyramid_point_renderer_base \
-# 	pyramid_point_renderer \
-# 	pyramid_point_renderer_color \
-# 	pyramid_point_renderer_elipse \
-# 	pyramid_templates
 
 OBJS =	plylib.o \
 	application.o \
@@ -132,11 +124,9 @@ $(OBJDIR)/%.o: %.c
 	$(CC) -c -o $@ $< $(INCLUDEDIRS) $(CCFLAGS)
 
 ppr: $(OBJ) 
+	@echo
+	@echo "Linking : $@"
 	$(CXX) $(OBJ) -o $@ $(CXXFLAGS) $(LIBDIRS) $(LIBLIST)
-	# for dir in ${SUBDIRS} ; do ( cd $$dir ; ${MAKE} ) ; done
-	# @echo
-	# @echo "Linking :  $@"
-	# $(CXX) $(OBJ2) -o $@ $(CXXFLAGS) $(LIBDIRS) $(LIBLIST)
 
 trackball: $(OBJDIR)/trackmode.o $(OBJDIR)/trackball.o
 plylib: $(OBJDIR)/plylib.o
