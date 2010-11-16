@@ -119,6 +119,7 @@ public:
 
 		int result = vcg::tri::io::ExporterPLY<MyMesh>::Save(mesh,filename,binary,info,cb);
 
+		return result;
 
 	}
 	static int LoadMesh (
