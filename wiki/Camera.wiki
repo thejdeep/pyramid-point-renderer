@@ -1,5 +1,7 @@
 #summary Manipulating the camera and creating a path.
 
+*this class has been removed on newer versions!*
+
 = Introduction =
 
 The *camera* class basically controls most of the OpenGL states and methods. This implementation will soon be modified, but for the meanwhile every object reports to the camera class when a local rotation or translation occurs.
