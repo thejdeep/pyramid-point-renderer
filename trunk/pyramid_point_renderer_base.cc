@@ -163,7 +163,8 @@ void PyramidPointRendererBase::projectSurfels ( const Object* const obj )
   obj->render();
 
   mShaderProjection.prog.Unbind();
-  fbo_lod[level]->release();
+  //  fbo_lod[level]->release();
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
 
 
@@ -226,7 +227,9 @@ void PyramidPointRendererBase::rasterizeAnalysisPyramid( void ) {
 
       rasterizePixels();	  
       mShaderAnalysis.prog.Unbind();
-      fbo_lod[level]->release();
+      //fbo_lod[level]->release();
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  
     }
   
 }
@@ -292,7 +295,9 @@ void PyramidPointRendererBase::rasterizeSynthesisPyramid( void )
 
       rasterizePixels();
       mShaderSynthesis.prog.Unbind();
-      fbo_lod[level]->release();
+      //fbo_lod[level]->release();
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
     }
 }
 
@@ -369,7 +374,9 @@ void PyramidPointRendererBase::clearBuffers( void ) {
     checkFramebufferStatus( __func__ );
     check_for_ogl_error("clearing");
 
-    fbo_lod[level]->release();
+    //fbo_lod[level]->release();
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
   }
 
   /// Clear the back buffer  
@@ -503,7 +510,9 @@ void PyramidPointRendererBase::createFBO() {
     check_for_ogl_error("fbo attachment");
     //checkFramebufferStatus( __func__ );
 
-    fbo_lod[level]->release();
+    //fbo_lod[level]->release();
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
     check_for_ogl_error("fbo attachment");
   }
 
@@ -520,20 +529,20 @@ void PyramidPointRendererBase::createFBO() {
   check_for_ogl_error("fbo_mipmap");
 }
 
-QString PyramidPointRendererBase::loadShaderSource(const QString& filename) const {
+// QString PyramidPointRendererBase::loadShaderSource(const QString& filename) const {
   
-  QString res;
+//   QString res;
   
-  QFile f(shaders_path.absolutePath() + "/shaders/splatpyramid/" + filename);
+//   QFile f(shaders_path.absolutePath() + "/shaders/splatpyramid/" + filename);
   
-  if (!f.open(QFile::ReadOnly))
-    {
-      std::cerr << "failed to load shader file " << filename.toAscii().data() << "\n";	  
-    }
-  //  else qDebug("Succesfully loaded shader");
+//   if (!f.open(QFile::ReadOnly))
+//     {
+//       std::cerr << "failed to load shader file " << filename.toAscii().data() << "\n";	  
+//     }
+//   //  else qDebug("Succesfully loaded shader");
 
-  QTextStream stream(&f);
-  res = stream.readAll();
-  f.close();
-  return res;
-} 
+//   QTextStream stream(&f);
+//   res = stream.readAll();
+//   f.close();
+//   return res;
+// } 

@@ -24,28 +24,32 @@ void PyramidPointRendererColor::createShaders ( void ) {
 
   bool link;
 
-  mShaderProjection.SetSources(loadShaderSource("shader_point_projection_color.vert").toAscii().data(), loadShaderSource("shader_point_projection_color.frag").toAscii().data());
+  //  mShaderProjection.SetSources(loadShaderSource("shader_point_projection_color.vert").toAscii().data(), loadShaderSource("shader_point_projection_color.frag").toAscii().data());
+  mShaderProjection.LoadSources("pyramid_point_renderer_color/shader_point_projection_color.vert", "pyramid_point_renderer_color/shader_point_projection_color.frag");
   link = mShaderProjection.prog.Link();
 
   std::string compileinfo = mShaderProjection.vshd.InfoLog();  
   std::cout << "Proj vert shader info : " << compileinfo << "\n";
   assert (link == 1);
 
-  mShaderAnalysis.SetSources(loadShaderSource("shader_analysis_color.vert").toAscii().data(), loadShaderSource("shader_analysis_color.frag").toAscii().data());
+  //  mShaderAnalysis.SetSources(loadShaderSource("shader_analysis_color.vert").toAscii().data(), loadShaderSource("shader_analysis_color.frag").toAscii().data());
+  mShaderAnalysis.LoadSources("pyramid_point_renderer_color/shader_analysis_color.vert", "pyramid_point_renderer_color/shader_analysis_color.frag");
   link = mShaderAnalysis.prog.Link();
 
   compileinfo = mShaderAnalysis.fshd.InfoLog();  
   std::cout << "Analysis frag shader info : " << compileinfo << "\n";
   assert (link == 1);
 
-  mShaderSynthesis.SetSources(loadShaderSource("shader_synthesis_color.vert").toAscii().data(), loadShaderSource("shader_synthesis_color.frag").toAscii().data());
+  //  mShaderSynthesis.SetSources(loadShaderSource("shader_synthesis_color.vert").toAscii().data(), loadShaderSource("shader_synthesis_color.frag").toAscii().data());
+  mShaderSynthesis.LoadSources("pyramid_point_renderer_color/shader_synthesis_color.vert", "pyramid_point_renderer_color/shader_synthesis_color.frag");
   link = mShaderSynthesis.prog.Link();
 
   compileinfo = mShaderSynthesis.fshd.InfoLog();  
   std::cout << "Synth Frag shader info : " << compileinfo << "\n";
   assert (link == 1);
 
-  mShaderPhong.SetSources(loadShaderSource("shader_phong_color.vert").toAscii().data(), loadShaderSource("shader_phong_color.frag").toAscii().data());
+  //  mShaderPhong.SetSources(loadShaderSource("shader_phong_color.vert").toAscii().data(), loadShaderSource("shader_phong_color.frag").toAscii().data());
+  mShaderPhong.LoadSources("pyramid_point_renderer_color/shader_phong_color.vert", "pyramid_point_renderer_color/shader_phong_color.frag");
   link = mShaderPhong.prog.Link();
 
   compileinfo = mShaderPhong.fshd.InfoLog();  

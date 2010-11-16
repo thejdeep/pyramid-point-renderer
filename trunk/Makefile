@@ -1,7 +1,28 @@
+OS = linux
+
+#include Makefile.in
+
+.SUFFIXES: .cc .c
 
 OS = linux
 
-include Makefile.in
+# compiler names
+CC = gcc
+CXX = g++
+
+VCGDIR = $(HOME)/devel/vcglib/
+
+ifeq ($(OS), windows)
+INCLUDEDIRS = -I$(VCGDIR) -I. -I.. -I/usr/include/GL
+OBJDIR = ./objs
+else
+INCLUDEDIRS = -I$(VCGDIR) -I/usr/include/GL -I./ -I../
+OBJDIR = objs
+endif
+
+CXXFLAGS = -g -O3 -Wall -Wno-deprecated
+
+CCFLAGS = -g -O3 -Wall
 
 OBJECTS = application.o \
 	main.o \
@@ -9,13 +30,18 @@ OBJECTS = application.o \
 	plylib.o \
 	object.o \
 	trackball.o \
-	trackmode.o
+	trackmode.o \
+	pyramid_point_renderer_base.o \
+	pyramid_point_renderer.o \
+	pyramid_point_renderer_color.o
+#	pyramid_point_renderer_elipse.o \
+#	pyramid_point_renderer_er.o
 
-SUBDIRS = pyramid_point_renderer_base \
-	pyramid_point_renderer \
-	pyramid_point_renderer_color \
-	pyramid_point_renderer_elipse \
-	pyramid_templates
+# SUBDIRS = pyramid_point_renderer_base \
+# 	pyramid_point_renderer \
+# 	pyramid_point_renderer_color \
+# 	pyramid_point_renderer_elipse \
+# 	pyramid_templates
 
 OBJS =	plylib.o \
 	application.o \
@@ -23,12 +49,8 @@ OBJS =	plylib.o \
 	point_based_renderer.o \
 	object.o \
 	trackball.o \
-	trackmode.o \
-	pyramid_point_renderer_base.o \
-	pyramid_point_renderer.o \
-	pyramid_point_renderer_color.o \
-	pyramid_point_renderer_elipse.o \
-	pyramid_point_renderer_er.o
+	trackmode.o
+
 
 CODES =	application.cc \
 	main.cc \
@@ -37,11 +59,12 @@ CODES =	application.cc \
 	$(VCGDIR)/wrap/gui/trackball.cpp \
 	$(VCGDIR)/wrap/gui/trackmode.cpp \
 	$(VCGDIR)/wrap/ply/plylib.cpp \
-	pyramid_point_renderer/pyramid_point_renderer_base.cc \
-	pyramid_point_renderer/pyramid_point_renderer.cc \
-	pyramid_point_renderer_color/pyramid_point_renderer_color.cc \
-	pyramid_point_renderer_elipse/pyramid_point_renderer_elipse.cc \
-	pyramid_templates/pyramid_point_renderer_er.cc
+	pyramid_point_renderer_base.cc \
+	pyramid_point_renderer.cc \
+	pyramid_point_renderer_color.cc
+#	pyramid_point_renderer_er.cc
+#	pyramid_point_renderer_elipse/pyramid_point_renderer_elipse.cc \
+
 
 
 OBJ = $(patsubst %,$(OBJDIR)/%,$(OBJECTS))
@@ -70,13 +93,13 @@ HEADERS = application.h \
 	main.h \
 	point_based_renderer.h \
 	object.h \
-	pyramid_point_renderer/pyramid_point_renderer_base.h \
-	pyramid_point_renderer/pyramid_point_renderer.h \
-	pyramid_point_renderer_color/pyramid_point_renderer_color.h \
-	pyramid_point_renderer_elipse/pyramid_point_renderer_elipse.h \
-	pyramid_templates/pyramid_point_renderer_er.h\
+	pyramid_point_renderer_base.h \
+	pyramid_point_renderer.h \
+	pyramid_point_renderer_color.h \
 	surfel.hpp\
 	IOSUrfels.hpp
+#	pyramid_point_renderer_er.h\
+#	pyramid_point_renderer_elipse/pyramid_point_renderer_elipse.h \
 
 ###################################
 
@@ -109,10 +132,11 @@ $(OBJDIR)/%.o: %.c
 	$(CC) -c -o $@ $< $(INCLUDEDIRS) $(CCFLAGS)
 
 ppr: $(OBJ) 
-	for dir in ${SUBDIRS} ; do ( cd $$dir ; ${MAKE} ) ; done
-	@echo
-	@echo "Linking :  $@"
-	$(CXX) $(OBJ2) -o $@ $(CXXFLAGS) $(LIBDIRS) $(LIBLIST)
+	$(CXX) $(OBJ) -o $@ $(CXXFLAGS) $(LIBDIRS) $(LIBLIST)
+	# for dir in ${SUBDIRS} ; do ( cd $$dir ; ${MAKE} ) ; done
+	# @echo
+	# @echo "Linking :  $@"
+	# $(CXX) $(OBJ2) -o $@ $(CXXFLAGS) $(LIBDIRS) $(LIBLIST)
 
 trackball: $(OBJDIR)/trackmode.o $(OBJDIR)/trackball.o
 plylib: $(OBJDIR)/plylib.o

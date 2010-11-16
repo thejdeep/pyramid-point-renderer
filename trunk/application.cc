@@ -88,10 +88,10 @@ void Application::drawPoints(void) {
 
   glBegin(GL_POINTS);
   
-  for (surfelVectorIter it = objects[0].getSurfels().begin(); it != objects[0].getSurfels().end(); ++it) {
-	Color4b c = it->Color();
-	glColor4f(c[0], c[1], c[2], 1.0f);  
-	glVertex(it);
+  for (surfelVectorIter it = objects[0].getSurfels()->begin(); it != objects[0].getSurfels()->end(); ++it) {
+    Color4b c = it->Color();
+    glColor4f(c[0], c[1], c[2], 1.0f);  
+    glVertex(it);
   }
   glEnd();
 }
@@ -114,9 +114,9 @@ void Application::setView( void )
   if(nearPlane<=objDist*.1f) nearPlane=objDist*.1f;
 
   if(fov==5)
-	glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,objDist - 2.f*clipRatioNear, objDist+2.f*clipRatioFar);
+    glOrtho(-ratio*fAspect,ratio*fAspect,-ratio,ratio,objDist - 2.f*clipRatioNear, objDist+2.f*clipRatioFar);
   else    		
-	gluPerspective(fov, fAspect, nearPlane, farPlane);
+    gluPerspective(fov, fAspect, nearPlane, farPlane);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -135,11 +135,11 @@ void Application::setView( void )
  **/
 void Application::draw( void ) {
 
-//   static int time;
-//   static int frame = 0;
-//   if (frame == 0)
-// 	time = glutGet(GLUT_ELAPSED_TIME);
-//   frame ++;
+  //   static int time;
+  //   static int frame = 0;
+  //   if (frame == 0)
+  // 	time = glutGet(GLUT_ELAPSED_TIME);
+  //   frame ++;
 
   if (objects.size() == 0)
     return;  
@@ -197,11 +197,11 @@ void Application::draw( void ) {
 
   // project all objects
   if (selected == 0)
-	for (unsigned int i = 0; i < objects.size(); ++i)
-	  point_based_render->projectSamples( &objects[i] );
+    for (unsigned int i = 0; i < objects.size(); ++i)
+      point_based_render->projectSamples( &objects[i] );
   // project only selected part
   else
-	point_based_render->projectSamples( &objects[selected-1] );
+    point_based_render->projectSamples( &objects[selected-1] );
 
   // Interpolates projected surfels using pyramid algorithm (pull-push)
   point_based_render->interpolate();
@@ -218,11 +218,11 @@ void Application::draw( void ) {
 
   glPopMatrix();
 
-//   if (frame == 10) {
-// 	frame = 0;
-// 	int endtime = glutGet(GLUT_ELAPSED_TIME);
-// 	cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
-//   }
+  //   if (frame == 10) {
+  // 	frame = 0;
+  // 	int endtime = glutGet(GLUT_ELAPSED_TIME);
+  // 	cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
+  //   }
 
   //  glFinish();
 }
@@ -240,7 +240,7 @@ void Application::reshape(int w, int h) {
  **/
 void Application::changeRendererType( int type ) {
   for (unsigned int i = 0; i < objects.size(); ++i)
-	objects[i].setRendererType((point_render_type_enum) type);
+    objects[i].setRendererType((point_render_type_enum) type);
   render_mode = type;
   createPointRenderer( );
 }
@@ -253,21 +253,21 @@ void Application::changeRendererType( int type ) {
 void Application::createPointRenderer( void ) {  
 
   if (point_based_render)
-	delete point_based_render;
+    delete point_based_render;
 
   if (render_mode == PYRAMID_POINTS)
-	point_based_render = new PyramidPointRenderer(canvas_width, canvas_height);
-  else if (render_mode == PYRAMID_ELIPSES)
-	point_based_render = new PyramidPointRendererElipse(canvas_width, canvas_height);
+    point_based_render = new PyramidPointRenderer(canvas_width, canvas_height);
   else if (render_mode == PYRAMID_POINTS_COLOR)
-	point_based_render = new PyramidPointRendererColor(canvas_width, canvas_height);
-  else if (render_mode == PYRAMID_TEMPLATES)
-    point_based_render = new PyramidPointRendererER(canvas_width, canvas_height);
+    point_based_render = new PyramidPointRendererColor(canvas_width, canvas_height);
+  // else if (render_mode == PYRAMID_ELLIPSES)
+  // 	point_based_render = new PyramidPointRendererElipse(canvas_width, canvas_height);
+  // else if (render_mode == PYRAMID_TEMPLATES)
+  //   point_based_render = new PyramidPointRendererER(canvas_width, canvas_height);
 
   assert (point_based_render);
 
   ((PyramidPointRendererBase*)point_based_render)->createShaders();
-   setQualityPerVertex(quality_per_vertex);
+  setQualityPerVertex(quality_per_vertex);
 
 }
 
@@ -287,19 +287,19 @@ int Application::readSurfelFile ( const char * filename, vector<Surfeld>& surfel
 
   bool normal_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
- 	normal_per_vertex = true;
+    normal_per_vertex = true;
 
   bool color_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
-	color_per_vertex = true;
+    color_per_vertex = true;
 
   quality_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
-	quality_per_vertex = true;
+    quality_per_vertex = true;
 
   bool radius_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTRADIUS)
- 	radius_per_vertex = true;
+    radius_per_vertex = true;
 
   cout << "has normal per vertex : " << normal_per_vertex << endl;
   cout << "has quality per vertex : " << quality_per_vertex << endl;
@@ -316,24 +316,24 @@ int Application::readSurfelFile ( const char * filename, vector<Surfeld>& surfel
   unsigned int pos = 0;
   for (CMesh::VertexIterator vit = mesh.vert.begin(); vit != mesh.vert.end(); ++vit) {
 	
-	vcg::Point3f p = (*vit).P();
-	vcg::Point3f n = (*vit).N();
+    vcg::Point3f p = (*vit).P();
+    vcg::Point3f n = (*vit).N();
 
- 	double quality = 1.0;
-	if (quality_per_vertex)
-	  quality = (double)((*vit).Q());
+    double quality = 1.0;
+    if (quality_per_vertex)
+      quality = (double)((*vit).Q());
 
-	Color4b c (0.2, 0.2, 0.2, 1.0);
-	if (color_per_vertex) {
-	  c = Color4b ((GLubyte)(*vit).C()[0], (GLubyte)(*vit).C()[1], (GLubyte)(*vit).C()[2], 1.0);
-	}
+    Color4b c (0.2, 0.2, 0.2, 1.0);
+    if (color_per_vertex) {
+      c = Color4b ((GLubyte)(*vit).C()[0], (GLubyte)(*vit).C()[1], (GLubyte)(*vit).C()[2], 1.0);
+    }
 
-	double radius = 0.25;
-	if (radius_per_vertex)
-	  radius = (double)((*vit).R());
+    double radius = 0.25;
+    if (radius_per_vertex)
+      radius = (double)((*vit).R());
 	
-	surfels.push_back ( Surfeld (p, n, c, quality, radius, pos) );
-	++pos;
+    surfels.push_back ( Surfeld (p, n, c, quality, radius, pos) );
+    ++pos;
   }
 
   return mesh.vn;
@@ -349,13 +349,13 @@ void Application::readFile ( const char * filename, bool eliptical ) {
   objects.push_back( Object( objects.size() ) );
 
   if(eliptical)
-  {
-		IOSurfels<double>::LoadSurfels(filename, (objects.back()).getSurfels());
+    {
+      IOSurfels<double>::LoadSurfels(filename, *(objects.back()).getSurfels());
 
-  }else
-  {
-		IOSurfels<double>::LoadMesh(filename, (objects.back()).getSurfels());
-  }
+    }else
+    {
+      IOSurfels<double>::LoadMesh(filename, *(objects.back()).getSurfels());
+    }
 
   //readSurfelFile ( filename, (objects.back()).getSurfels() );
 
@@ -373,9 +373,9 @@ void Application::readFile ( const char * filename, bool eliptical ) {
 /// @param filename The ply file.
 /// @return Number of points read from ply file.
 int Application::appendFile ( const char * filename ) { 
-   // Create a new primitive from given file
+  // Create a new primitive from given file
   objects.push_back( Object( objects.size() ) );
-  int pts = readSurfelFile ( filename, (objects.back()).getSurfels() );
+  int pts = readSurfelFile ( filename, *(objects.back()).getSurfels() );
   return pts;
 }
 
@@ -384,7 +384,7 @@ int Application::appendFile ( const char * filename ) {
 int Application::finishFileReading ( void ) {
 
   for (unsigned int i = 0; i < objects.size(); ++i)
-	objects[i].setRendererType( render_mode );
+    objects[i].setRendererType( render_mode );
   createPointRenderer();
 
   return 0;
@@ -505,15 +505,15 @@ void Application::mouseWheel( int step, bool shift, bool ctrl, bool alt ) {
   float notch = 0.3 * step;
 
   if (shift && ctrl) 
-	clipRatioFar *= powf(1.2f, notch);
+    clipRatioFar *= powf(1.2f, notch);
   else if (shift)
-	fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f);
+    fov = math::Clamp(fov*powf(1.2f,notch),5.0f,90.0f);
   else if (ctrl)
-	clipRatioNear *= powf(1.2f, notch);  
+    clipRatioNear *= powf(1.2f, notch);  
   else if (ctrl && alt)
-	clipRatioNear *= powf(1.2f, notch);  
+    clipRatioNear *= powf(1.2f, notch);  
   else
-	trackball.MouseWheel( notch );
+    trackball.MouseWheel( notch );
 }
 
 
@@ -525,7 +525,7 @@ int Application::getNumberPoints ( void ) {
   
   int num_pts = 0;
   for (unsigned int i = 0; i < objects.size(); ++i)
-	num_pts += objects[i].numberPoints();
+    num_pts += objects[i].numberPoints();
 
   return num_pts;
 }
@@ -573,8 +573,8 @@ void Application::setGpuMask ( int m ) {
  **/
 void Application::setPerVertexColor ( bool c ) {
   for (unsigned int i = 0; i < objects.size(); ++i) {
-	// Reset renderer type to load per vertex color or default color in vertex array
-	objects[i].setRendererType( objects[i].getRendererType() );
+    // Reset renderer type to load per vertex color or default color in vertex array
+    objects[i].setRendererType( objects[i].getRendererType() );
   }
 }
 
@@ -610,7 +610,7 @@ void Application::changeMaterial( int mat ) {
  **/
 void Application::setBackFaceCulling ( bool c ) {
   if (point_based_render)
-	point_based_render->setBackFaceCulling(c);
+    point_based_render->setBackFaceCulling(c);
 }
 
 /**
@@ -634,7 +634,7 @@ void Application::setQualityPerVertex ( bool c ) {
 void Application::increaseSelected ( void ) {
   selected++;
   if (selected > (int)objects.size())
-	selected = 0;
+    selected = 0;
   cout << "selected : " << selected << endl;
 
 }
@@ -644,6 +644,6 @@ void Application::increaseSelected ( void ) {
 void Application::decreaseSelected ( void ) {
   selected--;
   if (selected < 0)
-	selected = objects.size();
+    selected = objects.size();
   cout << "selected : " << selected << endl;
 }

@@ -20,7 +20,8 @@ typedef enum
   {
     PYRAMID_POINTS,
     PYRAMID_POINTS_COLOR,
-    PYRAMID_TEMPLATES
+    PYRAMID_TEMPLATES,
+    PYRAMID_ELLIPSES
   } point_render_type_enum;
 
 using namespace std;
