@@ -11,7 +11,6 @@
  * Default constructor.
  **/
 PyramidPointRendererColor::PyramidPointRendererColor(int w, int h) : PyramidPointRendererBase(w, h, 3) {
-  quality_per_vertex = 0;
 }
 
 void PyramidPointRendererColor::createShaders ( void ) {

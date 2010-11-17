@@ -151,8 +151,6 @@ void main (void) {
 		bufferB.x = zmin;
 		bufferB.y = new_zmax - zmin;
 		bufferB.zw /= valid_pixels;
-		//~ bufferB.xyzw /= valid_pixels;
-		//~ bufferB.y = 0.0;
 		bufferC.rgb /= valid_pixels;
 		bufferC.w = 1.0;
 	}

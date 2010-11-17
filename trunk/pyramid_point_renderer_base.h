@@ -13,11 +13,6 @@
 #include <cassert>
 
 #include "point_based_renderer.h"
-/* #include <QString> */
-/* #include <QFile> */
-/* #include <QDir> */
-/* #include <QTextStream> */
-/* #include <QGLFramebufferObject> */
 
 #define FBO_TYPE GL_TEXTURE_2D
 #define FBO_FORMAT GL_RGBA32F

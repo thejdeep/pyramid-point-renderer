@@ -18,29 +18,27 @@ void main (void) {
 
     normal = normalize(normal);
 
-	if (shininess == 99.0) {
-	  color.rgb = normal.rgb;
-	}
-	else {
-	  vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
+    if (shininess == 99.0) {
+      color.rgb = normal.rgb;
+    }
+    else {
+      vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
      
       color = color_ambient * (gl_LightSource[0].ambient + gl_LightModel.ambient);
 
-	  float NdotL = max(dot(normal.xyz, lightDir.xyz), 0.0);
-
-      //color += diffuse[material] * gl_LightSource[0].diffuse * NdotL;
+      float NdotL = max(dot(normal.xyz, lightDir.xyz), 0.0);
 
       if (NdotL > 0.0) {
-		color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
-		float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
-		color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
+	color += color_diffuse * gl_LightSource[0].diffuse * NdotL;
+	float NdotHV = max(dot(normal.xyz, gl_LightSource[0].halfVector.xyz), 0.0);
+	color += color_specular * gl_LightSource[0].specular * pow(NdotHV, shininess);
       }
     }
     color.a = 1.0;
   }
   else
-	discard;
-  //color = vec4(0.8, 0.8, 0.8, 0.0);
+    discard;
+  //color = vec4(0.8, 0.8, 0.8, 1.0);
   
   gl_FragColor = color;
 }

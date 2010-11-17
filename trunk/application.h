@@ -53,6 +53,7 @@ using namespace std;
 #include <wrap/io_trimesh/import.h>
 
 #include <wrap/gui/trackball.h>
+#include <vcg/math/matrix44.h>
 
 #include "IOSurfels.hpp"
 
@@ -63,7 +64,7 @@ class CFace;
 
 class MyUsedTypes: public vcg::UsedTypes< vcg::Use<CVertex>::AsVertexType, vcg::Use<CFace>::AsFaceType> {};
 
-class CVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vertex::Normal3f, vertex::Color4b, vertex::Radiusf, vertex::Qualityf> {};
+class CVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vertex::Normal3f, vertex::Color4b, vertex::Radiusf> {};
 class CFace : public vcg::Face<MyUsedTypes, vcg::face::VertexRef> {};
 class CMesh : public vcg::tri::TriMesh< std::vector<CVertex>, std::vector<CFace> > {};
 
@@ -78,15 +79,12 @@ class Application
  private :
 
   void createPointRenderer( void );
-  void glVertex ( const Surfeld * s ) const;
-  void glVertex ( const surfelVectorIter it ) const;
-  void glVertex ( const Point3f p ) const;
 
   void drawPoints ( void );
 
  public :
 
-  Application( GLint default_mode = PYRAMID_POINTS );
+  Application( GLint default_mode = PYRAMID_POINTS, int w = 512, int h = 512);
   ~Application();
   
   void readFile ( const char * filename, bool eliptical = 0 );
@@ -111,9 +109,7 @@ class Application
 
   void setBackFaceCulling ( bool c );
   void setEllipticalWeight ( bool b );
-  void setQualityPerVertex ( bool c );
 
-  void setQualityThreshold ( double q );
   void setReconstructionFilter ( double s );
   void setPrefilter ( double s );
   void setDepthTest ( bool d );
@@ -160,9 +156,6 @@ class Application
   // Determines which rendering class to use (Pyramid points, with color per vertex, templates version ...)
   // see objects.h for the complete list (point_render_type_enum).
   GLint render_mode;
-
-  // This is determined while reading the ply file, but can only be set after creating the point renderer
-  bool quality_per_vertex;
 
   // Flags on/off
   bool show_points;
