@@ -15,10 +15,12 @@
  * Initialize opengl and application state variables.
  * @param default_mode Defines the initial rendering mode.
  **/
-Application::Application( GLint default_mode ) {
+Application::Application( GLint default_mode, int w, int h ) {
 
-  canvas_width = canvas_height = 512;
-  windows_width = windows_height = canvas_width + 2*(canvas_width/32);
+  canvas_width = w;
+  canvas_height = h;
+  windows_width = w;
+  windows_height = h;
 
   trackball.center = vcg::Point3f(0, 0, 0);
   trackball.radius= 1;
@@ -61,26 +63,6 @@ Application::~Application( void ) {
   delete point_based_render;
 }
 
-/// Renders a surfel as a opengl point primitive
-/// @param s Pointer to surfel
-void Application::glVertex(const Surfeld * s) const {
-  Point3f p = s->Center();
-  glVertex3f(p[0], p[1], p[2]);
-}
-
-/// Renders a surfel as a opengl point primitive
-/// @param s Pointer to surfel
-void Application::glVertex(const surfelVectorIter it) const {
-  Point3f p = it->Center();
-  glVertex3f(p[0], p[1], p[2]);
-}
-
-/// Renders a vertex
-/// @param p Given vertex position
-void Application::glVertex(const Point3f p) const {
-  glVertex3f(p[0], p[1], p[2]);
-}
-
 /// Render all points with OpenGL
 void Application::drawPoints(void) {
   glPointSize(1.0);
@@ -90,8 +72,9 @@ void Application::drawPoints(void) {
   
   for (surfelVectorIter it = objects[0].getSurfels()->begin(); it != objects[0].getSurfels()->end(); ++it) {
     Color4b c = it->Color();
-    glColor4f(c[0], c[1], c[2], 1.0f);  
-    glVertex(it);
+    glColor4f(c[0], c[1], c[2], 1.0f);
+    Point3f p = it->Center();
+    glVertex3f(p[0], p[1], p[2]);
   }
   glEnd();
 }
@@ -135,11 +118,11 @@ void Application::setView( void )
  **/
 void Application::draw( void ) {
 
-  //   static int time;
-  //   static int frame = 0;
-  //   if (frame == 0)
-  // 	time = glutGet(GLUT_ELAPSED_TIME);
-  //   frame ++;
+    // static int time;
+    // static int frame = 0;
+    // if (frame == 0)
+    // 	time = glutGet(GLUT_ELAPSED_TIME);
+    // frame ++;
 
   if (objects.size() == 0)
     return;  
@@ -167,7 +150,7 @@ void Application::draw( void ) {
   glPushMatrix();
 
   // Loads current OpenGl state matrices into trackball matrices
-  trackball.GetView();
+  trackball.GetView();  
 
   // aplly transformations : translate to origin, multiply by trackball matrix, translate back
   trackball.Apply();
@@ -177,17 +160,11 @@ void Application::draw( void ) {
   glScalef(diag, diag, diag);
   glTranslatef(-FullBBox.Center()[0], -FullBBox.Center()[1], -FullBBox.Center()[2]);
 
-  // Get eye position rotated in inverse direction
-  // for backface culling
-  glPushMatrix();
-  Trackball tr;
-  tr.track = trackball.track;
-  tr.radius = trackball.radius;
-  tr.center = trackball.center;
-  tr.GetView();
-  // the ViewPoint method returns the eye position (0,0,0) multiplied by the inverse modelview matrix
-  vcg::Point3f vp = tr.camera.ViewPoint();
-  glPopMatrix();
+  /// Get eye position rotated in inverse direction for backface culling
+  Matrix44f model;
+  glGetv(GL_MODELVIEW_MATRIX,model);
+  Invert(model);
+  vcg::Point3f vp = model* Point3f(0., 0., 0.);
  
   // Set eye for back face culling in vertex shader of projection phase
   point_based_render->setEye( Point3f(vp[0], vp[1], vp[2]) );
@@ -218,20 +195,30 @@ void Application::draw( void ) {
 
   glPopMatrix();
 
-  //   if (frame == 10) {
-  // 	frame = 0;
-  // 	int endtime = glutGet(GLUT_ELAPSED_TIME);
-  // 	cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
-  //   }
+  // if (frame == 10) {
+  //   frame = 0;
+  //   int endtime = glutGet(GLUT_ELAPSED_TIME);
+  //   cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
+  // }
 
-  //  glFinish();
+  /// uncomment this to flush frames every time, so you can better compute the true time to compute one frame,
+  /// but of course, this will slow down a little the rendering since the graphics board must wait for everything
+  /// to finish before continuing with the next frame
+  //glFinish();
 }
 
 /// Reshape func
 /// @param w New window width
 /// @param h New window height
 void Application::reshape(int w, int h) {
-  //  camera->reshape(w, h);
+  canvas_width = w;
+  canvas_height = h;
+  windows_width = w;
+  windows_height = h;
+
+  createPointRenderer();
+
+  cout << "reshaping " << w << " " << h <<  endl;
 }
 
 /**
@@ -266,8 +253,7 @@ void Application::createPointRenderer( void ) {
 
   assert (point_based_render);
 
-  ((PyramidPointRendererBase*)point_based_render)->createShaders();
-  setQualityPerVertex(quality_per_vertex);
+  ((PyramidPointRendererBase*)point_based_render)->createShaders();  
 
 }
 
@@ -293,16 +279,11 @@ int Application::readSurfelFile ( const char * filename, vector<Surfeld>& surfel
   if (mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
     color_per_vertex = true;
 
-  quality_per_vertex = false;
-  if (mask & vcg::tri::io::Mask::IOM_VERTQUALITY)
-    quality_per_vertex = true;
-
   bool radius_per_vertex = false;
   if (mask & vcg::tri::io::Mask::IOM_VERTRADIUS)
     radius_per_vertex = true;
 
   cout << "has normal per vertex : " << normal_per_vertex << endl;
-  cout << "has quality per vertex : " << quality_per_vertex << endl;
   cout << "has color per vertex : " << color_per_vertex << endl;
   cout << "has radius per vertex : " << radius_per_vertex << endl;
 
@@ -319,10 +300,6 @@ int Application::readSurfelFile ( const char * filename, vector<Surfeld>& surfel
     vcg::Point3f p = (*vit).P();
     vcg::Point3f n = (*vit).N();
 
-    double quality = 1.0;
-    if (quality_per_vertex)
-      quality = (double)((*vit).Q());
-
     Color4b c (0.2, 0.2, 0.2, 1.0);
     if (color_per_vertex) {
       c = Color4b ((GLubyte)(*vit).C()[0], (GLubyte)(*vit).C()[1], (GLubyte)(*vit).C()[2], 1.0);
@@ -332,7 +309,7 @@ int Application::readSurfelFile ( const char * filename, vector<Surfeld>& surfel
     if (radius_per_vertex)
       radius = (double)((*vit).R());
 	
-    surfels.push_back ( Surfeld (p, n, c, quality, radius, pos) );
+    surfels.push_back ( Surfeld (p, n, c, radius, pos) );
     ++pos;
   }
 
@@ -541,15 +518,6 @@ void Application::setReconstructionFilter ( double s ) {
 }
 
 /**
- * Sets the quality threshold for interpolating samples.
- * @param q Quality threshold.
- **/
-void Application::setQualityThreshold ( double q ) { 
-  if (point_based_render)
-    point_based_render->setQualityThreshold(q);
-}
-
-/**
  * Sets the prefilter size.
  * @param s Prefilter size.
  **/
@@ -619,14 +587,6 @@ void Application::setBackFaceCulling ( bool c ) {
  **/
 void Application::setEllipticalWeight ( bool b ) {
   point_based_render->setEllipticalWeight(b);
-}
-
-/**
- * Turns quality per vertex on/off.
- * @param c Quality per vertex state.
- **/
-void Application::setQualityPerVertex ( bool c ) {
-  point_based_render->setQualityPerVertex(c);
 }
 
 /// Cycles through objects list for displaying individual parts of the model.

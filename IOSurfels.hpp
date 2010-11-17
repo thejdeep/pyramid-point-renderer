@@ -187,7 +187,7 @@ public:
 	  quality = static_cast<Real> ((*vit).Q());
 
 
-	s = Surfel<Real> (v, n, c,quality,radius,pos);
+	s = Surfel<Real> (v, n, c, radius, pos);
 
 	s.SetRadius(radius);
 

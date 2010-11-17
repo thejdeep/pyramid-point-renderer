@@ -13,8 +13,9 @@
 #include <dirent.h>
 #include <errno.h>
 
-
-static int windows_size = 512;                          // Initial window width
+// Initial window width
+static int windows_width = 1024;
+static int windows_height = 1024;
 
 bool depth_test;
 bool back_face_culling;
@@ -36,17 +37,18 @@ Application *application;
 void display( void )
 {
 
-  //   static int frame = 0, time, timebase = 0, fps;
+  // static int frame = 0, time, timebase = 0;
+  // float fps;
 
-  //   frame++;
-  //   time = glutGet(GLUT_ELAPSED_TIME);
+  // frame++;
+  // time = glutGet(GLUT_ELAPSED_TIME);
 	
-  //   if (time - timebase > 1000) {
-  // 	fps = frame*1000.0/(time-timebase);
-  // 	cout << fps << endl;
-  // 	timebase = time;
-  // 	frame = 0;
-  //   }
+  // if (time - timebase > 1000) {
+  //   fps = frame*1000.0/(float)(time-timebase);
+  //   cout << fps << endl;
+  //   timebase = time;
+  //   frame = 0;
+  // }
   
   application->draw();
 
@@ -62,7 +64,15 @@ void idle( void ) {
 
 void reshape(GLint width, GLint height)
 {
-  windows_size = width;
+  windows_width = width;
+  windows_height = height;
+
+  application->reshape(width, height);
+
+  application->changeMaterial(material);
+  application->setBackFaceCulling ( back_face_culling );
+  application->setEllipticalWeight( elliptical_weight );
+  application->setGpuMask ( mask_size );
   
 }
 
@@ -106,10 +116,6 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     auto_rotate = !auto_rotate;
     application->setAutoRotate( auto_rotate );
     break;
-  case 'c':
-    quality_per_vertex = !quality_per_vertex;
-    application->setQualityPerVertex( quality_per_vertex );
-    break;
   case 'w':
     elliptical_weight = !elliptical_weight;
     application->setEllipticalWeight( elliptical_weight );
@@ -122,18 +128,6 @@ void keyboard(unsigned char key_pressed, int x, int y) {
   case 'b' :
     back_face_culling = !back_face_culling;
     application->setBackFaceCulling ( back_face_culling );
-    break;
-  case '/':
-    if (quality_threshold > 0.0)
-      quality_threshold -= 0.01;
-    application->setQualityThreshold ( abs(quality_threshold) );
-    cout << "quality threshold : " << quality_threshold << endl;
-    break;
-  case '*':
-    if (quality_threshold < 1.0)
-      quality_threshold += 0.01;
-    application->setQualityThreshold ( quality_threshold );
-    cout << "quality threshold : " << quality_threshold << endl;
     break;
   case '.':
     application->increaseSelected ( );
@@ -221,8 +215,6 @@ void keyboardSpecial(int key_pressed, int x, int y) {
     application->setDepthTest( depth_test );
     application->setBackFaceCulling( back_face_culling );
     application->setEllipticalWeight( elliptical_weight );
-    application->setQualityThreshold( quality_threshold );
-    application->setQualityPerVertex( quality_per_vertex );
     break;
   }
 
@@ -337,7 +329,7 @@ int main(int argc, char * argv []) {
 
   // GLUT Window Initialization:
   glutInit (&argc, argv);
-  glutInitWindowSize (windows_size, windows_size);
+  glutInitWindowSize (windows_width, windows_height);
   glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(150, 0);
   glutCreateWindow ("Point Based Rendering");
@@ -362,7 +354,7 @@ int main(int argc, char * argv []) {
     }
 
   //application = new Application(PYRAMID_TEMPLATES);
-  application = new Application(PYRAMID_POINTS);
+  application = new Application(PYRAMID_POINTS, windows_width, windows_height);
 
   if (argc < 2) {
     cerr << "    Usage :" << endl << " pyramid-point-renderer <ply_file>" << endl;
@@ -411,9 +403,7 @@ int main(int argc, char * argv []) {
   application->changeMaterial(material);
   application->setBackFaceCulling ( back_face_culling );
   application->setEllipticalWeight( elliptical_weight );
-  application->setQualityThreshold( quality_threshold );
   application->setGpuMask ( mask_size );
-  //application->setQualityPerVertex( quality_per_vertex );
 
   //GLUT callback functions
   glutDisplayFunc(display);

@@ -136,12 +136,10 @@ public:
   Surfel (const Point3f& position, 
 	  const Point3f& normal,
 	  const Color4b& color,
-	  Real quality,
 	  Real radius,
 	  unsigned int 	id ) : 	mCenter(position),
 				mNormal(normal),
 				mColor(color),
-				mQuality(quality),
 				mSplatRadius(radius),
 				mID(id)
   {

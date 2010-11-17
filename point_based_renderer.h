@@ -94,17 +94,6 @@ class PointBasedRenderer
     **/
    virtual double getReconstructionFilterSize(void) { return reconstruction_filter_size; }
 
-   /**
-    * Sets the quality threshold for interpolating samples.
-    * @param q Quality threshold.
-    **/
-   virtual void setQualityThreshold(double q) { quality_threshold = q; }
-
-   /**
-    * Sets the quality per vertex flag.
-    * @param q Quality flag.
-    **/
-   virtual void setQualityPerVertex(bool q) { quality_per_vertex = q; }
 
    /** 
     * Sets the kernel size, for templates rendering only.
@@ -201,12 +190,6 @@ class PointBasedRenderer
 
    /// Flag to turn on/off elliptical weight
    bool elliptical_weight;
-
-   /// Flag to turn on/off quality per vertex interpolation.
-   bool quality_per_vertex;
-
-   /// Size of quality threshold for interpolation.
-   double quality_threshold;
 
    /// Size of reconstruction filter.
    double reconstruction_filter_size;
