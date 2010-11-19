@@ -40,7 +40,6 @@ class PyramidPointRendererBase : public PointBasedRenderer
 
 	const void rasterizePixels(void);
 
-	//QString loadShaderSource(const QString& file) const;
 
 	void resetPointers ( void ) {   
 		fbo_buffers = NULL;
@@ -63,8 +62,6 @@ class PyramidPointRendererBase : public PointBasedRenderer
 	void projectSamples (Object* const obj );
 	void interpolate ( void );
 	
-	//void setShadersDir ( QDir d) { shaders_path = d; }
-
 	protected:
 	/// Number of frame buffer object attachments.
 	int fbo_buffers_count;
@@ -103,11 +100,7 @@ class PyramidPointRendererBase : public PointBasedRenderer
 	int cur_level;
 
 	GLfloat vertices[4][2];
-	GLfloat texcoors0[4][2];
-
-	/// Path to meshlab's shaders directory
-	//QDir shaders_path;
-  
+	GLfloat texcoors0[4][2];  
 
 };
 

@@ -43,15 +43,15 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
   // rotate point to ellipse coordinate system
   vec2 rotated_pos = vec2(d.x*cos_angle + d.y*sin_angle,
-						  -d.x*sin_angle + d.y*cos_angle);
+			  -d.x*sin_angle + d.y*cos_angle);
 
   // major and minor axis
-  float a = 1.0*radius;
+  float a = 2.0*radius;
   float b = a*normal.z;
 
   // include antialiasing filter
-  a += prefilter_size;
-  b += prefilter_size;
+  /* a += prefilter_size; */
+  /* b += prefilter_size; */
 
   // inside ellipse test
   float test = ((rotated_pos.x*rotated_pos.x)/(a*a)) + ((rotated_pos.y*rotated_pos.y)/(b*b));
@@ -63,95 +63,125 @@ float pointInEllipse(in vec2 d, in float radius, in vec3 normal){
 
 void main (void) {
 
-	vec2 tex_coord[4];
+  const int k = 12;
 
-	vec4 bufferA = vec4(0.0, 0.0, 0.0, 0.0);
-	vec4 bufferB = vec4(0.0, 0.0, 0.0, 0.0);
+  vec2 tex_coord[k];
 
-	float valid_pixels = 0.0;
+  vec4 bufferA = vec4(0.0, 0.0, 0.0, 0.0);
+  vec4 bufferB = vec4(0.0, 0.0, 0.0, 0.0);
 
-	vec4 pixelA[4], pixelB[4];
+  float valid_pixels = 0.0;
 
-	vec2 center_coord = gl_TexCoord[0].st * level_ratio;
+  vec4 pixelA[k], pixelB[k];
 
-	//up-right
-	tex_coord[0].st = center_coord.st + offset.st;
-	//up-left
-	tex_coord[1].s = center_coord.s - offset.s;
-	tex_coord[1].t = center_coord.t + offset.t;
-	//down-right
-	tex_coord[2].s = center_coord.s + offset.s;
-	tex_coord[2].t = center_coord.t - offset.t;
-	//down-left
-	tex_coord[3].st = center_coord.st - offset.st;
+  vec2 center_coord = gl_TexCoord[0].st * level_ratio;
 
-	// Compute the front most pixel from lower level (minimum z
-	// coordinate)
-	float dist_test = 0.0;
-	float zmin = 10000.0;
-	float zmax = -10000.0;
-	float obj_id = -1.0;
-	for (int i = 0; i < 4; ++i) {
+  //up-right
+  tex_coord[0].st = center_coord.st + offset.st;
+  //up-left
+  tex_coord[1].s = center_coord.s - offset.s;
+  tex_coord[1].t = center_coord.t + offset.t;
+  //down-right
+  tex_coord[2].s = center_coord.s + offset.s;
+  tex_coord[2].t = center_coord.t - offset.t;
+  //down-left
+  tex_coord[3].st = center_coord.st - offset.st;
+
+  if (k == 12) {
+    //up-right-right and up-right-up
+    tex_coord[4] = tex_coord[5] = tex_coord[0];
+    tex_coord[4].s += 2.0*offset.s;
+    tex_coord[5].t += 2.0*offset.t;
+
+    //up-left-left and up-left-up
+    tex_coord[6] = tex_coord[7] = tex_coord[1];
+    tex_coord[6].s -= 2.0*offset.s;
+    tex_coord[7].t += 2.0*offset.t;
+
+    //down-right-right and down-right-down
+    tex_coord[8] = tex_coord[9] = tex_coord[2];
+    tex_coord[8].s += 2.0*offset.s;
+    tex_coord[9].t -= 2.0*offset.t;
+ 
+    //down-left-left and down-left-down
+    tex_coord[10] = tex_coord[11] = tex_coord[3];
+    tex_coord[10].s -= 2.0*offset.s;
+    tex_coord[11].t -= 2.0*offset.t;
+  }
+  
+
+  // Compute the front most pixel from lower level (minimum z coordinate)
+  float dist_test = 0.0;
+  float zmin = 10000.0;
+  float zmax = -10000.0;
+  float weights[k];
+  for (int i = 0; i < k; ++i) {
+    weights[i] = 0.0;
     pixelA[i] = texture2DLod (textureA, tex_coord[i].st, float(level-1)).xyzw;
-    if (pixelA[i].w > 0.0) {
-	  pixelB[i] = texture2DLod (textureB, tex_coord[i].st, float(level-1)).xyzw;	
-      dist_test = pointInEllipse(pixelB[i].zw, pixelA[i].w, pixelA[i].xyz);
 
-	  if  (dist_test != -10.0)
-		{
-		  // test for minimum depth coordinate of valid ellipses
-		  if (pixelB[i].x <= zmin) {
-			zmin = pixelB[i].x;
-			zmax = zmin + pixelB[i].y;
-		  }
-		}
+    if (pixelA[i].w > 0.0) {
+      pixelB[i] = texture2DLod (textureB, tex_coord[i].st, float(level-1)).xyzw;	
+
+      vec2 dist_to_pixel = pixelB[i].zw - center_coord;
+      dist_test = pointInEllipse(dist_to_pixel, pixelA[i].w, pixelA[i].xyz);
+
+      if  (dist_test != -1.0)
+	{
+	  // test for minimum depth coordinate of valid ellipses
+	  if (pixelB[i].x <= zmin) {
+	    zmin = pixelB[i].x;
+	    zmax = zmin + pixelB[i].y;
+	    weights[i] = exp(-0.5*dist_test);
+	  }
+	}
       else {
-		// if the ellipse does not reach the center ignore it in the averaging
-		pixelA[i].w = -1.0;
+	// if the ellipse does not reach the center ignore it in the averaging
+	pixelA[i].w = -1.0;
       }
     }
   }
 
   float new_zmax = zmax;
 
+  float total_weight = 0.0;
   // Gather pixels values
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < k; ++i)
     {
       // Check if valid gather pixel or unspecified (or ellipse out of reach set above)
       if (pixelA[i].w > 0.0) 
-		{
-	  	
-		  //if (abs(pixelC[i].w - obj_id) < 0.1 )
-		  {
-			// Depth test between valid in reach ellipses
-			if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
-			  {
-				float w = 1.0;
-				bufferA += pixelA[i] * w;
+	{
+	  {
+	    // Depth test between valid in reach ellipses
+	    if ((!depth_test) || (pixelB[i].x - pixelB[i].y <= zmax))
+	      {
+		
+		bufferA += pixelA[i] * weights[i];
 
-				// Increment ellipse total path with distance from gather pixel to center
-				//				bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
-				bufferB.zw += pixelB[i].zw * w;
+		// Increment ellipse total path with distance from gather pixel to center
+		//bufferB.zw += (pixelB[i].zw + gather_pixel_desloc[i].xy) * w;
+		bufferB.zw += pixelB[i].zw * weights[i];
 	      
-				// Take maximum depth range
-				new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
+		// Take maximum depth range
+		new_zmax = max(pixelB[i].x + pixelB[i].y, new_zmax);
 	      
-				valid_pixels += w;
-			  }
-		  }
-		}
+		total_weight += weights[i];
+	      }
+	  }
+	}
     }
 
   // average values if there are any valid ellipses
   // otherwise the pixel will be writen as unspecified
   
-  if (valid_pixels > 0.0)
+  if (total_weight > 0.0)
     {
-      bufferA /= valid_pixels;
+      bufferA /= total_weight;
       bufferA.xyz = normalize(bufferA.xyz);
       bufferB.x = zmin;
-      bufferB.y = new_zmax - zmin;
-      bufferB.zw /= valid_pixels;
+      //      bufferB.y = new_zmax - zmin;
+      bufferB.y = bufferA.w;
+
+      bufferB.zw /= total_weight;
     }
 
   // first buffer = (n.x, n.y, n.z, radius)

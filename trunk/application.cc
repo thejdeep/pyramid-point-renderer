@@ -118,11 +118,11 @@ void Application::setView( void )
  **/
 void Application::draw( void ) {
 
-    // static int time;
-    // static int frame = 0;
-    // if (frame == 0)
-    // 	time = glutGet(GLUT_ELAPSED_TIME);
-    // frame ++;
+  static int time;
+  static int frame = 0;
+  if (frame == 0)
+    time = glutGet(GLUT_ELAPSED_TIME);
+  frame ++;
 
   if (objects.size() == 0)
     return;  
@@ -195,11 +195,11 @@ void Application::draw( void ) {
 
   glPopMatrix();
 
-  // if (frame == 10) {
-  //   frame = 0;
-  //   int endtime = glutGet(GLUT_ELAPSED_TIME);
-  //   cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
-  // }
+  if (frame == 10) {
+    frame = 0;
+    int endtime = glutGet(GLUT_ELAPSED_TIME);
+    cout << "FPS : " << 10*1000.0/(endtime-time) << endl; 
+  }
 
   /// uncomment this to flush frames every time, so you can better compute the true time to compute one frame,
   /// but of course, this will slow down a little the rendering since the graphics board must wait for everything
@@ -325,14 +325,12 @@ void Application::readFile ( const char * filename, bool eliptical ) {
   // Create a new primitive from given file
   objects.push_back( Object( objects.size() ) );
 
-  if(eliptical)
-    {
-      IOSurfels<double>::LoadSurfels(filename, *(objects.back()).getSurfels());
-
-    }else
-    {
-      IOSurfels<double>::LoadMesh(filename, *(objects.back()).getSurfels());
-    }
+  if(eliptical) {
+    IOSurfels<double>::LoadSurfels(filename, *(objects.back()).getSurfels());
+  }
+  else {
+    IOSurfels<double>::LoadMesh(filename, *(objects.back()).getSurfels());
+  }
 
   //readSurfelFile ( filename, (objects.back()).getSurfels() );
 
@@ -516,6 +514,16 @@ void Application::setReconstructionFilter ( double s ) {
   if (point_based_render)
     point_based_render->setReconstructionFilterSize(s);
 }
+
+/**
+ * Sets the minimum radius size of the smallest axis of the projected splats.
+ * @param r Minimum radius size size.
+ **/
+void Application::setMinimumRadius ( double r ) { 
+  if (point_based_render)
+    point_based_render->setMinimumRadiusSize(r);
+}
+
 
 /**
  * Sets the prefilter size.
