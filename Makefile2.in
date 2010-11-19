@@ -1,9 +1,0 @@
-###################################
-
-$(OBJECTS): $(CODE)
-	@echo
-	@echo "Compiling C++ code in subdir : $@"
-	$(CXX) -c -o $@ $< $(INCLUDEDIRS) $(CXXFLAGS)
-
-clean:
-	rm -f *.o *~
