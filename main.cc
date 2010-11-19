@@ -26,11 +26,10 @@ bool active_alt;
 int mask_size;
 double reconstruction_filter_size;
 double prefilter_size;
-double quality_threshold;
-double quality_per_vertex;
 int material;
 bool auto_rotate;
 bool elliptical_weight;
+double minimum_radius_size;
 
 Application *application;
 
@@ -160,6 +159,18 @@ void keyboard(unsigned char key_pressed, int x, int y) {
     application->setReconstructionFilter ( reconstruction_filter_size );
     cout << "filter size : " << reconstruction_filter_size << endl;
     break;
+  case '>' :
+    minimum_radius_size += 0.01;
+    application->setMinimumRadius ( minimum_radius_size );
+    cout << "Minimum radius size : " << minimum_radius_size << endl;
+    break;
+  case '<' :
+    minimum_radius_size -= 0.01;
+    if (minimum_radius_size < 0.0)
+      minimum_radius_size = 0.0;
+    application->setMinimumRadius ( minimum_radius_size );
+    cout << "Minimum radius size : " << minimum_radius_size << endl;
+    break;
   }
 
   // material change
@@ -193,12 +204,12 @@ void keyboardSpecial(int key_pressed, int x, int y) {
     cout << "PYRAMID POINTS WITH COLOR" << endl;
     break;
   case GLUT_KEY_F3 :
-    application->changeRendererType ( 2 );
-    cout << "PYRAMID TEMPLATES WITH COLOR" << endl;
+    //    application->changeRendererType ( 2 );
+    cout << "PYRAMID TEMPLATES WITH COLOR NOT READY" << endl;
     break;
   case GLUT_KEY_F4 :
-    application->changeRendererType ( 3 );
-    cout << "PYRAMID ELIPSES" << endl;
+    //    application->changeRendererType ( 3 );
+    cout << "PYRAMID ELIPSES NOT READY" << endl;
     break;
   }
 
@@ -206,8 +217,8 @@ void keyboardSpecial(int key_pressed, int x, int y) {
   switch (key_pressed) {
   case GLUT_KEY_F1 :
   case GLUT_KEY_F2 :
-  case GLUT_KEY_F3 :
-  case GLUT_KEY_F4 :
+  // case GLUT_KEY_F3 :
+  // case GLUT_KEY_F4 :
     application->setGpuMask ( mask_size );
     application->changeMaterial ( material );
     application->setReconstructionFilter ( reconstruction_filter_size );
@@ -336,14 +347,12 @@ int main(int argc, char * argv []) {
 
   mask_size = 2;
   reconstruction_filter_size = 1.0;
-  prefilter_size = 0.0;
+  prefilter_size = 1.0;
   material = 3;
-  quality_threshold = 0.0;
   auto_rotate = false;
   elliptical_weight = true;
   depth_test = true;
   back_face_culling = true;
-  quality_per_vertex = false;
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
@@ -386,7 +395,6 @@ int main(int argc, char * argv []) {
     application->finishFileReading();
     material = 5;
     back_face_culling = true;
-    quality_threshold = 0.02;
   }
   // eliptical surfel file
   else if (strcmp (argv[1], "-l") == 0) {
@@ -400,6 +408,10 @@ int main(int argc, char * argv []) {
   }
   
   // Set initial values
+  application->setReconstructionFilter ( reconstruction_filter_size );
+  application->setPrefilter ( prefilter_size );
+  application->setMinimumRadius( minimum_radius_size );
+  application->setDepthTest( depth_test );
   application->changeMaterial(material);
   application->setBackFaceCulling ( back_face_culling );
   application->setEllipticalWeight( elliptical_weight );

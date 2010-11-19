@@ -111,6 +111,7 @@ class Application
   void setEllipticalWeight ( bool b );
 
   void setReconstructionFilter ( double s );
+  void setMinimumRadius ( double r );
   void setPrefilter ( double s );
   void setDepthTest ( bool d );
   

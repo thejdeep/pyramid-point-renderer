@@ -39,9 +39,6 @@ void main(void)
 	// compute depth value without projection matrix, only modelview
 	radius_depth_w = vec3(radius, -(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0)).z, v.w);
       
-	//~ pos = vec2 (v.x, v.y) / v.w;
-	//~ pos = (pos * 0.5) + vec2(0.5);
-
 	gl_Position = v;
   }
 }

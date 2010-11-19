@@ -32,5 +32,5 @@ void main(void)
   // Third buffer  : color
   //  gl_FragData[0] = vec4 (normal_vec, radius_depth_w.x / radius_depth_w.z );
   gl_FragData[0] = vec4 (normal_vec, proj_radius );
-  gl_FragData[1] = vec4 (radius_depth_w.y, 2.0*depth_interval, screen_pos);
+  gl_FragData[1] = vec4 (radius_depth_w.y, depth_interval, screen_pos);
 }
